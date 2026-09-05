@@ -1,0 +1,78 @@
+name: Bug report
+description: Report a reproducible defect without including private or sensitive data.
+title: "[Bug]: "
+labels:
+  - "type:bug"
+  - "status:triage"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste clipboard values, tool input, notes, generated secrets, file contents, sensitive filenames, credentials, or real user data.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What failed, and what user-visible impact did it have?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Open ...
+        2. Enter a non-sensitive test fixture ...
+        3. Tap ...
+        4. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include commit, build variant, device/emulator, Android/API, WebView version, window mode, and navigation mode where relevant.
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - P0 — release blocker, data loss, or critical security/privacy issue
+        - P1 — major function unavailable or broadly broken
+        - P2 — normal defect with a workaround
+        - P3 — minor or cosmetic defect
+    validations:
+      required: true
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Reproducibility
+      options:
+        - Always
+        - Often
+        - Intermittent
+        - Once
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Privacy-safe evidence
+      description: Attach redacted screenshots or logs and artifact hashes. Do not attach private inputs or files.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched existing issues for this defect.
+          required: true
+        - label: The report contains no secrets, credentials, private user data, or sensitive fixtures.
+          required: true

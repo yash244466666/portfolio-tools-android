@@ -1,0 +1,87 @@
+name: Tool implementation
+description: Plan or implement one audited catalog tool through its complete Android Definition of Done.
+title: "[Tool]: "
+labels:
+  - "type:tool"
+  - "status:triage"
+body:
+  - type: input
+    id: tool-id
+    attributes:
+      label: Tool ID
+      description: Stable audited registry ID.
+      placeholder: markdown-preview
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Core
+        - Developer
+        - Text
+        - Media
+        - Security
+        - Math
+    validations:
+      required: true
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Migration tier
+      options:
+        - Tier 1 — directly portable
+        - Tier 2 — platform adaptation
+        - Tier 3 — network
+        - Tier 4 — special product/policy decision
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: User outcome and scope
+      description: State the useful outcome, included behavior, and explicit exclusions.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source and independent oracle
+      description: Record upstream commit/paths, copied logic/data/assets, applicable standards, and independent correctness fixtures.
+    validations:
+      required: true
+  - type: textarea
+    id: platform
+    attributes:
+      label: Platform, data, and risk classification
+      description: Cover adapters, permissions, persistence, files, network providers, sensitive inputs, cleanup, and lifecycle behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: limits
+    attributes:
+      label: Limits and state model
+      description: Specify input/output, time, memory and file limits plus initial, empty, invalid, loading, success, cancelled, offline, denied, unsupported, over-limit, interrupted, and recovery states.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Tool-specific acceptance criteria
+      description: Add requirements beyond the mandatory Definition of Done.
+    validations:
+      required: true
+  - type: checkboxes
+    id: definition-of-ready
+    attributes:
+      label: Definition of Ready
+      options:
+        - label: Scope, exclusions, dependencies, risks, and blockers are explicit.
+          required: true
+        - label: Correctness oracle and representative fixtures are identified.
+          required: true
+        - label: Phone, tablet, landscape, split-screen, keyboard, IME, accessibility, offline, lifecycle, and recovery behavior are covered.
+          required: true
+        - label: Required platform behavior uses repository contracts; no direct Capacitor, localStorage, browser-window, or hidden-download access is planned.
+          required: true
