@@ -1,4 +1,4 @@
-import { Heart, LibraryBig, Settings2, Wrench } from "lucide-react"
+import { Heart, History, LibraryBig, Settings2, Wrench } from "lucide-react"
 import type { AppRoute } from "@/app/routing"
 import { routeHref } from "@/app/routing"
 
@@ -10,6 +10,7 @@ interface AppNavigationProps {
 const navigationItems = [
   { screen: "catalog" as const, label: "Tools", icon: LibraryBig },
   { screen: "favorites" as const, label: "Favorites", icon: Heart },
+  { screen: "recent" as const, label: "Recent", icon: History },
   { screen: "settings" as const, label: "Settings", icon: Settings2 },
 ]
 

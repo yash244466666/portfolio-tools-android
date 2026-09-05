@@ -40,3 +40,13 @@ test("theme selection persists", async ({ page }) => {
   await page.reload()
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark")
 })
+
+test("opening a tool adds it to the recent tools destination", async ({ page }) => {
+  await page.goto("/#/tool/unit-converter")
+  await expect(page.getByRole("heading", { name: "Unit Converter" })).toBeVisible()
+
+  await page.getByRole("link", { name: "Recent" }).click()
+  await expect(page.getByRole("heading", { name: "Recent tools" })).toBeVisible()
+  await expect(page.getByRole("link", { name: "Unit Converter" })).toBeVisible()
+  await expect(page.getByLabel("1 recent tool on this device")).toBeVisible()
+})

@@ -13,7 +13,7 @@ export function App() {
   const platform = usePlatform()
   const [route, setRoute] = useState<AppRoute>(() => parseHash())
   const [favorites, setFavorites] = useStoredStringArray("favorites")
-  const [, setRecents] = useStoredStringArray("recents")
+  const [recents, setRecents, recentsLoaded] = useStoredStringArray("recents")
   const [theme, setTheme] = useThemePreference()
   const network = useNetworkState()
   const [announcement, setAnnouncement] = useState("")
@@ -37,12 +37,18 @@ export function App() {
 
   const recordRecent = useCallback(
     (toolId: string) => {
+      if (!recentsLoaded) return
       setRecents((current) =>
         [toolId, ...current.filter((id) => id !== toolId)].slice(0, maximumRecentTools),
       )
     },
-    [setRecents],
+    [recentsLoaded, setRecents],
   )
+
+  const clearRecents = useCallback(() => {
+    setRecents([])
+    setAnnouncement("Recent tool history cleared.")
+  }, [setRecents])
 
   async function clearPreferences() {
     const confirmed = window.confirm("Clear favorites, recents, and theme from this installation?")
@@ -74,6 +80,16 @@ export function App() {
             mode="favorites"
             network={network}
             onToggleFavorite={toggleFavorite}
+          />
+        ) : null}
+        {route.screen === "recent" ? (
+          <CatalogScreen
+            favorites={favorites}
+            mode="recent"
+            network={network}
+            onClearRecents={clearRecents}
+            onToggleFavorite={toggleFavorite}
+            recents={recents}
           />
         ) : null}
         {route.screen === "settings" ? (

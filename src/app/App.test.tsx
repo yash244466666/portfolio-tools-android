@@ -37,4 +37,28 @@ describe("application shell", () => {
     expect(screen.getByRole("button", { name: "System" })).toBeInTheDocument()
     await waitFor(() => expect(document.documentElement).toHaveAttribute("data-theme"))
   })
+
+  it("shows stored recent tools in most-recent-first order", async () => {
+    localStorage.setItem(
+      "yash-tools:v1:recents",
+      JSON.stringify(["timestamp-converter", "unit-converter", "removed-tool"]),
+    )
+    window.location.hash = "#/recent"
+
+    render(
+      <PlatformProvider>
+        <App />
+      </PlatformProvider>,
+    )
+
+    expect(screen.getByRole("heading", { name: "Recent tools" })).toBeInTheDocument()
+    expect(await screen.findByLabelText("2 recent tools on this device")).toBeInTheDocument()
+    const recentLinks = screen.getAllByRole("link", {
+      name: /Timestamp Converter|Unit Converter/,
+    })
+    expect(recentLinks.map((link) => link.textContent)).toEqual([
+      "Timestamp Converter",
+      "Unit Converter",
+    ])
+  })
 })

@@ -9,7 +9,9 @@ import { Preferences } from "@capacitor/preferences"
 import { Share } from "@capacitor/share"
 import type { NetworkState, PlatformServices } from "@/platform/contracts"
 import { PlatformError } from "@/platform/errors"
+import { sanitizeGeneratedFileName } from "@/platform/shared/files"
 import { secureRandomService } from "@/platform/shared/random"
+import { validatedExternalUrl } from "@/platform/shared/urls"
 
 const preferencePrefix = "yash-tools:v1:"
 
@@ -44,7 +46,12 @@ export const capacitorPlatformServices: PlatformServices = {
         await Clipboard.write({ string: value })
         if (options?.clearAfterMs) {
           window.setTimeout(
-            () => void Clipboard.write({ string: "" }).catch(() => undefined),
+            () =>
+              void Clipboard.read()
+                .then(({ value: current }) =>
+                  current === value ? Clipboard.write({ string: "" }) : Promise.resolve(),
+                )
+                .catch(() => undefined),
             options.clearAfterMs,
           )
         }
@@ -85,15 +92,33 @@ export const capacitorPlatformServices: PlatformServices = {
       }
     },
     async remove(key) {
-      await Preferences.remove({ key: `${preferencePrefix}${key}` })
+      try {
+        await Preferences.remove({ key: `${preferencePrefix}${key}` })
+      } catch (error) {
+        throw new PlatformError(
+          "DATA_WRITE_FAILED",
+          "This saved setting could not be removed.",
+          true,
+          error,
+        )
+      }
     },
     async clear() {
-      const { keys } = await Preferences.keys()
-      await Promise.all(
-        keys
-          .filter((key) => key.startsWith(preferencePrefix))
-          .map((key) => Preferences.remove({ key })),
-      )
+      try {
+        const { keys } = await Preferences.keys()
+        await Promise.all(
+          keys
+            .filter((key) => key.startsWith(preferencePrefix))
+            .map((key) => Preferences.remove({ key })),
+        )
+      } catch (error) {
+        throw new PlatformError(
+          "DATA_WRITE_FAILED",
+          "Saved app preferences could not be cleared.",
+          true,
+          error,
+        )
+      }
     },
   },
   files: {
@@ -105,14 +130,15 @@ export const capacitorPlatformServices: PlatformServices = {
     },
     async share(file) {
       try {
+        const safeName = sanitizeGeneratedFileName(file.name)
         const saved = await Filesystem.writeFile({
-          path: `share/${file.name}`,
+          path: `share/${safeName}`,
           data: file.data,
           directory: Directory.Cache,
           encoding: file.encoding === "utf8" ? Encoding.UTF8 : undefined,
           recursive: true,
         })
-        await Share.share({ title: file.name, files: [saved.uri] })
+        await Share.share({ title: safeName, files: [saved.uri] })
       } catch (error) {
         throw new PlatformError("FILE_SHARE_FAILED", "The file could not be shared.", true, error)
       }
@@ -180,11 +206,9 @@ export const capacitorPlatformServices: PlatformServices = {
   },
   browser: {
     async open(url) {
-      if (url.protocol !== "https:") {
-        throw new PlatformError("EXTERNAL_URL_REJECTED", "Only secure web links are allowed.")
-      }
+      const validatedUrl = validatedExternalUrl(url)
       try {
-        await Browser.open({ url: url.toString(), presentationStyle: "popover" })
+        await Browser.open({ url: validatedUrl, presentationStyle: "popover" })
       } catch (error) {
         throw new PlatformError(
           "EXTERNAL_URL_OPEN_FAILED",

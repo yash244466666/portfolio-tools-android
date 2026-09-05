@@ -5,8 +5,10 @@ import type {
   PickedFile,
   PlatformServices,
 } from "@/platform/contracts"
-import { PlatformError } from "@/platform/errors"
+import { isCancellationError, PlatformError } from "@/platform/errors"
+import { generatedFileBytes, sanitizeGeneratedFileName } from "@/platform/shared/files"
 import { secureRandomService } from "@/platform/shared/random"
+import { validatedExternalUrl } from "@/platform/shared/urls"
 
 const preferencePrefix = "yash-tools:v1:"
 
@@ -18,6 +20,10 @@ async function pickFromBrowser(options: FilePickOptions) {
     input.multiple = options.multiple ?? false
     input.onchange = () => {
       const files = Array.from(input.files ?? [])
+      if (files.length === 0) {
+        reject(new PlatformError("FILE_PICK_CANCELLED", "No file selected."))
+        return
+      }
       const tooLarge = files.find((file) =>
         options.maximumBytes ? file.size > options.maximumBytes : false,
       )
@@ -42,15 +48,11 @@ async function pickFromBrowser(options: FilePickOptions) {
 }
 
 function browserDownload(file: GeneratedFile) {
-  const bytes =
-    file.encoding === "base64"
-      ? Uint8Array.from(atob(file.data), (character) => character.charCodeAt(0))
-      : file.data
-  const blob = new Blob([bytes], { type: file.mimeType })
+  const blob = new Blob([generatedFileBytes(file)], { type: file.mimeType })
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement("a")
   anchor.href = url
-  anchor.download = file.name
+  anchor.download = sanitizeGeneratedFileName(file.name)
   anchor.click()
   window.setTimeout(() => URL.revokeObjectURL(url), 0)
 }
@@ -82,7 +84,12 @@ export const webPlatformServices: PlatformServices = {
         await navigator.clipboard.writeText(value)
         if (options?.clearAfterMs) {
           window.setTimeout(() => {
-            void navigator.clipboard.writeText("").catch(() => undefined)
+            void navigator.clipboard
+              .readText()
+              .then((current) =>
+                current === value ? navigator.clipboard.writeText("") : Promise.resolve(),
+              )
+              .catch(() => undefined)
           }, options.clearAfterMs)
         }
       } catch (error) {
@@ -122,29 +129,59 @@ export const webPlatformServices: PlatformServices = {
       }
     },
     async remove(key) {
-      localStorage.removeItem(`${preferencePrefix}${key}`)
+      try {
+        localStorage.removeItem(`${preferencePrefix}${key}`)
+      } catch (error) {
+        throw new PlatformError(
+          "DATA_WRITE_FAILED",
+          "This saved setting could not be removed.",
+          true,
+          error,
+        )
+      }
     },
     async clear() {
-      Object.keys(localStorage)
-        .filter((key) => key.startsWith(preferencePrefix))
-        .forEach((key) => localStorage.removeItem(key))
+      try {
+        Object.keys(localStorage)
+          .filter((key) => key.startsWith(preferencePrefix))
+          .forEach((key) => localStorage.removeItem(key))
+      } catch (error) {
+        throw new PlatformError(
+          "DATA_WRITE_FAILED",
+          "Saved app preferences could not be cleared.",
+          true,
+          error,
+        )
+      }
     },
   },
   files: {
     pick: pickFromBrowser,
     async share(file) {
-      if (navigator.share && navigator.canShare) {
-        const blob = new Blob([file.data], { type: file.mimeType })
-        const shareFile = new File([blob], file.name, { type: file.mimeType })
-        if (navigator.canShare({ files: [shareFile] })) {
-          await navigator.share({ files: [shareFile], title: file.name })
-          return
+      const safeName = sanitizeGeneratedFileName(file.name)
+      try {
+        if (navigator.share && navigator.canShare) {
+          const blob = new Blob([generatedFileBytes(file)], { type: file.mimeType })
+          const shareFile = new File([blob], safeName, { type: file.mimeType })
+          if (navigator.canShare({ files: [shareFile] })) {
+            await navigator.share({ files: [shareFile], title: safeName })
+            return
+          }
         }
+        browserDownload({ ...file, name: safeName })
+      } catch (error) {
+        if (isCancellationError(error)) {
+          throw new PlatformError("FILE_SHARE_CANCELLED", "Sharing was cancelled.", true, error)
+        }
+        throw new PlatformError("FILE_SHARE_FAILED", "The file could not be shared.", true, error)
       }
-      browserDownload(file)
     },
     async saveAs(file) {
-      browserDownload(file)
+      try {
+        browserDownload(file)
+      } catch (error) {
+        throw new PlatformError("FILE_SAVE_FAILED", "The file could not be saved.", true, error)
+      }
     },
   },
   notifications: {
@@ -179,10 +216,10 @@ export const webPlatformServices: PlatformServices = {
   },
   browser: {
     async open(url) {
-      if (url.protocol !== "https:") {
-        throw new PlatformError("EXTERNAL_URL_REJECTED", "Only secure web links are allowed.")
+      const opened = window.open(validatedExternalUrl(url), "_blank", "noopener,noreferrer")
+      if (!opened) {
+        throw new PlatformError("EXTERNAL_URL_OPEN_FAILED", "The browser could not open this link.")
       }
-      window.open(url.toString(), "_blank", "noopener,noreferrer")
     },
   },
   random: secureRandomService,

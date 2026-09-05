@@ -1,14 +1,17 @@
-import { CircleCheck, CloudOff, Heart, Search, Wifi } from "lucide-react"
+import { CircleCheck, CloudOff, Heart, Search, Trash2, Wifi } from "lucide-react"
 import { useMemo, useState } from "react"
 import { routeHref } from "@/app/routing"
+import { Button } from "@/components/ui/Button"
 import type { NetworkState } from "@/platform/contracts"
-import { isEnabledTool, toolCategories, tools } from "@/tools/registry"
+import { getTool, isEnabledTool, toolCategories, tools } from "@/tools/registry"
 import type { ToolCategoryId, ToolDefinition } from "@/tools/types"
 
 interface CatalogScreenProps {
   favorites: string[]
-  mode?: "catalog" | "favorites"
+  mode?: "catalog" | "favorites" | "recent"
   network: NetworkState
+  recents?: string[]
+  onClearRecents?: () => void
   onToggleFavorite: (toolId: string) => void
 }
 
@@ -87,6 +90,8 @@ export function CatalogScreen({
   favorites,
   mode = "catalog",
   network,
+  recents = [],
+  onClearRecents,
   onToggleFavorite,
 }: CatalogScreenProps) {
   const [query, setQuery] = useState("")
@@ -94,7 +99,14 @@ export function CatalogScreen({
 
   const visibleTools = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase()
-    return tools.filter((tool) => {
+    const availableTools =
+      mode === "recent"
+        ? recents
+            .map((id) => getTool(id))
+            .filter((tool): tool is ToolDefinition => Boolean(tool && isEnabledTool(tool)))
+        : tools
+
+    return availableTools.filter((tool) => {
       if (mode === "favorites" && !favorites.includes(tool.id)) return false
       if (category !== "all" && tool.category !== category) return false
       if (!normalized) return true
@@ -103,10 +115,46 @@ export function CatalogScreen({
         .toLocaleLowerCase()
         .includes(normalized)
     })
-  }, [category, favorites, mode, query])
+  }, [category, favorites, mode, query, recents])
 
   const enabledCount = tools.filter(isEnabledTool).length
-  const heading = mode === "favorites" ? "Favorite tools" : "Useful tools, ready when you are"
+  const favoriteCount = tools.filter(
+    (tool) => isEnabledTool(tool) && favorites.includes(tool.id),
+  ).length
+  const recentCount = recents.filter((id) => {
+    const tool = getTool(id)
+    return Boolean(tool && isEnabledTool(tool))
+  }).length
+  const heading =
+    mode === "favorites"
+      ? "Favorite tools"
+      : mode === "recent"
+        ? "Recent tools"
+        : "Useful tools, ready when you are"
+  const summary =
+    mode === "favorites"
+      ? "Your device-local shortcuts. Favorites never require an account."
+      : mode === "recent"
+        ? "Quickly return to tools opened on this installation. Recent history stays on this device."
+        : "Fast developer and everyday utilities. Offline tools process input on this device; network tools are labeled."
+  const stat =
+    mode === "favorites"
+      ? {
+          count: favoriteCount,
+          label: favoriteCount === 1 ? "favorite tool saved" : "favorite tools saved",
+          accessibleLabel: `${favoriteCount} ${favoriteCount === 1 ? "favorite tool saved" : "favorite tools saved"}`,
+        }
+      : mode === "recent"
+        ? {
+            count: recentCount,
+            label: recentCount === 1 ? "recent tool on this device" : "recent tools on this device",
+            accessibleLabel: `${recentCount} ${recentCount === 1 ? "recent tool on this device" : "recent tools on this device"}`,
+          }
+        : {
+            count: enabledCount,
+            label: "foundation tools ready",
+            accessibleLabel: `${enabledCount} tools enabled in the foundation`,
+          }
 
   return (
     <div className="screen-content">
@@ -117,17 +165,19 @@ export function CatalogScreen({
             {heading}
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-7 text-[var(--text-secondary)]">
-            {mode === "favorites"
-              ? "Your device-local shortcuts. Favorites never require an account."
-              : "Fast developer and everyday utilities. Offline tools process input on this device; network tools are labeled."}
+            {summary}
           </p>
         </div>
-        <div
-          className="foundation-stat"
-          aria-label={`${enabledCount} tools enabled in the foundation`}
-        >
-          <strong>{enabledCount}</strong>
-          <span>foundation tools ready</span>
+        <div className="grid justify-items-start gap-2 md:justify-items-end">
+          <div className="foundation-stat" aria-label={stat.accessibleLabel}>
+            <strong>{stat.count}</strong>
+            <span>{stat.label}</span>
+          </div>
+          {mode === "recent" && recentCount > 0 && onClearRecents ? (
+            <Button onClick={onClearRecents} variant="quiet">
+              <Trash2 aria-hidden="true" size={18} /> Clear recent history
+            </Button>
+          ) : null}
         </div>
       </header>
 
@@ -190,7 +240,9 @@ export function CatalogScreen({
           <p>
             {mode === "favorites" && favorites.length === 0
               ? "Add a favorite from the Tools screen."
-              : "Try another search or category."}
+              : mode === "recent" && recentCount === 0
+                ? "Open a ready tool and it will appear here."
+                : "Try another search or category."}
           </p>
           <a className="text-link" href={routeHref({ screen: "catalog" })}>
             Browse all tools

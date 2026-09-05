@@ -6,8 +6,10 @@ export type PlatformErrorCode =
   | "FILE_PICK_CANCELLED"
   | "FILE_PICK_UNAVAILABLE"
   | "FILE_TOO_LARGE"
+  | "FILE_SHARE_CANCELLED"
   | "FILE_SHARE_FAILED"
   | "FILE_SAVE_UNAVAILABLE"
+  | "FILE_SAVE_FAILED"
   | "NOTIFICATION_DENIED"
   | "NOTIFICATION_SCHEDULE_FAILED"
   | "EXTERNAL_URL_REJECTED"
@@ -29,4 +31,13 @@ export class PlatformError extends Error {
 export function toSafeErrorMessage(error: unknown): string {
   if (error instanceof PlatformError) return error.message
   return "The operation could not be completed. Please try again."
+}
+
+export function isCancellationError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    (error as { name?: unknown }).name === "AbortError"
+  )
 }

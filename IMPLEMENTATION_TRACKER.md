@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-05 14:43 Europe/Berlin  
+> Last updated: 2026-09-05 17:54 Europe/Berlin  
 > Tracker schema: 1  
 > Current milestone: Foundation pass  
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`  
@@ -25,13 +25,13 @@ This is the living operational record for what is implemented, what is verified,
 | Workstream                  | Status  | Current evidence                                                                            | Remaining gate                                                           |
 | --------------------------- | ------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | Separate Git repository     | DONE    | Private GitHub repo; local `main` tracks `origin/main`                                      | Branch protection/required checks still require GitHub settings          |
-| Web application scaffold    | DONE    | Production build, 16 tests, and 8 phone/tablet E2E scenarios                                | Continue extending tests with migrated tools                             |
+| Web application scaffold    | DONE    | Production build, 52 tests, and 10 phone/tablet E2E scenarios                               | Continue extending tests with migrated tools                             |
 | Capacitor Android scaffold  | DONE    | 13 official plugins; Gradle lint plus debug/internal/release builds pass                    | Install/smoke test requires an Android device                            |
-| Adaptive application shell  | DONE    | Catalog, search, filters, bottom nav/rail; exact-width overflow tests and screenshot review | Landscape, split-screen, 200% text, and physical-device review           |
+| Adaptive application shell  | DONE    | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review | Landscape, split-screen, 200% text, and physical-device review           |
 | Tool registry               | DONE    | Typed 12-tool milestone registry; unique-ID tests                                           | Expand only through tool Definition of Done                              |
 | Enabled foundation tools    | DONE    | Unit, Timestamp, SHA Hash implementations and pure/E2E tests                                | Physical Android interaction check                                       |
-| Platform contracts          | DONE    | Clipboard, preferences, files, notification, network, browser, random, lifecycle, haptics   | Contract-test expansion                                                  |
-| Android platform adapters   | PARTIAL | Clipboard/preferences/share/notifications/network/browser/lifecycle/haptics coded           | SAF Pick/Save As, sensitive clipboard flag, native tests                 |
+| Platform contracts          | DONE    | Contracts plus shared web/Capacitor behavior tests across core adapter semantics            | Extend cases alongside each new native capability                        |
+| Android platform adapters   | PARTIAL | Clipboard/preferences/share/notifications/network/browser/lifecycle/haptics tested          | SAF Pick/Save As, sensitive clipboard flag, cache cleanup, native tests  |
 | Android hardening           | PARTIAL | API 24/36, backup/network/file rules, shrink, three-variant manifest budget, artifacts      | WebView termination/native safe mode and final icon/splash work          |
 | Agent documentation         | DONE    | Detailed synchronized `AGENT.md` and `CLAUDE.md`                                            | Recheck synchronization after future edits                               |
 | Audited implementation plan | DONE    | Full plan copied into repository root                                                       | Reconcile if upstream reference changes                                  |
@@ -85,7 +85,7 @@ This is the living operational record for what is implemented, what is verified,
 - [x] Exact-width overflow review at 320/375/600/768/1024 px plus phone/tablet screenshots.
 - [ ] Landscape and split-screen browser/device review.
 - [ ] 200% text and TalkBack manual review.
-- [ ] Recents user interface (IDs are stored, but no visible Recent section yet).
+- [x] Visible Recent destination with most-recent-first order, stale-ID filtering, empty state, and clear action.
 - [x] React render-error boundary with private recovery screen.
 - [ ] WebView renderer-termination detection and native safe-mode screen.
 
@@ -107,7 +107,7 @@ This is the living operational record for what is implemented, what is verified,
 - [ ] Android Storage Access Framework document picker.
 - [ ] Android `ACTION_CREATE_DOCUMENT` Save As bridge.
 - [ ] File cache cleanup/retention scheduler.
-- [ ] Platform adapter contract tests.
+- [x] Shared web/Capacitor adapter contract tests for clipboard, preferences, browser, network, files, and notifications.
 - [ ] Picker/share/notification UI Automator tests.
 
 ### Android project
@@ -153,7 +153,7 @@ This is the living operational record for what is implemented, what is verified,
 - [x] Hash tests use known empty and UTF-8 vectors.
 - [x] Hash UI labels SHA-1 as legacy and does not auto-persist input.
 - [x] MD5 implementation intentionally excluded from the foundation.
-- [ ] Component interaction tests for each enabled tool.
+- [x] Component interaction tests for each enabled tool.
 - [ ] Copy behavior verified in installed Android app.
 - [ ] Enabled tool routes verified through process recreation.
 
@@ -161,7 +161,7 @@ This is the living operational record for what is implemented, what is verified,
 
 | Order | Tool                | Status  | Technical path proved                      | Next acceptance work                      |
 | ----: | ------------------- | ------- | ------------------------------------------ | ----------------------------------------- |
-|     1 | Unit Converter      | DONE    | Pure calculations, responsive form         | Component + physical device verification  |
+|     1 | Unit Converter      | DONE    | Pure calculations, responsive form         | Physical device verification              |
 |     2 | Timestamp Converter | DONE    | Date/time, live state, clipboard           | Locale/time-zone/device verification      |
 |     3 | Hash Generator      | DONE    | Web Crypto, async state, clipboard         | Android WebView vectors/copy verification |
 |     4 | Markdown Preview    | PLANNED | Sanitization, rich rendering               | Extract, DOMPurify/marked, CSP tests      |
@@ -178,35 +178,44 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 
 ## 5. Platform adapter status
 
-| Adapter          | Web                | Android             | Automated tests                  | Device tests | Notes                                                |
-| ---------------- | ------------------ | ------------------- | -------------------------------- | ------------ | ---------------------------------------------------- |
-| Clipboard        | Implemented        | Implemented         | Pending                          | Pending      | Sensitive flag needs custom native implementation    |
-| Preferences      | Implemented        | Implemented         | Pending                          | Pending      | Foundation values only; durable schema still pending |
-| Secure random    | Implemented        | Same implementation | Partial through future consumers | Pending      | Web Crypto only                                      |
-| Network state    | Implemented        | Implemented         | Pending                          | Pending      | Connectivity is not reachability                     |
-| External browser | Implemented        | Implemented         | Pending                          | Pending      | HTTPS only                                           |
-| Lifecycle        | Implemented        | Implemented         | Pending                          | Pending      | Process/renderer recovery still pending              |
-| Haptics          | Best effort        | Implemented         | Not required                     | Pending      | Never blocks primary action                          |
-| Notifications    | Permission only    | Implemented         | Pending                          | Pending      | No exact-alarm permission                            |
-| File picker      | Browser input      | Typed unavailable   | Pending                          | Pending      | Must use SAF; no broad permission workaround         |
-| File share       | Download/Web Share | Cache + Share       | Pending                          | Pending      | Retention cleanup pending                            |
-| Save As          | Browser download   | Typed unavailable   | Pending                          | Pending      | Must use ACTION_CREATE_DOCUMENT                      |
+| Adapter          | Web                | Android             | Automated tests                 | Device tests | Notes                                                |
+| ---------------- | ------------------ | ------------------- | ------------------------------- | ------------ | ---------------------------------------------------- |
+| Clipboard        | Implemented        | Implemented         | Shared contract tests           | Pending      | Sensitive flag needs custom native implementation    |
+| Preferences      | Implemented        | Implemented         | Shared contract tests           | Pending      | Foundation values only; durable schema still pending |
+| Secure random    | Implemented        | Same implementation | Shared utility tests            | Pending      | Web Crypto only                                      |
+| Network state    | Implemented        | Implemented         | Shared contract tests           | Pending      | Connectivity is not reachability                     |
+| External browser | Implemented        | Implemented         | Shared URL/adapter tests        | Pending      | HTTPS only; embedded credentials rejected            |
+| Lifecycle        | Implemented        | Implemented         | Listener cleanup partly covered | Pending      | Process/renderer recovery still pending              |
+| Haptics          | Best effort        | Implemented         | Not required                    | Pending      | Never blocks primary action                          |
+| Notifications    | Permission only    | Implemented         | Schedule/cancel contract tests  | Pending      | No exact-alarm permission                            |
+| File picker      | Browser input      | Typed unavailable   | Typed-gap coverage              | Pending      | Must use SAF; no broad permission workaround         |
+| File share       | Download/Web Share | Cache + Share       | Bytes/name/cache-path tests     | Pending      | Retention cleanup pending                            |
+| Save As          | Browser download   | Typed unavailable   | Web bytes + typed-gap coverage  | Pending      | Must use ACTION_CREATE_DOCUMENT                      |
 
 ## 6. Quality-gate evidence
 
-| Date/time        | Commit/worktree        | Command                                              | Result  | Evidence/notes                                                                                |
-| ---------------- | ---------------------- | ---------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------- |
-| 2026-09-05 14:39 | Uncommitted foundation | `pnpm format:check`                                  | PASS    | All tracked source/document formats accepted                                                  |
-| 2026-09-05 14:39 | Uncommitted foundation | `pnpm check`                                         | PASS    | Strict typecheck; ESLint zero warnings; 6 files/16 tests; production build                    |
-| 2026-09-05 14:39 | Uncommitted foundation | `pnpm build`                                         | PASS    | Main JS 240.43 kB / 76.32 kB gzip; enabled tools remain lazy chunks                           |
-| 2026-09-05 14:40 | Uncommitted foundation | `pnpm test:e2e`                                      | PASS    | 8 scenarios across Pixel 5/tablet contexts; exact 320/375/600/768/1024 overflow loop          |
-| 2026-09-05 14:35 | Uncommitted foundation | Playwright full-page screenshot review               | PASS    | Phone and 1024 px layouts visually inspected; no clipping or accidental desktop-only shell    |
-| 2026-09-05 14:43 | Uncommitted foundation | `./android/gradlew -p android lintDebug`             | PASS    | Zero errors, 15 recorded warnings: generated icons/resources and available dependency updates |
-| 2026-09-05 14:43 | Uncommitted foundation | `assembleDebug assembleInternal bundleRelease`       | PASS    | Final web assets packaged; debug/internal APKs and minified release AAB produced              |
-| 2026-09-05 14:43 | Uncommitted foundation | `pnpm android:manifest:check debug/internal/release` | PASS    | Six reviewed permissions per variant; only `dev.yash.tools.MainActivity` exported             |
-| 2026-09-05 14:43 | Uncommitted foundation | APK signature and AAB native-library inspection      | PASS    | APKs verify v2; AAB intentionally unsigned; no `.so` entries                                  |
-| 2026-09-05 14:41 | Uncommitted foundation | `cmp`/SHA-256 documentation integrity checks         | PASS    | Agent files identical; copied plan checksum exactly matches upstream                          |
-| 2026-09-05 14:41 | Uncommitted foundation | `adb devices -l`                                     | BLOCKED | ADB server available, but no emulator or authorized physical device is connected              |
+| Date/time        | Commit/worktree          | Command                                                           | Result  | Evidence/notes                                                                                |
+| ---------------- | ------------------------ | ----------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------- |
+| 2026-09-05 14:39 | Uncommitted foundation   | `pnpm format:check`                                               | PASS    | All tracked source/document formats accepted                                                  |
+| 2026-09-05 14:39 | Uncommitted foundation   | `pnpm check`                                                      | PASS    | Strict typecheck; ESLint zero warnings; 6 files/16 tests; production build                    |
+| 2026-09-05 14:39 | Uncommitted foundation   | `pnpm build`                                                      | PASS    | Main JS 240.43 kB / 76.32 kB gzip; enabled tools remain lazy chunks                           |
+| 2026-09-05 14:40 | Uncommitted foundation   | `pnpm test:e2e`                                                   | PASS    | 8 scenarios across Pixel 5/tablet contexts; exact 320/375/600/768/1024 overflow loop          |
+| 2026-09-05 14:35 | Uncommitted foundation   | Playwright full-page screenshot review                            | PASS    | Phone and 1024 px layouts visually inspected; no clipping or accidental desktop-only shell    |
+| 2026-09-05 14:43 | Uncommitted foundation   | `./android/gradlew -p android lintDebug`                          | PASS    | Zero errors, 15 recorded warnings: generated icons/resources and available dependency updates |
+| 2026-09-05 14:43 | Uncommitted foundation   | `assembleDebug assembleInternal bundleRelease`                    | PASS    | Final web assets packaged; debug/internal APKs and minified release AAB produced              |
+| 2026-09-05 14:43 | Uncommitted foundation   | `pnpm android:manifest:check debug/internal/release`              | PASS    | Six reviewed permissions per variant; only `dev.yash.tools.MainActivity` exported             |
+| 2026-09-05 14:43 | Uncommitted foundation   | APK signature and AAB native-library inspection                   | PASS    | APKs verify v2; AAB intentionally unsigned; no `.so` entries                                  |
+| 2026-09-05 14:41 | Uncommitted foundation   | `cmp`/SHA-256 documentation integrity checks                      | PASS    | Agent files identical; copied plan checksum exactly matches upstream                          |
+| 2026-09-05 14:41 | Uncommitted foundation   | `adb devices -l`                                                  | BLOCKED | ADB server available, but no emulator or authorized physical device is connected              |
+| 2026-09-05 17:51 | Current foundation batch | `pnpm format:check`, `pnpm typecheck`, `pnpm lint`                | PASS    | Prettier accepted all files; strict TypeScript and ESLint completed with zero errors/warnings |
+| 2026-09-05 17:51 | Current foundation batch | `pnpm test`                                                       | PASS    | 12 files/52 tests: shared adapter contracts and all enabled-tool component interactions       |
+| 2026-09-05 17:51 | Current foundation batch | `pnpm build`                                                      | PASS    | Main JS 243.61 kB / 77.20 kB gzip; enabled tools remain lazy chunks                           |
+| 2026-09-05 17:52 | Current foundation batch | `pnpm test:e2e`                                                   | PASS    | 10 scenarios across phone/tablet, including persisted Recent navigation                       |
+| 2026-09-05 17:45 | Current foundation batch | Recent UI screenshot review                                       | PASS    | Empty-state phone dark and 1024 px light layouts inspected; labeled four-item adaptive nav    |
+| 2026-09-05 17:52 | Current foundation batch | `pnpm cap:sync`                                                   | PASS    | Current production web bundle copied into the Android asset output                            |
+| 2026-09-05 17:53 | Current foundation batch | `lintDebug`, `assembleDebug`, `assembleInternal`, `bundleRelease` | PASS    | All required Gradle variants completed; existing flatDir/Gradle deprecation warnings remain   |
+| 2026-09-05 17:54 | Current foundation batch | Manifest checks for debug/internal/release                        | PASS    | Six reviewed permissions per variant; only `dev.yash.tools.MainActivity` exported             |
+| 2026-09-05 17:54 | Current foundation batch | APK signatures and AAB native-library inspection                  | PASS    | Debug/internal APK v2 signatures verify; release AAB remains unsigned; no `.so` entries       |
 
 Android Lint currently reports warnings, not errors: generated Capacitor launcher/splash resources need final replacement/cleanup; some generated resources appear unused; Gradle 8.14.5 and AppCompat 1.8.0 updates are available; generated `flatDir`/Gradle 9 deprecation and Capacitor Filesystem deprecation notices remain. Review rather than suppress them during the relevant dependency/icon pass.
 
@@ -214,9 +223,9 @@ Android Lint currently reports warnings, not errors: generated Capacitor launche
 
 | Artifact     | Package/role              |     Bytes | SHA-256                                                            | Signing/status                           |
 | ------------ | ------------------------- | --------: | ------------------------------------------------------------------ | ---------------------------------------- |
-| Debug APK    | `dev.yash.tools.debug`    | 4,860,798 | `0f6169289138d114887afc3a5cd2c22fdd978980c3896a3793dcf938e2b978d8` | Local debug key; APK v2 verified         |
-| Internal APK | `dev.yash.tools.internal` | 4,860,592 | `dd2eafc23ef7b2b3acddcac70ad78af0c2f5bd859c1eb8d3fa8c4c115cd01ff3` | Local debug key; APK v2 verified         |
-| Release AAB  | `dev.yash.tools`          | 2,097,604 | `d60ff85157175fd95af3a046b31eba3568147478db8d169e20e55a13554e0495` | Build proof only; intentionally unsigned |
+| Debug APK    | `dev.yash.tools.debug`    | 5,118,022 | `ff7894942f307ba005d7a795101df47fc638ad34909b8b6c3a7313dd416a0f86` | Local debug key; APK v2 verified         |
+| Internal APK | `dev.yash.tools.internal` | 5,119,914 | `9c27b54ffdbefbcbf95c00663883056edc9ed35747d958c5aa5da05f30107357` | Local debug key; APK v2 verified         |
+| Release AAB  | `dev.yash.tools`          | 2,100,617 | `0e94a9337bd4e5f8618ede1512417e009ab52873c66b7e039967b809dac0e9fa` | Build proof only; intentionally unsigned |
 
 These are reproducibility evidence, not publication candidates. Rebuild after any source/config change and never distribute a debug-key artifact as production.
 
@@ -240,15 +249,15 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 
 ## 9. Next executable queue
 
-1. Approve or revise the provisional app name, application ID, bundled origin, privacy posture, and public v1 tool count.
-2. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
-3. Add platform-adapter contract tests and Android instrumentation/UI Automator harnesses.
-4. Design and implement the narrow Android Storage Access Framework picker and `ACTION_CREATE_DOCUMENT` Save As bridge.
-5. Implement sensitive clipboard metadata and deterministic share-cache cleanup.
-6. Implement WebView renderer-termination handling and a native safe-mode/recovery surface.
-7. Replace generated launcher/splash assets, including adaptive and monochrome icons, and clear their lint warnings.
-8. Freeze release-signing/key-custody strategy without committing secrets.
-9. Begin Markdown Preview only after device-level foundation gates remain green.
+1. Design and implement the narrow Android Storage Access Framework picker and `ACTION_CREATE_DOCUMENT` Save As bridge with native unit/instrumentation coverage.
+2. Implement sensitive clipboard metadata and deterministic share-cache cleanup/retention.
+3. Implement WebView renderer-termination handling and a native safe-mode/recovery surface.
+4. Add process-recreation, permission, picker, share, and notification instrumentation/UI Automator coverage.
+5. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
+6. Begin Markdown Preview only after the preceding device-level foundation gates remain green.
+7. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval.
+8. Approve or revise the provisional app name, application ID, bundled origin, privacy posture, and public v1 tool count before release work.
+9. Freeze release-signing/key-custody strategy without committing secrets.
 
 ## 10. Release-gate snapshot
 
@@ -300,3 +309,13 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Passed final web, E2E, Gradle lint, debug/internal APK, minified release AAB, manifest, signature, native-library, and documentation-integrity checks.
 - Recorded final artifact hashes and the physical-device blocker; no device was connected.
 - Created the private GitHub repository, configured `origin`, pushed `main`, and verified `visibility=PRIVATE`.
+
+### 2026-09-05 — Foundation UI and adapter-contract batch
+
+- Added a visible Recent destination to compact and expanded navigation, ordered by last-opened tool, with stale-ID filtering, a useful empty state, device-local wording, and explicit history clearing.
+- Prevented the asynchronous initial Recent load from overwriting a newly opened tool.
+- Added shared contract coverage for web and Capacitor clipboard, preferences, external browser, and network adapters.
+- Added file/share and notification adapter cases, typed share cancellation/save failure codes, shared external-URL validation, and generated-filename sanitization.
+- Corrected web Base64 sharing so Save/Share use decoded bytes and changed timed clipboard clearing to preserve newer clipboard contents.
+- Added interaction tests for Unit Converter, Timestamp Converter, and Hash Generator.
+- Passed all required web, E2E, Capacitor sync, Gradle variant, merged-manifest, signature, and native-library gates; no physical device was connected.
