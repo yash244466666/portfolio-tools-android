@@ -24,7 +24,7 @@ This is the living operational record for what is implemented, what is verified,
 
 | Workstream                  | Status  | Current evidence                                                                            | Remaining gate                                                           |
 | --------------------------- | ------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Separate Git repository     | DONE    | Independent `.git` initialized at `/home/yash/Desktop/yash/portfolio-tools-android`         | Remote/branch protection requires hosting decision                       |
+| Separate Git repository     | DONE    | Private GitHub repo; local `main` tracks `origin/main`                                      | Branch protection/required checks still require GitHub settings          |
 | Web application scaffold    | DONE    | Production build, 16 tests, and 8 phone/tablet E2E scenarios                                | Continue extending tests with migrated tools                             |
 | Capacitor Android scaffold  | DONE    | 13 official plugins; Gradle lint plus debug/internal/release builds pass                    | Install/smoke test requires an Android device                            |
 | Adaptive application shell  | DONE    | Catalog, search, filters, bottom nav/rail; exact-width overflow tests and screenshot review | Landscape, split-screen, 200% text, and physical-device review           |
@@ -58,7 +58,7 @@ This is the living operational record for what is implemented, what is verified,
 - [x] `AGENT.md` created.
 - [x] `CLAUDE.md` created and synchronized.
 - [x] README, architecture, design, provenance, ADRs, and device checklist created.
-- [ ] Repository remote created.
+- [x] Private GitHub repository created: `yash244466666/portfolio-tools-android`.
 - [ ] Default branch protection and required CI configured.
 - [ ] CI actions pinned by immutable commit.
 
@@ -299,3 +299,4 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Added an executable merged-manifest permission/export budget and wired it into CI/build scripts.
 - Passed final web, E2E, Gradle lint, debug/internal APK, minified release AAB, manifest, signature, native-library, and documentation-integrity checks.
 - Recorded final artifact hashes and the physical-device blocker; no device was connected.
+- Created the private GitHub repository, configured `origin`, pushed `main`, and verified `visibility=PRIVATE`.
