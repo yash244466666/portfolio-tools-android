@@ -1,0 +1,29 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+.idea/
+.vscode/
+*.iml
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Android local/generated build state
+android/.gradle/
+android/.idea/
+android/local.properties
+android/**/build/
+android/captures/
+*.apk
+*.aab
+*.jks
+*.keystore
+*.properties.local
+
+# Signing and Play credentials must never be committed
+signing/
+play-service-account*.json

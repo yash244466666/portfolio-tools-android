@@ -1,0 +1,147 @@
+import {
+  CircleHelp,
+  Database,
+  ExternalLink,
+  Moon,
+  ShieldCheck,
+  Smartphone,
+  Sun,
+} from "lucide-react"
+import type { ThemePreference } from "@/app/useAppState"
+import { Button } from "@/components/ui/Button"
+import { ToolPanel } from "@/components/ui/ToolPanel"
+import type { PlatformKind } from "@/platform/contracts"
+import { usePlatform } from "@/platform/platform-context"
+
+interface SettingsScreenProps {
+  platform: PlatformKind
+  theme: ThemePreference
+  onThemeChange: (value: ThemePreference) => void
+  onClearPreferences: () => Promise<void>
+}
+
+export function SettingsScreen({
+  platform,
+  theme,
+  onThemeChange,
+  onClearPreferences,
+}: SettingsScreenProps) {
+  const { browser } = usePlatform()
+
+  function openSupportSite() {
+    void browser.open(new URL("https://yashsikdar.com"))
+  }
+
+  return (
+    <div className="screen-content">
+      <header>
+        <p className="eyebrow">Settings & information</p>
+        <h1 className="screen-title" tabIndex={-1}>
+          Your app, your device
+        </h1>
+        <p className="mt-3 max-w-2xl leading-7 text-[var(--text-secondary)]">
+          The foundation stores only theme, favorites, and recent-tool IDs. Tool input is not saved
+          automatically.
+        </p>
+      </header>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <ToolPanel title="Appearance">
+          <fieldset>
+            <legend className="sr-only">Color theme</legend>
+            <div className="segmented-control three">
+              {(
+                [
+                  ["system", Smartphone, "System"],
+                  ["light", Sun, "Light"],
+                  ["dark", Moon, "Dark"],
+                ] as const
+              ).map(([value, Icon, label]) => (
+                <button
+                  aria-pressed={theme === value}
+                  className="segment"
+                  key={value}
+                  onClick={() => onThemeChange(value)}
+                  type="button"
+                >
+                  <Icon aria-hidden="true" size={18} /> {label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        </ToolPanel>
+
+        <ToolPanel title="Local data">
+          <div className="flex items-start gap-3">
+            <Database
+              aria-hidden="true"
+              className="mt-1 shrink-0 text-[var(--primary)]"
+              size={22}
+            />
+            <div>
+              <p className="text-sm leading-6 text-[var(--text-secondary)]">
+                Clear foundation preferences from this installation. This currently removes
+                favorites, recents, and theme only.
+              </p>
+              <Button className="mt-4" onClick={() => void onClearPreferences()} variant="danger">
+                Clear local preferences
+              </Button>
+            </div>
+          </div>
+        </ToolPanel>
+
+        <ToolPanel title="Privacy foundation">
+          <div className="flex items-start gap-3">
+            <ShieldCheck
+              aria-hidden="true"
+              className="mt-1 shrink-0 text-[var(--success-text)]"
+              size={22}
+            />
+            <ul className="grid gap-2 text-sm leading-6 text-[var(--text-secondary)]">
+              <li>No account, ads, analytics, or automatic crash uploads.</li>
+              <li>Enabled foundation tools work offline and process input locally.</li>
+              <li>Future network tools will be labeled before user input is sent.</li>
+              <li>Android backup exclusions are configured for app-private data.</li>
+            </ul>
+          </div>
+        </ToolPanel>
+
+        <ToolPanel title="Build information">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+            <dt className="text-[var(--text-secondary)]">Version</dt>
+            <dd className="font-mono">0.1.0</dd>
+            <dt className="text-[var(--text-secondary)]">Platform</dt>
+            <dd className="capitalize">{platform}</dd>
+            <dt className="text-[var(--text-secondary)]">Manifest</dt>
+            <dd>Foundation v1</dd>
+            <dt className="text-[var(--text-secondary)]">Enabled tools</dt>
+            <dd>3</dd>
+          </dl>
+        </ToolPanel>
+
+        <ToolPanel title="Help and project status">
+          <div className="flex items-start gap-3">
+            <CircleHelp
+              aria-hidden="true"
+              className="mt-1 shrink-0 text-[var(--primary)]"
+              size={22}
+            />
+            <div className="grid gap-3 text-sm leading-6 text-[var(--text-secondary)]">
+              <p>
+                Implementation progress, known limitations, physical-device checks, and release
+                gates are maintained in the repository documentation.
+              </p>
+              <button
+                className="text-link inline-flex min-h-12 items-center gap-1 text-left"
+                onClick={openSupportSite}
+                type="button"
+              >
+                Portfolio and support site <ExternalLink aria-hidden="true" size={15} />
+              </button>
+            </div>
+          </div>
+        </ToolPanel>
+      </div>
+    </div>
+  )
+}
