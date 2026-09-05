@@ -1,9 +1,10 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-05 18:55 Europe/Berlin
+> Last updated: 2026-09-05 19:24 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
+> Approved public version 1 scope: **all 87 audited catalog tools; 3 implemented, 84 remaining**
 > Public release readiness: **NO — foundation only**
 
 This is the living operational record for what is implemented, what is verified, what remains, and what is blocked. Update it in every implementation session. A checked item requires evidence; generated or coded does not automatically mean tested.
@@ -28,7 +29,7 @@ This is the living operational record for what is implemented, what is verified,
 | Web application scaffold    | DONE    | Production build, 58 tests, and 10 phone/tablet E2E scenarios                               | Continue extending tests with migrated tools                             |
 | Capacitor Android scaffold  | DONE    | 13 official plugins plus one app-owned plugin; all Gradle variants pass                     | Install/smoke test requires an Android device                            |
 | Adaptive application shell  | DONE    | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review | Landscape, split-screen, 200% text, and physical-device review           |
-| Tool registry               | DONE    | Typed 12-tool milestone registry; unique-ID tests                                           | Expand only through tool Definition of Done                              |
+| Tool registry               | PARTIAL | Typed 12-tool milestone registry within the approved 87-tool public scope; unique-ID tests  | Add the remaining 75 entries only as their implementation batches mature |
 | Enabled foundation tools    | DONE    | Unit, Timestamp, SHA Hash implementations and pure/E2E tests                                | Physical Android interaction check                                       |
 | Platform contracts          | DONE    | Contracts plus shared web/Capacitor behavior tests across core adapter semantics            | Extend cases alongside each new native capability                        |
 | Android platform adapters   | PARTIAL | Core adapters plus versioned SAF Pick/Save As and native policy tests                       | Sensitive clipboard flag, share-cache cleanup, device tests              |
@@ -160,7 +161,19 @@ This is the living operational record for what is implemented, what is verified,
 - [ ] Copy behavior verified in installed Android app.
 - [ ] Enabled tool routes verified through process recreation.
 
-## 4. Twelve-tool vertical slice
+## 4. Approved 87-tool public scope and twelve-tool architecture milestone
+
+The first public Google Play release is approved to contain all 87 tools from the audited upstream catalog. The initial 12-tool vertical slice remains the first architecture milestone and contains the 3 currently implemented tools plus 9 planned tools. After the milestone, 75 additional catalog tools must be migrated; overall, 84 of 87 tools are not yet implemented.
+
+| Public v1 category |  Tools |
+| ------------------ | -----: |
+| Core               |      7 |
+| Developer          |     45 |
+| Text               |     17 |
+| Media              |      3 |
+| Security           |      5 |
+| Math               |     10 |
+| **Total**          | **87** |
 
 | Order | Tool                | Status  | Technical path proved                      | Next acceptance work                      |
 | ----: | ------------------- | ------- | ------------------------------------------ | ----------------------------------------- |
@@ -177,7 +190,7 @@ This is the living operational record for what is implemented, what is verified,
 |    11 | File Hash Checker   | PLANNED | Large files, cancellation, streaming       | Native stream plugin or strict JS cap     |
 |    12 | Currency Converter  | PLANNED | Network, cache, offline/stale              | Packaged-origin CORS and provider review  |
 
-Vertical-slice completion requires all twelve to pass their Definition of Done in `AGENT.md`, not merely render.
+Vertical-slice completion requires all twelve to pass their Definition of Done in `AGENT.md`, not merely render. Public-release completion additionally requires the remaining 75 tools to pass the same gate; the 12-tool milestone is not an approved production subset.
 
 ## 5. Platform adapter status
 
@@ -238,21 +251,21 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 
 ## 8. Active risks, blockers, and assumptions
 
-| ID    | Type       | Severity | Item                                                                                       | Safe next action                                                                          |
-| ----- | ---------- | -------: | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| D-001 | Decision   |     High | `Yash Tools`, `dev.yash.tools`, and `app.yash.tools` are provisional                       | Approve/change before Play application creation                                           |
-| D-002 | Decision   |     High | Exact public version 1 enabled-tool count is not frozen                                    | Validate vertical slice and user priorities first                                         |
-| B-001 | Blocker    |     High | No physical Android device evidence yet                                                    | Build APK, connect/authorize device, execute checklist                                    |
-| B-002 | Blocker    |     High | No Play account/signing identity supplied                                                  | User completes account/identity and key-custody decision later; do not request passwords  |
-| R-001 | Risk       |     High | A future Android plugin update may add permissions/components                              | Keep the merged-manifest CI check mandatory and review every allowlist change             |
-| R-002 | Risk       |     High | Renderer termination could lose current nonsensitive work or loop                          | Implement host recovery/native safe mode before beta                                      |
-| R-003 | Risk       |   Medium | SAF selection returns metadata/URI; file-consuming tools still need bounded/streamed reads | Add a separate reviewed content-URI read/stream method with the first file-consuming tool |
-| R-004 | Risk       |   Medium | Current Capacitor Clipboard cannot express Android sensitive metadata                      | Add reviewed narrow native method before secret-copy tools                                |
-| R-005 | Risk       |   Medium | Share cache cleanup is not scheduled                                                       | Define retention and cleanup before QR/export tools                                       |
-| R-006 | Risk       |   Medium | `INTERNET` exists before network tools are enabled due to planned app scope/plugins        | Keep disclosed; verify no runtime requests from offline tools                             |
-| A-001 | Assumption |   Medium | API 24 remains product minimum                                                             | Revalidate against audience/device distribution before beta                               |
-| A-002 | Assumption |   Medium | Strict local-only backup policy is preferred                                               | User approves before durable Notes/Bookmarks release                                      |
-| A-003 | Assumption |      Low | Initial public app is free, no ads/account/analytics                                       | Any change requires ADR/privacy/Play review                                               |
+| ID    | Type       | Severity | Item                                                                                                   | Safe next action                                                                                                    |
+| ----- | ---------- | -------: | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| D-001 | Decision   |     High | `Yash Tools`, `dev.yash.tools`, and `app.yash.tools` are provisional                                   | Approve/change before Play application creation                                                                     |
+| B-001 | Blocker    |     High | No physical Android device evidence yet                                                                | Build APK, connect/authorize device, execute checklist                                                              |
+| B-002 | Blocker    |     High | No Play account/signing identity supplied                                                              | User completes account/identity and key-custody decision later; do not request passwords                            |
+| R-001 | Risk       |     High | A future Android plugin update may add permissions/components                                          | Keep the merged-manifest CI check mandatory and review every allowlist change                                       |
+| R-002 | Risk       |     High | Renderer termination could lose current nonsensitive work or loop                                      | Implement host recovery/native safe mode before beta                                                                |
+| R-003 | Risk       |   Medium | SAF selection returns metadata/URI; file-consuming tools still need bounded/streamed reads             | Add a separate reviewed content-URI read/stream method with the first file-consuming tool                           |
+| R-004 | Risk       |   Medium | Current Capacitor Clipboard cannot express Android sensitive metadata                                  | Add reviewed narrow native method before secret-copy tools                                                          |
+| R-005 | Risk       |   Medium | Share cache cleanup is not scheduled                                                                   | Define retention and cleanup before QR/export tools                                                                 |
+| R-006 | Risk       |   Medium | `INTERNET` exists before network tools are enabled due to planned app scope/plugins                    | Keep disclosed; verify no runtime requests from offline tools                                                       |
+| R-007 | Risk       |     High | The all-87 first-release scope creates a long critical path and concentrates tool-specific policy risk | Use the 12-tool milestone and controlled migration batches; any smaller production scope requires a superseding ADR |
+| A-001 | Assumption |   Medium | API 24 remains product minimum                                                                         | Revalidate against audience/device distribution before beta                                                         |
+| A-002 | Assumption |   Medium | Strict local-only backup policy is preferred                                                           | User approves before durable Notes/Bookmarks release                                                                |
+| A-003 | Assumption |      Low | Initial public app is free, no ads/account/analytics                                                   | Any change requires ADR/privacy/Play review                                                                         |
 
 ## 9. Next executable queue
 
@@ -262,9 +275,11 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 4. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
 5. Add a bounded or streamed `content://` read path alongside the first file-consuming tool that needs it.
 6. Begin Markdown Preview only after the preceding device-level foundation gates remain green.
-7. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval.
-8. Approve or revise the provisional app name, application ID, bundled origin, privacy posture, and public v1 tool count before release work.
-9. Freeze release-signing/key-custody strategy without committing secrets.
+7. Complete and Android-validate all 12 tools in the architecture milestone.
+8. Migrate the remaining 75 audited tools in controlled, risk-ordered batches until all 87 pass their Definition of Done.
+9. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval.
+10. Approve or revise the provisional app name, application ID, bundled origin, and privacy posture before release work; public v1 tool count is resolved at 87 by ADR 0004.
+11. Freeze release-signing/key-custody strategy without committing secrets.
 
 ## 10. Release-gate snapshot
 
@@ -277,7 +292,8 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 ### Closed-beta gate
 
 - Status: **NOT READY**.
-- Missing: frozen v1 scope, all included tools complete, policy/privacy/license/SBOM artifacts, device matrix, support/incident procedures exercised.
+- Scope: **FROZEN at all 87 audited tools by ADR 0004**.
+- Missing: all 87 tools complete, policy/privacy/license/SBOM artifacts, device matrix, support/incident procedures exercised.
 
 ### Production gate
 
@@ -292,6 +308,7 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 | App identity/origin          | Provisional                                                                     | `docs/decisions/0002-provisional-identity-and-privacy.md` |
 | v1 privacy posture           | Provisional recommended default                                                 | ADR 0002 and implementation plan                          |
 | Android document boundary    | Versioned SAF picker/Save As with bounded private handoff                       | `docs/decisions/0003-scoped-document-bridge.md`           |
+| Public v1 tool scope         | All 87 audited catalog tools; 12-tool slice remains an internal milestone       | `docs/decisions/0004-all-87-tools-first-release-scope.md` |
 | Backup policy                | Strict exclusion configured, awaiting product approval before durable-data beta | ADR 0002                                                  |
 | Internal routing             | Hash routes accepted for foundation                                             | Architecture document                                     |
 | App Links                    | Deferred until website/domain/certificate work exists                           | Implementation plan                                       |
@@ -337,3 +354,11 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Added adapter contract cases for valid/malformed/cancelled picker results and Save As handoff/cleanup, plus six native policy tests and CI execution.
 - Added ADR 0003 and updated architecture/provenance records.
 - Passed web, E2E, Capacitor sync, native unit, Gradle lint/variant, merged-manifest, signature, R8 retention, and native-library gates; system-picker/device behavior remains unverified without a connected device.
+
+### 2026-09-05 — Public version 1 scope decision
+
+- Recorded the product owner's approval that the first public Google Play release must include all 87 tools from the audited upstream catalog.
+- Retained the 12-tool vertical slice as an architecture milestone and made the remaining 75-tool migration an explicit post-milestone requirement.
+- Replaced the earlier approximate 70-tool target and later-version deferrals with an all-87 release gate; unresolved tool-specific technical, policy, legal, privacy, accessibility, or device evidence now blocks production unless a superseding ADR explicitly changes scope.
+- Added ADR 0004 and synchronized the operating guides, architecture overview, README, roadmap, tracker, release gates, and schedule assumptions.
+- Passed `pnpm format:check`, `git diff --check`, the `AGENT.md`/`CLAUDE.md` byte-identity check, and local ADR-reference existence checks. This planning-only batch changed no application artifact; the hashes in Section 7 remain current for commit `7866734`.

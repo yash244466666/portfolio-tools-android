@@ -18,6 +18,7 @@ The intended product is a fast, privacy-conscious collection of developer and ev
 - Uses Android system facilities for files, sharing, notifications, lifecycle, and external links.
 - Remains usable on phones, tablets, landscape, split-screen, foldable layouts, keyboards, and assistive technology.
 - Publishes only tools that meet the repository's Definition of Done.
+- Ships all 87 tools from the audited upstream catalog in the first public Google Play release; the 12-tool vertical slice is an internal milestone, not the public scope.
 
 The source portfolio is an upstream reference, not a runtime dependency.
 
@@ -27,7 +28,7 @@ Implemented now:
 
 - React/Vite/TypeScript/Tailwind application.
 - Capacitor Android project.
-- Typed tool registry containing the planned 12-tool vertical slice.
+- Typed tool registry containing the initial 12-tool architecture milestone within the approved 87-tool public-release scope.
 - Three enabled tools: Unit Converter, Timestamp Converter, and Hash Generator.
 - Catalog search and category filters.
 - Favorites and recent-tool persistence.
@@ -35,6 +36,7 @@ Implemented now:
 - Compact bottom navigation and expanded navigation rail.
 - Offline/network status service.
 - Web and Capacitor platform-service implementations.
+- Versioned Android Storage Access Framework picker and Save As bridge.
 - Debug, internal, and release Android variants.
 - API 24 minimum and API 36 compile/target configuration.
 - Cleartext-network rejection, backup exclusions, cache-only FileProvider paths, and release shrinking.
@@ -43,12 +45,12 @@ Implemented now:
 Not yet implemented:
 
 - Remaining nine vertical-slice tools.
-- Android Storage Access Framework picker and Save As bridge.
+- Remaining 75 catalog tools after the vertical slice; 84 of the approved 87 are not yet implemented overall.
 - Fully sensitive Android clipboard metadata through a custom native bridge.
+- Deterministic share-cache cleanup and retention.
 - Renderer-termination recovery host and native safe-mode screen.
 - Final icons, splash assets, app name, application ID approval, App Links, and Play signing.
 - Physical-device verification and Play-distributed artifact testing.
-- Complete 87-tool catalog and migration.
 
 The detailed, authoritative status belongs in `IMPLEMENTATION_TRACKER.md`. Update it whenever a task changes state.
 
@@ -617,18 +619,22 @@ Compiling is not completion. Browser-only success is not Android completion. Vis
 
 Unless the tracker or user changes priority:
 
-1. Keep the foundation gates green and finish native debug build verification.
-2. Implement Android document picker/Save As contracts and adapter tests.
-3. Add renderer termination and process-recovery host behavior.
-4. Port Markdown Preview with sanitizer/CSP tests.
-5. Port Regex Tester into a terminable Worker.
-6. Port QR Generator and real Android file sharing.
-7. Port JSON Editor with compact/expanded and accessible fallback behavior.
-8. Port Notes with schema migration, export/import, and honest unencrypted-storage copy.
-9. Port Pomodoro with best-effort notifications and process reconstruction.
-10. Port Image Compressor and File Hash Checker with strict limits.
-11. Prove packaged-origin CORS and port Currency Converter.
-12. Reassess the exact public v1 enabled-tool manifest.
+1. Land the verified Android document picker/Save As branch through review.
+2. Implement sensitive clipboard metadata and deterministic share-cache cleanup.
+3. Add renderer termination, process recovery, and native safe-mode behavior.
+4. Add instrumentation coverage and execute the physical-device foundation checklist.
+5. Add bounded or streamed `content://` reads with the first file-consuming tool.
+6. Port Markdown Preview with sanitizer/CSP tests.
+7. Port Regex Tester into a terminable Worker.
+8. Port QR Generator and real Android file sharing.
+9. Port JSON Editor with compact/expanded and accessible fallback behavior.
+10. Port Notes with schema migration, export/import, and honest unencrypted-storage copy.
+11. Port Pomodoro with best-effort notifications and process reconstruction.
+12. Port Image Compressor and File Hash Checker with strict limits.
+13. Prove packaged-origin CORS and port Currency Converter.
+14. Validate the complete 12-tool architecture milestone on Android.
+15. Migrate the remaining 75 audited catalog tools in controlled, risk-ordered batches.
+16. Submit no production candidate until all 87 tools pass the Definition of Done and the release manifest, store claims, and signed artifact agree.
 
 ## 28. Handoff checklist
 

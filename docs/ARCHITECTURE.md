@@ -1,6 +1,6 @@
 # Foundation Architecture
 
-> Status: accepted for the foundation; irreversible identity and release decisions remain provisional.
+> Status: accepted for the foundation; the 87-tool first-release scope is accepted, while identity and other irreversible release decisions remain provisional.
 
 ## Runtime shape
 
@@ -37,6 +37,8 @@ Dependency direction is one way. Tool features may depend on shared UI and platf
 ### Tool registry
 
 `src/tools/registry.ts` is a deterministic compile-time registry. Implemented components are lazy imports. A tool cannot be enabled without an implementation. The registry also exposes risk, persistence, and network classifications needed by UI and tests.
+
+The audited public version 1 scope contains all 87 upstream catalog tools. The initial 12-tool registry is an architecture milestone that proves the reusable paths before the remaining 75 tools are added; it does not reduce the production scope. Production submission requires all 87 entries to be enabled and to pass the per-tool Definition of Done.
 
 ### Tool features
 
