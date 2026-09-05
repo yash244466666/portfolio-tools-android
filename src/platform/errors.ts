@@ -4,10 +4,15 @@ export type PlatformErrorCode =
   | "DATA_READ_FAILED"
   | "DATA_WRITE_FAILED"
   | "FILE_PICK_CANCELLED"
+  | "FILE_PICK_FAILED"
   | "FILE_PICK_UNAVAILABLE"
+  | "FILE_INVALID_ARGUMENT"
+  | "FILE_OPERATION_IN_PROGRESS"
+  | "FILE_OPERATION_INTERRUPTED"
   | "FILE_TOO_LARGE"
   | "FILE_SHARE_CANCELLED"
   | "FILE_SHARE_FAILED"
+  | "FILE_SAVE_CANCELLED"
   | "FILE_SAVE_UNAVAILABLE"
   | "FILE_SAVE_FAILED"
   | "NOTIFICATION_DENIED"
@@ -37,7 +42,10 @@ export function isCancellationError(error: unknown): boolean {
   return (
     typeof error === "object" &&
     error !== null &&
-    "name" in error &&
-    (error as { name?: unknown }).name === "AbortError"
+    (("name" in error && (error as { name?: unknown }).name === "AbortError") ||
+      ("code" in error &&
+        ((error as { code?: unknown }).code === "FILE_PICK_CANCELLED" ||
+          (error as { code?: unknown }).code === "FILE_SHARE_CANCELLED" ||
+          (error as { code?: unknown }).code === "FILE_SAVE_CANCELLED")))
   )
 }

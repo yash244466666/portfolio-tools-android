@@ -1,9 +1,9 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-05 17:54 Europe/Berlin  
-> Tracker schema: 1  
-> Current milestone: Foundation pass  
-> Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`  
+> Last updated: 2026-09-05 18:55 Europe/Berlin
+> Tracker schema: 1
+> Current milestone: Foundation pass
+> Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Public release readiness: **NO — foundation only**
 
 This is the living operational record for what is implemented, what is verified, what remains, and what is blocked. Update it in every implementation session. A checked item requires evidence; generated or coded does not automatically mean tested.
@@ -25,13 +25,13 @@ This is the living operational record for what is implemented, what is verified,
 | Workstream                  | Status  | Current evidence                                                                            | Remaining gate                                                           |
 | --------------------------- | ------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | Separate Git repository     | DONE    | Private GitHub repo; local `main` tracks `origin/main`                                      | Branch protection/required checks still require GitHub settings          |
-| Web application scaffold    | DONE    | Production build, 52 tests, and 10 phone/tablet E2E scenarios                               | Continue extending tests with migrated tools                             |
-| Capacitor Android scaffold  | DONE    | 13 official plugins; Gradle lint plus debug/internal/release builds pass                    | Install/smoke test requires an Android device                            |
+| Web application scaffold    | DONE    | Production build, 58 tests, and 10 phone/tablet E2E scenarios                               | Continue extending tests with migrated tools                             |
+| Capacitor Android scaffold  | DONE    | 13 official plugins plus one app-owned plugin; all Gradle variants pass                     | Install/smoke test requires an Android device                            |
 | Adaptive application shell  | DONE    | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review | Landscape, split-screen, 200% text, and physical-device review           |
 | Tool registry               | DONE    | Typed 12-tool milestone registry; unique-ID tests                                           | Expand only through tool Definition of Done                              |
 | Enabled foundation tools    | DONE    | Unit, Timestamp, SHA Hash implementations and pure/E2E tests                                | Physical Android interaction check                                       |
 | Platform contracts          | DONE    | Contracts plus shared web/Capacitor behavior tests across core adapter semantics            | Extend cases alongside each new native capability                        |
-| Android platform adapters   | PARTIAL | Clipboard/preferences/share/notifications/network/browser/lifecycle/haptics tested          | SAF Pick/Save As, sensitive clipboard flag, cache cleanup, native tests  |
+| Android platform adapters   | PARTIAL | Core adapters plus versioned SAF Pick/Save As and native policy tests                       | Sensitive clipboard flag, share-cache cleanup, device tests              |
 | Android hardening           | PARTIAL | API 24/36, backup/network/file rules, shrink, three-variant manifest budget, artifacts      | WebView termination/native safe mode and final icon/splash work          |
 | Agent documentation         | DONE    | Detailed synchronized `AGENT.md` and `CLAUDE.md`                                            | Recheck synchronization after future edits                               |
 | Audited implementation plan | DONE    | Full plan copied into repository root                                                       | Reconcile if upstream reference changes                                  |
@@ -104,10 +104,11 @@ This is the living operational record for what is implemented, what is verified,
 - [x] Best-effort notification permission/schedule/cancel implementation.
 - [x] Cache file generation and Android share adapter.
 - [ ] Android sensitive clipboard `EXTRA_IS_SENSITIVE` native bridge.
-- [ ] Android Storage Access Framework document picker.
-- [ ] Android `ACTION_CREATE_DOCUMENT` Save As bridge.
-- [ ] File cache cleanup/retention scheduler.
+- [x] Android Storage Access Framework document picker with validated `content://` metadata.
+- [x] Android `ACTION_CREATE_DOCUMENT` Save As bridge with a bounded private-cache handoff.
+- [ ] Share-cache cleanup/retention scheduler; Save As handoffs are deleted when calls settle.
 - [x] Shared web/Capacitor adapter contract tests for clipboard, preferences, browser, network, files, and notifications.
+- [x] Native document validation policy tests wired into local and CI Gradle gates.
 - [ ] Picker/share/notification UI Automator tests.
 
 ### Android project
@@ -131,6 +132,8 @@ This is the living operational record for what is implemented, what is verified,
 - [x] Automated manifest denylist/allowlist runs locally and in CI.
 - [x] Capacitor exact-alarm and reboot permissions/receiver explicitly removed.
 - [x] Tooling-only AndroidX exported profile receiver explicitly removed.
+- [x] App-owned `DocumentFiles` plugin registered with a versioned, metadata-only bridge and no new permission/component.
+- [x] Capacitor bridge logging disabled so plugin arguments cannot enter Logcat.
 - [x] `lintDebug` passes with zero errors; generated-resource/dependency warnings are recorded below.
 - [x] Debug APK builds and verifies with APK Signature Scheme v2 debug signing.
 - [x] Internal APK builds and verifies with APK Signature Scheme v2 debug signing.
@@ -188,9 +191,9 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 | Lifecycle        | Implemented        | Implemented         | Listener cleanup partly covered | Pending      | Process/renderer recovery still pending              |
 | Haptics          | Best effort        | Implemented         | Not required                    | Pending      | Never blocks primary action                          |
 | Notifications    | Permission only    | Implemented         | Schedule/cancel contract tests  | Pending      | No exact-alarm permission                            |
-| File picker      | Browser input      | Typed unavailable   | Typed-gap coverage              | Pending      | Must use SAF; no broad permission workaround         |
+| File picker      | Browser input      | SAF Open Document   | Adapter + native policy tests   | Pending      | Metadata/content URI only; no broad permissions      |
 | File share       | Download/Web Share | Cache + Share       | Bytes/name/cache-path tests     | Pending      | Retention cleanup pending                            |
-| Save As          | Browser download   | Typed unavailable   | Web bytes + typed-gap coverage  | Pending      | Must use ACTION_CREATE_DOCUMENT                      |
+| Save As          | Browser download   | SAF Create Document | Adapter + native policy tests   | Pending      | 5 MiB handoff; immediate best-effort cache cleanup   |
 
 ## 6. Quality-gate evidence
 
@@ -216,6 +219,10 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 | 2026-09-05 17:53 | Current foundation batch | `lintDebug`, `assembleDebug`, `assembleInternal`, `bundleRelease` | PASS    | All required Gradle variants completed; existing flatDir/Gradle deprecation warnings remain   |
 | 2026-09-05 17:54 | Current foundation batch | Manifest checks for debug/internal/release                        | PASS    | Six reviewed permissions per variant; only `dev.yash.tools.MainActivity` exported             |
 | 2026-09-05 17:54 | Current foundation batch | APK signatures and AAB native-library inspection                  | PASS    | Debug/internal APK v2 signatures verify; release AAB remains unsigned; no `.so` entries       |
+| 2026-09-05 18:55 | SAF document batch       | `pnpm format:check`, `pnpm typecheck`, `pnpm lint`, `pnpm test`   | PASS    | Formatting, strict types, zero lint warnings, and 12 files/58 tests                           |
+| 2026-09-05 18:49 | SAF document batch       | `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`                    | PASS    | Main JS 246.85 kB/78.32 kB gzip; 10 E2E cases; packaged config disables bridge logging        |
+| 2026-09-05 18:50 | SAF document batch       | `testDebugUnitTest`, `lintDebug`, all variant builds              | PASS    | 6 native policy tests; zero lint errors; debug/internal APK and minified release AAB built    |
+| 2026-09-05 18:51 | SAF document batch       | Manifest, signing, R8, and native-library audits                  | PASS    | Six reviewed permissions; one exported Activity; APK v2; plugin methods kept; no AAB `.so`    |
 
 Android Lint currently reports warnings, not errors: generated Capacitor launcher/splash resources need final replacement/cleanup; some generated resources appear unused; Gradle 8.14.5 and AppCompat 1.8.0 updates are available; generated `flatDir`/Gradle 9 deprecation and Capacitor Filesystem deprecation notices remain. Review rather than suppress them during the relevant dependency/icon pass.
 
@@ -223,37 +230,37 @@ Android Lint currently reports warnings, not errors: generated Capacitor launche
 
 | Artifact     | Package/role              |     Bytes | SHA-256                                                            | Signing/status                           |
 | ------------ | ------------------------- | --------: | ------------------------------------------------------------------ | ---------------------------------------- |
-| Debug APK    | `dev.yash.tools.debug`    | 5,118,022 | `ff7894942f307ba005d7a795101df47fc638ad34909b8b6c3a7313dd416a0f86` | Local debug key; APK v2 verified         |
-| Internal APK | `dev.yash.tools.internal` | 5,119,914 | `9c27b54ffdbefbcbf95c00663883056edc9ed35747d958c5aa5da05f30107357` | Local debug key; APK v2 verified         |
-| Release AAB  | `dev.yash.tools`          | 2,100,617 | `0e94a9337bd4e5f8618ede1512417e009ab52873c66b7e039967b809dac0e9fa` | Build proof only; intentionally unsigned |
+| Debug APK    | `dev.yash.tools.debug`    | 5,121,613 | `fcfd23b055d54b8c7c0ad655fa72c8ec96c01a42e45990f2487a7333aee5312c` | Local debug key; APK v2 verified         |
+| Internal APK | `dev.yash.tools.internal` | 5,123,505 | `3e9c6b91861d668b4a3e95106fedaafde32f8db8151bbc37994184eee42f0115` | Local debug key; APK v2 verified         |
+| Release AAB  | `dev.yash.tools`          | 2,113,309 | `a995a21ad866ea005d29483dfa5825756b09891bc1b09e71c7bf17c55ad81840` | Build proof only; intentionally unsigned |
 
 These are reproducibility evidence, not publication candidates. Rebuild after any source/config change and never distribute a debug-key artifact as production.
 
 ## 8. Active risks, blockers, and assumptions
 
-| ID    | Type       | Severity | Item                                                                                | Safe next action                                                                         |
-| ----- | ---------- | -------: | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| D-001 | Decision   |     High | `Yash Tools`, `dev.yash.tools`, and `app.yash.tools` are provisional                | Approve/change before Play application creation                                          |
-| D-002 | Decision   |     High | Exact public version 1 enabled-tool count is not frozen                             | Validate vertical slice and user priorities first                                        |
-| B-001 | Blocker    |     High | No physical Android device evidence yet                                             | Build APK, connect/authorize device, execute checklist                                   |
-| B-002 | Blocker    |     High | No Play account/signing identity supplied                                           | User completes account/identity and key-custody decision later; do not request passwords |
-| R-001 | Risk       |     High | A future Android plugin update may add permissions/components                       | Keep the merged-manifest CI check mandatory and review every allowlist change            |
-| R-002 | Risk       |     High | Renderer termination could lose current nonsensitive work or loop                   | Implement host recovery/native safe mode before beta                                     |
-| R-003 | Risk       |     High | Current file picker/Save As are not implemented on Android                          | Implement narrow SAF plugin before file-based tools                                      |
-| R-004 | Risk       |   Medium | Current Capacitor Clipboard cannot express Android sensitive metadata               | Add reviewed narrow native method before secret-copy tools                               |
-| R-005 | Risk       |   Medium | Share cache cleanup is not scheduled                                                | Define retention and cleanup before QR/export tools                                      |
-| R-006 | Risk       |   Medium | `INTERNET` exists before network tools are enabled due to planned app scope/plugins | Keep disclosed; verify no runtime requests from offline tools                            |
-| A-001 | Assumption |   Medium | API 24 remains product minimum                                                      | Revalidate against audience/device distribution before beta                              |
-| A-002 | Assumption |   Medium | Strict local-only backup policy is preferred                                        | User approves before durable Notes/Bookmarks release                                     |
-| A-003 | Assumption |      Low | Initial public app is free, no ads/account/analytics                                | Any change requires ADR/privacy/Play review                                              |
+| ID    | Type       | Severity | Item                                                                                       | Safe next action                                                                          |
+| ----- | ---------- | -------: | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| D-001 | Decision   |     High | `Yash Tools`, `dev.yash.tools`, and `app.yash.tools` are provisional                       | Approve/change before Play application creation                                           |
+| D-002 | Decision   |     High | Exact public version 1 enabled-tool count is not frozen                                    | Validate vertical slice and user priorities first                                         |
+| B-001 | Blocker    |     High | No physical Android device evidence yet                                                    | Build APK, connect/authorize device, execute checklist                                    |
+| B-002 | Blocker    |     High | No Play account/signing identity supplied                                                  | User completes account/identity and key-custody decision later; do not request passwords  |
+| R-001 | Risk       |     High | A future Android plugin update may add permissions/components                              | Keep the merged-manifest CI check mandatory and review every allowlist change             |
+| R-002 | Risk       |     High | Renderer termination could lose current nonsensitive work or loop                          | Implement host recovery/native safe mode before beta                                      |
+| R-003 | Risk       |   Medium | SAF selection returns metadata/URI; file-consuming tools still need bounded/streamed reads | Add a separate reviewed content-URI read/stream method with the first file-consuming tool |
+| R-004 | Risk       |   Medium | Current Capacitor Clipboard cannot express Android sensitive metadata                      | Add reviewed narrow native method before secret-copy tools                                |
+| R-005 | Risk       |   Medium | Share cache cleanup is not scheduled                                                       | Define retention and cleanup before QR/export tools                                       |
+| R-006 | Risk       |   Medium | `INTERNET` exists before network tools are enabled due to planned app scope/plugins        | Keep disclosed; verify no runtime requests from offline tools                             |
+| A-001 | Assumption |   Medium | API 24 remains product minimum                                                             | Revalidate against audience/device distribution before beta                               |
+| A-002 | Assumption |   Medium | Strict local-only backup policy is preferred                                               | User approves before durable Notes/Bookmarks release                                      |
+| A-003 | Assumption |      Low | Initial public app is free, no ads/account/analytics                                       | Any change requires ADR/privacy/Play review                                               |
 
 ## 9. Next executable queue
 
-1. Design and implement the narrow Android Storage Access Framework picker and `ACTION_CREATE_DOCUMENT` Save As bridge with native unit/instrumentation coverage.
-2. Implement sensitive clipboard metadata and deterministic share-cache cleanup/retention.
-3. Implement WebView renderer-termination handling and a native safe-mode/recovery surface.
-4. Add process-recreation, permission, picker, share, and notification instrumentation/UI Automator coverage.
-5. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
+1. Implement sensitive clipboard metadata and deterministic share-cache cleanup/retention.
+2. Implement WebView renderer-termination handling and a native safe-mode/recovery surface.
+3. Add process-recreation, permission, picker, Save As, share, and notification instrumentation/UI Automator coverage.
+4. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
+5. Add a bounded or streamed `content://` read path alongside the first file-consuming tool that needs it.
 6. Begin Markdown Preview only after the preceding device-level foundation gates remain green.
 7. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval.
 8. Approve or revise the provisional app name, application ID, bundled origin, privacy posture, and public v1 tool count before release work.
@@ -265,7 +272,7 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 
 - Status: **FOUNDATION PASS COMPLETE; FULL GATE IN PROGRESS**.
 - Passed: stack, bundled/minified builds, typed registry, adapter boundary, three representative tools, browser QA, manifest budget, baseline security config.
-- Missing: complete 12-tool internal slice, SAF file adapter, native renderer recovery, and physical/Play-installed artifact evidence.
+- Missing: complete 12-tool internal slice, native renderer recovery, file-content streaming, and physical/Play-installed artifact evidence.
 
 ### Closed-beta gate
 
@@ -284,6 +291,7 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 | Stack                        | Accepted                                                                        | `docs/decisions/0001-foundation-stack.md`                 |
 | App identity/origin          | Provisional                                                                     | `docs/decisions/0002-provisional-identity-and-privacy.md` |
 | v1 privacy posture           | Provisional recommended default                                                 | ADR 0002 and implementation plan                          |
+| Android document boundary    | Versioned SAF picker/Save As with bounded private handoff                       | `docs/decisions/0003-scoped-document-bridge.md`           |
 | Backup policy                | Strict exclusion configured, awaiting product approval before durable-data beta | ADR 0002                                                  |
 | Internal routing             | Hash routes accepted for foundation                                             | Architecture document                                     |
 | App Links                    | Deferred until website/domain/certificate work exists                           | Implementation plan                                       |
@@ -319,3 +327,13 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Corrected web Base64 sharing so Save/Share use decoded bytes and changed timed clipboard clearing to preserve newer clipboard contents.
 - Added interaction tests for Unit Converter, Timestamp Converter, and Hash Generator.
 - Passed all required web, E2E, Capacitor sync, Gradle variant, merged-manifest, signature, and native-library gates; no physical device was connected.
+
+### 2026-09-05 — Scoped Android document batch
+
+- Added the manually registered, bridge-contract-v1 `DocumentFiles` plugin for `ACTION_OPEN_DOCUMENT` and `ACTION_CREATE_DOCUMENT`.
+- Added native validation for operation IDs, MIME filters, URI schemes, selection counts, sizes, filenames, cache paths, concurrency, cancellation, and interrupted calls.
+- Kept selected content outside the JavaScript bridge and used a 5 MiB private-cache handoff for generated Save As output; cache data is removed after success, cancellation, or failure.
+- Disabled Capacitor bridge logging in every variant so plugin arguments cannot expose clipboard values, generated bytes, or filenames in Logcat.
+- Added adapter contract cases for valid/malformed/cancelled picker results and Save As handoff/cleanup, plus six native policy tests and CI execution.
+- Added ADR 0003 and updated architecture/provenance records.
+- Passed web, E2E, Capacitor sync, native unit, Gradle lint/variant, merged-manifest, signature, R8 retention, and native-library gates; system-picker/device behavior remains unverified without a connected device.

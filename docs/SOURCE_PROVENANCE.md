@@ -16,6 +16,13 @@ The Android repository is a separate codebase. The upstream path is recorded for
 | `src/tools/registry.ts`              | `lib/content/tools/index.ts`, `lib/content/tools/types.ts`                            | New Android-specific typed milestone registry; only the 12-tool vertical slice is represented initially                      |
 | `ANDROID_APP_IMPLEMENTATION_PLAN.md` | same filename in upstream working tree                                                | Exact reference copy at foundation creation time                                                                             |
 
+## Platform implementation references
+
+| Android artifact                        | Reference                                                                                        | Treatment                                                                                                                      |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `DocumentFilesPlugin.java`              | Android Storage Access Framework guide and Capacitor 8.5.1 installed `Plugin.java` callback APIs | Original narrow implementation using documented intent/callback patterns; no upstream portfolio code or third-party asset used |
+| `DocumentFilePolicy.java` and its tests | MIME/URI/size requirements in the Android intent and shared-document documentation               | Original validation policy and synthetic fixtures; no copied dataset                                                           |
+
 ## Licensing/provenance rules
 
 - Before copying a dependency, asset, or dataset, record source version/commit, license, transformation, and attribution requirement.
