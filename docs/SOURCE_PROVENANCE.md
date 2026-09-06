@@ -24,6 +24,7 @@ The Android repository is a separate codebase. The upstream path is recorded for
 | `DocumentFilePolicy.java` and its tests                                                                 | MIME/URI/size requirements in the Android intent and shared-document documentation               | Original validation policy and synthetic fixtures; no copied dataset                                                           |
 | `SensitiveClipboardPlugin.java`, `ClipboardPolicy.java` and their tests                                 | Android clipboard guidance and the API 33 `ClipDescription.EXTRA_IS_SENSITIVE` documentation     | Original narrow implementation and synthetic boundary fixtures; no upstream portfolio code or third-party asset used           |
 | `GeneratedCachePlugin.java`, `GeneratedCachePolicy.java`, `GeneratedCacheRegistry.java` and their tests | Android cache-directory and share-target lifetime guidance                                       | Original deterministic retention policy and synthetic boundary fixtures; no upstream portfolio code or third-party asset used  |
+| `RendererRecovery.java`, `RendererRecoveryPolicy.java` and their tests                                  | Android WebView `onRenderProcessGone` recovery guidance and Capacitor 8.5.1 `WebViewListener`    | Original loop-guard policy and native safe-mode screen; no upstream portfolio code or third-party asset used                   |
 
 ## Licensing/provenance rules
 

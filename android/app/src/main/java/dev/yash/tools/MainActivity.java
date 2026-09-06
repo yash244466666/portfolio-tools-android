@@ -11,5 +11,6 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(SensitiveClipboardPlugin.class);
         registerPlugin(GeneratedCachePlugin.class);
         super.onCreate(savedInstanceState);
+        getBridge().addWebViewListener(new RendererRecovery(getBridge()));
     }
 }
