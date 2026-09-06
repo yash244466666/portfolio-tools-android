@@ -134,6 +134,17 @@ interface PullRequest {
   mergedAt: string | null
 }
 
+interface TrackedPullRequest {
+  number: number
+  issueKey: string
+  workType: WorkType
+  priority: string
+  phase: string
+  category: string
+  risk: string
+  estimate: number
+}
+
 interface CommandOptions {
   input?: string
   allowFailure?: boolean
@@ -1156,31 +1167,32 @@ function setProjectFields(
   console.log(`Project fields ready (${updates.length} values reconciled).`)
 }
 
-function linkSafPullRequest(
+function linkTrackedPullRequest(
   repository: string,
   project: ManagedProject,
   fields: ProjectField[],
   issues: Map<string, GitHubIssue>,
+  definition: TrackedPullRequest,
 ): void {
-  const workItem = issues.get("land-document-saf-pr")
-  invariant(workItem, "Missing work item land-document-saf-pr")
+  const workItem = issues.get(definition.issueKey)
+  invariant(workItem, `Missing work item ${definition.issueKey}`)
   const pull = ghJson<PullRequest>([
     "pr",
     "view",
-    "1",
+    String(definition.number),
     "--repo",
     repository,
     "--json",
     "id,url,title,body,state,mergedAt",
   ])
-  invariant(pull, "Pull request #1 was not returned by GitHub")
+  invariant(pull, `Pull request #${definition.number} was not returned by GitHub`)
   const closingText = `Closes #${workItem.number}`
   const currentBody = pull.body ?? ""
   if (!currentBody.includes(closingText)) {
     runGh([
       "pr",
       "edit",
-      "1",
+      String(definition.number),
       "--repo",
       repository,
       "--body",
@@ -1202,20 +1214,23 @@ function linkSafPullRequest(
       "--format",
       "json",
     ])
-    invariant(added, "GitHub did not return the project item for pull request #1")
+    invariant(
+      added,
+      `GitHub did not return the project item for pull request #${definition.number}`,
+    )
     item = added
   }
 
-  invariant(item, "GitHub did not return the project item for pull request #1")
+  invariant(item, `GitHub did not return the project item for pull request #${definition.number}`)
   const fieldByName = new Map(fields.map((field) => [field.name, field]))
   const values = {
     Workflow: pull.state === "OPEN" ? "In Review" : "Done",
-    "Work Type": "Foundation",
-    Priority: "P0 Critical",
-    Phase: "Foundation",
-    Category: "Platform",
-    Risk: "High",
-    Estimate: 2,
+    "Work Type": definition.workType,
+    Priority: definition.priority,
+    Phase: definition.phase,
+    Category: definition.category,
+    Risk: definition.risk,
+    Estimate: definition.estimate,
   }
   const operations = Object.entries(values)
     .map(([name, value], index) => {
@@ -1250,7 +1265,30 @@ const project = provisionProject(manifest.repository)
 const fields = provisionProjectFields(project)
 const itemIds = addProjectItems(project, issues)
 setProjectFields(project, fields, definitions, issues, itemIds)
-linkSafPullRequest(manifest.repository, project, fields, issues)
+for (const pullRequest of [
+  {
+    number: 1,
+    issueKey: "land-document-saf-pr",
+    workType: "Foundation" as const,
+    priority: "P0 Critical",
+    phase: "Foundation",
+    category: "Platform",
+    risk: "High",
+    estimate: 2,
+  },
+  {
+    number: 130,
+    issueKey: "github-work-management",
+    workType: "Foundation" as const,
+    priority: "P0 Critical",
+    phase: "Foundation",
+    category: "Platform",
+    risk: "Medium",
+    estimate: 3,
+  },
+] satisfies TrackedPullRequest[]) {
+  linkTrackedPullRequest(manifest.repository, project, fields, issues, pullRequest)
+}
 
 const rootLaunchEpic = issues.get("launch-v1")
 invariant(rootLaunchEpic, "Missing root launch epic after provisioning")

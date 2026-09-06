@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 07:32 Europe/Berlin
+> Last updated: 2026-09-06 07:38 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -404,3 +404,4 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Applied the updated manifest successfully: 128 existing issues reconciled, zero duplicates, zero reparenting, zero dependency drift, and 128 closing markers confirmed by read-back. All 87 tool issues remain present.
 - Merged fully described and green PR #1 into `main` as merge commit `7d3b2d7`, automatically closed issue #13, and reconciled both the issue and pull-request Project items to Done.
 - Retargeted PR #130 from the merged feature branch to `main`, replaced its stale stacking notes with the gap-audit evidence, and confirmed a clean merge state with both hosted CI jobs passing.
+- Generalized bootstrap pull-request reconciliation so a rebuilt Project restores and state-maps both PR #1 and PR #130 instead of only the original SAF pull request.
