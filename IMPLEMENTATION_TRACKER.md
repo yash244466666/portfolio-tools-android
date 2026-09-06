@@ -1,10 +1,10 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 22:20 Europe/Berlin
+> Last updated: 2026-09-06 23:10 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **all 87 audited catalog tools; 6 implemented, 81 remaining**
+> Approved public version 1 scope: **all 87 audited catalog tools; 7 implemented, 80 remaining**
 > Public release readiness: **NO — foundation only**
 
 This is the living operational record for what is implemented, what is verified, what remains, and what is blocked. Update it in every implementation session. A checked item requires evidence; generated or coded does not automatically mean tested.
@@ -31,7 +31,7 @@ This is the living operational record for what is implemented, what is verified,
 | Capacitor Android scaffold  | DONE    | 13 official plugins plus one app-owned plugin; all Gradle variants pass                                                                   | Install/smoke test requires an Android device                            |
 | Adaptive application shell  | DONE    | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review                                               | Landscape, split-screen, 200% text, and physical-device review           |
 | Tool registry               | PARTIAL | Typed 12-tool milestone registry within the approved 87-tool public scope; unique-ID tests                                                | Add the remaining 75 entries only as their implementation batches mature |
-| Enabled foundation tools    | DONE    | Unit, Timestamp, SHA Hash, Markdown Preview, Regex Tester, QR Generator implementations and pure/E2E tests                                | Physical Android interaction check                                       |
+| Enabled foundation tools    | DONE    | Unit, Timestamp, SHA Hash, Markdown Preview, Regex Tester, QR Generator, JSON Editor implementations and pure/E2E tests                   | Physical Android interaction check                                       |
 | Platform contracts          | DONE    | Contracts plus shared web/Capacitor behavior tests across core adapter semantics                                                          | Extend cases alongside each new native capability                        |
 | Android platform adapters   | PARTIAL | Core adapters, SAF Pick/Save As, sensitive-clipboard bridge, generated-cache janitor, streamed/bounded content reads, native policy tests | Instrumentation/device tests                                             |
 | Android hardening           | PARTIAL | API 24/36, backup/network/file rules, shrink, three-variant manifest budget, artifacts                                                    | WebView termination/native safe mode and final icon/splash work          |
@@ -178,20 +178,20 @@ The first public Google Play release is approved to contain all 87 tools from th
 | Math               |     10 |
 | **Total**          | **87** |
 
-| Order | Tool                | Status  | Technical path proved                                              | Next acceptance work                      |
-| ----: | ------------------- | ------- | ------------------------------------------------------------------ | ----------------------------------------- |
-|     1 | Unit Converter      | DONE    | Pure calculations, responsive form                                 | Physical device verification              |
-|     2 | Timestamp Converter | DONE    | Date/time, live state, clipboard                                   | Locale/time-zone/device verification      |
-|     3 | Hash Generator      | DONE    | Web Crypto, async state, clipboard                                 | Android WebView vectors/copy verification |
-|     4 | Markdown Preview    | DONE    | Sanitizer allowlist, GFM vectors, hostile-input corpus, lazy chunk | Android artifact interaction/device check |
-|     5 | Regex Tester        | DONE    | Terminable Worker, budgets, cancellation, hostile-input recovery   | Android artifact interaction/device check |
-|     6 | QR Generator        | DONE    | Pure render plan, canvas, bridge share/Save As, spec vectors       | Android artifact interaction/device check |
-|     7 | JSON Editor         | PLANNED | CodeMirror, import/export, adaptive editor                         | Size/depth limits and accessible fallback |
-|     8 | Notes/Scratchpad    | PLANNED | Durable preferences, migrations, export                            | Storage schema and unencrypted-data UX    |
-|     9 | Pomodoro Timer      | PLANNED | Lifecycle, notification, reconstruction                            | Notification channel and reboot semantics |
-|    10 | Image Compressor    | PLANNED | Picker, decoded limits, generated output                           | SAF picker, EXIF/metadata policy          |
-|    11 | File Hash Checker   | PLANNED | Large files, cancellation, streaming                               | Native stream plugin or strict JS cap     |
-|    12 | Currency Converter  | PLANNED | Network, cache, offline/stale                                      | Packaged-origin CORS and provider review  |
+| Order | Tool                | Status  | Technical path proved                                                | Next acceptance work                      |
+| ----: | ------------------- | ------- | -------------------------------------------------------------------- | ----------------------------------------- |
+|     1 | Unit Converter      | DONE    | Pure calculations, responsive form                                   | Physical device verification              |
+|     2 | Timestamp Converter | DONE    | Date/time, live state, clipboard                                     | Locale/time-zone/device verification      |
+|     3 | Hash Generator      | DONE    | Web Crypto, async state, clipboard                                   | Android WebView vectors/copy verification |
+|     4 | Markdown Preview    | DONE    | Sanitizer allowlist, GFM vectors, hostile-input corpus, lazy chunk   | Android artifact interaction/device check |
+|     5 | Regex Tester        | DONE    | Terminable Worker, budgets, cancellation, hostile-input recovery     | Android artifact interaction/device check |
+|     6 | QR Generator        | DONE    | Pure render plan, canvas, bridge share/Save As, spec vectors         | Android artifact interaction/device check |
+|     7 | JSON Editor         | DONE    | Bounded parsing, plain-text editor, view-only tree, tab/panel layout | Android artifact interaction/device check |
+|     8 | Notes/Scratchpad    | PLANNED | Durable preferences, migrations, export                              | Storage schema and unencrypted-data UX    |
+|     9 | Pomodoro Timer      | PLANNED | Lifecycle, notification, reconstruction                              | Notification channel and reboot semantics |
+|    10 | Image Compressor    | PLANNED | Picker, decoded limits, generated output                             | SAF picker, EXIF/metadata policy          |
+|    11 | File Hash Checker   | PLANNED | Large files, cancellation, streaming                                 | Native stream plugin or strict JS cap     |
+|    12 | Currency Converter  | PLANNED | Network, cache, offline/stale                                        | Packaged-origin CORS and provider review  |
 
 Vertical-slice completion requires all twelve to pass their Definition of Done in `AGENT.md`, not merely render. Public-release completion additionally requires the remaining 75 tools to pass the same gate; the 12-tool milestone is not an approved production subset.
 
@@ -280,6 +280,10 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 | 2026-09-06 21:51                                                                                                                                                                                                                                                                                                                                                                                             | QR Generator batch        | `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`                                             | PASS    | QrGenerator lazy chunk 29.29 kB/10.94 kB gzip; 16 E2E scenarios; assets synced                |
 | 2026-09-06 21:52                                                                                                                                                                                                                                                                                                                                                                                             | QR Generator batch        | `testDebugUnitTest`, `lintDebug`, all variants                                             | PASS    | 38 native tests; zero lint errors; debug/internal APKs and minified release AAB built         |
 | 2026-09-06 21:53                                                                                                                                                                                                                                                                                                                                                                                             | QR Generator batch        | Manifest checks, APK v2, artifact contents, work-items/actions, `git diff --check`         | PASS    | Six permissions/variant; one exported Activity; tool chunk in all artifacts; audits valid     |
+| 2026-09-06 23:05                                                                                                                                                                                                                                                                                                                                                                                             | JSON Editor batch         | `pnpm format:check`, `pnpm typecheck`, `pnpm lint`, `pnpm test`                            | PASS    | Formatting accepted; strict types and zero lint warnings; 21 files/158 tests                  |
+| 2026-09-06 23:06                                                                                                                                                                                                                                                                                                                                                                                             | JSON Editor batch         | `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`                                             | PASS    | JsonEditor lazy chunk 7.14 kB/2.79 kB gzip; 18 E2E scenarios; assets synced                   |
+| 2026-09-06 23:07                                                                                                                                                                                                                                                                                                                                                                                             | JSON Editor batch         | `testDebugUnitTest`, `lintDebug`, all variants                                             | PASS    | 38 native tests; zero lint errors; debug/internal APKs and minified release AAB built         |
+| 2026-09-06 23:08                                                                                                                                                                                                                                                                                                                                                                                             | JSON Editor batch         | Manifest checks, APK v2, artifact contents, work-items/actions, `git diff --check`         | PASS    | Six permissions/variant; one exported Activity; tool chunk in all artifacts; audits valid     |
 | Android Lint currently reports warnings, not errors: generated Capacitor launcher/splash resources need final replacement/cleanup; some generated resources appear unused; Gradle 8.14.5 and AppCompat 1.8.0 updates are available; generated `flatDir`/Gradle 9 deprecation and Capacitor Filesystem deprecation notices remain. Review rather than suppress them during the relevant dependency/icon pass. |
 
 ## 7. Artifact inventory
@@ -316,7 +320,7 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 1. Configure the recommended saved Project views in GitHub's UI; upgrade the account plan before completing protected-main issue #129.
 2. Add process-recreation, permission, picker, Save As, share, notification, and renderer-recovery instrumentation/UI Automator coverage.
 3. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
-4. Port the JSON Editor with compact/expanded layouts and an accessible fallback (issue #49).
+4. Port Notes/Scratchpad with durable storage, schema migration, export, and honest unencrypted copy (issue #109).
 5. Complete and Android-validate all 12 tools in the architecture milestone.
 6. Migrate the remaining 75 audited tools in controlled, risk-ordered batches until all 87 pass their Definition of Done.
 7. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval.
@@ -534,3 +538,11 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Merged PR #138 into `main` as `9355fe9`, closing issue #51; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain. An initial hosted lint failure (unused mock parameter in the new component test, missed by a local gate ordering mistake) was fixed and re-verified before merge; the failure never touched product code.
 - Six of the 87 approved tools are implemented. The vertical slice still needs JSON Editor, Notes/Scratchpad, Pomodoro Timer, Image Compressor, File Hash Checker, and Currency Converter.
 - Next executable item: the JSON Editor tool migration (issue #49).
+
+### 2026-09-06 — JSON Editor tool migration batch
+
+- Implemented the `json-editor` tool from the audited upstream component as bounded pure parsing plus a plain-text-first editor and a view-only inspector tree (ADR 0012): 256 KiB input cap checked before parsing, typed invalid/over-limit results with truncated messages, a recoverable RangeError branch for engines that recurse, and the upstream CodeMirror dependency and in-tree editing intentionally not copied. The tree renders only expanded paths with 48 dp `aria-expanded` rows, 80-character previews, a 1000-node render cap, a 64-level depth cap, and an expand-all refusal beyond 2000 nodes. Compact windows switch Editor/Tree through a tablist; expanded windows show both panels. Export is Copy/Share/Save through the `FileService` bridges; the upstream hidden download anchor is not copied.
+- Fixed a parse-order defect found by the new vectors (oversized whitespace-only input previously reported `invalid` instead of `over-limit`) and documented the `1e999` engine serialization quirk and duplicate/`__proto__` key handling in tests.
+- Added 11 pure vectors (representative and malformed documents, 60 000-deep nesting never crashing, size cap, duplicate and prototype-named keys as plain data, format/minify, tree expansion paths, render/depth/preview caps, expand-all cap) and 7 component cases (empty/valid/invalid, format/minify round-trip, disabled transforms, tree expand/collapse, share payload, over-limit, reset). E2E grew to 18 scenarios covering format, disabled transforms, and tree inspection on both device profiles.
+- Passed formatting, strict typecheck, zero-warning lint, 158 web tests (21 files), 18 E2E scenarios, production build (JsonEditor lazy chunk 7.14 kB/2.79 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
+- Next executable item: the Notes/Scratchpad tool migration (issue #109) with durable storage, schema migration, export/import, and honest unencrypted-storage copy.
