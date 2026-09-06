@@ -15,6 +15,14 @@ The Android repository is a separate codebase. The upstream path is recorded for
 | `src/tools/hash-generator/`          | `components/tools/core/hash-generator.tsx`, `components/tools/shared/crypto-utils.ts` | Reworked to Web Crypto SHA algorithms only; MD5 custom implementation intentionally not copied                               |
 | `src/tools/registry.ts`              | `lib/content/tools/index.ts`, `lib/content/tools/types.ts`                            | New Android-specific typed milestone registry; only the 12-tool vertical slice is represented initially                      |
 | `ANDROID_APP_IMPLEMENTATION_PLAN.md` | same filename in upstream working tree                                                | Exact reference copy at foundation creation time                                                                             |
+| `src/tools/markdown-preview/`        | `components/tools/dev/markdown-preview.tsx`                                           | Reworked into pure typed logic plus mobile UI; added explicit sanitizer allowlist, input limits, debounce, and states        |
+
+## Dependency provenance
+
+| Dependency  | Version | License                 | Treatment                                                                                          |
+| ----------- | ------- | ----------------------- | -------------------------------------------------------------------------------------------------- |
+| `marked`    | 18.0.11 | MIT                     | GFM Markdown parser, bundled offline; standard vectors test its documented behavior                |
+| `dompurify` | 3.4.14  | (MPL-2.0 OR Apache-2.0) | HTML sanitizer with an explicit narrow allowlist (ADR 0008); hostile-input corpus tests the policy |
 
 ## Platform implementation references
 

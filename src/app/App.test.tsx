@@ -22,7 +22,7 @@ describe("application shell", () => {
     ).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Unit Converter" })).toBeInTheDocument()
     expect(screen.getByText("Markdown Preview")).toBeInTheDocument()
-    expect(screen.getByLabelText("3 tools enabled in the foundation")).toBeInTheDocument()
+    expect(screen.getByLabelText("4 tools enabled in the foundation")).toBeInTheDocument()
     await waitFor(() => expect(document.documentElement).toHaveAttribute("data-theme"))
   })
 

@@ -33,6 +33,20 @@ test("an enabled tool opens and performs a conversion", async ({ page }) => {
   await expect(page.locator("#to-value")).toContainText("0.002")
 })
 
+test("markdown preview renders sanitized output", async ({ page }) => {
+  await page.goto("/#/tool/markdown-preview")
+  await expect(page.getByRole("heading", { name: "Markdown Preview" })).toBeVisible()
+
+  await page.getByLabel("Markdown input").fill("# Hello\n\n**bold** body")
+  await expect(
+    page.getByRole("region", { name: "Rendered preview" }).getByRole("heading", { name: "Hello" }),
+  ).toBeVisible()
+
+  await page.getByLabel("Markdown input").fill("<script>alert(1)</script>\n\nplain text")
+  await expect(page.getByRole("region", { name: "Rendered preview" })).toContainText("plain text")
+  await expect(page.getByRole("region", { name: "Rendered preview" })).not.toContainText("alert")
+})
+
 test("theme selection persists", async ({ page }) => {
   await page.goto("/#/settings")
   await page.getByRole("button", { name: "Dark" }).click()
