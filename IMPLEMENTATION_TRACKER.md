@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 07:50 Europe/Berlin
+> Last updated: 2026-09-06 14:30 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -23,24 +23,24 @@ This is the living operational record for what is implemented, what is verified,
 
 ## 2. Foundation dashboard
 
-| Workstream                  | Status  | Current evidence                                                                            | Remaining gate                                                           |
-| --------------------------- | ------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Separate Git repository     | DONE    | Private GitHub repo; local `main` tracks `origin/main`                                      | Branch protection/required checks still require GitHub settings          |
-| GitHub work management      | DONE    | Project #8; 128 reconciled issues including 87 tools; PR #130 merged as `1fbd6af`           | Optional saved views are a UI step; protected main needs GitHub Pro      |
-| Web application scaffold    | DONE    | Production build, 58 tests, and 10 phone/tablet E2E scenarios                               | Continue extending tests with migrated tools                             |
-| Capacitor Android scaffold  | DONE    | 13 official plugins plus one app-owned plugin; all Gradle variants pass                     | Install/smoke test requires an Android device                            |
-| Adaptive application shell  | DONE    | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review | Landscape, split-screen, 200% text, and physical-device review           |
-| Tool registry               | PARTIAL | Typed 12-tool milestone registry within the approved 87-tool public scope; unique-ID tests  | Add the remaining 75 entries only as their implementation batches mature |
-| Enabled foundation tools    | DONE    | Unit, Timestamp, SHA Hash implementations and pure/E2E tests                                | Physical Android interaction check                                       |
-| Platform contracts          | DONE    | Contracts plus shared web/Capacitor behavior tests across core adapter semantics            | Extend cases alongside each new native capability                        |
-| Android platform adapters   | PARTIAL | Core adapters plus versioned SAF Pick/Save As and native policy tests                       | Sensitive clipboard flag, share-cache cleanup, device tests              |
-| Android hardening           | PARTIAL | API 24/36, backup/network/file rules, shrink, three-variant manifest budget, artifacts      | WebView termination/native safe mode and final icon/splash work          |
-| Agent documentation         | DONE    | Detailed synchronized `AGENT.md` and `CLAUDE.md`                                            | Recheck synchronization after future edits                               |
-| Audited implementation plan | DONE    | Full plan copied into repository root                                                       | Reconcile if upstream reference changes                                  |
-| Tracker and provenance      | DONE    | This file plus `docs/SOURCE_PROVENANCE.md`                                                  | Maintain every session                                                   |
-| CI                          | PARTIAL | Web/E2E and Android lint/debug/manifest-budget jobs defined                                 | Execute on hosted repository; pin actions by commit before production    |
-| Physical device QA          | BLOCKED | Checklist and installable debug APK exist; `adb devices -l` returned no devices             | Connect and authorize a device, then execute the checklist               |
-| Play Console/release        | BLOCKED | Release requirements documented                                                             | Requires approved identity, account, signing, store assets, declarations |
+| Workstream                  | Status  | Current evidence                                                                                   | Remaining gate                                                           |
+| --------------------------- | ------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Separate Git repository     | DONE    | Private GitHub repo; local `main` tracks `origin/main`                                             | Branch protection/required checks still require GitHub settings          |
+| GitHub work management      | DONE    | Project #8; 128 reconciled issues including 87 tools; PR #130 merged as `1fbd6af`                  | Optional saved views are a UI step; protected main needs GitHub Pro      |
+| Web application scaffold    | DONE    | Production build, 58 tests, and 10 phone/tablet E2E scenarios                                      | Continue extending tests with migrated tools                             |
+| Capacitor Android scaffold  | DONE    | 13 official plugins plus one app-owned plugin; all Gradle variants pass                            | Install/smoke test requires an Android device                            |
+| Adaptive application shell  | DONE    | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review        | Landscape, split-screen, 200% text, and physical-device review           |
+| Tool registry               | PARTIAL | Typed 12-tool milestone registry within the approved 87-tool public scope; unique-ID tests         | Add the remaining 75 entries only as their implementation batches mature |
+| Enabled foundation tools    | DONE    | Unit, Timestamp, SHA Hash implementations and pure/E2E tests                                       | Physical Android interaction check                                       |
+| Platform contracts          | DONE    | Contracts plus shared web/Capacitor behavior tests across core adapter semantics                   | Extend cases alongside each new native capability                        |
+| Android platform adapters   | PARTIAL | Core adapters plus versioned SAF Pick/Save As, sensitive-clipboard bridge, and native policy tests | Share-cache cleanup, instrumentation/device tests                        |
+| Android hardening           | PARTIAL | API 24/36, backup/network/file rules, shrink, three-variant manifest budget, artifacts             | WebView termination/native safe mode and final icon/splash work          |
+| Agent documentation         | DONE    | Detailed synchronized `AGENT.md` and `CLAUDE.md`                                                   | Recheck synchronization after future edits                               |
+| Audited implementation plan | DONE    | Full plan copied into repository root                                                              | Reconcile if upstream reference changes                                  |
+| Tracker and provenance      | DONE    | This file plus `docs/SOURCE_PROVENANCE.md`                                                         | Maintain every session                                                   |
+| CI                          | PARTIAL | Web/E2E and Android lint/debug/manifest-budget jobs defined                                        | Execute on hosted repository; pin actions by commit before production    |
+| Physical device QA          | BLOCKED | Checklist and installable debug APK exist; `adb devices -l` returned no devices                    | Connect and authorize a device, then execute the checklist               |
+| Play Console/release        | BLOCKED | Release requirements documented                                                                    | Requires approved identity, account, signing, store assets, declarations |
 
 ## 3. Foundation acceptance checklist
 
@@ -106,7 +106,7 @@ This is the living operational record for what is implemented, what is verified,
 - [x] Optional haptics web/Capacitor implementation.
 - [x] Best-effort notification permission/schedule/cancel implementation.
 - [x] Cache file generation and Android share adapter.
-- [ ] Android sensitive clipboard `EXTRA_IS_SENSITIVE` native bridge.
+- [x] Android sensitive clipboard `EXTRA_IS_SENSITIVE` native bridge with adapter/native policy tests; installed-artifact device verification remains pending.
 - [x] Android Storage Access Framework document picker with validated `content://` metadata.
 - [x] Android `ACTION_CREATE_DOCUMENT` Save As bridge with a bounded private-cache handoff.
 - [ ] Generated-file cache cleanup/retention scheduler; immediate Save As cleanup exists, but process-death/cleanup-failure orphans remain.
@@ -196,57 +196,63 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 
 ## 5. Platform adapter status
 
-| Adapter          | Web                | Android             | Automated tests                 | Device tests | Notes                                                |
-| ---------------- | ------------------ | ------------------- | ------------------------------- | ------------ | ---------------------------------------------------- |
-| Clipboard        | Implemented        | Implemented         | Shared contract tests           | Pending      | Sensitive flag needs custom native implementation    |
-| Preferences      | Implemented        | Implemented         | Shared contract tests           | Pending      | Foundation values only; durable schema still pending |
-| Secure random    | Implemented        | Same implementation | Shared utility tests            | Pending      | Web Crypto only                                      |
-| Network state    | Implemented        | Implemented         | Shared contract tests           | Pending      | Connectivity is not reachability                     |
-| External browser | Implemented        | Implemented         | Shared URL/adapter tests        | Pending      | HTTPS only; embedded credentials rejected            |
-| Lifecycle        | Implemented        | Implemented         | Listener cleanup partly covered | Pending      | Process/renderer recovery still pending              |
-| Haptics          | Best effort        | Implemented         | Not required                    | Pending      | Never blocks primary action                          |
-| Notifications    | Permission only    | Implemented         | Schedule/cancel contract tests  | Pending      | No exact-alarm permission                            |
-| File picker      | Browser input      | SAF Open Document   | Adapter + native policy tests   | Pending      | Metadata/content URI only; no broad permissions      |
-| File share       | Download/Web Share | Cache + Share       | Bytes/name/cache-path tests     | Pending      | Retention cleanup pending                            |
-| Save As          | Browser download   | SAF Create Document | Adapter + native policy tests   | Pending      | 5 MiB handoff; immediate best-effort cache cleanup   |
+| Adapter          | Web                | Android             | Automated tests                 | Device tests | Notes                                                                                 |
+| ---------------- | ------------------ | ------------------- | ------------------------------- | ------------ | ------------------------------------------------------------------------------------- |
+| Clipboard        | Implemented        | Implemented         | Shared contract tests           | Pending      | Android 13+ sensitive flag via custom native bridge; 1 MiB write limit both platforms |
+| Preferences      | Implemented        | Implemented         | Shared contract tests           | Pending      | Foundation values only; durable schema still pending                                  |
+| Secure random    | Implemented        | Same implementation | Shared utility tests            | Pending      | Web Crypto only                                                                       |
+| Network state    | Implemented        | Implemented         | Shared contract tests           | Pending      | Connectivity is not reachability                                                      |
+| External browser | Implemented        | Implemented         | Shared URL/adapter tests        | Pending      | HTTPS only; embedded credentials rejected                                             |
+| Lifecycle        | Implemented        | Implemented         | Listener cleanup partly covered | Pending      | Process/renderer recovery still pending                                               |
+| Haptics          | Best effort        | Implemented         | Not required                    | Pending      | Never blocks primary action                                                           |
+| Notifications    | Permission only    | Implemented         | Schedule/cancel contract tests  | Pending      | No exact-alarm permission                                                             |
+| File picker      | Browser input      | SAF Open Document   | Adapter + native policy tests   | Pending      | Metadata/content URI only; no broad permissions                                       |
+| File share       | Download/Web Share | Cache + Share       | Bytes/name/cache-path tests     | Pending      | Retention cleanup pending                                                             |
+| Save As          | Browser download   | SAF Create Document | Adapter + native policy tests   | Pending      | 5 MiB handoff; immediate best-effort cache cleanup                                    |
 
 ## 6. Quality-gate evidence
 
-| Date/time        | Commit/worktree          | Command                                                            | Result  | Evidence/notes                                                                                |
-| ---------------- | ------------------------ | ------------------------------------------------------------------ | ------- | --------------------------------------------------------------------------------------------- |
-| 2026-09-05 14:39 | Uncommitted foundation   | `pnpm format:check`                                                | PASS    | All tracked source/document formats accepted                                                  |
-| 2026-09-05 14:39 | Uncommitted foundation   | `pnpm check`                                                       | PASS    | Strict typecheck; ESLint zero warnings; 6 files/16 tests; production build                    |
-| 2026-09-05 14:39 | Uncommitted foundation   | `pnpm build`                                                       | PASS    | Main JS 240.43 kB / 76.32 kB gzip; enabled tools remain lazy chunks                           |
-| 2026-09-05 14:40 | Uncommitted foundation   | `pnpm test:e2e`                                                    | PASS    | 8 scenarios across Pixel 5/tablet contexts; exact 320/375/600/768/1024 overflow loop          |
-| 2026-09-05 14:35 | Uncommitted foundation   | Playwright full-page screenshot review                             | PASS    | Phone and 1024 px layouts visually inspected; no clipping or accidental desktop-only shell    |
-| 2026-09-05 14:43 | Uncommitted foundation   | `./android/gradlew -p android lintDebug`                           | PASS    | Zero errors, 15 recorded warnings: generated icons/resources and available dependency updates |
-| 2026-09-05 14:43 | Uncommitted foundation   | `assembleDebug assembleInternal bundleRelease`                     | PASS    | Final web assets packaged; debug/internal APKs and minified release AAB produced              |
-| 2026-09-05 14:43 | Uncommitted foundation   | `pnpm android:manifest:check debug/internal/release`               | PASS    | Six reviewed permissions per variant; only `dev.yash.tools.MainActivity` exported             |
-| 2026-09-05 14:43 | Uncommitted foundation   | APK signature and AAB native-library inspection                    | PASS    | APKs verify v2; AAB intentionally unsigned; no `.so` entries                                  |
-| 2026-09-05 14:41 | Uncommitted foundation   | `cmp`/SHA-256 documentation integrity checks                       | PASS    | Agent files identical; copied plan checksum exactly matches upstream                          |
-| 2026-09-05 14:41 | Uncommitted foundation   | `adb devices -l`                                                   | BLOCKED | ADB server available, but no emulator or authorized physical device is connected              |
-| 2026-09-05 17:51 | Current foundation batch | `pnpm format:check`, `pnpm typecheck`, `pnpm lint`                 | PASS    | Prettier accepted all files; strict TypeScript and ESLint completed with zero errors/warnings |
-| 2026-09-05 17:51 | Current foundation batch | `pnpm test`                                                        | PASS    | 12 files/52 tests: shared adapter contracts and all enabled-tool component interactions       |
-| 2026-09-05 17:51 | Current foundation batch | `pnpm build`                                                       | PASS    | Main JS 243.61 kB / 77.20 kB gzip; enabled tools remain lazy chunks                           |
-| 2026-09-05 17:52 | Current foundation batch | `pnpm test:e2e`                                                    | PASS    | 10 scenarios across phone/tablet, including persisted Recent navigation                       |
-| 2026-09-05 17:45 | Current foundation batch | Recent UI screenshot review                                        | PASS    | Empty-state phone dark and 1024 px light layouts inspected; labeled four-item adaptive nav    |
-| 2026-09-05 17:52 | Current foundation batch | `pnpm cap:sync`                                                    | PASS    | Current production web bundle copied into the Android asset output                            |
-| 2026-09-05 17:53 | Current foundation batch | `lintDebug`, `assembleDebug`, `assembleInternal`, `bundleRelease`  | PASS    | All required Gradle variants completed; existing flatDir/Gradle deprecation warnings remain   |
-| 2026-09-05 17:54 | Current foundation batch | Manifest checks for debug/internal/release                         | PASS    | Six reviewed permissions per variant; only `dev.yash.tools.MainActivity` exported             |
-| 2026-09-05 17:54 | Current foundation batch | APK signatures and AAB native-library inspection                   | PASS    | Debug/internal APK v2 signatures verify; release AAB remains unsigned; no `.so` entries       |
-| 2026-09-05 18:55 | SAF document batch       | `pnpm format:check`, `pnpm typecheck`, `pnpm lint`, `pnpm test`    | PASS    | Formatting, strict types, zero lint warnings, and 12 files/58 tests                           |
-| 2026-09-05 18:49 | SAF document batch       | `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`                     | PASS    | Main JS 246.85 kB/78.32 kB gzip; 10 E2E cases; packaged config disables bridge logging        |
-| 2026-09-05 18:50 | SAF document batch       | `testDebugUnitTest`, `lintDebug`, all variant builds               | PASS    | 6 native policy tests; zero lint errors; debug/internal APK and minified release AAB built    |
-| 2026-09-05 18:51 | SAF document batch       | Manifest, signing, R8, and native-library audits                   | PASS    | Six reviewed permissions; one exported Activity; APK v2; plugin methods kept; no AAB `.so`    |
-| 2026-09-05 20:24 | GitHub management batch  | Work-item/action audits, `pnpm typecheck`, `pnpm lint`             | PASS    | 128-issue/87-tool manifest and 8 immutable action references valid; strict checks pass        |
-| 2026-09-05 20:24 | GitHub management batch  | Idempotent remote provisioning and read-back audit                 | PASS    | Project #8; 128 markers/87 tools; 29 labels; 6 milestones; 90 dependencies; 7 custom fields   |
-| 2026-09-05 20:24 | Repository governance    | GitHub branch-protection and ruleset API checks                    | BLOCKED | Private-repository account plan returns HTTP 403 and requires GitHub Pro or public visibility |
-| 2026-09-05 20:27 | GitHub management batch  | `pnpm test`, `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`        | PASS    | 12 files/58 tests; 10 E2E scenarios; production bundle packaged into the Android project      |
-| 2026-09-05 20:27 | GitHub management batch  | Native unit, lint, debug/internal/release builds and manifests     | PASS    | Gradle passed; six permissions/variant; one exported Activity; no AAB `.so` files             |
-| 2026-09-06 07:08 | PR #1 pre-merge audit    | Full web, E2E, sync, native unit/lint/variant/manifest gates       | PASS    | 58 web tests, 10 E2E; 7 native policy tests; explicit Save As truncation regression covered   |
-| 2026-09-06 07:25 | GitHub issue gap audit   | Manifest validation, remote reconciliation, and read-back          | PASS    | 87-tool catalog exact; 128 managed bodies; no duplicate, stale dependency, or hierarchy drift |
-| 2026-09-06 07:32 | PR #1 merge and retarget | Hosted `web-quality`/`android-debug`; post-merge Project read-back | PASS    | PR #1 merged as `7d3b2d7`; issue #13 and PR item Done; PR #130 clean against `main`           |
-| 2026-09-06 07:50 | PR #130 completion       | Review state, hosted CI, issue evidence, and squash merge          | PASS    | Both hosted jobs passed; issue #12 completed; PR #130 merged as `1fbd6af`                     |
+| Date/time        | Commit/worktree           | Command                                                                      | Result  | Evidence/notes                                                                                |
+| ---------------- | ------------------------- | ---------------------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------- |
+| 2026-09-05 14:39 | Uncommitted foundation    | `pnpm format:check`                                                          | PASS    | All tracked source/document formats accepted                                                  |
+| 2026-09-05 14:39 | Uncommitted foundation    | `pnpm check`                                                                 | PASS    | Strict typecheck; ESLint zero warnings; 6 files/16 tests; production build                    |
+| 2026-09-05 14:39 | Uncommitted foundation    | `pnpm build`                                                                 | PASS    | Main JS 240.43 kB / 76.32 kB gzip; enabled tools remain lazy chunks                           |
+| 2026-09-05 14:40 | Uncommitted foundation    | `pnpm test:e2e`                                                              | PASS    | 8 scenarios across Pixel 5/tablet contexts; exact 320/375/600/768/1024 overflow loop          |
+| 2026-09-05 14:35 | Uncommitted foundation    | Playwright full-page screenshot review                                       | PASS    | Phone and 1024 px layouts visually inspected; no clipping or accidental desktop-only shell    |
+| 2026-09-05 14:43 | Uncommitted foundation    | `./android/gradlew -p android lintDebug`                                     | PASS    | Zero errors, 15 recorded warnings: generated icons/resources and available dependency updates |
+| 2026-09-05 14:43 | Uncommitted foundation    | `assembleDebug assembleInternal bundleRelease`                               | PASS    | Final web assets packaged; debug/internal APKs and minified release AAB produced              |
+| 2026-09-05 14:43 | Uncommitted foundation    | `pnpm android:manifest:check debug/internal/release`                         | PASS    | Six reviewed permissions per variant; only `dev.yash.tools.MainActivity` exported             |
+| 2026-09-05 14:43 | Uncommitted foundation    | APK signature and AAB native-library inspection                              | PASS    | APKs verify v2; AAB intentionally unsigned; no `.so` entries                                  |
+| 2026-09-05 14:41 | Uncommitted foundation    | `cmp`/SHA-256 documentation integrity checks                                 | PASS    | Agent files identical; copied plan checksum exactly matches upstream                          |
+| 2026-09-05 14:41 | Uncommitted foundation    | `adb devices -l`                                                             | BLOCKED | ADB server available, but no emulator or authorized physical device is connected              |
+| 2026-09-05 17:51 | Current foundation batch  | `pnpm format:check`, `pnpm typecheck`, `pnpm lint`                           | PASS    | Prettier accepted all files; strict TypeScript and ESLint completed with zero errors/warnings |
+| 2026-09-05 17:51 | Current foundation batch  | `pnpm test`                                                                  | PASS    | 12 files/52 tests: shared adapter contracts and all enabled-tool component interactions       |
+| 2026-09-05 17:51 | Current foundation batch  | `pnpm build`                                                                 | PASS    | Main JS 243.61 kB / 77.20 kB gzip; enabled tools remain lazy chunks                           |
+| 2026-09-05 17:52 | Current foundation batch  | `pnpm test:e2e`                                                              | PASS    | 10 scenarios across phone/tablet, including persisted Recent navigation                       |
+| 2026-09-05 17:45 | Current foundation batch  | Recent UI screenshot review                                                  | PASS    | Empty-state phone dark and 1024 px light layouts inspected; labeled four-item adaptive nav    |
+| 2026-09-05 17:52 | Current foundation batch  | `pnpm cap:sync`                                                              | PASS    | Current production web bundle copied into the Android asset output                            |
+| 2026-09-05 17:53 | Current foundation batch  | `lintDebug`, `assembleDebug`, `assembleInternal`, `bundleRelease`            | PASS    | All required Gradle variants completed; existing flatDir/Gradle deprecation warnings remain   |
+| 2026-09-05 17:54 | Current foundation batch  | Manifest checks for debug/internal/release                                   | PASS    | Six reviewed permissions per variant; only `dev.yash.tools.MainActivity` exported             |
+| 2026-09-05 17:54 | Current foundation batch  | APK signatures and AAB native-library inspection                             | PASS    | Debug/internal APK v2 signatures verify; release AAB remains unsigned; no `.so` entries       |
+| 2026-09-05 18:55 | SAF document batch        | `pnpm format:check`, `pnpm typecheck`, `pnpm lint`, `pnpm test`              | PASS    | Formatting, strict types, zero lint warnings, and 12 files/58 tests                           |
+| 2026-09-05 18:49 | SAF document batch        | `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`                               | PASS    | Main JS 246.85 kB/78.32 kB gzip; 10 E2E cases; packaged config disables bridge logging        |
+| 2026-09-05 18:50 | SAF document batch        | `testDebugUnitTest`, `lintDebug`, all variant builds                         | PASS    | 6 native policy tests; zero lint errors; debug/internal APK and minified release AAB built    |
+| 2026-09-05 18:51 | SAF document batch        | Manifest, signing, R8, and native-library audits                             | PASS    | Six reviewed permissions; one exported Activity; APK v2; plugin methods kept; no AAB `.so`    |
+| 2026-09-05 20:24 | GitHub management batch   | Work-item/action audits, `pnpm typecheck`, `pnpm lint`                       | PASS    | 128-issue/87-tool manifest and 8 immutable action references valid; strict checks pass        |
+| 2026-09-05 20:24 | GitHub management batch   | Idempotent remote provisioning and read-back audit                           | PASS    | Project #8; 128 markers/87 tools; 29 labels; 6 milestones; 90 dependencies; 7 custom fields   |
+| 2026-09-05 20:24 | Repository governance     | GitHub branch-protection and ruleset API checks                              | BLOCKED | Private-repository account plan returns HTTP 403 and requires GitHub Pro or public visibility |
+| 2026-09-05 20:27 | GitHub management batch   | `pnpm test`, `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`                  | PASS    | 12 files/58 tests; 10 E2E scenarios; production bundle packaged into the Android project      |
+| 2026-09-05 20:27 | GitHub management batch   | Native unit, lint, debug/internal/release builds and manifests               | PASS    | Gradle passed; six permissions/variant; one exported Activity; no AAB `.so` files             |
+| 2026-09-06 07:08 | PR #1 pre-merge audit     | Full web, E2E, sync, native unit/lint/variant/manifest gates                 | PASS    | 58 web tests, 10 E2E; 7 native policy tests; explicit Save As truncation regression covered   |
+| 2026-09-06 07:25 | GitHub issue gap audit    | Manifest validation, remote reconciliation, and read-back                    | PASS    | 87-tool catalog exact; 128 managed bodies; no duplicate, stale dependency, or hierarchy drift |
+| 2026-09-06 07:32 | PR #1 merge and retarget  | Hosted `web-quality`/`android-debug`; post-merge Project read-back           | PASS    | PR #1 merged as `7d3b2d7`; issue #13 and PR item Done; PR #130 clean against `main`           |
+| 2026-09-06 07:50 | PR #130 completion        | Review state, hosted CI, issue evidence, and squash merge                    | PASS    | Both hosted jobs passed; issue #12 completed; PR #130 merged as `1fbd6af`                     |
+| 2026-09-06 14:05 | Sensitive clipboard batch | `pnpm format:check`, `pnpm typecheck`, `pnpm lint`, `pnpm test`              | PASS    | Formatting accepted; strict types and zero lint warnings; 12 files/65 tests                   |
+| 2026-09-06 14:06 | Sensitive clipboard batch | `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`                               | PASS    | Main JS 247.52 kB/78.45 kB gzip; 10 E2E scenarios; assets packaged into the Android project   |
+| 2026-09-06 14:10 | Sensitive clipboard batch | `testDebugUnitTest`                                                          | PASS    | 7 ClipboardPolicy tests plus 7 existing DocumentFilePolicy tests; zero failures               |
+| 2026-09-06 14:12 | Sensitive clipboard batch | `lintDebug assembleDebug assembleInternal bundleRelease`                     | PASS    | Zero lint errors; debug/internal APKs and minified release AAB rebuilt                        |
+| 2026-09-06 14:13 | Sensitive clipboard batch | Manifest checks debug/internal/release                                       | PASS    | Six reviewed permissions per variant; only `dev.yash.tools.MainActivity` exported             |
+| 2026-09-06 14:14 | Sensitive clipboard batch | APK v2 signature, AAB native-library, work-items/actions, `git diff --check` | PASS    | APK v2 verified; AAB unsigned with no `.so`; manifests valid; no whitespace errors            |
 
 Android Lint currently reports warnings, not errors: generated Capacitor launcher/splash resources need final replacement/cleanup; some generated resources appear unused; Gradle 8.14.5 and AppCompat 1.8.0 updates are available; generated `flatDir`/Gradle 9 deprecation and Capacitor Filesystem deprecation notices remain. Review rather than suppress them during the relevant dependency/icon pass.
 
@@ -254,9 +260,9 @@ Android Lint currently reports warnings, not errors: generated Capacitor launche
 
 | Artifact     | Package/role              |     Bytes | SHA-256                                                            | Signing/status                           |
 | ------------ | ------------------------- | --------: | ------------------------------------------------------------------ | ---------------------------------------- |
-| Debug APK    | `dev.yash.tools.debug`    | 4,871,624 | `8222ec12a5fdc8d2930b859cce1317e3ffb7543c1cb10466e132b0edb2a112a1` | Local debug key; APK v2 verified         |
-| Internal APK | `dev.yash.tools.internal` | 4,872,212 | `fd7d9243f88e5e4fcb35fbbbfab2f8e7c3006b94bc4c552a0657dee72f9873a5` | Local debug key; APK v2 verified         |
-| Release AAB  | `dev.yash.tools`          | 2,113,313 | `0f5fd65d7bbcc507120489ae48162fbace47f2274202fb40c7dc7ab148ffd360` | Build proof only; intentionally unsigned |
+| Debug APK    | `dev.yash.tools.debug`    | 4,875,064 | `afb830549381f54d094886a2bb23bb1e70bfed565431798b4e598b91a40a2d03` | Local debug key; APK v2 verified         |
+| Internal APK | `dev.yash.tools.internal` | 4,875,402 | `22c7919210a90b2749c6913a0f339afce4f4b5586ef9766b125262a37c09ee34` | Local debug key; APK v2 verified         |
+| Release AAB  | `dev.yash.tools`          | 2,115,513 | `95e502d02724805f996aec48a76e87c15819f232752b8c998961a5b34e3a3cdb` | Build proof only; intentionally unsigned |
 
 These are reproducibility evidence, not publication candidates. Rebuild after any source/config change and never distribute a debug-key artifact as production.
 
@@ -282,7 +288,7 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 ## 9. Next executable queue
 
 1. Configure the recommended saved Project views in GitHub's UI; upgrade the account plan before completing protected-main issue #129.
-2. Implement sensitive clipboard metadata and deterministic generated-file cache cleanup/retention for Share and Save As.
+2. Implement deterministic generated-file cache cleanup/retention for Share and Save As (issue #15).
 3. Implement WebView renderer-termination handling and a native safe-mode/recovery surface.
 4. Add process-recreation, permission, picker, Save As, share, and notification instrumentation/UI Automator coverage.
 5. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
@@ -406,3 +412,13 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Retargeted PR #130 from the merged feature branch to `main`, replaced its stale stacking notes with the gap-audit evidence, and confirmed a clean merge state with both hosted CI jobs passing.
 - Generalized bootstrap pull-request reconciliation so a rebuilt Project restores and state-maps both PR #1 and PR #130 instead of only the original SAF pull request.
 - Recorded completion evidence on issue #12, checked both acceptance criteria, and squash-merged PR #130 into `main` as `1fbd6af` after both hosted jobs passed.
+
+### 2026-09-06 — Sensitive Android clipboard batch
+
+- Added the app-owned, version-1 `SensitiveClipboard` Capacitor plugin with a single `write` operation that carries the bridge contract version, value, and sensitive flag.
+- On Android 13+ the plugin attaches `ClipDescription.EXTRA_IS_SENSITIVE` through `setExtras(PersistableBundle)`; older versions degrade to a normal write. The write runs on the main thread with an empty clip label, performs no logging or clipboard reads, and adds no permission, exported component, dependency, or ProGuard rule.
+- Routed every Android clipboard write through the new bridge so normal and sensitive copies share one native policy path; clipboard reads and the stale-timer-protected timed clear remain on the official plugin and adapter.
+- Added a 1 MiB UTF-8 clipboard write limit enforced in both adapters before the bridge and validated again natively; typed `CLIPBOARD_INVALID_ARGUMENT` and `CLIPBOARD_WRITE_FAILED` codes now cover invalid requests, write failures, and over-limit values.
+- Added shared adapter contract cases (sensitive copy semantics, over-limit rejection on both platforms), Capacitor-specific bridge routing/error mapping cases, and seven pure `ClipboardPolicy` native tests including the API 33 gating decision.
+- Added ADR 0005 and updated the architecture overview and source provenance. Physical verification of the sensitive extra, preview suppression, and timed clear inside the installed artifact remains assigned to the instrumentation and device issues.
+- Passed formatting, strict typecheck, zero-warning lint, 65 web tests (12 files), 10 E2E scenarios, production build, Capacitor sync, 14 native policy tests, Android Lint, debug/internal APK and minified release AAB builds, three manifest budgets, APK v2 signatures, AAB native-library inspection, work-item/action audits, and `git diff --check`.

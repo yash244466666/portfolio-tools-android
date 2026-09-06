@@ -18,10 +18,11 @@ The Android repository is a separate codebase. The upstream path is recorded for
 
 ## Platform implementation references
 
-| Android artifact                        | Reference                                                                                        | Treatment                                                                                                                      |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| `DocumentFilesPlugin.java`              | Android Storage Access Framework guide and Capacitor 8.5.1 installed `Plugin.java` callback APIs | Original narrow implementation using documented intent/callback patterns; no upstream portfolio code or third-party asset used |
-| `DocumentFilePolicy.java` and its tests | MIME/URI/size requirements in the Android intent and shared-document documentation               | Original validation policy and synthetic fixtures; no copied dataset                                                           |
+| Android artifact                                                        | Reference                                                                                        | Treatment                                                                                                                      |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `DocumentFilesPlugin.java`                                              | Android Storage Access Framework guide and Capacitor 8.5.1 installed `Plugin.java` callback APIs | Original narrow implementation using documented intent/callback patterns; no upstream portfolio code or third-party asset used |
+| `DocumentFilePolicy.java` and its tests                                 | MIME/URI/size requirements in the Android intent and shared-document documentation               | Original validation policy and synthetic fixtures; no copied dataset                                                           |
+| `SensitiveClipboardPlugin.java`, `ClipboardPolicy.java` and their tests | Android clipboard guidance and the API 33 `ClipDescription.EXTRA_IS_SENSITIVE` documentation     | Original narrow implementation and synthetic boundary fixtures; no upstream portfolio code or third-party asset used           |
 
 ## Licensing/provenance rules
 

@@ -11,6 +11,7 @@ import { secureRandomService } from "@/platform/shared/random"
 import { validatedExternalUrl } from "@/platform/shared/urls"
 
 const preferencePrefix = "yash-tools:v1:"
+const maximumClipboardBytes = 1024 * 1024
 
 async function pickFromBrowser(options: FilePickOptions) {
   return new Promise<PickedFile[]>((resolve, reject) => {
@@ -80,6 +81,14 @@ export const webPlatformServices: PlatformServices = {
       }
     },
     async writeText(value, options) {
+      // The Web Clipboard API cannot mark values as sensitive, so the flag degrades to a no-op
+      // here; the Android adapter applies the sensitive-clipboard metadata instead.
+      if (new TextEncoder().encode(value).byteLength > maximumClipboardBytes) {
+        throw new PlatformError(
+          "CLIPBOARD_INVALID_ARGUMENT",
+          "The copied value exceeds the clipboard size limit.",
+        )
+      }
       try {
         await navigator.clipboard.writeText(value)
         if (options?.clearAfterMs) {

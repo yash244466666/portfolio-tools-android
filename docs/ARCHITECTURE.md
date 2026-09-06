@@ -50,6 +50,8 @@ Each tool directory owns its UI, pure logic, fixtures, and tests. Algorithms sho
 
 Android document selection and Save As use the app-owned, versioned `DocumentFiles` bridge. It returns validated `content://` metadata from `ACTION_OPEN_DOCUMENT` and streams bounded generated output from a private cache handoff into an `ACTION_CREATE_DOCUMENT` destination. The bridge accepts no arbitrary paths or intents and requires no storage/media permission. File-consuming tools still need a reviewed native streaming or bounded import-copy operation.
 
+Android clipboard writes use the app-owned, versioned `SensitiveClipboard` bridge so secret-classified copies can carry Android 13+ sensitive-clipboard metadata; older versions degrade to a normal write. It validates and bounds every write, never reads the clipboard or logs values, and requires no permission. Clipboard reads and the stale-timer-protected timed clear remain on the official plugin and adapter.
+
 ### Persistence
 
 Preferences are namespaced and JSON encoded. This is suitable for foundation settings/IDs, not large documents. Durable Notes/Bookmarks require schema/version/migration/export design before implementation.
