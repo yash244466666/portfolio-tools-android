@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 21:05 Europe/Berlin
+> Last updated: 2026-09-06 21:20 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -509,3 +509,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Added ADR 0010 and updated the architecture overview and provenance. The registry now marks `regex-tester` enabled with a lazy component; the app-shell enabled-count test now derives from the registry instead of a hardcoded number. Physical-device evidence for Regex Tester (classic-Worker behavior on old WebViews, TalkBack) remains assigned to issues #17/#18.
 - Passed formatting, strict typecheck, zero-warning lint, 123 web tests (17 files), 14 E2E scenarios, production build (RegexTester lazy chunk 6.78 kB/2.49 kB gzip plus a 1.47 kB worker chunk), Capacitor sync, 38 native policy tests, Android Lint, debug/internal APK and minified release AAB builds with the worker chunk present in every artifact, three manifest budgets, APK v2 signatures on both APKs, work-item/action audits, and `git diff --check`.
 - Next executable item: the QR Code Generator tool migration (issue #51), which also exercises real Android file sharing.
+
+### 2026-09-06 — Regex Tester merge reconciliation
+
+- Merged PR #137 into `main` as `b401d4c`, closing issue #56; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
+- Five of the 87 approved tools are implemented. The vertical slice still needs QR Generator, JSON Editor, Notes/Scratchpad, Pomodoro Timer, Image Compressor, File Hash Checker, and Currency Converter.
+- Next executable item: the QR Code Generator tool migration (issue #51), which also exercises real Android file sharing through the existing share bridge.
