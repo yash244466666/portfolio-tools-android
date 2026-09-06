@@ -52,6 +52,8 @@ Android document selection and Save As use the app-owned, versioned `DocumentFil
 
 Android clipboard writes use the app-owned, versioned `SensitiveClipboard` bridge so secret-classified copies can carry Android 13+ sensitive-clipboard metadata; older versions degrade to a normal write. It validates and bounds every write, never reads the clipboard or logs values, and requires no permission. Clipboard reads and the stale-timer-protected timed clear remain on the official plugin and adapter.
 
+Generated-file cache (`cache/share/` and `cache/save/<operation>/`) is cleaned by the app-owned, versioned `GeneratedCache` janitor using a pure policy: bounded deterministic retention windows, ownership-validated deletion targets, active-operation protection, low-space behavior, and canonical-path containment. It runs at bridge load and opportunistically before generated-file operations, and never touches other cache or user data.
+
 ### Persistence
 
 Preferences are namespaced and JSON encoded. This is suitable for foundation settings/IDs, not large documents. Durable Notes/Bookmarks require schema/version/migration/export design before implementation.

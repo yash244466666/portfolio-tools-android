@@ -17,6 +17,7 @@ import {
   SensitiveClipboard,
   sensitiveClipboardContractVersion,
 } from "@/platform/capacitor/sensitive-clipboard"
+import { GeneratedCache, generatedCacheContractVersion } from "@/platform/capacitor/generated-cache"
 import type {
   FilePickOptions,
   NetworkState,
@@ -173,6 +174,17 @@ async function writeClipboardValue(value: string, sensitive: boolean): Promise<v
   }
 }
 
+/**
+ * Best-effort janitor trigger. The native pass is single-flight and bounded; failures and
+ * already-running rejections are ignored because cleanup must never delay or block a
+ * generated-file operation. Startup recovery is handled natively when the bridge loads.
+ */
+function sweepGeneratedCache(): void {
+  void GeneratedCache.cleanup({ contractVersion: generatedCacheContractVersion }).catch(
+    () => undefined,
+  )
+}
+
 function stableNotificationId(value: string): number {
   let hash = 0
   for (const character of value) hash = (hash * 31 + character.charCodeAt(0)) | 0
@@ -292,6 +304,7 @@ export const capacitorPlatformServices: PlatformServices = {
       }
     },
     async share(file) {
+      sweepGeneratedCache()
       try {
         const safeName = sanitizeGeneratedFileName(file.name)
         const saved = await Filesystem.writeFile({
@@ -307,6 +320,7 @@ export const capacitorPlatformServices: PlatformServices = {
       }
     },
     async saveAs(file) {
+      sweepGeneratedCache()
       const operationId = secureRandomService.uuid()
       const name = sanitizeGeneratedFileName(file.name)
       if (!isValidMimeType(file.mimeType, false)) {
