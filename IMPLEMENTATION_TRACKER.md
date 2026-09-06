@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 07:08 Europe/Berlin
+> Last updated: 2026-09-06 07:25 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -23,24 +23,24 @@ This is the living operational record for what is implemented, what is verified,
 
 ## 2. Foundation dashboard
 
-| Workstream                  | Status      | Current evidence                                                                            | Remaining gate                                                           |
-| --------------------------- | ----------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Separate Git repository     | DONE        | Private GitHub repo; local `main` tracks `origin/main`                                      | Branch protection/required checks still require GitHub settings          |
-| GitHub work management      | IN PROGRESS | Project #8; 128 marked issues including 87 tools; 6 milestones; 29 labels; dependency graph | Merge setup PR; configure saved views; protected main needs GitHub Pro   |
-| Web application scaffold    | DONE        | Production build, 58 tests, and 10 phone/tablet E2E scenarios                               | Continue extending tests with migrated tools                             |
-| Capacitor Android scaffold  | DONE        | 13 official plugins plus one app-owned plugin; all Gradle variants pass                     | Install/smoke test requires an Android device                            |
-| Adaptive application shell  | DONE        | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review | Landscape, split-screen, 200% text, and physical-device review           |
-| Tool registry               | PARTIAL     | Typed 12-tool milestone registry within the approved 87-tool public scope; unique-ID tests  | Add the remaining 75 entries only as their implementation batches mature |
-| Enabled foundation tools    | DONE        | Unit, Timestamp, SHA Hash implementations and pure/E2E tests                                | Physical Android interaction check                                       |
-| Platform contracts          | DONE        | Contracts plus shared web/Capacitor behavior tests across core adapter semantics            | Extend cases alongside each new native capability                        |
-| Android platform adapters   | PARTIAL     | Core adapters plus versioned SAF Pick/Save As and native policy tests                       | Sensitive clipboard flag, share-cache cleanup, device tests              |
-| Android hardening           | PARTIAL     | API 24/36, backup/network/file rules, shrink, three-variant manifest budget, artifacts      | WebView termination/native safe mode and final icon/splash work          |
-| Agent documentation         | DONE        | Detailed synchronized `AGENT.md` and `CLAUDE.md`                                            | Recheck synchronization after future edits                               |
-| Audited implementation plan | DONE        | Full plan copied into repository root                                                       | Reconcile if upstream reference changes                                  |
-| Tracker and provenance      | DONE        | This file plus `docs/SOURCE_PROVENANCE.md`                                                  | Maintain every session                                                   |
-| CI                          | PARTIAL     | Web/E2E and Android lint/debug/manifest-budget jobs defined                                 | Execute on hosted repository; pin actions by commit before production    |
-| Physical device QA          | BLOCKED     | Checklist and installable debug APK exist; `adb devices -l` returned no devices             | Connect and authorize a device, then execute the checklist               |
-| Play Console/release        | BLOCKED     | Release requirements documented                                                             | Requires approved identity, account, signing, store assets, declarations |
+| Workstream                  | Status      | Current evidence                                                                                | Remaining gate                                                           |
+| --------------------------- | ----------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Separate Git repository     | DONE        | Private GitHub repo; local `main` tracks `origin/main`                                          | Branch protection/required checks still require GitHub settings          |
+| GitHub work management      | IN PROGRESS | Project #8; 128 reconciled issues including 87 tools; 6 milestones; 29 labels; dependency graph | Merge setup PR; configure saved views; protected main needs GitHub Pro   |
+| Web application scaffold    | DONE        | Production build, 58 tests, and 10 phone/tablet E2E scenarios                                   | Continue extending tests with migrated tools                             |
+| Capacitor Android scaffold  | DONE        | 13 official plugins plus one app-owned plugin; all Gradle variants pass                         | Install/smoke test requires an Android device                            |
+| Adaptive application shell  | DONE        | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review     | Landscape, split-screen, 200% text, and physical-device review           |
+| Tool registry               | PARTIAL     | Typed 12-tool milestone registry within the approved 87-tool public scope; unique-ID tests      | Add the remaining 75 entries only as their implementation batches mature |
+| Enabled foundation tools    | DONE        | Unit, Timestamp, SHA Hash implementations and pure/E2E tests                                    | Physical Android interaction check                                       |
+| Platform contracts          | DONE        | Contracts plus shared web/Capacitor behavior tests across core adapter semantics                | Extend cases alongside each new native capability                        |
+| Android platform adapters   | PARTIAL     | Core adapters plus versioned SAF Pick/Save As and native policy tests                           | Sensitive clipboard flag, share-cache cleanup, device tests              |
+| Android hardening           | PARTIAL     | API 24/36, backup/network/file rules, shrink, three-variant manifest budget, artifacts          | WebView termination/native safe mode and final icon/splash work          |
+| Agent documentation         | DONE        | Detailed synchronized `AGENT.md` and `CLAUDE.md`                                                | Recheck synchronization after future edits                               |
+| Audited implementation plan | DONE        | Full plan copied into repository root                                                           | Reconcile if upstream reference changes                                  |
+| Tracker and provenance      | DONE        | This file plus `docs/SOURCE_PROVENANCE.md`                                                      | Maintain every session                                                   |
+| CI                          | PARTIAL     | Web/E2E and Android lint/debug/manifest-budget jobs defined                                     | Execute on hosted repository; pin actions by commit before production    |
+| Physical device QA          | BLOCKED     | Checklist and installable debug APK exist; `adb devices -l` returned no devices                 | Connect and authorize a device, then execute the checklist               |
+| Play Console/release        | BLOCKED     | Release requirements documented                                                                 | Requires approved identity, account, signing, store assets, declarations |
 
 ## 3. Foundation acceptance checklist
 
@@ -109,7 +109,7 @@ This is the living operational record for what is implemented, what is verified,
 - [ ] Android sensitive clipboard `EXTRA_IS_SENSITIVE` native bridge.
 - [x] Android Storage Access Framework document picker with validated `content://` metadata.
 - [x] Android `ACTION_CREATE_DOCUMENT` Save As bridge with a bounded private-cache handoff.
-- [ ] Share-cache cleanup/retention scheduler; Save As handoffs are deleted when calls settle.
+- [ ] Generated-file cache cleanup/retention scheduler; immediate Save As cleanup exists, but process-death/cleanup-failure orphans remain.
 - [x] Shared web/Capacitor adapter contract tests for clipboard, preferences, browser, network, files, and notifications.
 - [x] Native document validation policy tests wired into local and CI Gradle gates.
 - [ ] Picker/share/notification UI Automator tests.
@@ -244,6 +244,7 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 | 2026-09-05 20:27 | GitHub management batch  | `pnpm test`, `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`       | PASS    | 12 files/58 tests; 10 E2E scenarios; production bundle packaged into the Android project      |
 | 2026-09-05 20:27 | GitHub management batch  | Native unit, lint, debug/internal/release builds and manifests    | PASS    | Gradle passed; six permissions/variant; one exported Activity; no AAB `.so` files             |
 | 2026-09-06 07:08 | PR #1 pre-merge audit    | Full web, E2E, sync, native unit/lint/variant/manifest gates      | PASS    | 58 web tests, 10 E2E; 7 native policy tests; explicit Save As truncation regression covered   |
+| 2026-09-06 07:25 | GitHub issue gap audit   | Manifest validation, remote reconciliation, and read-back         | PASS    | 87-tool catalog exact; 128 managed bodies; no duplicate, stale dependency, or hierarchy drift |
 
 Android Lint currently reports warnings, not errors: generated Capacitor launcher/splash resources need final replacement/cleanup; some generated resources appear unused; Gradle 8.14.5 and AppCompat 1.8.0 updates are available; generated `flatDir`/Gradle 9 deprecation and Capacitor Filesystem deprecation notices remain. Review rather than suppress them during the relevant dependency/icon pass.
 
@@ -269,7 +270,7 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 | R-002 | Risk       |     High | Renderer termination could lose current nonsensitive work or loop                                      | Implement host recovery/native safe mode before beta                                                                |
 | R-003 | Risk       |   Medium | SAF selection returns metadata/URI; file-consuming tools still need bounded/streamed reads             | Add a separate reviewed content-URI read/stream method with the first file-consuming tool                           |
 | R-004 | Risk       |   Medium | Current Capacitor Clipboard cannot express Android sensitive metadata                                  | Add reviewed narrow native method before secret-copy tools                                                          |
-| R-005 | Risk       |   Medium | Share cache cleanup is not scheduled                                                                   | Define retention and cleanup before QR/export tools                                                                 |
+| R-005 | Risk       |   Medium | Share and Save As caches lack orphan cleanup after process death or failed immediate deletion          | Implement bounded generated-file retention through issue #15 before QR/export tools                                 |
 | R-006 | Risk       |   Medium | `INTERNET` exists before network tools are enabled due to planned app scope/plugins                    | Keep disclosed; verify no runtime requests from offline tools                                                       |
 | R-007 | Risk       |     High | The all-87 first-release scope creates a long critical path and concentrates tool-specific policy risk | Use the 12-tool milestone and controlled migration batches; any smaller production scope requires a superseding ADR |
 | A-001 | Assumption |   Medium | API 24 remains product minimum                                                                         | Revalidate against audience/device distribution before beta                                                         |
@@ -280,7 +281,7 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 
 1. Review and merge PR #1, then review and merge stacked work-management PR #130.
 2. Configure the recommended saved Project views in GitHub's UI; upgrade the account plan before completing protected-main issue #129.
-3. Implement sensitive clipboard metadata and deterministic share-cache cleanup/retention.
+3. Implement sensitive clipboard metadata and deterministic generated-file cache cleanup/retention for Share and Save As.
 4. Implement WebView renderer-termination handling and a native safe-mode/recovery surface.
 5. Add process-recreation, permission, picker, Save As, share, and notification instrumentation/UI Automator coverage.
 6. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
@@ -392,3 +393,11 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Changed the destination stream mode from generic write (`w`) to explicit write-and-truncate (`wt`) so a provider cannot retain stale trailing bytes when replacing output, and added native policy regression coverage.
 - Re-ran formatting, strict typecheck/lint, 58 unit/component tests, production build, 10 E2E scenarios, Capacitor sync, 7 native policy tests, Android Lint, debug/internal APKs, release AAB, three manifest-budget checks, APK v2 signatures, and native-library inspection successfully.
 - Physical system-picker, provider-interoperability, and process-recreation evidence remains assigned to the existing instrumentation and device issues; it is not claimed by this merge.
+
+### 2026-09-06 — GitHub issue and Project gap audit
+
+- Reconciled the issue manifest against the exact 87-tool upstream catalog and confirmed no missing or extra tool work items.
+- Expanded issue #15 from share-only cleanup to bounded generated-file retention for both `cache/share/` and orphaned `cache/save/<operation>/` handoffs, including process death, failed immediate deletion, active-operation protection, and lazy-reader/provider tests.
+- Made provisioning reconcile managed issue titles, bodies, labels, milestones, parent relationships, and dependency removals/additions instead of only creating missing records; unmanaged labels, checked criteria, and notes outside managed markers are preserved.
+- Added manifest hierarchy/dependency cycle checks, duplicate blocker/marker detection, Project option validation, closed-item Done mapping, and remote Project field-shape verification.
+- Applied the updated manifest successfully: 128 existing issues reconciled, zero duplicates, zero reparenting, zero dependency drift, and 128 closing markers confirmed by read-back. All 87 tool issues remain present.

@@ -93,7 +93,11 @@ interface GitHubIssue {
   number: number
   title: string
   body: string | null
+  state: "open" | "closed"
   html_url: string
+  labels: ({ name: string } | string)[]
+  milestone: { number: number } | null
+  parent_issue_url?: string | null
   pull_request?: unknown
 }
 
@@ -126,6 +130,8 @@ interface PullRequest {
   url: string
   title: string
   body: string | null
+  state: "OPEN" | "CLOSED" | "MERGED"
+  mergedAt: string | null
 }
 
 interface CommandOptions {
@@ -184,6 +190,22 @@ function unique<T>(values: T[], label: string): Set<T> {
     seen.add(value)
   }
   return seen
+}
+
+function validateAcyclic(graph: Map<string, string[]>, label: string): void {
+  const visiting = new Set<string>()
+  const visited = new Set<string>()
+
+  const visit = (key: string, path: string[]): void => {
+    if (visited.has(key)) return
+    invariant(!visiting.has(key), `${label} cycle: ${[...path, key].join(" -> ")}`)
+    visiting.add(key)
+    for (const next of graph.get(key) ?? []) visit(next, [...path, key])
+    visiting.delete(key)
+    visited.add(key)
+  }
+
+  for (const key of graph.keys()) visit(key, [])
 }
 
 function tierFor(toolId: string): number {
@@ -278,17 +300,24 @@ function validateManifest(): {
     "work-item key",
   )
   const milestoneKeys = new Set(manifest.milestones.map(({ key }) => key))
+  const parentGraph = new Map<string, string[]>()
+  const dependencyGraph = new Map<string, string[]>()
 
   for (const item of [...manifest.epics, ...manifest.tasks]) {
+    invariant(item.key === "launch-v1" || item.parent, `${item.key} must have a parent`)
+    invariant(item.key !== "launch-v1" || !item.parent, "launch-v1 must be the only root item")
     if (item.parent)
       invariant(issueKeys.has(item.parent), `${item.key} has unknown parent ${item.parent}`)
+    parentGraph.set(item.key, item.parent ? [item.parent] : [])
     if (item.milestone) {
       invariant(
         milestoneKeys.has(item.milestone),
         `${item.key} has unknown milestone ${item.milestone}`,
       )
     }
-    for (const blocker of item.blockedBy ?? []) {
+    const blockers = [...unique(item.blockedBy ?? [], `${item.key} blocker`)]
+    dependencyGraph.set(item.key, blockers)
+    for (const blocker of blockers) {
       invariant(issueKeys.has(blocker), `${item.key} has unknown blocker ${blocker}`)
       invariant(blocker !== item.key, `${item.key} cannot block itself`)
     }
@@ -296,10 +325,21 @@ function validateManifest(): {
 
   for (const [toolId, blockers] of Object.entries(manifest.toolDependencies)) {
     invariant(toolIds.has(toolId), `Dependencies reference unknown tool ${toolId}`)
-    for (const blocker of blockers) {
+    const key = `tool:${toolId}`
+    const uniqueBlockers = [...unique(blockers, `${key} blocker`)]
+    dependencyGraph.set(key, uniqueBlockers)
+    for (const blocker of uniqueBlockers) {
       invariant(issueKeys.has(blocker), `Tool ${toolId} has unknown blocker ${blocker}`)
+      invariant(blocker !== key, `${key} cannot block itself`)
     }
   }
+  for (const [id, , category] of manifest.tools) {
+    const key = `tool:${id}`
+    parentGraph.set(key, [categoryEpics[category]])
+    if (!dependencyGraph.has(key)) dependencyGraph.set(key, [])
+  }
+  validateAcyclic(parentGraph, "Parent hierarchy")
+  validateAcyclic(dependencyGraph, "Dependency graph")
 
   const labelNames = new Set(manifest.labels.map(({ name }) => name))
   for (const required of [
@@ -360,6 +400,7 @@ function checklist(lines: string[]): string {
 
 function bodyFor(item: WorkItemDefinition): string {
   const marker = `<!-- yash-tools-work-item:${item.key} -->`
+  const endMarker = "<!-- /yash-tools-work-item -->"
   const metadata = [
     `- Work type: ${item.type}`,
     `- Priority: ${item.priority}`,
@@ -413,7 +454,9 @@ Use the GitHub dependency relationships on this issue as the authoritative block
 
 ## Definition of Done
 
-This issue closes only when every applicable item in \`AGENT.md\` Section 26 passes. Compilation, browser-only behavior, or visual completion is insufficient.`
+This issue closes only when every applicable item in \`AGENT.md\` Section 26 passes. Compilation, browser-only behavior, or visual completion is insufficient.
+
+${endMarker}`
   }
 
   invariant(item.outcome, `${item.key} must define an outcome`)
@@ -442,7 +485,9 @@ ${checklist(item.acceptance)}
 
 ## Completion rule
 
-Close only when the stated outcome and every applicable repository acceptance gate pass. A partial implementation remains open or is split into linked sub-issues.`
+Close only when the stated outcome and every applicable repository acceptance gate pass. A partial implementation remains open or is split into linked sub-issues.
+
+${endMarker}`
 }
 
 function issueDefinitions(): WorkItemDefinition[] {
@@ -483,6 +528,50 @@ function issueDefinitions(): WorkItemDefinition[] {
     }
   })
   return [...epics, ...tasks, ...tools]
+}
+
+function validateDefinitions(definitions: WorkItemDefinition[]): void {
+  const fields = new Map(manifest.project.fields.map((field) => [field.name, field]))
+  const requiredFields = [
+    "Workflow",
+    "Work Type",
+    "Priority",
+    "Phase",
+    "Category",
+    "Risk",
+    "Estimate",
+  ]
+  for (const name of requiredFields) invariant(fields.has(name), `Missing Project field ${name}`)
+
+  for (const definition of definitions) {
+    invariant(definition.title.trim().length > 0, `${definition.key} must have a title`)
+    invariant(
+      Number.isInteger(definition.estimate) &&
+        (definition.type === "Epic" ? definition.estimate === 0 : definition.estimate > 0),
+      `${definition.key} must have a positive integer estimate (or zero for an epic)`,
+    )
+    const values: Record<string, string | number> = {
+      Workflow: definition.workflow,
+      "Work Type": definition.type,
+      Priority: definition.priority,
+      Phase: definition.phase,
+      Category: definition.category,
+      Risk: definition.risk,
+      Estimate: definition.estimate,
+    }
+    for (const [name, value] of Object.entries(values)) {
+      const field = fields.get(name)
+      invariant(field, `Missing Project field ${name}`)
+      if (field.type === "NUMBER") {
+        invariant(typeof value === "number", `${definition.key} has non-numeric ${name}`)
+      } else {
+        invariant(
+          field.options?.includes(String(value)),
+          `${definition.key} uses unknown ${name} option ${String(value)}`,
+        )
+      }
+    }
+  }
 }
 
 function runGh(
@@ -616,6 +705,40 @@ function markerKey(body: string | null): string | null {
   return body?.match(/<!-- yash-tools-work-item:([^ ]+) -->/)?.[1] ?? null
 }
 
+function reconciledIssueBody(currentBody: string | null, desiredBody: string): string {
+  if (!currentBody) return desiredBody
+
+  const completed = new Set(
+    [...currentBody.matchAll(/^- \[[xX]\] (.+)$/gm)].map((match) => match[1]),
+  )
+  const withCompletedChecks = desiredBody.replace(/^- \[ \] (.+)$/gm, (line, text: string) =>
+    completed.has(text) ? `- [x] ${text}` : line,
+  )
+  const start = currentBody.search(/<!-- yash-tools-work-item:[^ ]+ -->/)
+  const endMarker = "<!-- /yash-tools-work-item -->"
+  const end = currentBody.indexOf(endMarker, start)
+  if (start < 0 || end < 0) return withCompletedChecks
+
+  return `${currentBody.slice(0, start)}${withCompletedChecks}${currentBody.slice(end + endMarker.length)}`
+}
+
+function issueLabelNames(issue: GitHubIssue): string[] {
+  return issue.labels.map((label) => (typeof label === "string" ? label : label.name))
+}
+
+function sameStringSet(left: string[], right: string[]): boolean {
+  if (left.length !== right.length) return false
+  const sortedLeft = [...left].sort()
+  const sortedRight = [...right].sort()
+  return sortedLeft.every((value, index) => value === sortedRight[index])
+}
+
+function issueNumberFromApiUrl(url: string): number {
+  const value = Number(url.match(/\/issues\/(\d+)$/)?.[1])
+  invariant(Number.isInteger(value) && value > 0, `Invalid GitHub issue URL: ${url}`)
+  return value
+}
+
 function provisionIssues(
   repository: string,
   definitions: WorkItemDefinition[],
@@ -626,14 +749,21 @@ function provisionIssues(
     `repos/${repository}/issues?state=all&per_page=100`,
   ).filter((issue) => !issue.pull_request)
   const byKey = new Map<string, GitHubIssue>()
+  const definitionKeys = new Set(definitions.map(({ key }) => key))
   for (const issue of existing) {
     const key = markerKey(issue.body)
-    if (key) byKey.set(key, issue)
+    if (key) {
+      invariant(definitionKeys.has(key), `GitHub issue #${issue.number} has unknown marker ${key}`)
+      invariant(!byKey.has(key), `Multiple GitHub issues use work-item marker ${key}`)
+      byKey.set(key, issue)
+    }
   }
 
   let created = 0
+  let updated = 0
+  let reparented = 0
+  const managedLabels = new Set(manifest.labels.map(({ name }) => name))
   for (const definition of definitions) {
-    if (byKey.has(definition.key)) continue
     const parent = definition.parent ? byKey.get(definition.parent) : null
     invariant(
       !definition.parent || parent,
@@ -641,21 +771,74 @@ function provisionIssues(
     )
     const milestone = definition.milestone ? milestones.get(definition.milestone) : null
     invariant(!definition.milestone || milestone, `${definition.key} milestone missing`)
-    const issue = api<GitHubIssue>("POST", `repos/${repository}/issues`, {
-      title: definition.title,
-      body: bodyFor(definition),
-      labels: labelsFor(definition),
-      milestone: milestone?.number,
-      parent_issue_id: parent?.id,
-    })
-    invariant(issue, `Issue ${definition.key} was not returned by GitHub`)
-    byKey.set(definition.key, issue)
-    created += 1
-    if (created % 10 === 0) console.log(`  created ${created} new issues`)
-    pause(450)
+    let issue = byKey.get(definition.key)
+    if (!issue) {
+      const createdIssue = api<GitHubIssue>("POST", `repos/${repository}/issues`, {
+        title: definition.title,
+        body: bodyFor(definition),
+        labels: labelsFor(definition),
+        milestone: milestone?.number,
+        parent_issue_id: parent?.id,
+      })
+      invariant(createdIssue, `Issue ${definition.key} was not returned by GitHub`)
+      issue = createdIssue
+      byKey.set(definition.key, issue)
+      created += 1
+      if (created % 10 === 0) console.log(`  created ${created} new issues`)
+      pause(450)
+      continue
+    }
+
+    const desiredBody = reconciledIssueBody(issue.body, bodyFor(definition))
+    const desiredManagedLabels = labelsFor(definition)
+    const unmanagedLabels = issueLabelNames(issue).filter((label) => !managedLabels.has(label))
+    const desiredLabels = [...new Set([...unmanagedLabels, ...desiredManagedLabels])]
+    const patch: Record<string, unknown> = {}
+    if (issue.title !== definition.title) patch.title = definition.title
+    if (issue.body !== desiredBody) patch.body = desiredBody
+    if (!sameStringSet(issueLabelNames(issue), desiredLabels)) patch.labels = desiredLabels
+    if ((issue.milestone?.number ?? null) !== (milestone?.number ?? null)) {
+      patch.milestone = milestone?.number ?? null
+    }
+    if (Object.keys(patch).length > 0) {
+      const reconciled = api<GitHubIssue>(
+        "PATCH",
+        `repos/${repository}/issues/${issue.number}`,
+        patch,
+      )
+      invariant(reconciled, `Updated issue ${definition.key} was not returned by GitHub`)
+      issue = reconciled
+      byKey.set(definition.key, issue)
+      updated += 1
+      pause(250)
+    }
+
+    const desiredParentUrl = parent
+      ? `https://api.github.com/repos/${repository}/issues/${parent.number}`
+      : null
+    const currentParentUrl = issue.parent_issue_url ?? null
+    if (currentParentUrl !== desiredParentUrl) {
+      if (parent) {
+        api("POST", `repos/${repository}/issues/${parent.number}/sub_issues`, {
+          sub_issue_id: issue.id,
+          replace_parent: true,
+        })
+      } else {
+        invariant(currentParentUrl, `${definition.key} has no parent to remove`)
+        api(
+          "DELETE",
+          `repos/${repository}/issues/${issueNumberFromApiUrl(currentParentUrl)}/sub_issue`,
+          { sub_issue_id: issue.id },
+        )
+      }
+      reparented += 1
+      pause(300)
+    }
   }
 
-  console.log(`Issues ready: ${byKey.size} marked items (${created} created in this run).`)
+  console.log(
+    `Issues ready: ${byKey.size} marked items (${created} created, ${updated} updated, ${reparented} reparented in this run).`,
+  )
   return byKey
 }
 
@@ -666,17 +849,34 @@ function provisionDependencies(
 ): void {
   console.log("Provisioning issue dependencies...")
   let created = 0
+  let removed = 0
   for (const definition of definitions) {
     const target = issues.get(definition.key)
     invariant(target, `Missing target issue ${definition.key}`)
     const blockers = definition.blockedBy ?? []
-    if (blockers.length === 0) continue
     const existing = api<GitHubIssue[]>(
       "GET",
       `repos/${repository}/issues/${target.number}/dependencies/blocked_by?per_page=100`,
     )
     invariant(existing, `Dependencies for ${definition.key} were not returned by GitHub`)
     const existingIds = new Set(existing.map((issue) => issue.id))
+    const desiredIds = new Set(
+      blockers.map((blockerKey) => {
+        const blocker = issues.get(blockerKey)
+        invariant(blocker, `Missing blocking issue ${blockerKey}`)
+        return blocker.id
+      }),
+    )
+    for (const dependency of existing) {
+      if (desiredIds.has(dependency.id)) continue
+      api(
+        "DELETE",
+        `repos/${repository}/issues/${target.number}/dependencies/blocked_by/${dependency.id}`,
+      )
+      existingIds.delete(dependency.id)
+      removed += 1
+      pause(300)
+    }
     for (const blockerKey of blockers) {
       const blocker = issues.get(blockerKey)
       invariant(blocker, `Missing blocking issue ${blockerKey}`)
@@ -689,7 +889,7 @@ function provisionDependencies(
       pause(300)
     }
   }
-  console.log(`Dependencies ready (${created} created in this run).`)
+  console.log(`Dependencies ready (${created} created, ${removed} removed in this run).`)
 }
 
 function provisionProject(repository: string): ManagedProject {
@@ -799,6 +999,28 @@ function provisionProjectFields(project: ManagedProject): ProjectField[] {
     "json",
   ])
   fields = Array.isArray(value) ? value : (value?.fields ?? [])
+  for (const definition of manifest.project.fields) {
+    const field = fields.find(({ name }) => name === definition.name)
+    invariant(field, `Project field missing after provisioning: ${definition.name}`)
+    if (definition.type === "SINGLE_SELECT") {
+      invariant(
+        field.type === "ProjectV2SingleSelectField",
+        `Project field ${definition.name} is not single-select`,
+      )
+      const actualOptions = new Set(field.options?.map(({ name }) => name) ?? [])
+      for (const option of definition.options ?? []) {
+        invariant(
+          actualOptions.has(option),
+          `Project field ${definition.name} is missing option ${option}; recreate the field or add the option in GitHub before rerunning`,
+        )
+      }
+    } else {
+      invariant(
+        field.type === "ProjectV2Field",
+        `Project field ${definition.name} is not a number field`,
+      )
+    }
+  }
   return fields
 }
 
@@ -906,7 +1128,7 @@ function setProjectFields(
     const itemId = projectItemIds.get(issue.html_url)
     invariant(itemId, `Missing project item for ${definition.key}`)
     const values = {
-      Workflow: definition.workflow,
+      Workflow: issue.state === "closed" ? "Done" : definition.workflow,
       "Work Type": definition.type,
       Priority: definition.priority,
       Phase: definition.phase,
@@ -949,7 +1171,7 @@ function linkSafPullRequest(
     "--repo",
     repository,
     "--json",
-    "id,url,title,body",
+    "id,url,title,body,state,mergedAt",
   ])
   invariant(pull, "Pull request #1 was not returned by GitHub")
   const closingText = `Closes #${workItem.number}`
@@ -987,7 +1209,7 @@ function linkSafPullRequest(
   invariant(item, "GitHub did not return the project item for pull request #1")
   const fieldByName = new Map(fields.map((field) => [field.name, field]))
   const values = {
-    Workflow: "In Review",
+    Workflow: pull.state === "OPEN" ? "In Review" : "Done",
     "Work Type": "Foundation",
     Priority: "P0 Critical",
     Phase: "Foundation",
@@ -1007,6 +1229,7 @@ function linkSafPullRequest(
 
 const validation = validateManifest()
 const definitions = issueDefinitions()
+validateDefinitions(definitions)
 console.log(
   `Manifest valid: ${manifest.tools.length} tools (${validation.tierCounts.join("/")} by tier), ${manifest.epics.length} epics, ${manifest.tasks.length} launch tasks, ${definitions.length} total issues.`,
 )

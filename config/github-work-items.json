@@ -422,7 +422,7 @@
     },
     {
       "key": "share-cache-cleanup",
-      "title": "Implement deterministic share-cache cleanup and retention",
+      "title": "Implement deterministic generated-file cache cleanup and retention",
       "parent": "foundation-epic",
       "type": "Foundation",
       "category": "Platform",
@@ -432,10 +432,11 @@
       "estimate": 3,
       "workflow": "Ready",
       "milestone": "foundation",
-      "outcome": "Bound cache lifetime and clean abandoned generated share files without deleting active or unrelated data.",
+      "outcome": "Bound cache lifetime and clean abandoned generated share and Save As handoffs without deleting active or unrelated data.",
       "acceptance": [
-        "Retention, startup/lifecycle cleanup, concurrency, low-space, cancellation, and receiver-lazy-read behavior have tests.",
-        "Only operation-owned cache paths are eligible for deletion."
+        "Retention, startup/lifecycle cleanup, concurrency, low-space, cancellation, process death, and receiver/provider-lazy-read behavior have tests.",
+        "Both `cache/share/` files and `cache/save/<operation>/` handoffs have bounded retention, including orphan recovery after process death or failed immediate cleanup.",
+        "Active operations are protected and only validated operation-owned cache paths are eligible for deletion; unrelated cache and user data remain untouched."
       ]
     },
     {
