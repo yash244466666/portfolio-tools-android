@@ -20,7 +20,7 @@ This repository is currently a foundation build, not a Play-ready release.
 - Strict backup, cleartext-network, and FileProvider defaults
 - Unit, component, registry, and browser-harness tests
 
-The planned vertical slice contains 12 representative tools. The complete roadmap is in [ANDROID_APP_IMPLEMENTATION_PLAN.md](ANDROID_APP_IMPLEMENTATION_PLAN.md), while live status and next tasks are in [IMPLEMENTATION_TRACKER.md](IMPLEMENTATION_TRACKER.md).
+The first public Google Play release is approved to include all 87 tools from the audited upstream catalog. The currently registered 12-tool vertical slice is the first architecture milestone, not a reduced release scope. Three tools are implemented today, and every public tool must pass the repository Definition of Done before it is enabled. The complete roadmap is in [ANDROID_APP_IMPLEMENTATION_PLAN.md](ANDROID_APP_IMPLEMENTATION_PLAN.md), while live status and next tasks are in [IMPLEMENTATION_TRACKER.md](IMPLEMENTATION_TRACKER.md).
 
 ## Requirements
 

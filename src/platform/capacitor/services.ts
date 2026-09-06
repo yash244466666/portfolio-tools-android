@@ -7,13 +7,135 @@ import { LocalNotifications } from "@capacitor/local-notifications"
 import { Network } from "@capacitor/network"
 import { Preferences } from "@capacitor/preferences"
 import { Share } from "@capacitor/share"
-import type { NetworkState, PlatformServices } from "@/platform/contracts"
-import { PlatformError } from "@/platform/errors"
-import { sanitizeGeneratedFileName } from "@/platform/shared/files"
+import {
+  DocumentFiles,
+  documentFilesContractVersion,
+  type NativePickedDocument,
+  type SaveDocumentOptions,
+} from "@/platform/capacitor/document-files"
+import type {
+  FilePickOptions,
+  NetworkState,
+  PickedFile,
+  PlatformServices,
+} from "@/platform/contracts"
+import { PlatformError, type PlatformErrorCode } from "@/platform/errors"
+import { sanitizeGeneratedFileName, validatedGeneratedFileBytes } from "@/platform/shared/files"
 import { secureRandomService } from "@/platform/shared/random"
 import { validatedExternalUrl } from "@/platform/shared/urls"
 
 const preferencePrefix = "yash-tools:v1:"
+const saveCacheDirectory = "save"
+const maximumPickerBytes = 100 * 1024 * 1024
+
+const nativeFileErrorMessages: Partial<Record<PlatformErrorCode, string>> = {
+  FILE_INVALID_ARGUMENT: "The file request was invalid.",
+  FILE_OPERATION_IN_PROGRESS: "Finish or cancel the current file request first.",
+  FILE_OPERATION_INTERRUPTED: "The file request was interrupted. Please try again.",
+  FILE_PICK_CANCELLED: "No file selected.",
+  FILE_PICK_FAILED: "The selected document could not be opened.",
+  FILE_SAVE_CANCELLED: "Save cancelled.",
+  FILE_SAVE_FAILED: "The document could not be saved.",
+  FILE_TOO_LARGE: "The document exceeds the allowed size.",
+}
+
+function nativeErrorCode(error: unknown): PlatformErrorCode | undefined {
+  if (typeof error !== "object" || error === null || !("code" in error)) return undefined
+  const code = (error as { code?: unknown }).code
+  return typeof code === "string" &&
+    Object.prototype.hasOwnProperty.call(nativeFileErrorMessages, code)
+    ? (code as PlatformErrorCode)
+    : undefined
+}
+
+function mappedNativeFileError(
+  error: unknown,
+  fallbackCode: "FILE_PICK_FAILED" | "FILE_SAVE_FAILED",
+): PlatformError {
+  if (error instanceof PlatformError) return error
+  const code = nativeErrorCode(error) ?? fallbackCode
+  return new PlatformError(code, nativeFileErrorMessages[code] ?? "The file request failed.")
+}
+
+function isValidMimeType(value: string, allowWildcard: boolean): boolean {
+  const [type, subtype, ...extra] = value.split("/")
+  if (!type || !subtype || extra.length > 0) return false
+  const token = /^[a-z0-9][a-z0-9!#$&^_.+-]*$/i
+  if (type === "*" || subtype === "*") {
+    return allowWildcard && subtype === "*" && (type === "*" || token.test(type))
+  }
+  return token.test(type) && token.test(subtype)
+}
+
+function validatedPickOptions(
+  options: FilePickOptions,
+): Required<Pick<FilePickOptions, "accept">> & Omit<FilePickOptions, "accept"> {
+  const accept = [...new Set(options.accept.map((value) => value.trim().toLowerCase()))]
+  if (
+    accept.length === 0 ||
+    accept.length > 32 ||
+    accept.some((value) => !isValidMimeType(value, true))
+  ) {
+    throw new PlatformError("FILE_INVALID_ARGUMENT", "Choose one or more valid MIME types.")
+  }
+  if (
+    options.maximumBytes !== undefined &&
+    (!Number.isSafeInteger(options.maximumBytes) ||
+      options.maximumBytes <= 0 ||
+      options.maximumBytes > maximumPickerBytes)
+  ) {
+    throw new PlatformError("FILE_INVALID_ARGUMENT", "The file size limit is invalid.")
+  }
+  return { ...options, accept }
+}
+
+function validatedPickedDocuments(
+  result: { contractVersion?: unknown; operationId?: unknown; files?: unknown },
+  operationId: string,
+  options: FilePickOptions,
+): PickedFile[] {
+  if (
+    result.contractVersion !== documentFilesContractVersion ||
+    result.operationId !== operationId ||
+    !Array.isArray(result.files) ||
+    result.files.length === 0 ||
+    result.files.length > (options.multiple ? 20 : 1)
+  ) {
+    throw new PlatformError("FILE_PICK_FAILED", "The document picker returned an invalid result.")
+  }
+
+  return result.files.map((candidate: NativePickedDocument) => {
+    if (
+      typeof candidate?.name !== "string" ||
+      !candidate.name ||
+      new TextEncoder().encode(candidate.name).byteLength > 120 ||
+      typeof candidate.mimeType !== "string" ||
+      !isValidMimeType(candidate.mimeType, false) ||
+      !Number.isSafeInteger(candidate.size) ||
+      candidate.size < 0 ||
+      (options.maximumBytes !== undefined && candidate.size > options.maximumBytes) ||
+      typeof candidate.uri !== "string" ||
+      !candidate.uri.startsWith("content://")
+    ) {
+      throw new PlatformError("FILE_PICK_FAILED", "The document picker returned invalid metadata.")
+    }
+    return {
+      name: candidate.name,
+      mimeType: candidate.mimeType,
+      size: candidate.size,
+      uri: candidate.uri,
+    }
+  })
+}
+
+async function discardSave(options: SaveDocumentOptions): Promise<void> {
+  await DocumentFiles.discardSave(options).catch(() => undefined)
+  await Filesystem.rmdir({
+    path: `${saveCacheDirectory}/${options.operationId}`,
+    directory: Directory.Cache,
+    recursive: true,
+  }).catch(() => undefined)
+}
 
 function stableNotificationId(value: string): number {
   let hash = 0
@@ -122,11 +244,21 @@ export const capacitorPlatformServices: PlatformServices = {
     },
   },
   files: {
-    async pick() {
-      throw new PlatformError(
-        "FILE_PICK_UNAVAILABLE",
-        "Android document picking is scheduled for the file-adapter milestone.",
-      )
+    async pick(options) {
+      const validated = validatedPickOptions(options)
+      const operationId = secureRandomService.uuid()
+      try {
+        const result = await DocumentFiles.pickDocuments({
+          contractVersion: documentFilesContractVersion,
+          operationId,
+          accept: validated.accept,
+          multiple: validated.multiple ?? false,
+          maximumBytes: validated.maximumBytes,
+        })
+        return validatedPickedDocuments(result, operationId, validated)
+      } catch (error) {
+        throw mappedNativeFileError(error, "FILE_PICK_FAILED")
+      }
     },
     async share(file) {
       try {
@@ -143,11 +275,44 @@ export const capacitorPlatformServices: PlatformServices = {
         throw new PlatformError("FILE_SHARE_FAILED", "The file could not be shared.", true, error)
       }
     },
-    async saveAs() {
-      throw new PlatformError(
-        "FILE_SAVE_UNAVAILABLE",
-        "Save As will be enabled after the Android document-create adapter is complete.",
-      )
+    async saveAs(file) {
+      const operationId = secureRandomService.uuid()
+      const name = sanitizeGeneratedFileName(file.name)
+      if (!isValidMimeType(file.mimeType, false)) {
+        throw new PlatformError("FILE_INVALID_ARGUMENT", "The output MIME type is invalid.")
+      }
+
+      let size: number
+      try {
+        size = validatedGeneratedFileBytes(file).byteLength
+      } catch (error) {
+        if (error instanceof RangeError) {
+          throw new PlatformError("FILE_TOO_LARGE", error.message)
+        }
+        throw new PlatformError("FILE_INVALID_ARGUMENT", "The generated file data is invalid.")
+      }
+
+      const options: SaveDocumentOptions = {
+        contractVersion: documentFilesContractVersion,
+        operationId,
+        name,
+        mimeType: file.mimeType.toLowerCase(),
+        size,
+      }
+      try {
+        await Filesystem.writeFile({
+          path: `${saveCacheDirectory}/${operationId}/${name}`,
+          data: file.data,
+          directory: Directory.Cache,
+          encoding: file.encoding === "utf8" ? Encoding.UTF8 : undefined,
+          recursive: true,
+        })
+        await DocumentFiles.saveDocument(options)
+      } catch (error) {
+        throw mappedNativeFileError(error, "FILE_SAVE_FAILED")
+      } finally {
+        await discardSave(options)
+      }
     },
   },
   notifications: {

@@ -12,6 +12,11 @@ const pluginMocks = vi.hoisted(() => ({
   browserOpen: vi.fn<(options: { url: string; presentationStyle: string }) => Promise<void>>(),
   clipboardRead: vi.fn<() => Promise<{ value: string }>>(),
   clipboardWrite: vi.fn<(options: { string: string }) => Promise<void>>(),
+  documentDiscardSave: vi.fn<(options: NativeSaveOptions) => Promise<void>>(),
+  documentPick: vi.fn<(options: NativePickOptions) => Promise<NativePickResult>>(),
+  documentSave: vi.fn<(options: NativeSaveOptions) => Promise<void>>(),
+  filesystemRmdir:
+    vi.fn<(options: { path: string; directory: string; recursive: boolean }) => Promise<void>>(),
   filesystemWriteFile:
     vi.fn<
       (options: {
@@ -37,15 +42,44 @@ const pluginMocks = vi.hoisted(() => ({
   share: vi.fn<(options: { title: string; files: string[] }) => Promise<void>>(),
 }))
 
+interface NativePickOptions {
+  contractVersion: number
+  operationId: string
+  accept: string[]
+  multiple: boolean
+  maximumBytes?: number
+}
+
+interface NativePickResult {
+  contractVersion: number
+  operationId: string
+  files: Array<{ name: string; mimeType: string; size: number; uri: string }>
+}
+
+interface NativeSaveOptions {
+  contractVersion: number
+  operationId: string
+  name: string
+  mimeType: string
+  size: number
+}
+
 vi.mock("@capacitor/app", () => ({ App: { addListener: pluginMocks.appAddListener } }))
 vi.mock("@capacitor/browser", () => ({ Browser: { open: pluginMocks.browserOpen } }))
 vi.mock("@capacitor/clipboard", () => ({
   Clipboard: { read: pluginMocks.clipboardRead, write: pluginMocks.clipboardWrite },
 }))
+vi.mock("@capacitor/core", () => ({
+  registerPlugin: () => ({
+    discardSave: pluginMocks.documentDiscardSave,
+    pickDocuments: pluginMocks.documentPick,
+    saveDocument: pluginMocks.documentSave,
+  }),
+}))
 vi.mock("@capacitor/filesystem", () => ({
   Directory: { Cache: "CACHE" },
   Encoding: { UTF8: "utf8" },
-  Filesystem: { writeFile: pluginMocks.filesystemWriteFile },
+  Filesystem: { rmdir: pluginMocks.filesystemRmdir, writeFile: pluginMocks.filesystemWriteFile },
 }))
 vi.mock("@capacitor/haptics", () => ({
   Haptics: { impact: pluginMocks.hapticsImpact },
@@ -181,6 +215,21 @@ function configureNativeMocks() {
     }
   })
   pluginMocks.browserOpen.mockResolvedValue(undefined)
+  pluginMocks.documentDiscardSave.mockResolvedValue(undefined)
+  pluginMocks.documentPick.mockImplementation(async ({ operationId }) => ({
+    contractVersion: 1,
+    operationId,
+    files: [
+      {
+        name: "fixture.txt",
+        mimeType: "text/plain",
+        size: 12,
+        uri: "content://documents/fixture",
+      },
+    ],
+  }))
+  pluginMocks.documentSave.mockResolvedValue(undefined)
+  pluginMocks.filesystemRmdir.mockResolvedValue(undefined)
   pluginMocks.filesystemWriteFile.mockResolvedValue({ uri: "file:///cache/share/output.txt" })
   pluginMocks.hapticsImpact.mockResolvedValue(undefined)
   pluginMocks.notificationsCancel.mockResolvedValue(undefined)
@@ -401,10 +450,103 @@ describe("web-specific adapter behavior", () => {
 })
 
 describe("Capacitor-specific adapter behavior", () => {
-  it("keeps picker and Save As unavailable with stable typed errors", async () => {
+  it("returns bounded content-URI metadata from the versioned document picker", async () => {
+    await expect(
+      capacitorPlatformServices.files.pick({
+        accept: ["TEXT/PLAIN", "text/plain"],
+        maximumBytes: 1_024,
+      }),
+    ).resolves.toEqual([
+      {
+        name: "fixture.txt",
+        mimeType: "text/plain",
+        size: 12,
+        uri: "content://documents/fixture",
+      },
+    ])
+
+    const pickOptions = pluginMocks.documentPick.mock.calls[0]?.[0]
+    expect(pickOptions).toEqual({
+      contractVersion: 1,
+      operationId: pickOptions?.operationId,
+      accept: ["text/plain"],
+      multiple: false,
+      maximumBytes: 1_024,
+    })
+    expect(pickOptions?.operationId).toMatch(/^[0-9a-f-]{36}$/)
+  })
+
+  it("maps native picker cancellation and rejects malformed picker metadata", async () => {
+    pluginMocks.documentPick.mockRejectedValueOnce({ code: "FILE_PICK_CANCELLED" })
     await expect(capacitorPlatformServices.files.pick({ accept: ["text/plain"] })).rejects.toEqual(
-      expectPlatformError("FILE_PICK_UNAVAILABLE"),
+      expectPlatformError("FILE_PICK_CANCELLED"),
     )
+
+    pluginMocks.documentPick.mockImplementationOnce(async ({ operationId }) => ({
+      contractVersion: 1,
+      operationId,
+      files: [
+        {
+          name: "fixture.txt",
+          mimeType: "text/plain",
+          size: 12,
+          uri: "file:///unscoped/fixture.txt",
+        },
+      ],
+    }))
+    await expect(capacitorPlatformServices.files.pick({ accept: ["text/plain"] })).rejects.toEqual(
+      expectPlatformError("FILE_PICK_FAILED"),
+    )
+  })
+
+  it("rejects unsafe picker filters and oversized limits before opening Android UI", async () => {
+    await expect(capacitorPlatformServices.files.pick({ accept: ["../*"] })).rejects.toEqual(
+      expectPlatformError("FILE_INVALID_ARGUMENT"),
+    )
+    await expect(
+      capacitorPlatformServices.files.pick({
+        accept: ["*/*"],
+        maximumBytes: 100 * 1024 * 1024 + 1,
+      }),
+    ).rejects.toEqual(expectPlatformError("FILE_INVALID_ARGUMENT"))
+    expect(pluginMocks.documentPick).not.toHaveBeenCalled()
+  })
+
+  it("writes a bounded private-cache handoff before native Save As and always cleans it", async () => {
+    await capacitorPlatformServices.files.saveAs({
+      name: "../output.txt",
+      mimeType: "text/plain",
+      data: "safe fixture",
+      encoding: "utf8",
+    })
+
+    const saveOptions = pluginMocks.documentSave.mock.calls[0]?.[0]
+    expect(saveOptions).toEqual({
+      contractVersion: 1,
+      operationId: saveOptions?.operationId,
+      name: "-output.txt",
+      mimeType: "text/plain",
+      size: 12,
+    })
+    expect(saveOptions?.operationId).toMatch(/^[0-9a-f-]{36}$/)
+    expect(pluginMocks.filesystemWriteFile).toHaveBeenCalledWith({
+      path: `save/${saveOptions?.operationId}/-output.txt`,
+      data: "safe fixture",
+      directory: "CACHE",
+      encoding: "utf8",
+      recursive: true,
+    })
+    expect(pluginMocks.documentDiscardSave).toHaveBeenCalledWith(saveOptions)
+    expect(pluginMocks.filesystemRmdir).toHaveBeenCalledWith({
+      path: `save/${saveOptions?.operationId}`,
+      directory: "CACHE",
+      recursive: true,
+    })
+  })
+
+  it("maps Save As cancellation and cleans the private handoff", async () => {
+    pluginMocks.documentSave.mockRejectedValueOnce({ code: "FILE_SAVE_CANCELLED" })
+
     await expect(
       capacitorPlatformServices.files.saveAs({
         name: "output.txt",
@@ -412,7 +554,24 @@ describe("Capacitor-specific adapter behavior", () => {
         data: "safe fixture",
         encoding: "utf8",
       }),
-    ).rejects.toEqual(expectPlatformError("FILE_SAVE_UNAVAILABLE"))
+    ).rejects.toEqual(expectPlatformError("FILE_SAVE_CANCELLED"))
+
+    expect(pluginMocks.documentDiscardSave).toHaveBeenCalledOnce()
+    expect(pluginMocks.filesystemRmdir).toHaveBeenCalledOnce()
+  })
+
+  it("rejects generated Save As output above the bridge limit before caching it", async () => {
+    await expect(
+      capacitorPlatformServices.files.saveAs({
+        name: "large.txt",
+        mimeType: "text/plain",
+        data: "a".repeat(5 * 1024 * 1024 + 1),
+        encoding: "utf8",
+      }),
+    ).rejects.toEqual(expectPlatformError("FILE_TOO_LARGE"))
+
+    expect(pluginMocks.filesystemWriteFile).not.toHaveBeenCalled()
+    expect(pluginMocks.documentSave).not.toHaveBeenCalled()
   })
 
   it("writes shares only below the narrow cache directory with a sanitized name", async () => {

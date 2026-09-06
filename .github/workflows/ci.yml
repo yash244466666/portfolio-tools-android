@@ -50,5 +50,5 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm cap:sync
-      - run: ./android/gradlew -p android lintDebug assembleDebug
+      - run: ./android/gradlew -p android testDebugUnitTest lintDebug assembleDebug
       - run: pnpm android:manifest:check debug

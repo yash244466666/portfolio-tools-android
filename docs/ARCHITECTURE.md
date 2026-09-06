@@ -1,6 +1,6 @@
 # Foundation Architecture
 
-> Status: accepted for the foundation; irreversible identity and release decisions remain provisional.
+> Status: accepted for the foundation; the 87-tool first-release scope is accepted, while identity and other irreversible release decisions remain provisional.
 
 ## Runtime shape
 
@@ -38,6 +38,8 @@ Dependency direction is one way. Tool features may depend on shared UI and platf
 
 `src/tools/registry.ts` is a deterministic compile-time registry. Implemented components are lazy imports. A tool cannot be enabled without an implementation. The registry also exposes risk, persistence, and network classifications needed by UI and tests.
 
+The audited public version 1 scope contains all 87 upstream catalog tools. The initial 12-tool registry is an architecture milestone that proves the reusable paths before the remaining 75 tools are added; it does not reduce the production scope. Production submission requires all 87 entries to be enabled and to pass the per-tool Definition of Done.
+
 ### Tool features
 
 Each tool directory owns its UI, pure logic, fixtures, and tests. Algorithms should be usable without React. Platform effects enter only through interfaces.
@@ -46,7 +48,7 @@ Each tool directory owns its UI, pure logic, fixtures, and tests. Algorithms sho
 
 `src/platform/contracts.ts` defines stable capability contracts. `src/platform/services.ts` selects web or Capacitor implementations once. Adapter failures use stable safe error codes.
 
-The current Capacitor file picker and Save As methods are explicit typed gaps. They will be replaced by a narrow Storage Access Framework implementation rather than broad permissions.
+Android document selection and Save As use the app-owned, versioned `DocumentFiles` bridge. It returns validated `content://` metadata from `ACTION_OPEN_DOCUMENT` and streams bounded generated output from a private cache handoff into an `ACTION_CREATE_DOCUMENT` destination. The bridge accepts no arbitrary paths or intents and requires no storage/media permission. File-consuming tools still need a reviewed native streaming or bounded import-copy operation.
 
 ### Persistence
 

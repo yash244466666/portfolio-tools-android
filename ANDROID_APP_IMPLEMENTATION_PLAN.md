@@ -1475,28 +1475,13 @@ Include:
 
 ### Public version 1
 
-Target approximately 70 or more thoroughly tested tools. A smaller stable catalog is preferable to claiming all 87 while several crash, lose files, or work poorly on phones.
+The approved first public Google Play release contains all 87 tools from the audited upstream catalog. This is a release gate, not an aspirational count. All 87 must be marked `enabled` in the reviewed release manifest, pass their individual Definition of Done, and match the signed artifact, help, privacy disclosures, and store claims.
 
-The exact count is a target, not a launch requirement. Only tools marked `enabled` in the signed release manifest and passing their Definition of Done may be mentioned in the Play listing. Experimental tools should remain in internal builds rather than appear as visibly broken production entries.
+The 12-tool vertical slice remains the first architecture milestone. Partial subsets may be used in internal and closed-test artifacts during development, but no smaller subset is approved for production. A tool that cannot pass its technical, Play-policy, legal, provider, privacy, security, accessibility, or device gate blocks public version 1 until the issue is resolved or the product owner explicitly approves a scope change in a superseding ADR.
 
-### Version 1.1
+### Post-release updates
 
-Add or improve:
-
-- PDF workflows
-- Image processing
-- Large-file hashing
-- Currency Converter
-- DNS Lookup
-
-### Version 1.2
-
-Consider:
-
-- Audio Recorder
-- Video to GIF
-
-Keep YouTube Downloader excluded until it receives a separate Play policy, legal, reliability, and product-value review.
+Version 1.1 and later may improve PDF, image, large-file, currency, DNS, audio, and video workflows, but their audited catalog entries are not deferred from the approved 87-tool first release. YouTube Downloader remains disabled during development until it passes a separate Play-policy, legal, reliability, provider-terms, and product-value review. Because all 87 tools are required, an unresolved or failed review blocks production rather than silently reducing the release scope.
 
 ## 15. Main risks and mitigations
 
@@ -1549,15 +1534,14 @@ For one developer working consistently:
 | Adapter-heavy tools | 2–3 weeks |
 | QA, security, performance, and Play preparation | 2–3 weeks |
 | **Internal vertical-slice alpha** | **Approximately 3–5 engineering weeks** |
-| **Feature-complete closed beta** | **Approximately 7–10 engineering weeks** |
-| **Public version 1** | **Approximately 9–13 engineering weeks** |
-| **Near-complete safe parity** | **Approximately 13–18 engineering weeks** |
+| **Feature-complete 87-tool closed beta** | **Approximately 13–18 engineering weeks** |
+| **Public version 1 with all 87 tools** | **Approximately 16–22 engineering weeks** |
 
-These ranges assume one experienced developer, substantial reuse of the existing tools, and no major native-plugin failure. PDF, audio, video, large-file streaming, or Play policy issues can extend the upper bound. The mandatory 14-day closed-test period, if applicable, can overlap final QA, store preparation, and later tool development, but production access and Play review time remain calendar dependencies.
+These ranges assume one experienced developer, substantial reuse of the existing tools, and no major native-plugin failure. The 87-tool public-release estimate replaces the earlier smaller-scope estimate and must be re-baselined after the vertical slice and policy-sensitive tool reviews. PDF, audio, video, large-file streaming, or Play policy issues can extend the upper bound. The mandatory 14-day closed-test period, if applicable, can overlap final QA and store preparation, but production access and Play review time remain calendar dependencies.
 
 ## 18. First concrete milestone
 
-The first milestone should not be all 87 tools. It should prove every major technical path with approximately 12 tools.
+The first milestone should not attempt all 87 tools at once. It should prove every major technical path with approximately 12 tools before scaling the same reviewed patterns to the full approved public-release catalog.
 
 Suggested vertical slice:
 
@@ -1584,6 +1568,8 @@ Milestone acceptance criteria:
 - The architecture supports adding the remaining tools without new global patterns.
 
 Once this vertical slice is stable, the remaining Tier 1 tools can be migrated rapidly and with much less architectural risk.
+
+Completing the vertical slice is not public-release completion. After it passes, migrate the remaining 75 audited catalog tools across every tier and apply the same per-tool Definition of Done.
 
 ## 19. Non-functional requirements and budgets
 
@@ -1701,8 +1687,8 @@ A tool is `enabled` for production only when all applicable items pass:
 
 ### Gate B — Closed beta ready
 
-- Version 1 scope is frozen.
-- Every included tool meets its Definition of Done.
+- Version 1 scope is frozen at all 87 audited catalog tools under ADR 0004.
+- Every one of the 87 tools meets its Definition of Done in the final release-candidate closed test.
 - Privacy, Data Safety, permissions, third-party notices, SBOM, and store claims match the candidate artifact.
 - No open critical/high security issue or known data-loss defect exists.
 - Support, incident, and rollback procedures are documented.
@@ -1736,8 +1722,8 @@ The project can be scaffolded only after the first group is resolved; the second
 
 ### Required before closed beta
 
-- Exact version 1 tool manifest
-- Audio output format and whether Audio Recorder is deferred
+- Reconcile the exact all-87 version 1 tool IDs against the audited upstream commit and the Android release manifest
+- Audio output format and release-quality evidence for Audio Recorder
 - File-size/page/duration limits confirmed by profiling
 - API-provider terms and fallback decisions
 - Privacy-policy and support URLs
@@ -1952,7 +1938,7 @@ Test Samsung, Pixel, and at least one aggressively battery-optimizing OEM before
 
 ## 29. Product validation, pricing, and store positioning
 
-Technical reuse does not by itself establish a successful Play product. Add a short product-validation track before committing to the public tool count.
+Technical reuse does not by itself establish a successful Play product. The public count is fixed at 87 under ADR 0004, but product validation must still determine the primary audience, hero tools, catalog ordering, positioning, and support priorities.
 
 ### 29.1 Target user and value proposition
 
@@ -2377,7 +2363,7 @@ The following are intentional unresolved choices, not omissions. Assign each a n
 - Production local WebView scheme/hostname/origin
 - App Link requirement and owned domain
 - Strict local-only backup choice
-- Exact version 1 tool manifest, hero tools, and deferred/experimental list
+- Exact version 1 tool manifest is resolved as all 87 audited tools under ADR 0004; hero tools and development-only experimental ordering remain to be decided
 - Android min/target SDK and supported WebView baseline
 
 ### Before closed testing
@@ -2389,7 +2375,7 @@ The following are intentional unresolved choices, not omissions. Assign each a n
 - Support/privacy/security contacts and public URLs
 - Store positioning supported by competitor/user-validation evidence
 - Accessibility test devices/users and known-limitation policy
-- Decision on whether Audio Recorder or Video to GIF meets release quality; YouTube Downloader remains excluded unless separately re-reviewed
+- Release-quality evidence for Audio Recorder and Video to GIF, plus the separate Play-policy, legal, provider-terms, reliability, and product-value review for YouTube Downloader; unresolved evidence blocks the all-87 production scope
 
 ### Before production
 
