@@ -83,3 +83,27 @@ test("regex tester evaluates in a worker and stops hostile patterns", async ({ p
     timeout: 10_000,
   })
 })
+
+test("qr generator renders a symbol with consistent output dimensions", async ({ page }) => {
+  await page.goto("/#/tool/qr-generator")
+  await expect(page.getByRole("heading", { name: "QR Generator" })).toBeVisible()
+
+  await page.getByLabel("QR text").fill("https://example.com/qr")
+  const description = page.getByText(/QR version \d+: \d+ by \d+ modules rendered at/)
+  await expect(description).toBeVisible()
+
+  // The canvas backing store must match the documented output size exactly, independent
+  // of the CSS display size.
+  const describedText = (await description.textContent()) ?? ""
+  const describedPixels = Number(/rendered at (\d+) by/.exec(describedText)?.[1])
+  const canvasWidth = await page.locator("canvas").evaluate((canvas) => {
+    return (canvas as HTMLCanvasElement).width
+  })
+  expect(canvasWidth).toBe(describedPixels)
+  expect(canvasWidth).toBeGreaterThan(200)
+
+  // Oversized input shows the typed over-limit state instead of a symbol.
+  await page.getByLabel("QR text").fill("a".repeat(4001))
+  await expect(page.getByText(/QR text is limited to 4000 bytes/)).toBeVisible()
+  await expect(page.getByText("Shorten the text to generate a QR code.")).toBeVisible()
+})
