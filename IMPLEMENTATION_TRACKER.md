@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 20:25 Europe/Berlin
+> Last updated: 2026-09-06 20:45 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -490,3 +490,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Added 11 pure `ContentReadPolicyTest` native cases with real SHA vectors (empty stream, `abc` vectors, multi-chunk streams, oversized rejection, mid-stream cancellation, hex encoding) and shared/native/web adapter contract cases (bounded reads, digest vectors, invalid limits/URIs/algorithms, pre-aborted signals, mid-flight cancellation wiring, native failure mapping).
 - Added ADR 0009 and updated the architecture overview and provenance. Provider interoperability and process-interruption behavior with real DocumentsProviders remains assigned to issues #17/#18.
 - Passed formatting, strict typecheck, zero-warning lint, 93 web tests (14 files), 12 E2E scenarios, production build, Capacitor sync, 38 native policy tests, Android Lint, debug/internal APK and minified release AAB builds, three manifest budgets, APK v2 signatures, AAB native-library inspection, work-item/action audits, and `git diff --check`.
+
+### 2026-09-06 — Content-read bridge merge reconciliation
+
+- Merged PR #136 into `main` as `c56cd26`, closing issue #19; the Project item is Done. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
+- The foundation now includes the bounded/streamed `content://` read path, so the file-consuming tools (Image Compressor, File Hash Checker) are unblocked; the vertical slice still needs Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro, Image Compressor, File Hash Checker, and Currency Converter.
+- Next executable item: the Regex Tester tool migration (terminable Worker, hostile-input time budgets).
