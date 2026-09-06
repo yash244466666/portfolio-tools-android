@@ -79,14 +79,15 @@ export const tools: readonly ToolDefinition[] = [
   {
     id: "regex-tester",
     label: "Regex Tester",
-    description: "Test patterns inside a time-bounded worker.",
+    description: "Test patterns against text inside a time-bounded worker.",
     category: "dev",
-    tags: ["regex", "pattern"],
+    tags: ["regex", "pattern", "offline", "worker"],
     icon: Regex,
-    status: "planned",
+    status: "enabled",
     risk: "high",
     network: false,
     persistent: false,
+    component: lazy(() => import("@/tools/regex-tester/RegexTester")),
   },
   {
     id: "qr-generator",

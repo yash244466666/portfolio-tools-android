@@ -44,6 +44,8 @@ The audited public version 1 scope contains all 87 upstream catalog tools. The i
 
 Each tool directory owns its UI, pure logic, fixtures, and tests. Algorithms should be usable without React. Platform effects enter only through interfaces.
 
+Tools that execute hostile user input use the terminable-Worker pattern proven by Regex Tester: a pure bounded engine runs inside a lazily created classic Web Worker, and the UI thread enforces a wall-clock deadline that terminates and replaces the Worker when a run wedges (ADR 0010). There is deliberately no main-thread fallback for such execution.
+
 ### Platform layer
 
 `src/platform/contracts.ts` defines stable capability contracts. `src/platform/services.ts` selects web or Capacitor implementations once. Adapter failures use stable safe error codes.
