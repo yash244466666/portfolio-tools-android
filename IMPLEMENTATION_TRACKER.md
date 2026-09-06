@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 21:55 Europe/Berlin
+> Last updated: 2026-09-06 22:20 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -528,3 +528,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Added 10 pure generation vectors (version-1 spec structure: finder patterns, separators, timing row; version growth; per-level capacities at the version-40 boundary; multi-byte byte-cap counting; over-limit before the library; render-plan whole-pixel math including the one-pixel-per-module floor; base64 vectors and chunk-boundary round-trip) and 7 component cases (empty, render + text equivalent, share, save, share failure recovery, over-limit, per-level capacity, reset). E2E grew to 16 scenarios and asserts the canvas backing size equals the documented output size exactly.
 - Passed formatting, strict typecheck, zero-warning lint, 139 web tests (19 files), 16 E2E scenarios, production build (QrGenerator lazy chunk 29.29 kB/10.94 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
 - Next executable item: the JSON Editor tool migration (issue #49), which needs compact/expanded layouts, size/depth limits, and an accessible plain-text fallback.
+
+### 2026-09-06 — QR Generator merge reconciliation
+
+- Merged PR #138 into `main` as `9355fe9`, closing issue #51; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain. An initial hosted lint failure (unused mock parameter in the new component test, missed by a local gate ordering mistake) was fixed and re-verified before merge; the failure never touched product code.
+- Six of the 87 approved tools are implemented. The vertical slice still needs JSON Editor, Notes/Scratchpad, Pomodoro Timer, Image Compressor, File Hash Checker, and Currency Converter.
+- Next executable item: the JSON Editor tool migration (issue #49).
