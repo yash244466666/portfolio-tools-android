@@ -1,0 +1,51 @@
+name: Release gate
+description: Track architecture, closed-beta, or production evidence through first Google Play launch.
+title: "[Release]: "
+labels:
+  - "type:release"
+  - "status:triage"
+body:
+  - type: dropdown
+    id: gate
+    attributes:
+      label: Release gate
+      options:
+        - Architecture proven
+        - All-87 closed beta ready
+        - Production ready
+        - First managed-publishing launch
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Required outcome
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required evidence
+      description: Include commit/tag, AAB/APK hashes, CI runs, device matrix, Play reports, declarations, approvals, and owner.
+    validations:
+      required: true
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers and dependencies
+      description: Link blocking issues and state the safe next action.
+    validations:
+      required: true
+  - type: checkboxes
+    id: controls
+    attributes:
+      label: Release controls
+      options:
+        - label: All claims match the reviewed artifact and enabled 87-tool manifest.
+          required: true
+        - label: Permission, privacy, Data Safety, dependency/license, signing, and artifact evidence is reconciled.
+          required: true
+        - label: No critical/high security issue or known data-loss defect remains open.
+          required: true
+        - label: Publication itself requires explicit product-owner authorization.
+          required: true

@@ -587,6 +587,10 @@ Release distinctions:
 - Preserve user changes and unrelated work.
 - Do not use destructive Git operations such as `git reset --hard` or blind checkout/revert.
 - Do not commit unless the user requests a commit.
+- Use the GitHub work-management system in `docs/WORK_MANAGEMENT.md`; Issues are executable scope, dependencies are blockers, milestones are gates, and the linked Project is the planning view.
+- Start substantial implementation from a refined issue, use `<type>/<issue-number>-<short-slug>` branches, and put `Closes #<issue-number>` in the pull request body.
+- Keep issue/Project state and `IMPLEMENTATION_TRACKER.md` evidence reconciled after every substantial batch; do not close a tool before Android artifact and applicable device evidence pass.
+- Run `pnpm github:work-items:check` after changing the work-item manifest. Remote provisioning is explicit through `pnpm github:work-items:apply`; builds and CI must never mutate GitHub planning state.
 - Keep generated Android project changes reviewable.
 - Do not edit generated `dist/` or `android/app/src/main/assets/public/` by hand; rebuild/sync them.
 - Do not hand-edit the lockfile; change `package.json` and run pnpm.

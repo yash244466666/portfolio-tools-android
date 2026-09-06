@@ -1,0 +1,1102 @@
+{
+  "schemaVersion": 1,
+  "repository": "yash244466666/portfolio-tools-android",
+  "auditedUpstreamCommit": "61e54c64edbeffc9487239b6dae399e255c6a71d",
+  "project": {
+    "title": "Yash Tools Android — Google Play v1",
+    "description": "Delivery system for the first Google Play release containing all 87 audited tools.",
+    "visibility": "PRIVATE",
+    "readme": "Tracks foundation, all 87 tool migrations, quality/device certification, closed testing, signing, store preparation, and the explicitly authorized first production launch. Issues and pull requests provide evidence; project fields provide planning views. Production publication still requires explicit product-owner authorization.",
+    "fields": [
+      {
+        "name": "Workflow",
+        "type": "SINGLE_SELECT",
+        "options": ["Backlog", "Ready", "In Progress", "In Review", "Device QA", "Blocked", "Done"]
+      },
+      {
+        "name": "Work Type",
+        "type": "SINGLE_SELECT",
+        "options": ["Epic", "Tool", "Foundation", "Quality", "Release", "Bug"]
+      },
+      {
+        "name": "Priority",
+        "type": "SINGLE_SELECT",
+        "options": ["P0 Critical", "P1 High", "P2 Normal", "P3 Low"]
+      },
+      {
+        "name": "Phase",
+        "type": "SINGLE_SELECT",
+        "options": [
+          "Foundation",
+          "12-Tool Milestone",
+          "Tier 1 Migration",
+          "Adapter/Network/Special",
+          "Closed Beta",
+          "Production"
+        ]
+      },
+      {
+        "name": "Category",
+        "type": "SINGLE_SELECT",
+        "options": ["Core", "Developer", "Text", "Media", "Security", "Math", "Platform", "Release"]
+      },
+      {
+        "name": "Risk",
+        "type": "SINGLE_SELECT",
+        "options": ["Low", "Medium", "High", "Critical"]
+      },
+      { "name": "Estimate", "type": "NUMBER" }
+    ]
+  },
+  "labels": [
+    {
+      "name": "type:epic",
+      "color": "3E4B9E",
+      "description": "Parent outcome containing related work items"
+    },
+    {
+      "name": "type:tool",
+      "color": "1D76DB",
+      "description": "One audited catalog tool through Definition of Done"
+    },
+    {
+      "name": "type:foundation",
+      "color": "5319E7",
+      "description": "Architecture, platform, native host, build, or CI work"
+    },
+    {
+      "name": "type:quality",
+      "color": "0E8A16",
+      "description": "Cross-catalog testing, accessibility, performance, or certification"
+    },
+    {
+      "name": "type:release",
+      "color": "B60205",
+      "description": "Google Play, signing, policy, listing, or launch work"
+    },
+    { "name": "type:bug", "color": "D73A4A", "description": "A reproducible defect" },
+    {
+      "name": "status:triage",
+      "color": "FBCA04",
+      "description": "Needs classification or Definition of Ready"
+    },
+    { "name": "status:ready", "color": "0E8A16", "description": "Refined and safe to start" },
+    {
+      "name": "status:blocked",
+      "color": "B60205",
+      "description": "Cannot progress until a linked dependency or external state changes"
+    },
+    {
+      "name": "status:device-qa",
+      "color": "006B75",
+      "description": "Implementation exists; installed-artifact evidence remains"
+    },
+    { "name": "priority:p0", "color": "B60205", "description": "Critical path or release blocker" },
+    { "name": "priority:p1", "color": "D93F0B", "description": "High priority" },
+    { "name": "priority:p2", "color": "FBCA04", "description": "Normal priority" },
+    { "name": "priority:p3", "color": "C5DEF5", "description": "Low priority" },
+    { "name": "category:core", "color": "0052CC", "description": "Core catalog" },
+    { "name": "category:developer", "color": "0366D6", "description": "Developer catalog" },
+    { "name": "category:text", "color": "7057FF", "description": "Text catalog" },
+    { "name": "category:media", "color": "D876E3", "description": "Media catalog" },
+    { "name": "category:security", "color": "B60205", "description": "Security catalog" },
+    { "name": "category:math", "color": "008672", "description": "Math catalog" },
+    {
+      "name": "category:platform",
+      "color": "5319E7",
+      "description": "Shared platform and Android host"
+    },
+    {
+      "name": "category:release",
+      "color": "6F42C1",
+      "description": "Cross-cutting quality or release operations"
+    },
+    { "name": "tier:1", "color": "C2E0C6", "description": "Directly portable tool" },
+    { "name": "tier:2", "color": "FEF2C0", "description": "Platform adaptation required" },
+    { "name": "tier:3", "color": "F9D0C4", "description": "Network-dependent tool" },
+    {
+      "name": "tier:4",
+      "color": "D4C5F9",
+      "description": "Special product, policy, permission, or media decision"
+    },
+    {
+      "name": "scope:vertical-slice",
+      "color": "1D76DB",
+      "description": "One of the 12 architecture-milestone tools"
+    },
+    {
+      "name": "risk:high",
+      "color": "D93F0B",
+      "description": "High technical, privacy, policy, performance, or data-loss risk"
+    },
+    { "name": "risk:critical", "color": "B60205", "description": "Unresolved risk blocks release" }
+  ],
+  "milestones": [
+    {
+      "key": "foundation",
+      "title": "Foundation Complete",
+      "description": "Platform contracts, recovery, native bridges, instrumentation, and foundation physical-device evidence pass."
+    },
+    {
+      "key": "vertical-slice",
+      "title": "12-Tool Architecture Milestone",
+      "description": "All 12 representative tools pass their Definition of Done on bundled Android artifacts."
+    },
+    {
+      "key": "tier-1",
+      "title": "Tier 1 Directly Portable Catalog",
+      "description": "All remaining directly portable catalog tools pass their Definition of Done."
+    },
+    {
+      "key": "heavy-tools",
+      "title": "Adapter and Policy-Heavy Catalog",
+      "description": "Tier 2–4 file, storage, timer, network, media, permission, and special-review tools pass."
+    },
+    {
+      "key": "closed-beta",
+      "title": "All-87 Closed Beta",
+      "description": "One candidate with all 87 tools enabled passes closed testing and complete quality evidence."
+    },
+    {
+      "key": "play-launch",
+      "title": "Google Play v1 Launch",
+      "description": "Signing, store, policy, production eligibility, pre-launch, launch plan, and explicit publication authorization pass."
+    }
+  ],
+  "epics": [
+    {
+      "key": "launch-v1",
+      "title": "[Epic] Launch Yash Tools v1 on Google Play with all 87 tools",
+      "parent": null,
+      "category": "Release",
+      "phase": "Production",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 0,
+      "workflow": "In Progress",
+      "milestone": "play-launch",
+      "outcome": "Publish the reviewed, signed, all-87-tool Android application through the explicitly approved first managed-publishing launch window.",
+      "acceptance": [
+        "All 87 audited tools are enabled and pass the repository Definition of Done.",
+        "Architecture, closed-beta, and production gates all pass against the same candidate.",
+        "The product owner explicitly authorizes publication after reviewing the final AAB hash and launch record."
+      ],
+      "blockedBy": [
+        "foundation-epic",
+        "core-epic",
+        "developer-epic",
+        "text-epic",
+        "media-epic",
+        "security-epic",
+        "math-epic",
+        "quality-epic",
+        "play-release-epic"
+      ]
+    },
+    {
+      "key": "foundation-epic",
+      "title": "[Epic] Complete foundation and native platform",
+      "parent": "launch-v1",
+      "category": "Platform",
+      "phase": "Foundation",
+      "priority": "P0 Critical",
+      "risk": "High",
+      "estimate": 0,
+      "workflow": "In Progress",
+      "milestone": "foundation",
+      "outcome": "Finish the shared Android platform, recovery, file, clipboard, lifecycle, instrumentation, and device foundations required by the catalog.",
+      "acceptance": [
+        "Every foundation sub-issue is complete with tests and artifact evidence.",
+        "No unresolved permission, export, privacy, storage, or recovery architecture gap remains."
+      ]
+    },
+    {
+      "key": "core-epic",
+      "title": "[Epic] Deliver all 7 Core tools",
+      "parent": "launch-v1",
+      "category": "Core",
+      "phase": "Tier 1 Migration",
+      "priority": "P1 High",
+      "risk": "High",
+      "estimate": 0,
+      "workflow": "In Progress",
+      "milestone": "play-launch",
+      "outcome": "Deliver all seven audited Core tools at production quality.",
+      "acceptance": [
+        "All 7 Core tool sub-issues are complete.",
+        "The release manifest and store claims include the same reviewed Core catalog."
+      ]
+    },
+    {
+      "key": "developer-epic",
+      "title": "[Epic] Deliver all 45 Developer tools",
+      "parent": "launch-v1",
+      "category": "Developer",
+      "phase": "Tier 1 Migration",
+      "priority": "P1 High",
+      "risk": "Critical",
+      "estimate": 0,
+      "workflow": "Backlog",
+      "milestone": "play-launch",
+      "outcome": "Deliver all 45 audited Developer tools, including network and special-policy entries, at production quality.",
+      "acceptance": [
+        "All 45 Developer tool sub-issues are complete.",
+        "YouTube Downloader has explicit compliant policy/legal/provider evidence or the all-87 scope is formally revisited."
+      ]
+    },
+    {
+      "key": "text-epic",
+      "title": "[Epic] Deliver all 17 Text tools",
+      "parent": "launch-v1",
+      "category": "Text",
+      "phase": "Tier 1 Migration",
+      "priority": "P1 High",
+      "risk": "High",
+      "estimate": 0,
+      "workflow": "Backlog",
+      "milestone": "play-launch",
+      "outcome": "Deliver all 17 audited Text tools, including durable Notes and timer behavior, at production quality.",
+      "acceptance": [
+        "All 17 Text tool sub-issues are complete.",
+        "Durable data, export, lifecycle, notification, and recovery behavior pass."
+      ]
+    },
+    {
+      "key": "media-epic",
+      "title": "[Epic] Deliver all 3 Media tools",
+      "parent": "launch-v1",
+      "category": "Media",
+      "phase": "Adapter/Network/Special",
+      "priority": "P1 High",
+      "risk": "Critical",
+      "estimate": 0,
+      "workflow": "Backlog",
+      "milestone": "play-launch",
+      "outcome": "Deliver Audio Recorder, Video to GIF, and File Hash Checker with reviewed permissions, memory limits, streaming, and device evidence.",
+      "acceptance": [
+        "All 3 Media tool sub-issues are complete.",
+        "Microphone, encoding, large-file, privacy, and Play-policy evidence passes."
+      ]
+    },
+    {
+      "key": "security-epic",
+      "title": "[Epic] Deliver all 5 Security tools",
+      "parent": "launch-v1",
+      "category": "Security",
+      "phase": "Tier 1 Migration",
+      "priority": "P1 High",
+      "risk": "High",
+      "estimate": 0,
+      "workflow": "Backlog",
+      "milestone": "play-launch",
+      "outcome": "Deliver all five audited Security tools without logging or persisting sensitive inputs.",
+      "acceptance": [
+        "All 5 Security tool sub-issues are complete.",
+        "Security wording, correctness oracles, clipboard handling, and sensitive-data tests pass."
+      ]
+    },
+    {
+      "key": "math-epic",
+      "title": "[Epic] Deliver all 10 Math tools",
+      "parent": "launch-v1",
+      "category": "Math",
+      "phase": "Tier 1 Migration",
+      "priority": "P1 High",
+      "risk": "High",
+      "estimate": 0,
+      "workflow": "Backlog",
+      "milestone": "play-launch",
+      "outcome": "Deliver all ten audited Math tools with independent correctness, time, locale, accessibility, and lifecycle evidence.",
+      "acceptance": [
+        "All 10 Math tool sub-issues are complete.",
+        "Calculations, time tools, simulations, and accessibility output pass independent fixtures."
+      ]
+    },
+    {
+      "key": "quality-epic",
+      "title": "[Epic] Certify quality, accessibility, performance, and Android devices",
+      "parent": "launch-v1",
+      "category": "Release",
+      "phase": "Closed Beta",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 0,
+      "workflow": "Backlog",
+      "milestone": "closed-beta",
+      "outcome": "Produce complete cross-catalog automated, accessibility, performance, interoperability, and physical-device evidence for the all-87 candidate.",
+      "acceptance": [
+        "Every quality sub-issue passes against identified artifacts.",
+        "No critical/high security issue, data-loss defect, or release-threshold regression remains."
+      ]
+    },
+    {
+      "key": "play-release-epic",
+      "title": "[Epic] Prepare and execute the first Google Play launch",
+      "parent": "launch-v1",
+      "category": "Release",
+      "phase": "Production",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 0,
+      "workflow": "Backlog",
+      "milestone": "play-launch",
+      "outcome": "Complete identity, signing, policy declarations, store assets, closed testing, pre-launch triage, candidate approval, and managed publication.",
+      "acceptance": [
+        "Every release sub-issue passes against one reproducible signed candidate.",
+        "Publication occurs only after explicit product-owner authorization."
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "key": "github-work-management",
+      "title": "Establish GitHub launch work-management system",
+      "parent": "foundation-epic",
+      "type": "Foundation",
+      "category": "Platform",
+      "phase": "Foundation",
+      "priority": "P0 Critical",
+      "risk": "Medium",
+      "estimate": 3,
+      "workflow": "In Review",
+      "milestone": "foundation",
+      "outcome": "Provide the durable issue hierarchy, dependencies, milestones, labels, project fields, templates, and repository automation used through the first Google Play launch.",
+      "acceptance": [
+        "All 87 audited tools and every launch gate are represented by stable, idempotently provisioned work items.",
+        "The project workflow, issue hierarchy, dependencies, templates, and contributor rules are documented and independently reproducible from the repository."
+      ]
+    },
+    {
+      "key": "land-document-saf-pr",
+      "title": "Land scoped Android document picker and Save As bridge",
+      "parent": "foundation-epic",
+      "type": "Foundation",
+      "category": "Platform",
+      "phase": "Foundation",
+      "priority": "P0 Critical",
+      "risk": "High",
+      "estimate": 2,
+      "workflow": "In Review",
+      "milestone": "foundation",
+      "outcome": "Review and merge the verified SAF/Save As implementation without broad storage permissions.",
+      "acceptance": [
+        "PR #1 passes review and required CI.",
+        "System-picker and process-recreation device evidence is linked before the foundation gate closes."
+      ]
+    },
+    {
+      "key": "repository-governance",
+      "title": "Enforce protected main branch and immutable CI supply chain",
+      "parent": "foundation-epic",
+      "type": "Foundation",
+      "category": "Platform",
+      "phase": "Foundation",
+      "priority": "P0 Critical",
+      "risk": "High",
+      "estimate": 2,
+      "workflow": "Blocked",
+      "milestone": "foundation",
+      "outcome": "Require pull requests and passing web-quality/android-debug checks on main, prohibit force pushes and deletion, and pin every CI action to an audited immutable commit.",
+      "acceptance": [
+        "Every third-party action reference is pinned to a reviewed full commit SHA with its release line documented.",
+        "The private repository plan supports branch protection or rulesets and main requires pull requests, both CI jobs, resolved conversations, linear history, and no force push or deletion."
+      ]
+    },
+    {
+      "key": "sensitive-clipboard",
+      "title": "Implement sensitive Android clipboard metadata",
+      "parent": "foundation-epic",
+      "type": "Foundation",
+      "category": "Platform",
+      "phase": "Foundation",
+      "priority": "P0 Critical",
+      "risk": "High",
+      "estimate": 3,
+      "workflow": "Ready",
+      "milestone": "foundation",
+      "outcome": "Provide a narrow platform-contract path that marks secrets as sensitive on supported Android versions without logging values.",
+      "acceptance": [
+        "Normal and sensitive copy semantics have adapter/native tests.",
+        "Clipboard values never enter logs and newer clipboard contents are never cleared by stale timers."
+      ]
+    },
+    {
+      "key": "share-cache-cleanup",
+      "title": "Implement deterministic generated-file cache cleanup and retention",
+      "parent": "foundation-epic",
+      "type": "Foundation",
+      "category": "Platform",
+      "phase": "Foundation",
+      "priority": "P0 Critical",
+      "risk": "High",
+      "estimate": 3,
+      "workflow": "Ready",
+      "milestone": "foundation",
+      "outcome": "Bound cache lifetime and clean abandoned generated share and Save As handoffs without deleting active or unrelated data.",
+      "acceptance": [
+        "Retention, startup/lifecycle cleanup, concurrency, low-space, cancellation, process death, and receiver/provider-lazy-read behavior have tests.",
+        "Both `cache/share/` files and `cache/save/<operation>/` handoffs have bounded retention, including orphan recovery after process death or failed immediate cleanup.",
+        "Active operations are protected and only validated operation-owned cache paths are eligible for deletion; unrelated cache and user data remain untouched."
+      ]
+    },
+    {
+      "key": "renderer-recovery",
+      "title": "Implement WebView renderer termination recovery and native safe mode",
+      "parent": "foundation-epic",
+      "type": "Foundation",
+      "category": "Platform",
+      "phase": "Foundation",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 5,
+      "workflow": "Ready",
+      "milestone": "foundation",
+      "outcome": "Recover from renderer termination and repeated startup failure without loops or restoration of sensitive input.",
+      "acceptance": [
+        "Native safe mode offers reload and catalog recovery from a renderer-independent surface.",
+        "Crash-loop thresholds, nonsensitive state restoration, diagnostics, and process recreation are tested."
+      ]
+    },
+    {
+      "key": "android-instrumentation",
+      "title": "Add Android instrumentation and UI Automator foundation coverage",
+      "parent": "foundation-epic",
+      "type": "Foundation",
+      "category": "Platform",
+      "phase": "Foundation",
+      "priority": "P0 Critical",
+      "risk": "High",
+      "estimate": 5,
+      "workflow": "Backlog",
+      "milestone": "foundation",
+      "outcome": "Automate process recreation, permission denial, picker, Save As, sharing, notifications, Back, and recovery behavior.",
+      "acceptance": [
+        "Tests run against bundled Android artifacts without a development server.",
+        "Permission/export budgets are not weakened to make automation pass."
+      ],
+      "blockedBy": ["renderer-recovery"]
+    },
+    {
+      "key": "physical-foundation-qa",
+      "title": "Execute the physical-device foundation checklist",
+      "parent": "foundation-epic",
+      "type": "Quality",
+      "category": "Platform",
+      "phase": "Foundation",
+      "priority": "P0 Critical",
+      "risk": "High",
+      "estimate": 5,
+      "workflow": "Blocked",
+      "milestone": "foundation",
+      "outcome": "Install the current artifact and record navigation, rotation, process, theme, clipboard, files, sharing, notifications, offline, recovery, and enabled-tool results.",
+      "acceptance": [
+        "Device model, Android/API, WebView, navigation mode, artifact hash, and privacy-safe evidence are recorded.",
+        "Every failed or blocked checklist row links a follow-up issue."
+      ],
+      "blockedBy": ["android-instrumentation"]
+    },
+    {
+      "key": "content-uri-streaming",
+      "title": "Add bounded or streamed content-URI reads",
+      "parent": "foundation-epic",
+      "type": "Foundation",
+      "category": "Platform",
+      "phase": "Foundation",
+      "priority": "P0 Critical",
+      "risk": "High",
+      "estimate": 5,
+      "workflow": "Backlog",
+      "milestone": "foundation",
+      "outcome": "Allow reviewed file-consuming tools to process user-selected content URIs with strict limits and cancellation.",
+      "acceptance": [
+        "The bridge accepts no arbitrary paths or intents and adds no broad storage/media permission.",
+        "Unknown sizes, provider failures, cancellation, low memory, cleanup, and process interruption are tested."
+      ],
+      "blockedBy": ["land-document-saf-pr"]
+    },
+    {
+      "key": "foundation-gate-audit",
+      "title": "Close the architecture-proven foundation gate",
+      "parent": "foundation-epic",
+      "type": "Quality",
+      "category": "Platform",
+      "phase": "Foundation",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 3,
+      "workflow": "Blocked",
+      "milestone": "foundation",
+      "outcome": "Reconcile source, tests, manifests, adapters, ADRs, artifacts, and device evidence before scaling migration.",
+      "acceptance": [
+        "No critical architecture decision or foundation blocker remains.",
+        "The tracker contains current evidence, artifact hashes, risks, blockers, and the next queue."
+      ],
+      "blockedBy": [
+        "land-document-saf-pr",
+        "repository-governance",
+        "sensitive-clipboard",
+        "share-cache-cleanup",
+        "renderer-recovery",
+        "android-instrumentation",
+        "physical-foundation-qa",
+        "content-uri-streaming"
+      ]
+    },
+    {
+      "key": "all87-test-matrix",
+      "title": "Complete the all-87 automated regression matrix",
+      "parent": "quality-epic",
+      "type": "Quality",
+      "category": "Release",
+      "phase": "Closed Beta",
+      "priority": "P0 Critical",
+      "risk": "High",
+      "estimate": 8,
+      "workflow": "Backlog",
+      "milestone": "closed-beta",
+      "outcome": "Run pure, component, adapter, E2E, Android, manifest, and artifact tests across all enabled tools.",
+      "acceptance": [
+        "Every tool maps to independent fixtures and applicable test layers.",
+        "The matrix records artifact commit/hash and contains no weakened or skipped release gates."
+      ]
+    },
+    {
+      "key": "accessibility-certification",
+      "title": "Certify accessibility and adaptive layouts for all 87 tools",
+      "parent": "quality-epic",
+      "type": "Quality",
+      "category": "Release",
+      "phase": "Closed Beta",
+      "priority": "P0 Critical",
+      "risk": "High",
+      "estimate": 8,
+      "workflow": "Backlog",
+      "milestone": "closed-beta",
+      "outcome": "Verify TalkBack, Switch Access, keyboard, 200% text, contrast, reduced motion, touch targets, phones, tablets, landscape, and split-screen.",
+      "acceptance": [
+        "Every enabled screen has evidence or a documented release-blocking defect.",
+        "Canvas/editor output has accessible equivalents and no essential information relies on color, motion, or hover."
+      ]
+    },
+    {
+      "key": "performance-certification",
+      "title": "Certify startup, memory, responsiveness, cancellation, and size budgets",
+      "parent": "quality-epic",
+      "type": "Quality",
+      "category": "Release",
+      "phase": "Closed Beta",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 8,
+      "workflow": "Backlog",
+      "milestone": "closed-beta",
+      "outcome": "Profile the full catalog and high-memory tools on the approved device matrix and release build.",
+      "acceptance": [
+        "Cold start, chunk, memory, input/output, long-task, cancellation, and 16 KB compatibility budgets pass or have approved ADR exceptions.",
+        "No tool blocks the UI or permits unbounded allocation."
+      ]
+    },
+    {
+      "key": "security-privacy-sbom",
+      "title": "Complete security, privacy, dependency, license, notices, and SBOM audit",
+      "parent": "quality-epic",
+      "type": "Quality",
+      "category": "Release",
+      "phase": "Closed Beta",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 8,
+      "workflow": "Backlog",
+      "milestone": "closed-beta",
+      "outcome": "Reconcile the threat model, permission/export budget, data inventory, providers, dependencies, licenses, provenance, notices, and SBOM against the candidate.",
+      "acceptance": [
+        "No critical/high security issue or known data-loss defect remains.",
+        "Privacy, Data Safety, provider, permission, license, provenance, and store claims match the exact artifact."
+      ]
+    },
+    {
+      "key": "device-matrix",
+      "title": "Execute the final Android device and WebView compatibility matrix",
+      "parent": "quality-epic",
+      "type": "Quality",
+      "category": "Release",
+      "phase": "Closed Beta",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 8,
+      "workflow": "Blocked",
+      "milestone": "closed-beta",
+      "outcome": "Verify the all-87 candidate across approved Android versions, OEM behavior, WebView versions, form factors, navigation modes, and low-resource conditions.",
+      "acceptance": [
+        "The complete matrix records models, API/WebView, artifact hashes, results, and follow-up disposition.",
+        "Process, renderer, storage, sharing, notification, offline, accessibility, and every enabled tool are covered."
+      ],
+      "blockedBy": ["all87-test-matrix", "accessibility-certification", "performance-certification"]
+    },
+    {
+      "key": "export-interoperability",
+      "title": "Certify import, export, Save As, and sharing interoperability",
+      "parent": "quality-epic",
+      "type": "Quality",
+      "category": "Release",
+      "phase": "Closed Beta",
+      "priority": "P1 High",
+      "risk": "High",
+      "estimate": 5,
+      "workflow": "Backlog",
+      "milestone": "closed-beta",
+      "outcome": "Verify canonical MIME, extension, encoding, filenames, finalized bytes, grants, lazy receivers, cancellation, and cleanup for every file format.",
+      "acceptance": [
+        "Each exported format works with at least two intended receiving apps where applicable.",
+        "Preview, Share, and Save use identical finalized bytes and no private path is exposed."
+      ]
+    },
+    {
+      "key": "final-identity",
+      "title": "Approve final app identity, package, origin, audience, countries, and pricing",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Production",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 3,
+      "workflow": "Blocked",
+      "milestone": "play-launch",
+      "outcome": "Replace or explicitly approve every provisional identity and market decision before Play app creation.",
+      "acceptance": [
+        "Name, immutable application ID, bundled origin, publisher/account type, audience, countries, language, category, free/no-ads posture, and domain are approved in ADRs.",
+        "All source, Android resources, support/privacy URLs, and Play metadata agree."
+      ]
+    },
+    {
+      "key": "launcher-splash-assets",
+      "title": "Create and validate final launcher icons and splash screen",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Production",
+      "priority": "P1 High",
+      "risk": "Medium",
+      "estimate": 5,
+      "workflow": "Blocked",
+      "milestone": "play-launch",
+      "outcome": "Replace generated placeholders with approved adaptive, monochrome, round, legacy, and splash assets.",
+      "acceptance": [
+        "Assets render correctly across supported launchers, themes, masks, API levels, and Play listing requirements.",
+        "Asset provenance and visual approval are recorded."
+      ],
+      "blockedBy": ["final-identity"]
+    },
+    {
+      "key": "play-account-package",
+      "title": "Verify Play developer account and register the final package",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Production",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 3,
+      "workflow": "Blocked",
+      "milestone": "play-launch",
+      "outcome": "Complete personal/organization verification, package registration, public contact, trader/legal, and production-access prerequisites without sharing credentials.",
+      "acceptance": [
+        "Account and package state is recorded without passwords, recovery codes, keys, or service-account files.",
+        "Applicable closed-testing eligibility and regional publisher obligations are known."
+      ],
+      "blockedBy": ["final-identity"]
+    },
+    {
+      "key": "signing-strategy",
+      "title": "Approve production signing, Play App Signing, upload-key custody, and recovery",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Production",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 5,
+      "workflow": "Blocked",
+      "milestone": "play-launch",
+      "outcome": "Establish auditable signing ownership and recovery outside the repository and untrusted CI.",
+      "acceptance": [
+        "Play App Signing enrollment, upload key, separate backups, named owners, rotation/recovery, CI secret boundaries, and clean-build reproduction are approved and rehearsed.",
+        "No secret material appears in Git, issues, logs, fixtures, or pull-request CI."
+      ],
+      "blockedBy": ["play-account-package"]
+    },
+    {
+      "key": "privacy-data-safety",
+      "title": "Publish privacy policy and complete Play declarations",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Production",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 5,
+      "workflow": "Backlog",
+      "milestone": "play-launch",
+      "outcome": "Make privacy, Data Safety, permissions, target audience, content rating, ads, app access, Financial Features, export, and provider declarations match the candidate.",
+      "acceptance": [
+        "Public privacy/support/security URLs are live and match bundled offline summaries.",
+        "Every SDK, network tool, durable data path, permission, export format, and deletion/retention behavior is reconciled."
+      ]
+    },
+    {
+      "key": "store-listing",
+      "title": "Prepare the final Google Play listing, screenshots, and support content",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Production",
+      "priority": "P1 High",
+      "risk": "High",
+      "estimate": 5,
+      "workflow": "Blocked",
+      "milestone": "play-launch",
+      "outcome": "Produce honest listing text and real phone/tablet screenshots for the exact all-87 release candidate.",
+      "acceptance": [
+        "Title, short/full descriptions, category, feature graphic, icon, screenshots, contact links, help, limitations, network disclosures, and 87-tool claims match the artifact.",
+        "No fabricated review, rating, capability, privacy, reliability, or offline claim is used."
+      ],
+      "blockedBy": ["final-identity", "launcher-splash-assets", "privacy-data-safety"]
+    },
+    {
+      "key": "network-provider-review",
+      "title": "Approve production network providers, CORS behavior, terms, caching, and fallback",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Adapter/Network/Special",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 5,
+      "workflow": "Backlog",
+      "milestone": "heavy-tools",
+      "outcome": "Prove packaged-origin behavior and approve provider terms, domains, attribution, rates, country availability, privacy, timeouts, cache, offline, removal, and fallback behavior.",
+      "acceptance": [
+        "Only reviewed HTTPS origins are allowlisted and cold/offline/stale/error states pass.",
+        "Privacy and store disclosures match actual provider requests and retained cache data."
+      ]
+    },
+    {
+      "key": "audio-recorder-review",
+      "title": "Complete Audio Recorder permission, privacy, format, and device review",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Adapter/Network/Special",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 5,
+      "workflow": "Backlog",
+      "milestone": "heavy-tools",
+      "outcome": "Approve a foreground-only, user-initiated recording design with narrow permission and honest format/privacy behavior.",
+      "acceptance": [
+        "Permission denial/revocation, interruptions, calls/routes, backgrounding, duration/size, low storage, export, cleanup, and privacy declarations pass.",
+        "No background microphone permission or misleading recording claim is introduced."
+      ]
+    },
+    {
+      "key": "video-gif-review",
+      "title": "Complete Video to GIF worker, codec, memory, metadata, and device review",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Adapter/Network/Special",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 5,
+      "workflow": "Backlog",
+      "milestone": "heavy-tools",
+      "outcome": "Approve a bounded cancellable encoding path that does not block the renderer or exhaust memory.",
+      "acceptance": [
+        "Duration, dimensions, frames, bytes, metadata, cancellation, unsupported codec, interruption, low memory/storage, output, and device limits pass.",
+        "Codec/dependency licenses and 16 KB/native-library implications are approved."
+      ]
+    },
+    {
+      "key": "youtube-review",
+      "title": "Complete YouTube Downloader Play-policy, legal, provider, reliability, and product review",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Adapter/Network/Special",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 8,
+      "workflow": "Blocked",
+      "milestone": "heavy-tools",
+      "outcome": "Determine and evidence whether the audited downloader can be legally, contractually, reliably, and policy-compliantly enabled in the all-87 Play release.",
+      "acceptance": [
+        "Play policy, copyright/legal, YouTube and provider terms, data/network behavior, availability, failure/removal behavior, user value, and store wording are reviewed by the appropriate owner.",
+        "A failed or unresolved review blocks the all-87 release or triggers an explicit superseding scope ADR; it is never silently shipped or omitted."
+      ]
+    },
+    {
+      "key": "all87-release-candidate",
+      "title": "Build and approve the reproducible all-87 release candidate",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Closed Beta",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 8,
+      "workflow": "Blocked",
+      "milestone": "closed-beta",
+      "outcome": "Produce one reviewed, signed, reproducible AAB with all 87 tools enabled and every evidence inventory reconciled.",
+      "acceptance": [
+        "Protected commit/tag, version, manifest, tests, device matrix, dependency lock, SBOM, signing, AAB hash, privacy, help, and store claims refer to one candidate.",
+        "No release blocker or unreviewed permission/component/dependency/provider remains."
+      ],
+      "blockedBy": [
+        "foundation-epic",
+        "core-epic",
+        "developer-epic",
+        "text-epic",
+        "media-epic",
+        "security-epic",
+        "math-epic",
+        "all87-test-matrix",
+        "accessibility-certification",
+        "performance-certification",
+        "security-privacy-sbom",
+        "export-interoperability",
+        "final-identity",
+        "launcher-splash-assets",
+        "signing-strategy",
+        "privacy-data-safety",
+        "store-listing",
+        "network-provider-review",
+        "audio-recorder-review",
+        "video-gif-review",
+        "youtube-review"
+      ]
+    },
+    {
+      "key": "closed-test",
+      "title": "Run required Google Play closed testing and disposition tester findings",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Closed Beta",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 5,
+      "workflow": "Blocked",
+      "milestone": "closed-beta",
+      "outcome": "Meet the account's current closed-testing eligibility requirements with representative use and auditable feedback disposition.",
+      "acceptance": [
+        "Tester enrollment, required continuous period, feedback, regressions, fixes, and production-access application are recorded without collecting unnecessary private data.",
+        "All material tester findings are fixed, accepted with evidence, or block production."
+      ],
+      "blockedBy": ["play-account-package", "all87-release-candidate"]
+    },
+    {
+      "key": "play-prelaunch",
+      "title": "Triage Google Play pre-launch, Android vitals, and compatibility findings",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Closed Beta",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 5,
+      "workflow": "Blocked",
+      "milestone": "closed-beta",
+      "outcome": "Review Play automated/device findings and meet internal crash, ANR, security, accessibility, and compatibility thresholds.",
+      "acceptance": [
+        "Every finding has a linked fix, evidence-backed disposition, or release-blocking decision.",
+        "The tested Play artifact hash matches the approved candidate."
+      ],
+      "blockedBy": ["all87-release-candidate"]
+    },
+    {
+      "key": "launch-runbooks",
+      "title": "Rehearse support, incident, rollback, halt, forward-fix, and unpublish runbooks",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Production",
+      "priority": "P0 Critical",
+      "risk": "High",
+      "estimate": 5,
+      "workflow": "Backlog",
+      "milestone": "play-launch",
+      "outcome": "Ensure named owners can respond safely to first-release incidents without assuming rollback repairs installed devices.",
+      "acceptance": [
+        "Support, vulnerability intake, incident severity, halt, forward-fix, unpublish, signing recovery, backup restoration, and communication procedures are rehearsed.",
+        "Owners, observation window, stop conditions, and privacy-safe diagnostic paths are recorded."
+      ]
+    },
+    {
+      "key": "managed-publishing-launch",
+      "title": "Approve and execute the first managed-publishing production launch",
+      "parent": "play-release-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Production",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 3,
+      "workflow": "Blocked",
+      "milestone": "play-launch",
+      "outcome": "Publish the approved all-87 candidate during a staffed managed-publishing window and record the result.",
+      "acceptance": [
+        "Production access, review approval, countries, managed-publishing state, artifact hash, owners, monitoring, support, observation window, and stop conditions are confirmed.",
+        "The product owner explicitly authorizes publication immediately before the irreversible action; this issue does not itself grant publication authority."
+      ],
+      "blockedBy": ["closed-test", "play-prelaunch", "device-matrix", "launch-runbooks"]
+    }
+  ],
+  "verticalSlice": [
+    "unit-converter",
+    "timestamp-converter",
+    "hash-generator",
+    "markdown-preview",
+    "regex-tester",
+    "qr-generator",
+    "json-editor",
+    "notes-scratchpad",
+    "pomodoro-timer",
+    "image-compressor",
+    "file-hash-checker",
+    "currency-converter"
+  ],
+  "implementedTools": ["unit-converter", "timestamp-converter", "hash-generator"],
+  "tier2": [
+    "pdf-converter",
+    "image-compressor",
+    "json-editor",
+    "base64-tool",
+    "qr-generator",
+    "color-palette-from-image",
+    "ical-generator",
+    "vcard-generator",
+    "chart-generator",
+    "pomodoro-timer",
+    "notes-scratchpad",
+    "bookmark-manager",
+    "file-hash-checker",
+    "stopwatch",
+    "countdown-timer"
+  ],
+  "tier3": ["currency-converter", "dns-lookup"],
+  "tier4": ["audio-recorder", "video-to-gif", "youtube-downloader"],
+  "toolDependencies": {
+    "pdf-converter": ["content-uri-streaming", "share-cache-cleanup"],
+    "currency-converter": ["network-provider-review"],
+    "image-compressor": ["content-uri-streaming", "share-cache-cleanup"],
+    "json-editor": ["content-uri-streaming", "share-cache-cleanup"],
+    "base64-tool": ["content-uri-streaming", "share-cache-cleanup"],
+    "qr-generator": ["share-cache-cleanup"],
+    "password-generator": ["sensitive-clipboard"],
+    "color-palette-from-image": ["content-uri-streaming"],
+    "ical-generator": ["share-cache-cleanup"],
+    "vcard-generator": ["share-cache-cleanup"],
+    "hmac-generator": ["sensitive-clipboard"],
+    "chart-generator": ["share-cache-cleanup"],
+    "dns-lookup": ["network-provider-review"],
+    "youtube-downloader": ["youtube-review", "network-provider-review"],
+    "pomodoro-timer": ["renderer-recovery", "android-instrumentation"],
+    "notes-scratchpad": ["renderer-recovery"],
+    "bookmark-manager": ["renderer-recovery"],
+    "audio-recorder": ["audio-recorder-review", "content-uri-streaming", "share-cache-cleanup"],
+    "video-to-gif": ["video-gif-review", "content-uri-streaming", "share-cache-cleanup"],
+    "file-hash-checker": ["content-uri-streaming"],
+    "stopwatch": ["renderer-recovery"],
+    "countdown-timer": ["renderer-recovery", "android-instrumentation"]
+  },
+  "tools": [
+    ["pdf-converter", "PDF Converter", "core"],
+    ["currency-converter", "Currency Converter", "core"],
+    ["unit-converter", "Unit Converter", "core"],
+    ["timestamp-converter", "Timestamp Converter", "core"],
+    ["number-base-converter", "Number Base Converter", "core"],
+    ["hash-generator", "Hash Generator", "core"],
+    ["image-compressor", "Image Compressor", "core"],
+    ["json-editor", "JSON Editor", "dev"],
+    ["base64-tool", "Base64 Encode/Decode", "dev"],
+    ["qr-generator", "QR Code Generator", "dev"],
+    ["password-generator", "Password Generator", "dev"],
+    ["color-picker", "Color Picker", "dev"],
+    ["lorem-ipsum-generator", "Lorem Ipsum Generator", "dev"],
+    ["markdown-preview", "Markdown Preview", "dev"],
+    ["regex-tester", "Regex Tester", "dev"],
+    ["url-encoder", "URL Encoder/Decoder", "dev"],
+    ["html-entity-encoder", "HTML Entity Encoder", "dev"],
+    ["jwt-decoder", "JWT Decoder", "dev"],
+    ["svg-optimizer", "SVG Optimizer", "dev"],
+    ["css-gradient-generator", "CSS Gradient Generator", "dev"],
+    ["color-palette-from-image", "Color Palette from Image", "dev"],
+    ["csv-json-converter", "CSV to JSON Converter", "dev"],
+    ["yaml-json-converter", "YAML to JSON Converter", "dev"],
+    ["xml-formatter", "XML Formatter", "dev"],
+    ["sql-formatter", "SQL Formatter", "dev"],
+    ["ical-generator", "iCalendar Generator", "dev"],
+    ["vcard-generator", "vCard Generator", "dev"],
+    ["rot13-cipher", "ROT13 / Caesar Cipher", "dev"],
+    ["morse-code-translator", "Morse Code Translator", "dev"],
+    ["hmac-generator", "HMAC Generator", "dev"],
+    ["uuid-generator", "UUID Generator", "dev"],
+    ["box-shadow-generator", "Box Shadow Generator", "dev"],
+    ["border-radius-generator", "Border Radius Generator", "dev"],
+    ["text-shadow-generator", "Text Shadow Generator", "dev"],
+    ["flexbox-playground", "Flexbox Playground", "dev"],
+    ["grid-generator", "CSS Grid Generator", "dev"],
+    ["triangle-generator", "CSS Triangle Generator", "dev"],
+    ["http-status-codes", "HTTP Status Codes", "dev"],
+    ["mime-type-lookup", "MIME Type Lookup", "dev"],
+    ["dns-lookup", "DNS Lookup", "dev"],
+    ["open-graph-preview", "Open Graph Preview", "dev"],
+    ["meta-tag-generator", "Meta Tag Generator", "dev"],
+    ["text-to-slug", "Text to Slug", "dev"],
+    ["unicode-lookup", "Unicode Lookup", "dev"],
+    ["ascii-table", "ASCII Table", "dev"],
+    ["fake-data-generator", "Fake Data Generator", "dev"],
+    ["gradient-border-generator", "Gradient Border Generator", "dev"],
+    ["animation-css-generator", "CSS Animation Generator", "dev"],
+    ["glassmorphism-generator", "Glassmorphism Generator", "dev"],
+    ["neumorphism-generator", "Neumorphism Generator", "dev"],
+    ["chart-generator", "Chart Generator", "dev"],
+    ["youtube-downloader", "YouTube Downloader", "dev"],
+    ["word-counter", "Word Counter", "text"],
+    ["case-converter", "Case Converter", "text"],
+    ["text-diff", "Text Diff", "text"],
+    ["remove-duplicates", "Remove Duplicates", "text"],
+    ["character-counter", "Character Counter", "text"],
+    ["emoji-picker", "Emoji Picker", "text"],
+    ["hash-diff", "Hash Diff", "text"],
+    ["pomodoro-timer", "Pomodoro Timer", "text"],
+    ["cron-builder", "Cron Expression Builder", "text"],
+    ["find-replace", "Find & Replace", "text"],
+    ["reverse-text", "Reverse Text", "text"],
+    ["sort-lines", "Sort Lines", "text"],
+    ["add-line-numbers", "Add Line Numbers", "text"],
+    ["trim-whitespace", "Trim Whitespace", "text"],
+    ["invisible-character-detector", "Invisible Character Detector", "text"],
+    ["notes-scratchpad", "Notes / Scratchpad", "text"],
+    ["bookmark-manager", "Bookmark Manager", "text"],
+    ["audio-recorder", "Audio Recorder", "media"],
+    ["video-to-gif", "Video to GIF", "media"],
+    ["file-hash-checker", "File Hash Checker", "media"],
+    ["password-strength-checker", "Password Strength Checker", "security"],
+    ["data-sanitizer", "Data Sanitizer", "security"],
+    ["csp-generator", "CSP Generator", "security"],
+    ["cors-header-builder", "CORS Header Builder", "security"],
+    ["robots-txt-generator", "Robots.txt Generator", "security"],
+    ["percentage-calculator", "Percentage Calculator", "math"],
+    ["age-calculator", "Age Calculator", "math"],
+    ["tip-calculator", "Tip Calculator", "math"],
+    ["gcd-lcm-calculator", "GCD/LCM Calculator", "math"],
+    ["roman-numeral-converter", "Roman Numeral Converter", "math"],
+    ["bitwise-calculator", "Bitwise Calculator", "math"],
+    ["color-blindness-simulator", "Color Blindness Simulator", "math"],
+    ["calculator", "Scientific Calculator", "math"],
+    ["stopwatch", "Stopwatch", "math"],
+    ["countdown-timer", "Countdown Timer", "math"]
+  ]
+}

@@ -1,0 +1,51 @@
+name: Foundation or architecture work
+description: Propose platform, architecture, security, recovery, build, CI, or native-host work.
+title: "[Foundation]: "
+labels:
+  - "type:foundation"
+  - "status:triage"
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: Describe the user or engineering capability that must exist when this closes.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Current evidence and problem
+      description: Link code, tracker rows, tests, manifests, ADRs, or device evidence.
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Architecture, permission, privacy, and dependency boundaries
+      description: State whether an ADR, manifest-budget review, privacy update, provider review, or new dependency is required.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Required validation and artifacts
+      description: List web, Android, manifest, instrumentation, physical-device, security, and artifact evidence.
+    validations:
+      required: true
+  - type: checkboxes
+    id: ready
+    attributes:
+      label: Readiness checks
+      options:
+        - label: This work preserves the platform-service boundary and permission/export budget.
+          required: true
+        - label: Sensitive values, filenames, file contents, credentials, and real user data will not be logged or attached.
+          required: true
