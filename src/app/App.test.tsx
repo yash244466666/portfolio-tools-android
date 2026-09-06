@@ -2,6 +2,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react"
 import { afterEach } from "vitest"
 import { App } from "@/app/App"
 import { PlatformProvider } from "@/platform/platform-context"
+import { isEnabledTool, tools } from "@/tools/registry"
 
 afterEach(() => {
   cleanup()
@@ -22,7 +23,10 @@ describe("application shell", () => {
     ).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Unit Converter" })).toBeInTheDocument()
     expect(screen.getByText("Markdown Preview")).toBeInTheDocument()
-    expect(screen.getByLabelText("4 tools enabled in the foundation")).toBeInTheDocument()
+    const enabledCount = tools.filter(isEnabledTool).length
+    expect(
+      screen.getByLabelText(`${enabledCount} tools enabled in the foundation`),
+    ).toBeInTheDocument()
     await waitFor(() => expect(document.documentElement).toHaveAttribute("data-theme"))
   })
 

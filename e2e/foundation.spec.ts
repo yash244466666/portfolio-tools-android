@@ -64,3 +64,22 @@ test("opening a tool adds it to the recent tools destination", async ({ page }) 
   await expect(page.getByRole("link", { name: "Unit Converter" })).toBeVisible()
   await expect(page.getByLabel("1 recent tool on this device")).toBeVisible()
 })
+
+test("regex tester evaluates in a worker and stops hostile patterns", async ({ page }) => {
+  await page.goto("/#/tool/regex-tester")
+  await expect(page.getByRole("heading", { name: "Regex Tester" })).toBeVisible()
+
+  await page.getByLabel("Pattern").fill("\\d+")
+  await page.getByLabel("Flags").fill("g")
+  await page.getByLabel("Test string").fill("a1b22c333")
+  await expect(page.getByRole("heading", { name: "Matches (3)" })).toBeVisible()
+  await expect(page.getByRole("region", { name: "Highlighted matches" })).toContainText("333")
+
+  // A catastrophic pattern wedges its worker; the wall-clock budget must terminate it
+  // instead of freezing the interface.
+  await page.getByLabel("Pattern").fill("(a+)+$")
+  await page.getByLabel("Test string").fill(`${"a".repeat(30)}!`)
+  await expect(page.getByText(/stopped because it exceeded the time budget/)).toBeVisible({
+    timeout: 10_000,
+  })
+})
