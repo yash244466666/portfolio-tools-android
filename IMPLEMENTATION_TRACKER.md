@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 23:10 Europe/Berlin
+> Last updated: 2026-09-06 23:35 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -545,4 +545,10 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Fixed a parse-order defect found by the new vectors (oversized whitespace-only input previously reported `invalid` instead of `over-limit`) and documented the `1e999` engine serialization quirk and duplicate/`__proto__` key handling in tests.
 - Added 11 pure vectors (representative and malformed documents, 60 000-deep nesting never crashing, size cap, duplicate and prototype-named keys as plain data, format/minify, tree expansion paths, render/depth/preview caps, expand-all cap) and 7 component cases (empty/valid/invalid, format/minify round-trip, disabled transforms, tree expand/collapse, share payload, over-limit, reset). E2E grew to 18 scenarios covering format, disabled transforms, and tree inspection on both device profiles.
 - Passed formatting, strict typecheck, zero-warning lint, 158 web tests (21 files), 18 E2E scenarios, production build (JsonEditor lazy chunk 7.14 kB/2.79 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
+- Next executable item: the Notes/Scratchpad tool migration (issue #109) with durable storage, schema migration, export/import, and honest unencrypted-storage copy.
+
+### 2026-09-06 — JSON Editor merge reconciliation
+
+- Merged PR #139 into `main` as `d900561`, closing issue #49; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
+- Seven of the 87 approved tools are implemented. The vertical slice still needs Notes/Scratchpad, Pomodoro Timer, Image Compressor, File Hash Checker, and Currency Converter.
 - Next executable item: the Notes/Scratchpad tool migration (issue #109) with durable storage, schema migration, export/import, and honest unencrypted-storage copy.
