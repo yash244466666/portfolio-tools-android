@@ -1,4 +1,5 @@
 import type {
+  ContentDigestAlgorithm,
   FilePickOptions,
   GeneratedFile,
   NetworkState,
@@ -6,12 +7,20 @@ import type {
   PlatformServices,
 } from "@/platform/contracts"
 import { isCancellationError, PlatformError } from "@/platform/errors"
-import { generatedFileBytes, sanitizeGeneratedFileName } from "@/platform/shared/files"
+import {
+  bytesToBase64,
+  generatedFileBytes,
+  sanitizeGeneratedFileName,
+} from "@/platform/shared/files"
 import { secureRandomService } from "@/platform/shared/random"
 import { validatedExternalUrl } from "@/platform/shared/urls"
 
 const preferencePrefix = "yash-tools:v1:"
 const maximumClipboardBytes = 1024 * 1024
+/** The plan's JavaScript hashing limit; Android streams natively instead. */
+const maximumWebDigestBytes = 50 * 1024 * 1024
+const maximumWebReadBytes = 16 * 1024 * 1024
+const webDigestAlgorithms: readonly ContentDigestAlgorithm[] = ["sha-1", "sha-256", "sha-512"]
 
 async function pickFromBrowser(options: FilePickOptions) {
   return new Promise<PickedFile[]>((resolve, reject) => {
@@ -62,6 +71,41 @@ function browserNetworkState(): NetworkState {
   return {
     connected: navigator.onLine,
     connectionType: navigator.onLine ? "unknown" : "none",
+  }
+}
+
+function digestAlgorithmName(algorithm: ContentDigestAlgorithm): string {
+  return algorithm.toUpperCase()
+}
+
+function digestToHex(buffer: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buffer), (byte) => byte.toString(16).padStart(2, "0")).join("")
+}
+
+function requiredWebSourceFile(file: PickedFile): File {
+  if (!(file.file instanceof File)) {
+    throw new PlatformError(
+      "FILE_PICK_UNAVAILABLE",
+      "The selected file is no longer available. Pick it again.",
+    )
+  }
+  return file.file
+}
+
+function validatedWebReadLimit(maximumBytes: number): number {
+  if (
+    !Number.isSafeInteger(maximumBytes) ||
+    maximumBytes <= 0 ||
+    maximumBytes > maximumWebReadBytes
+  ) {
+    throw new PlatformError("FILE_INVALID_ARGUMENT", "The read size limit is invalid.")
+  }
+  return maximumBytes
+}
+
+function checkWebDigestAbort(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    throw new PlatformError("FILE_READ_CANCELLED", "The operation was cancelled.")
   }
 }
 
@@ -191,6 +235,31 @@ export const webPlatformServices: PlatformServices = {
       } catch (error) {
         throw new PlatformError("FILE_SAVE_FAILED", "The file could not be saved.", true, error)
       }
+    },
+    async readContent(file, options, signal) {
+      const source = requiredWebSourceFile(file)
+      const maximumBytes = validatedWebReadLimit(options.maximumBytes)
+      if (source.size > maximumBytes) {
+        throw new PlatformError("FILE_TOO_LARGE", "The file exceeds the read limit.")
+      }
+      checkWebDigestAbort(signal)
+      const bytes = new Uint8Array(await source.arrayBuffer())
+      checkWebDigestAbort(signal)
+      return { size: bytes.byteLength, data: bytesToBase64(bytes), encoding: "base64" }
+    },
+    async digestContent(file, options, signal) {
+      if (!webDigestAlgorithms.includes(options.algorithm)) {
+        throw new PlatformError("FILE_INVALID_ARGUMENT", "The digest algorithm is unsupported.")
+      }
+      const source = requiredWebSourceFile(file)
+      if (source.size > maximumWebDigestBytes) {
+        throw new PlatformError("FILE_TOO_LARGE", "The file exceeds the JavaScript hashing limit.")
+      }
+      checkWebDigestAbort(signal)
+      const buffer = await source.arrayBuffer()
+      checkWebDigestAbort(signal)
+      const digest = await crypto.subtle.digest(digestAlgorithmName(options.algorithm), buffer)
+      return { algorithm: options.algorithm, digestHex: digestToHex(digest), size: source.size }
     },
   },
   notifications: {

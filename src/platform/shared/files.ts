@@ -31,6 +31,18 @@ export function sanitizeGeneratedFileName(name: string): string {
   return truncated || fallbackName
 }
 
+const base64ChunkSize = 0x8000
+
+/** Encodes bytes as standard Base64 without loading the whole binary string at once. */
+export function bytesToBase64(bytes: Uint8Array): string {
+  let binary = ""
+  for (let offset = 0; offset < bytes.length; offset += base64ChunkSize) {
+    const chunk = bytes.subarray(offset, offset + base64ChunkSize)
+    binary += String.fromCharCode(...chunk)
+  }
+  return btoa(binary)
+}
+
 export function generatedFileBytes(file: GeneratedFile): Uint8Array<ArrayBuffer> {
   if (file.encoding === "utf8") return new TextEncoder().encode(file.data)
 

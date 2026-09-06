@@ -19,6 +19,7 @@ import {
 } from "@/platform/capacitor/sensitive-clipboard"
 import { GeneratedCache, generatedCacheContractVersion } from "@/platform/capacitor/generated-cache"
 import type {
+  ContentDigestAlgorithm,
   FilePickOptions,
   NetworkState,
   PickedFile,
@@ -42,6 +43,8 @@ const nativeFileErrorMessages: Partial<Record<PlatformErrorCode, string>> = {
   FILE_SAVE_CANCELLED: "Save cancelled.",
   FILE_SAVE_FAILED: "The document could not be saved.",
   FILE_TOO_LARGE: "The document exceeds the allowed size.",
+  FILE_READ_FAILED: "The selected document could not be read.",
+  FILE_READ_CANCELLED: "The operation was cancelled.",
 }
 
 function nativeRejectionCode(error: unknown): string | undefined {
@@ -60,7 +63,7 @@ function nativeErrorCode(error: unknown): PlatformErrorCode | undefined {
 
 function mappedNativeFileError(
   error: unknown,
-  fallbackCode: "FILE_PICK_FAILED" | "FILE_SAVE_FAILED",
+  fallbackCode: "FILE_PICK_FAILED" | "FILE_SAVE_FAILED" | "FILE_READ_FAILED",
 ): PlatformError {
   if (error instanceof PlatformError) return error
   const code = nativeErrorCode(error) ?? fallbackCode
@@ -183,6 +186,41 @@ function sweepGeneratedCache(): void {
   void GeneratedCache.cleanup({ contractVersion: generatedCacheContractVersion }).catch(
     () => undefined,
   )
+}
+
+const maximumNativeReadBytes = 16 * 1024 * 1024
+const maximumNativeDigestBytes = 1024 * 1024 * 1024
+const nativeDigestAlgorithms: readonly ContentDigestAlgorithm[] = ["sha-1", "sha-256", "sha-512"]
+
+function validatedContentUri(file: PickedFile): string {
+  if (typeof file.uri !== "string" || !file.uri.startsWith("content://")) {
+    throw new PlatformError("FILE_INVALID_ARGUMENT", "The selected document URI is invalid.")
+  }
+  return file.uri
+}
+
+function validatedDigestAlgorithm(algorithm: ContentDigestAlgorithm): ContentDigestAlgorithm {
+  if (!nativeDigestAlgorithms.includes(algorithm)) {
+    throw new PlatformError("FILE_INVALID_ARGUMENT", "The digest algorithm is unsupported.")
+  }
+  return algorithm
+}
+
+function validatedContentReadLimit(maximumBytes: number): number {
+  if (
+    !Number.isSafeInteger(maximumBytes) ||
+    maximumBytes <= 0 ||
+    maximumBytes > maximumNativeReadBytes
+  ) {
+    throw new PlatformError("FILE_INVALID_ARGUMENT", "The read size limit is invalid.")
+  }
+  return maximumBytes
+}
+
+function abortCancelled(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    throw new PlatformError("FILE_READ_CANCELLED", "The operation was cancelled.")
+  }
 }
 
 function stableNotificationId(value: string): number {
@@ -357,6 +395,53 @@ export const capacitorPlatformServices: PlatformServices = {
         throw mappedNativeFileError(error, "FILE_SAVE_FAILED")
       } finally {
         await discardSave(options)
+      }
+    },
+    async readContent(file, options, signal) {
+      abortCancelled(signal)
+      const uri = validatedContentUri(file)
+      const maximumBytes = validatedContentReadLimit(options.maximumBytes)
+      if (Number.isSafeInteger(file.size) && file.size > maximumBytes) {
+        throw new PlatformError("FILE_TOO_LARGE", "The document exceeds the read limit.")
+      }
+      try {
+        const result = await DocumentFiles.readContent({
+          contractVersion: documentFilesContractVersion,
+          uri,
+          maximumBytes,
+        })
+        return { size: result.size, data: result.data, encoding: "base64" }
+      } catch (error) {
+        throw mappedNativeFileError(error, "FILE_READ_FAILED")
+      }
+    },
+    async digestContent(file, options, signal) {
+      abortCancelled(signal)
+      const algorithm = validatedDigestAlgorithm(options.algorithm)
+      const uri = validatedContentUri(file)
+      if (Number.isSafeInteger(file.size) && file.size > maximumNativeDigestBytes) {
+        throw new PlatformError("FILE_TOO_LARGE", "The document exceeds the digest limit.")
+      }
+      const operationId = secureRandomService.uuid()
+      const onAbort = () => {
+        void DocumentFiles.cancelDigest({
+          contractVersion: documentFilesContractVersion,
+          operationId,
+        }).catch(() => undefined)
+      }
+      signal?.addEventListener("abort", onAbort, { once: true })
+      try {
+        const result = await DocumentFiles.digestContent({
+          contractVersion: documentFilesContractVersion,
+          operationId,
+          uri,
+          algorithm,
+        })
+        return { algorithm, digestHex: result.digest, size: result.size }
+      } catch (error) {
+        throw mappedNativeFileError(error, "FILE_READ_FAILED")
+      } finally {
+        signal?.removeEventListener("abort", onAbort)
       }
     },
   },

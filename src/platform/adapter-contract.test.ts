@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import type { NetworkState, PlatformServices, Unsubscribe } from "@/platform/contracts"
+import type { NetworkState, PickedFile, PlatformServices, Unsubscribe } from "@/platform/contracts"
 import type { PlatformError } from "@/platform/errors"
 
 type ListenerHandle = { remove: () => Promise<void> }
@@ -14,6 +14,10 @@ const pluginMocks = vi.hoisted(() => ({
   documentDiscardSave: vi.fn<(options: NativeSaveOptions) => Promise<void>>(),
   documentPick: vi.fn<(options: NativePickOptions) => Promise<NativePickResult>>(),
   documentSave: vi.fn<(options: NativeSaveOptions) => Promise<void>>(),
+  documentDigest: vi.fn<(options: NativeDigestOptions) => Promise<NativeContentDigestResult>>(),
+  documentCancelDigest:
+    vi.fn<(options: { contractVersion: number; operationId: string }) => Promise<void>>(),
+  documentReadContent: vi.fn<(options: NativeReadOptions) => Promise<NativeBoundedContentResult>>(),
   generatedCacheCleanup: vi.fn<(options: { contractVersion: number }) => Promise<unknown>>(),
   sensitiveClipboardWrite: vi.fn<(options: NativeClipboardWriteOptions) => Promise<void>>(),
   filesystemRmdir:
@@ -71,6 +75,33 @@ interface NativeClipboardWriteOptions {
   sensitive: boolean
 }
 
+interface NativeDigestOptions {
+  contractVersion: number
+  operationId: string
+  uri: string
+  algorithm: string
+}
+
+interface NativeContentDigestResult {
+  contractVersion: number
+  operationId: string
+  algorithm: string
+  digest: string
+  size: number
+}
+
+interface NativeReadOptions {
+  contractVersion: number
+  uri: string
+  maximumBytes: number
+}
+
+interface NativeBoundedContentResult {
+  contractVersion: number
+  size: number
+  data: string
+}
+
 vi.mock("@capacitor/app", () => ({ App: { addListener: pluginMocks.appAddListener } }))
 vi.mock("@capacitor/browser", () => ({ Browser: { open: pluginMocks.browserOpen } }))
 vi.mock("@capacitor/clipboard", () => ({
@@ -83,8 +114,11 @@ vi.mock("@capacitor/core", () => ({
       : name === "GeneratedCache"
         ? { cleanup: pluginMocks.generatedCacheCleanup }
         : {
+            cancelDigest: pluginMocks.documentCancelDigest,
+            digestContent: pluginMocks.documentDigest,
             discardSave: pluginMocks.documentDiscardSave,
             pickDocuments: pluginMocks.documentPick,
+            readContent: pluginMocks.documentReadContent,
             saveDocument: pluginMocks.documentSave,
           },
 }))
@@ -128,6 +162,7 @@ const preferencePrefix = "yash-tools:v1:"
 
 interface AdapterHarness {
   services: PlatformServices
+  pickedFile(): PickedFile
   setClipboard(value: string): void
   getClipboard(): string
   setRawPreference(key: string, value: string): void
@@ -241,6 +276,19 @@ function configureNativeMocks() {
     ],
   }))
   pluginMocks.documentSave.mockResolvedValue(undefined)
+  pluginMocks.documentDigest.mockImplementation(async ({ operationId, algorithm }) => ({
+    contractVersion: 1,
+    operationId,
+    algorithm,
+    digest: "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    size: 3,
+  }))
+  pluginMocks.documentCancelDigest.mockResolvedValue(undefined)
+  pluginMocks.documentReadContent.mockImplementation(async () => ({
+    contractVersion: 1,
+    size: 3,
+    data: "YWJj",
+  }))
   pluginMocks.generatedCacheCleanup.mockResolvedValue({
     contractVersion: 1,
     deletedFiles: 0,
@@ -260,6 +308,12 @@ function configureNativeMocks() {
 function webHarness(): AdapterHarness {
   return {
     services: webPlatformServices,
+    pickedFile: () => ({
+      name: "fixture.txt",
+      mimeType: "text/plain",
+      size: 3,
+      file: new File(["abc"], "fixture.txt", { type: "text/plain" }),
+    }),
     setClipboard(value) {
       webClipboard = value
     },
@@ -285,6 +339,12 @@ function webHarness(): AdapterHarness {
 function nativeHarness(): AdapterHarness {
   return {
     services: capacitorPlatformServices,
+    pickedFile: () => ({
+      name: "fixture.txt",
+      mimeType: "text/plain",
+      size: 3,
+      uri: "content://documents/fixture",
+    }),
     setClipboard(value) {
       nativeClipboard = value
     },
@@ -334,6 +394,61 @@ function runSharedAdapterContract(name: string, createHarness: () => AdapterHarn
         expectPlatformError("CLIPBOARD_INVALID_ARGUMENT"),
       )
       expect(harness.getClipboard()).toBe("")
+    })
+
+    it("reads picked content through the bounded contract", async () => {
+      const result = await harness.services.files.readContent(harness.pickedFile(), {
+        maximumBytes: 1024,
+      })
+      expect(result).toEqual({ size: 3, data: "YWJj", encoding: "base64" })
+    })
+
+    it("rejects oversized and invalid content reads before touching the source", async () => {
+      await expect(
+        harness.services.files.readContent(harness.pickedFile(), { maximumBytes: 2 }),
+      ).rejects.toEqual(expectPlatformError("FILE_TOO_LARGE"))
+      await expect(
+        harness.services.files.readContent(harness.pickedFile(), { maximumBytes: 0 }),
+      ).rejects.toEqual(expectPlatformError("FILE_INVALID_ARGUMENT"))
+      await expect(
+        harness.services.files.readContent(harness.pickedFile(), {
+          maximumBytes: 16 * 1024 * 1024 + 1,
+        }),
+      ).rejects.toEqual(expectPlatformError("FILE_INVALID_ARGUMENT"))
+    })
+
+    it("digests picked content with the supported algorithms", async () => {
+      const result = await harness.services.files.digestContent(harness.pickedFile(), {
+        algorithm: "sha-256",
+      })
+      expect(result).toEqual({
+        algorithm: "sha-256",
+        digestHex: "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+        size: 3,
+      })
+
+      await expect(
+        harness.services.files.digestContent(harness.pickedFile(), { algorithm: "md5" as never }),
+      ).rejects.toEqual(expectPlatformError("FILE_INVALID_ARGUMENT"))
+    })
+
+    it("rejects content operations whose signal is already aborted", async () => {
+      const controller = new AbortController()
+      controller.abort()
+      await expect(
+        harness.services.files.readContent(
+          harness.pickedFile(),
+          { maximumBytes: 1024 },
+          controller.signal,
+        ),
+      ).rejects.toEqual(expectPlatformError("FILE_READ_CANCELLED"))
+      await expect(
+        harness.services.files.digestContent(
+          harness.pickedFile(),
+          { algorithm: "sha-256" },
+          controller.signal,
+        ),
+      ).rejects.toEqual(expectPlatformError("FILE_READ_CANCELLED"))
     })
 
     it("does not erase clipboard content copied by the user after a timed write", async () => {
@@ -466,6 +581,32 @@ describe("web-specific adapter behavior", () => {
     )
   })
 
+  it("rejects web content operations without a browser File source", async () => {
+    await expect(
+      webPlatformServices.files.readContent(
+        {
+          name: "fixture.txt",
+          mimeType: "text/plain",
+          size: 3,
+          uri: "content://documents/fixture",
+        },
+        { maximumBytes: 1024 },
+      ),
+    ).rejects.toEqual(expectPlatformError("FILE_PICK_UNAVAILABLE"))
+  })
+
+  it("rejects web digests above the JavaScript hashing limit", async () => {
+    const oversized = new File(["x".repeat(50 * 1024 * 1024 + 1)], "big.txt", {
+      type: "text/plain",
+    })
+    await expect(
+      webPlatformServices.files.digestContent(
+        { name: "big.txt", mimeType: "text/plain", size: oversized.size, file: oversized },
+        { algorithm: "sha-256" },
+      ),
+    ).rejects.toEqual(expectPlatformError("FILE_TOO_LARGE"))
+  })
+
   it("maps a dismissed share sheet to cancellation", async () => {
     webShareMock.mockRejectedValue(new DOMException("dismissed", "AbortError"))
 
@@ -481,6 +622,82 @@ describe("web-specific adapter behavior", () => {
 })
 
 describe("Capacitor-specific adapter behavior", () => {
+  it("passes versioned digest requests and wires mid-flight cancellation", async () => {
+    const nativePicked = {
+      name: "fixture.txt",
+      mimeType: "text/plain",
+      size: 3,
+      uri: "content://documents/fixture",
+    }
+    await capacitorPlatformServices.files.digestContent(nativePicked, { algorithm: "sha-512" })
+
+    const digestOptions = pluginMocks.documentDigest.mock.calls[0]?.[0]
+    expect(digestOptions).toEqual({
+      contractVersion: 1,
+      operationId: digestOptions?.operationId,
+      uri: "content://documents/fixture",
+      algorithm: "sha-512",
+    })
+    expect(digestOptions?.operationId).toMatch(/^[0-9a-f-]{36}$/)
+
+    pluginMocks.documentDigest.mockImplementationOnce(
+      ({ operationId, algorithm }) =>
+        new Promise((resolve) =>
+          setTimeout(
+            () => resolve({ contractVersion: 1, operationId, algorithm, digest: "ff", size: 3 }),
+            20,
+          ),
+        ),
+    )
+    const controller = new AbortController()
+    const pending = capacitorPlatformServices.files.digestContent(
+      nativePicked,
+      { algorithm: "sha-256" },
+      controller.signal,
+    )
+    controller.abort()
+    expect((await pending).algorithm).toBe("sha-256")
+    const cancelOptions = pluginMocks.documentCancelDigest.mock.calls[0]?.[0]
+    expect(cancelOptions?.contractVersion).toBe(1)
+    expect(cancelOptions?.operationId).toMatch(/^[0-9a-f-]{36}$/)
+  })
+
+  it("maps native content failures and rejects unvalidated URIs", async () => {
+    pluginMocks.documentDigest.mockRejectedValueOnce({ code: "FILE_READ_FAILED" })
+    await expect(
+      capacitorPlatformServices.files.digestContent(
+        {
+          name: "fixture.txt",
+          mimeType: "text/plain",
+          size: 3,
+          uri: "content://documents/fixture",
+        },
+        { algorithm: "sha-256" },
+      ),
+    ).rejects.toEqual(expectPlatformError("FILE_READ_FAILED"))
+
+    pluginMocks.documentReadContent.mockRejectedValueOnce({ code: "FILE_READ_CANCELLED" })
+    await expect(
+      capacitorPlatformServices.files.readContent(
+        {
+          name: "fixture.txt",
+          mimeType: "text/plain",
+          size: 3,
+          uri: "content://documents/fixture",
+        },
+        { maximumBytes: 1024 },
+      ),
+    ).rejects.toEqual(expectPlatformError("FILE_READ_CANCELLED"))
+
+    await expect(
+      capacitorPlatformServices.files.digestContent(
+        { name: "fixture.txt", mimeType: "text/plain", size: 3, uri: "file:///unscoped" },
+        { algorithm: "sha-256" },
+      ),
+    ).rejects.toEqual(expectPlatformError("FILE_INVALID_ARGUMENT"))
+    expect(pluginMocks.documentDigest).toHaveBeenCalledTimes(1)
+  })
+
   it("requests a bounded cleanup pass before generated-file operations without blocking them", async () => {
     await capacitorPlatformServices.files.share({
       name: "output.txt",
