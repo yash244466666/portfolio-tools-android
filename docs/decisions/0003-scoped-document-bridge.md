@@ -14,7 +14,7 @@ Android file-based tools need user-directed import and export without broad stor
 Add the app-owned, version-1 `DocumentFiles` Capacitor plugin with only three operations:
 
 - `pickDocuments` launches `ACTION_OPEN_DOCUMENT` with `CATEGORY_OPENABLE` and returns bounded, validated metadata plus `content://` URIs. It does not copy content or retain URI access.
-- `saveDocument` launches `ACTION_CREATE_DOCUMENT` for a generated file already staged under the private `cache/save/<operation-id>/` directory. Native code resolves that exact location, streams it to the selected destination off the main thread, and deletes the staged file when the operation settles.
+- `saveDocument` launches `ACTION_CREATE_DOCUMENT` for a generated file already staged under the private `cache/save/<operation-id>/` directory. Native code resolves that exact location, opens the selected destination in explicit write-and-truncate (`wt`) mode, streams the output off the main thread, and deletes the staged file when the operation settles.
 - `discardSave` removes the exact staged operation after cancellation or adapter failure.
 
 Every request carries bridge contract version `1` and a UUID operation ID. The plugin allows only one active system document operation, validates all arguments again in Java, accepts at most 32 MIME filters and 20 selected documents, defaults picker size to 50 MiB, and enforces a 100 MiB hard picker metadata limit. Generated Save As handoffs are limited to 5 MiB; larger output requires a later native streaming design rather than increasing bridge payloads.

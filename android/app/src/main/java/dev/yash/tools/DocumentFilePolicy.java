@@ -14,6 +14,7 @@ final class DocumentFilePolicy {
     static final long DEFAULT_MAX_PICK_BYTES = 50L * 1024L * 1024L;
     static final long MAX_PICK_BYTES = 100L * 1024L * 1024L;
     static final long MAX_SAVE_BYTES = 5L * 1024L * 1024L;
+    static final String SAVE_OUTPUT_MODE = "wt";
 
     private static final int MAX_FILE_NAME_BYTES = 120;
     private static final String FALLBACK_FILE_NAME = "yash-tools-output";
