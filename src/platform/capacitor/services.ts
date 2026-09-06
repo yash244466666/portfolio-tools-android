@@ -13,6 +13,11 @@ import {
   type NativePickedDocument,
   type SaveDocumentOptions,
 } from "@/platform/capacitor/document-files"
+import {
+  SensitiveClipboard,
+  sensitiveClipboardContractVersion,
+} from "@/platform/capacitor/sensitive-clipboard"
+import { GeneratedCache, generatedCacheContractVersion } from "@/platform/capacitor/generated-cache"
 import type {
   FilePickOptions,
   NetworkState,
@@ -39,9 +44,14 @@ const nativeFileErrorMessages: Partial<Record<PlatformErrorCode, string>> = {
   FILE_TOO_LARGE: "The document exceeds the allowed size.",
 }
 
-function nativeErrorCode(error: unknown): PlatformErrorCode | undefined {
+function nativeRejectionCode(error: unknown): string | undefined {
   if (typeof error !== "object" || error === null || !("code" in error)) return undefined
   const code = (error as { code?: unknown }).code
+  return typeof code === "string" ? code : undefined
+}
+
+function nativeErrorCode(error: unknown): PlatformErrorCode | undefined {
+  const code = nativeRejectionCode(error)
   return typeof code === "string" &&
     Object.prototype.hasOwnProperty.call(nativeFileErrorMessages, code)
     ? (code as PlatformErrorCode)
@@ -137,6 +147,44 @@ async function discardSave(options: SaveDocumentOptions): Promise<void> {
   }).catch(() => undefined)
 }
 
+const maximumClipboardBytes = 1024 * 1024
+
+function mappedClipboardError(error: unknown): PlatformError {
+  if (error instanceof PlatformError) return error
+  return nativeRejectionCode(error) === "CLIPBOARD_INVALID_ARGUMENT"
+    ? new PlatformError("CLIPBOARD_INVALID_ARGUMENT", "The clipboard request was invalid.")
+    : new PlatformError("CLIPBOARD_WRITE_FAILED", "The value could not be copied.", true, error)
+}
+
+async function writeClipboardValue(value: string, sensitive: boolean): Promise<void> {
+  if (new TextEncoder().encode(value).byteLength > maximumClipboardBytes) {
+    throw new PlatformError(
+      "CLIPBOARD_INVALID_ARGUMENT",
+      "The copied value exceeds the clipboard size limit.",
+    )
+  }
+  try {
+    await SensitiveClipboard.write({
+      contractVersion: sensitiveClipboardContractVersion,
+      value,
+      sensitive,
+    })
+  } catch (error) {
+    throw mappedClipboardError(error)
+  }
+}
+
+/**
+ * Best-effort janitor trigger. The native pass is single-flight and bounded; failures and
+ * already-running rejections are ignored because cleanup must never delay or block a
+ * generated-file operation. Startup recovery is handled natively when the bridge loads.
+ */
+function sweepGeneratedCache(): void {
+  void GeneratedCache.cleanup({ contractVersion: generatedCacheContractVersion }).catch(
+    () => undefined,
+  )
+}
+
 function stableNotificationId(value: string): number {
   let hash = 0
   for (const character of value) hash = (hash * 31 + character.charCodeAt(0)) | 0
@@ -165,25 +213,20 @@ export const capacitorPlatformServices: PlatformServices = {
     },
     async writeText(value, options) {
       try {
-        await Clipboard.write({ string: value })
+        await writeClipboardValue(value, options?.sensitive === true)
         if (options?.clearAfterMs) {
           window.setTimeout(
             () =>
               void Clipboard.read()
                 .then(({ value: current }) =>
-                  current === value ? Clipboard.write({ string: "" }) : Promise.resolve(),
+                  current === value ? writeClipboardValue("", false) : Promise.resolve(),
                 )
                 .catch(() => undefined),
             options.clearAfterMs,
           )
         }
       } catch (error) {
-        throw new PlatformError(
-          "CLIPBOARD_WRITE_FAILED",
-          "The result could not be copied.",
-          true,
-          error,
-        )
+        throw mappedClipboardError(error)
       }
     },
   },
@@ -261,6 +304,7 @@ export const capacitorPlatformServices: PlatformServices = {
       }
     },
     async share(file) {
+      sweepGeneratedCache()
       try {
         const safeName = sanitizeGeneratedFileName(file.name)
         const saved = await Filesystem.writeFile({
@@ -276,6 +320,7 @@ export const capacitorPlatformServices: PlatformServices = {
       }
     },
     async saveAs(file) {
+      sweepGeneratedCache()
       const operationId = secureRandomService.uuid()
       const name = sanitizeGeneratedFileName(file.name)
       if (!isValidMimeType(file.mimeType, false)) {

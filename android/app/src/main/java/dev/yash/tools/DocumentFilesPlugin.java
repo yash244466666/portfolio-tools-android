@@ -179,6 +179,7 @@ public final class DocumentFilesPlugin extends Plugin {
             reject(call, ERROR_IN_PROGRESS, "Another document request is already open.");
             return;
         }
+        GeneratedCacheRegistry.beginSaveOperation(request.operationId);
         File source = resolveSaveSource(request);
         if (source == null || !source.isFile() || source.length() != request.size) {
             finishOperation(request.operationId);
@@ -345,6 +346,9 @@ public final class DocumentFilesPlugin extends Plugin {
                 activeOperationId = null;
             }
         }
+        // Save As operations stage a private-cache handoff; the cleanup janitor must never treat
+        // an operation as abandoned while it is still open. A null id clears every registration.
+        GeneratedCacheRegistry.endSaveOperation(operationId);
     }
 
     private List<Uri> selectedUris(Intent data) {
