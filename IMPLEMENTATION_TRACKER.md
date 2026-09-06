@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 07:38 Europe/Berlin
+> Last updated: 2026-09-06 07:50 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -23,24 +23,24 @@ This is the living operational record for what is implemented, what is verified,
 
 ## 2. Foundation dashboard
 
-| Workstream                  | Status      | Current evidence                                                                            | Remaining gate                                                           |
-| --------------------------- | ----------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Separate Git repository     | DONE        | Private GitHub repo; local `main` tracks `origin/main`                                      | Branch protection/required checks still require GitHub settings          |
-| GitHub work management      | IN PROGRESS | Project #8; 128 reconciled issues including 87 tools; PR #130 green against `main`          | Merge setup PR; configure saved views; protected main needs GitHub Pro   |
-| Web application scaffold    | DONE        | Production build, 58 tests, and 10 phone/tablet E2E scenarios                               | Continue extending tests with migrated tools                             |
-| Capacitor Android scaffold  | DONE        | 13 official plugins plus one app-owned plugin; all Gradle variants pass                     | Install/smoke test requires an Android device                            |
-| Adaptive application shell  | DONE        | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review | Landscape, split-screen, 200% text, and physical-device review           |
-| Tool registry               | PARTIAL     | Typed 12-tool milestone registry within the approved 87-tool public scope; unique-ID tests  | Add the remaining 75 entries only as their implementation batches mature |
-| Enabled foundation tools    | DONE        | Unit, Timestamp, SHA Hash implementations and pure/E2E tests                                | Physical Android interaction check                                       |
-| Platform contracts          | DONE        | Contracts plus shared web/Capacitor behavior tests across core adapter semantics            | Extend cases alongside each new native capability                        |
-| Android platform adapters   | PARTIAL     | Core adapters plus versioned SAF Pick/Save As and native policy tests                       | Sensitive clipboard flag, share-cache cleanup, device tests              |
-| Android hardening           | PARTIAL     | API 24/36, backup/network/file rules, shrink, three-variant manifest budget, artifacts      | WebView termination/native safe mode and final icon/splash work          |
-| Agent documentation         | DONE        | Detailed synchronized `AGENT.md` and `CLAUDE.md`                                            | Recheck synchronization after future edits                               |
-| Audited implementation plan | DONE        | Full plan copied into repository root                                                       | Reconcile if upstream reference changes                                  |
-| Tracker and provenance      | DONE        | This file plus `docs/SOURCE_PROVENANCE.md`                                                  | Maintain every session                                                   |
-| CI                          | PARTIAL     | Web/E2E and Android lint/debug/manifest-budget jobs defined                                 | Execute on hosted repository; pin actions by commit before production    |
-| Physical device QA          | BLOCKED     | Checklist and installable debug APK exist; `adb devices -l` returned no devices             | Connect and authorize a device, then execute the checklist               |
-| Play Console/release        | BLOCKED     | Release requirements documented                                                             | Requires approved identity, account, signing, store assets, declarations |
+| Workstream                  | Status  | Current evidence                                                                            | Remaining gate                                                           |
+| --------------------------- | ------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Separate Git repository     | DONE    | Private GitHub repo; local `main` tracks `origin/main`                                      | Branch protection/required checks still require GitHub settings          |
+| GitHub work management      | DONE    | Project #8; 128 reconciled issues including 87 tools; PR #130 merged as `1fbd6af`           | Optional saved views are a UI step; protected main needs GitHub Pro      |
+| Web application scaffold    | DONE    | Production build, 58 tests, and 10 phone/tablet E2E scenarios                               | Continue extending tests with migrated tools                             |
+| Capacitor Android scaffold  | DONE    | 13 official plugins plus one app-owned plugin; all Gradle variants pass                     | Install/smoke test requires an Android device                            |
+| Adaptive application shell  | DONE    | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review | Landscape, split-screen, 200% text, and physical-device review           |
+| Tool registry               | PARTIAL | Typed 12-tool milestone registry within the approved 87-tool public scope; unique-ID tests  | Add the remaining 75 entries only as their implementation batches mature |
+| Enabled foundation tools    | DONE    | Unit, Timestamp, SHA Hash implementations and pure/E2E tests                                | Physical Android interaction check                                       |
+| Platform contracts          | DONE    | Contracts plus shared web/Capacitor behavior tests across core adapter semantics            | Extend cases alongside each new native capability                        |
+| Android platform adapters   | PARTIAL | Core adapters plus versioned SAF Pick/Save As and native policy tests                       | Sensitive clipboard flag, share-cache cleanup, device tests              |
+| Android hardening           | PARTIAL | API 24/36, backup/network/file rules, shrink, three-variant manifest budget, artifacts      | WebView termination/native safe mode and final icon/splash work          |
+| Agent documentation         | DONE    | Detailed synchronized `AGENT.md` and `CLAUDE.md`                                            | Recheck synchronization after future edits                               |
+| Audited implementation plan | DONE    | Full plan copied into repository root                                                       | Reconcile if upstream reference changes                                  |
+| Tracker and provenance      | DONE    | This file plus `docs/SOURCE_PROVENANCE.md`                                                  | Maintain every session                                                   |
+| CI                          | PARTIAL | Web/E2E and Android lint/debug/manifest-budget jobs defined                                 | Execute on hosted repository; pin actions by commit before production    |
+| Physical device QA          | BLOCKED | Checklist and installable debug APK exist; `adb devices -l` returned no devices             | Connect and authorize a device, then execute the checklist               |
+| Play Console/release        | BLOCKED | Release requirements documented                                                             | Requires approved identity, account, signing, store assets, declarations |
 
 ## 3. Foundation acceptance checklist
 
@@ -246,6 +246,7 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 | 2026-09-06 07:08 | PR #1 pre-merge audit    | Full web, E2E, sync, native unit/lint/variant/manifest gates       | PASS    | 58 web tests, 10 E2E; 7 native policy tests; explicit Save As truncation regression covered   |
 | 2026-09-06 07:25 | GitHub issue gap audit   | Manifest validation, remote reconciliation, and read-back          | PASS    | 87-tool catalog exact; 128 managed bodies; no duplicate, stale dependency, or hierarchy drift |
 | 2026-09-06 07:32 | PR #1 merge and retarget | Hosted `web-quality`/`android-debug`; post-merge Project read-back | PASS    | PR #1 merged as `7d3b2d7`; issue #13 and PR item Done; PR #130 clean against `main`           |
+| 2026-09-06 07:50 | PR #130 completion       | Review state, hosted CI, issue evidence, and squash merge          | PASS    | Both hosted jobs passed; issue #12 completed; PR #130 merged as `1fbd6af`                     |
 
 Android Lint currently reports warnings, not errors: generated Capacitor launcher/splash resources need final replacement/cleanup; some generated resources appear unused; Gradle 8.14.5 and AppCompat 1.8.0 updates are available; generated `flatDir`/Gradle 9 deprecation and Capacitor Filesystem deprecation notices remain. Review rather than suppress them during the relevant dependency/icon pass.
 
@@ -280,19 +281,18 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 
 ## 9. Next executable queue
 
-1. Review and merge work-management PR #130, now retargeted directly to `main` with both hosted checks passing.
-2. Configure the recommended saved Project views in GitHub's UI; upgrade the account plan before completing protected-main issue #129.
-3. Implement sensitive clipboard metadata and deterministic generated-file cache cleanup/retention for Share and Save As.
-4. Implement WebView renderer-termination handling and a native safe-mode/recovery surface.
-5. Add process-recreation, permission, picker, Save As, share, and notification instrumentation/UI Automator coverage.
-6. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
-7. Add a bounded or streamed `content://` read path alongside the first file-consuming tool that needs it.
-8. Begin Markdown Preview only after the preceding device-level foundation gates remain green.
-9. Complete and Android-validate all 12 tools in the architecture milestone.
-10. Migrate the remaining 75 audited tools in controlled, risk-ordered batches until all 87 pass their Definition of Done.
-11. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval.
-12. Approve or revise the provisional app name, application ID, bundled origin, and privacy posture before release work; public v1 tool count is resolved at 87 by ADR 0004.
-13. Freeze release-signing/key-custody strategy without committing secrets.
+1. Configure the recommended saved Project views in GitHub's UI; upgrade the account plan before completing protected-main issue #129.
+2. Implement sensitive clipboard metadata and deterministic generated-file cache cleanup/retention for Share and Save As.
+3. Implement WebView renderer-termination handling and a native safe-mode/recovery surface.
+4. Add process-recreation, permission, picker, Save As, share, and notification instrumentation/UI Automator coverage.
+5. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
+6. Add a bounded or streamed `content://` read path alongside the first file-consuming tool that needs it.
+7. Begin Markdown Preview only after the preceding device-level foundation gates remain green.
+8. Complete and Android-validate all 12 tools in the architecture milestone.
+9. Migrate the remaining 75 audited tools in controlled, risk-ordered batches until all 87 pass their Definition of Done.
+10. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval.
+11. Approve or revise the provisional app name, application ID, bundled origin, and privacy posture before release work; public v1 tool count is resolved at 87 by ADR 0004.
+12. Freeze release-signing/key-custody strategy without committing secrets.
 
 ## 10. Release-gate snapshot
 
@@ -405,3 +405,4 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Merged fully described and green PR #1 into `main` as merge commit `7d3b2d7`, automatically closed issue #13, and reconciled both the issue and pull-request Project items to Done.
 - Retargeted PR #130 from the merged feature branch to `main`, replaced its stale stacking notes with the gap-audit evidence, and confirmed a clean merge state with both hosted CI jobs passing.
 - Generalized bootstrap pull-request reconciliation so a rebuilt Project restores and state-maps both PR #1 and PR #130 instead of only the original SAF pull request.
+- Recorded completion evidence on issue #12, checked both acceptance criteria, and squash-merged PR #130 into `main` as `1fbd6af` after both hosted jobs passed.
