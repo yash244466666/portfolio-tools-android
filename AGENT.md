@@ -29,7 +29,7 @@ Implemented now:
 - React/Vite/TypeScript/Tailwind application.
 - Capacitor Android project.
 - Typed tool registry containing the initial 12-tool architecture milestone within the approved 87-tool public-release scope.
-- Three enabled tools: Unit Converter, Timestamp Converter, and Hash Generator.
+- Four enabled tools: Unit Converter, Timestamp Converter, Hash Generator, and Markdown Preview.
 - Catalog search and category filters.
 - Favorites and recent-tool persistence.
 - System/light/dark theme preferences.
@@ -45,10 +45,8 @@ Implemented now:
 Not yet implemented:
 
 - Remaining nine vertical-slice tools.
-- Remaining 75 catalog tools after the vertical slice; 84 of the approved 87 are not yet implemented overall.
-- Fully sensitive Android clipboard metadata through a custom native bridge.
-- Deterministic share-cache cleanup and retention.
-- Renderer-termination recovery host and native safe-mode screen.
+- Remaining 75 catalog tools after the vertical slice; 83 of the approved 87 are not yet implemented overall.
+- Installed-artifact device verification of the sensitive clipboard bridge, generated-file cache cleanup, and renderer recovery/safe mode.
 - Final icons, splash assets, app name, application ID approval, App Links, and Play signing.
 - Physical-device verification and Play-distributed artifact testing.
 
@@ -656,9 +654,9 @@ Before ending work:
 ## 29. Critical warnings
 
 - The current app name, package ID, origin, and publisher details are provisional.
-- The three enabled tools are a foundation, not the public release scope.
-- Android file picking/Save As and renderer-safe recovery remain incomplete.
-- Sensitive clipboard flags require native work beyond the current general Capacitor clipboard call.
+- The four enabled tools are a foundation, not the public release scope.
+- Device verification of file picking/Save As and renderer recovery remains outstanding.
+- Device verification of the sensitive clipboard extra and preview suppression remains outstanding.
 - Final icons/splash/store assets are placeholders.
 - No release keystore or Play credentials exist in this repository.
 - Do not publish the current artifact.
