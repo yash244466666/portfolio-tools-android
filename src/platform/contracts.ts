@@ -40,10 +40,45 @@ export interface FilePickOptions {
   maximumBytes?: number
 }
 
+export interface BoundedContent {
+  size: number
+  data: string
+  encoding: "base64"
+}
+
+export type ContentDigestAlgorithm = "sha-1" | "sha-256" | "sha-512"
+
+export interface ContentDigest {
+  algorithm: ContentDigestAlgorithm
+  digestHex: string
+  size: number
+}
+
+export interface ContentReadOptions {
+  /** Hard native cap is 16 MiB; tools pass their own smaller bound. */
+  maximumBytes: number
+}
+
+export interface ContentDigestOptions {
+  algorithm: ContentDigestAlgorithm
+}
+
 export interface FileService {
   pick(options: FilePickOptions): Promise<PickedFile[]>
   share(file: GeneratedFile): Promise<void>
   saveAs(file: GeneratedFile): Promise<void>
+  /** Bounded in-memory copy of a picked file; oversized content is rejected, never truncated. */
+  readContent(
+    file: PickedFile,
+    options: ContentReadOptions,
+    signal?: AbortSignal,
+  ): Promise<BoundedContent>
+  /** Streams a digest of a picked file; large content never crosses the bridge in full. */
+  digestContent(
+    file: PickedFile,
+    options: ContentDigestOptions,
+    signal?: AbortSignal,
+  ): Promise<ContentDigest>
 }
 
 export interface NotificationRequestResult {

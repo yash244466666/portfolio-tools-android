@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
+import android.util.Base64;
 import androidx.activity.result.ActivityResult;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -24,7 +25,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -40,10 +44,16 @@ public final class DocumentFilesPlugin extends Plugin {
     private static final String ERROR_SAVE_CANCELLED = "FILE_SAVE_CANCELLED";
     private static final String ERROR_SAVE_FAILED = "FILE_SAVE_FAILED";
     private static final String ERROR_TOO_LARGE = "FILE_TOO_LARGE";
+    private static final String ERROR_READ_FAILED = "FILE_READ_FAILED";
+    private static final String ERROR_READ_CANCELLED = "FILE_READ_CANCELLED";
     private static final String SAVE_CACHE_DIRECTORY = "save";
 
     private final Object operationLock = new Object();
     private String activeOperationId;
+
+    private final Object contentLock = new Object();
+    private String activeContentOperationId;
+    private final Set<String> cancelledContentOperations = new HashSet<>();
 
     @PluginMethod
     public void pickDocuments(PluginCall call) {
@@ -158,6 +168,7 @@ public final class DocumentFilesPlugin extends Plugin {
             file.put("size", metadata.size);
             file.put("uri", uri.toString());
             files.put(file);
+            PickedUriRegistry.remember(uri.toString());
         }
 
         JSObject response = new JSObject();
@@ -250,6 +261,152 @@ public final class DocumentFilesPlugin extends Plugin {
         }
     }
 
+    /**
+     * Streams a previously picked content URI through a MessageDigest without buffering the
+     * content. The stream enforces the byte cap and the cancellation flag between chunks; only
+     * the digest, byte count, and algorithm cross the bridge, never the file bytes.
+     */
+    @PluginMethod
+    public void digestContent(PluginCall call) {
+        if (!hasCurrentContract(call)) {
+            reject(call, ERROR_INVALID_ARGUMENT, "The content digest request version is unsupported.");
+            return;
+        }
+        String operationId = call.getString("operationId");
+        String uri = call.getString("uri");
+        String requestedAlgorithm = call.getString("algorithm");
+        String algorithm = ContentReadPolicy.digestAlgorithm(requestedAlgorithm);
+        if (
+            !DocumentFilePolicy.isValidOperationId(operationId) ||
+            !ContentReadPolicy.isValidContentUri(uri) ||
+            !PickedUriRegistry.isPicked(uri) ||
+            algorithm == null
+        ) {
+            reject(call, ERROR_INVALID_ARGUMENT, "The content digest request is invalid.");
+            return;
+        }
+        if (!beginContentOperation(operationId)) {
+            reject(call, ERROR_IN_PROGRESS, "Another content operation is already running.");
+            return;
+        }
+        final String algorithmName = algorithm;
+        getBridge().execute(() -> completeDigestContent(call, operationId, uri, requestedAlgorithm, algorithmName));
+    }
+
+    private void completeDigestContent(
+        PluginCall call,
+        String operationId,
+        String uri,
+        String requestedAlgorithm,
+        String algorithmName
+    ) {
+        try {
+            InputStream input = getContext().getContentResolver().openInputStream(Uri.parse(uri));
+            if (input == null) {
+                finishContentOperation(operationId);
+                reject(call, ERROR_READ_FAILED, "The selected document could not be read.");
+                return;
+            }
+            MessageDigest digest = MessageDigest.getInstance(algorithmName);
+            ContentReadPolicy.StreamDigest result = ContentReadPolicy.digestStream(
+                input,
+                digest,
+                ContentReadPolicy.MAX_HASH_BYTES,
+                () -> isContentCancelled(operationId)
+            );
+            JSObject response = new JSObject();
+            response.put("contractVersion", DocumentFilePolicy.CONTRACT_VERSION);
+            response.put("operationId", operationId);
+            response.put("algorithm", requestedAlgorithm);
+            response.put("digest", ContentReadPolicy.toHex(result.digest));
+            response.put("size", result.size);
+            finishContentOperation(operationId);
+            resolve(call, response);
+        } catch (ContentReadPolicy.StreamCancelledException ignored) {
+            finishContentOperation(operationId);
+            reject(call, ERROR_READ_CANCELLED, "The content digest was cancelled.");
+        } catch (ContentReadPolicy.StreamSizeExceededException ignored) {
+            finishContentOperation(operationId);
+            reject(call, ERROR_TOO_LARGE, "The selected document exceeds the allowed size.");
+        } catch (IOException | RuntimeException | java.security.NoSuchAlgorithmException ignored) {
+            finishContentOperation(operationId);
+            reject(call, ERROR_READ_FAILED, "The selected document could not be read.");
+        }
+    }
+
+    /** Idempotent cancellation: an unknown or already-finished operation resolves silently. */
+    @PluginMethod
+    public void cancelDigest(PluginCall call) {
+        if (!hasCurrentContract(call)) {
+            reject(call, ERROR_INVALID_ARGUMENT, "The cancellation request version is unsupported.");
+            return;
+        }
+        String operationId = call.getString("operationId");
+        if (!DocumentFilePolicy.isValidOperationId(operationId)) {
+            reject(call, ERROR_INVALID_ARGUMENT, "The cancellation request is invalid.");
+            return;
+        }
+        cancelContentOperation(operationId);
+        resolve(call, null);
+    }
+
+    /**
+     * Copies a previously picked content URI into a bounded in-memory handoff and returns it as
+     * Base64. The cap is validated before streaming and oversized content is rejected rather than
+     * truncated, so a tool never receives partial bytes presented as complete.
+     */
+    @PluginMethod
+    public void readContent(PluginCall call) {
+        if (!hasCurrentContract(call)) {
+            reject(call, ERROR_INVALID_ARGUMENT, "The content read request version is unsupported.");
+            return;
+        }
+        String uri = call.getString("uri");
+        Long requestedMaximum = numberAsLong(call.getData().opt("maximumBytes"));
+        if (
+            !ContentReadPolicy.isValidContentUri(uri) ||
+            !PickedUriRegistry.isPicked(uri)
+        ) {
+            reject(call, ERROR_INVALID_ARGUMENT, "The content read request is invalid.");
+            return;
+        }
+        final long maximumBytes;
+        try {
+            maximumBytes = ContentReadPolicy.validateReadMaximum(requestedMaximum);
+        } catch (IllegalArgumentException ignored) {
+            reject(call, ERROR_INVALID_ARGUMENT, "The content read size limit is invalid.");
+            return;
+        }
+        if (!beginContentOperation("read-" + uri)) {
+            reject(call, ERROR_IN_PROGRESS, "Another content operation is already running.");
+            return;
+        }
+        final long resolvedMaximum = maximumBytes;
+        getBridge().execute(() -> completeReadContent(call, uri, resolvedMaximum));
+    }
+
+    private void completeReadContent(PluginCall call, String uri, long maximumBytes) {
+        try {
+            InputStream input = getContext().getContentResolver().openInputStream(Uri.parse(uri));
+            if (input == null) {
+                reject(call, ERROR_READ_FAILED, "The selected document could not be read.");
+                return;
+            }
+            byte[] content = ContentReadPolicy.readBounded(input, maximumBytes);
+            JSObject response = new JSObject();
+            response.put("contractVersion", DocumentFilePolicy.CONTRACT_VERSION);
+            response.put("size", content.length);
+            response.put("data", Base64.encodeToString(content, Base64.NO_WRAP));
+            resolve(call, response);
+        } catch (ContentReadPolicy.StreamSizeExceededException ignored) {
+            reject(call, ERROR_TOO_LARGE, "The selected document exceeds the allowed size.");
+        } catch (IOException | RuntimeException ignored) {
+            reject(call, ERROR_READ_FAILED, "The selected document could not be read.");
+        } finally {
+            finishContentOperation("read-" + uri);
+        }
+    }
+
     @PluginMethod
     public void discardSave(PluginCall call) {
         SaveRequest request = validatedSaveRequest(call);
@@ -271,6 +428,7 @@ public final class DocumentFilesPlugin extends Plugin {
     protected void handleOnDestroy() {
         super.handleOnDestroy();
         finishOperation(null);
+        finishContentOperation(null);
     }
 
     private boolean hasCurrentContract(PluginCall call) {
@@ -349,6 +507,44 @@ public final class DocumentFilesPlugin extends Plugin {
         // Save As operations stage a private-cache handoff; the cleanup janitor must never treat
         // an operation as abandoned while it is still open. A null id clears every registration.
         GeneratedCacheRegistry.endSaveOperation(operationId);
+    }
+
+    private boolean beginContentOperation(String operationId) {
+        synchronized (contentLock) {
+            if (activeContentOperationId != null) {
+                return false;
+            }
+            activeContentOperationId = operationId;
+            return true;
+        }
+    }
+
+    private void finishContentOperation(String operationId) {
+        synchronized (contentLock) {
+            if (operationId == null) {
+                activeContentOperationId = null;
+                cancelledContentOperations.clear();
+                return;
+            }
+            if (operationId.equals(activeContentOperationId)) {
+                activeContentOperationId = null;
+            }
+            cancelledContentOperations.remove(operationId);
+        }
+    }
+
+    private boolean isContentCancelled(String operationId) {
+        synchronized (contentLock) {
+            return cancelledContentOperations.contains(operationId);
+        }
+    }
+
+    private void cancelContentOperation(String operationId) {
+        synchronized (contentLock) {
+            if (operationId.equals(activeContentOperationId)) {
+                cancelledContentOperations.add(operationId);
+            }
+        }
     }
 
     private List<Uri> selectedUris(Intent data) {

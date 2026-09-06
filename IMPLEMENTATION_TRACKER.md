@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 19:45 Europe/Berlin
+> Last updated: 2026-09-06 20:25 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -23,24 +23,24 @@ This is the living operational record for what is implemented, what is verified,
 
 ## 2. Foundation dashboard
 
-| Workstream                  | Status  | Current evidence                                                                                          | Remaining gate                                                           |
-| --------------------------- | ------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Separate Git repository     | DONE    | Private GitHub repo; local `main` tracks `origin/main`                                                    | Branch protection/required checks still require GitHub settings          |
-| GitHub work management      | DONE    | Project #8; 128 reconciled issues including 87 tools; PR #130 merged as `1fbd6af`                         | Optional saved views are a UI step; protected main needs GitHub Pro      |
-| Web application scaffold    | DONE    | Production build, 80 tests, and 12 phone/tablet E2E scenarios                                             | Continue extending tests with migrated tools                             |
-| Capacitor Android scaffold  | DONE    | 13 official plugins plus one app-owned plugin; all Gradle variants pass                                   | Install/smoke test requires an Android device                            |
-| Adaptive application shell  | DONE    | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review               | Landscape, split-screen, 200% text, and physical-device review           |
-| Tool registry               | PARTIAL | Typed 12-tool milestone registry within the approved 87-tool public scope; unique-ID tests                | Add the remaining 75 entries only as their implementation batches mature |
-| Enabled foundation tools    | DONE    | Unit, Timestamp, SHA Hash implementations and pure/E2E tests                                              | Physical Android interaction check                                       |
-| Platform contracts          | DONE    | Contracts plus shared web/Capacitor behavior tests across core adapter semantics                          | Extend cases alongside each new native capability                        |
-| Android platform adapters   | PARTIAL | Core adapters, SAF Pick/Save As, sensitive-clipboard bridge, generated-cache janitor, native policy tests | Instrumentation/device tests                                             |
-| Android hardening           | PARTIAL | API 24/36, backup/network/file rules, shrink, three-variant manifest budget, artifacts                    | WebView termination/native safe mode and final icon/splash work          |
-| Agent documentation         | DONE    | Detailed synchronized `AGENT.md` and `CLAUDE.md`                                                          | Recheck synchronization after future edits                               |
-| Audited implementation plan | DONE    | Full plan copied into repository root                                                                     | Reconcile if upstream reference changes                                  |
-| Tracker and provenance      | DONE    | This file plus `docs/SOURCE_PROVENANCE.md`                                                                | Maintain every session                                                   |
-| CI                          | PARTIAL | Web/E2E and Android lint/debug/manifest-budget jobs defined                                               | Execute on hosted repository; pin actions by commit before production    |
-| Physical device QA          | BLOCKED | Checklist and installable debug APK exist; `adb devices -l` returned no devices                           | Connect and authorize a device, then execute the checklist               |
-| Play Console/release        | BLOCKED | Release requirements documented                                                                           | Requires approved identity, account, signing, store assets, declarations |
+| Workstream                  | Status  | Current evidence                                                                                                                          | Remaining gate                                                           |
+| --------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Separate Git repository     | DONE    | Private GitHub repo; local `main` tracks `origin/main`                                                                                    | Branch protection/required checks still require GitHub settings          |
+| GitHub work management      | DONE    | Project #8; 128 reconciled issues including 87 tools; PR #130 merged as `1fbd6af`                                                         | Optional saved views are a UI step; protected main needs GitHub Pro      |
+| Web application scaffold    | DONE    | Production build, 80 tests, and 12 phone/tablet E2E scenarios                                                                             | Continue extending tests with migrated tools                             |
+| Capacitor Android scaffold  | DONE    | 13 official plugins plus one app-owned plugin; all Gradle variants pass                                                                   | Install/smoke test requires an Android device                            |
+| Adaptive application shell  | DONE    | Catalog, search, filters, Favorites/Recent, bottom nav/rail, overflow and screenshot review                                               | Landscape, split-screen, 200% text, and physical-device review           |
+| Tool registry               | PARTIAL | Typed 12-tool milestone registry within the approved 87-tool public scope; unique-ID tests                                                | Add the remaining 75 entries only as their implementation batches mature |
+| Enabled foundation tools    | DONE    | Unit, Timestamp, SHA Hash implementations and pure/E2E tests                                                                              | Physical Android interaction check                                       |
+| Platform contracts          | DONE    | Contracts plus shared web/Capacitor behavior tests across core adapter semantics                                                          | Extend cases alongside each new native capability                        |
+| Android platform adapters   | PARTIAL | Core adapters, SAF Pick/Save As, sensitive-clipboard bridge, generated-cache janitor, streamed/bounded content reads, native policy tests | Instrumentation/device tests                                             |
+| Android hardening           | PARTIAL | API 24/36, backup/network/file rules, shrink, three-variant manifest budget, artifacts                                                    | WebView termination/native safe mode and final icon/splash work          |
+| Agent documentation         | DONE    | Detailed synchronized `AGENT.md` and `CLAUDE.md`                                                                                          | Recheck synchronization after future edits                               |
+| Audited implementation plan | DONE    | Full plan copied into repository root                                                                                                     | Reconcile if upstream reference changes                                  |
+| Tracker and provenance      | DONE    | This file plus `docs/SOURCE_PROVENANCE.md`                                                                                                | Maintain every session                                                   |
+| CI                          | PARTIAL | Web/E2E and Android lint/debug/manifest-budget jobs defined                                                                               | Execute on hosted repository; pin actions by commit before production    |
+| Physical device QA          | BLOCKED | Checklist and installable debug APK exist; `adb devices -l` returned no devices                                                           | Connect and authorize a device, then execute the checklist               |
+| Play Console/release        | BLOCKED | Release requirements documented                                                                                                           | Requires approved identity, account, signing, store assets, declarations |
 
 ## 3. Foundation acceptance checklist
 
@@ -109,6 +109,7 @@ This is the living operational record for what is implemented, what is verified,
 - [x] Android sensitive clipboard `EXTRA_IS_SENSITIVE` native bridge with adapter/native policy tests; installed-artifact device verification remains pending.
 - [x] Android Storage Access Framework document picker with validated `content://` metadata.
 - [x] Android `ACTION_CREATE_DOCUMENT` Save As bridge with a bounded private-cache handoff.
+- [x] Versioned bounded/streamed `content://` read bridge (native digest streaming with cancellation, bounded in-memory copy) with real SHA policy vectors; provider-interoperability device evidence pending.
 - [x] Generated-file cache cleanup/retention janitor for `cache/share/` and `cache/save/<operation>/` with policy tests; installed-artifact retention/device verification remains pending.
 - [x] Shared web/Capacitor adapter contract tests for clipboard, preferences, browser, network, files, and notifications.
 - [x] Native document validation policy tests wired into local and CI Gradle gates.
@@ -196,19 +197,20 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 
 ## 5. Platform adapter status
 
-| Adapter          | Web                | Android             | Automated tests                 | Device tests | Notes                                                                                 |
-| ---------------- | ------------------ | ------------------- | ------------------------------- | ------------ | ------------------------------------------------------------------------------------- |
-| Clipboard        | Implemented        | Implemented         | Shared contract tests           | Pending      | Android 13+ sensitive flag via custom native bridge; 1 MiB write limit both platforms |
-| Preferences      | Implemented        | Implemented         | Shared contract tests           | Pending      | Foundation values only; durable schema still pending                                  |
-| Secure random    | Implemented        | Same implementation | Shared utility tests            | Pending      | Web Crypto only                                                                       |
-| Network state    | Implemented        | Implemented         | Shared contract tests           | Pending      | Connectivity is not reachability                                                      |
-| External browser | Implemented        | Implemented         | Shared URL/adapter tests        | Pending      | HTTPS only; embedded credentials rejected                                             |
-| Lifecycle        | Implemented        | Implemented         | Listener cleanup partly covered | Pending      | Renderer recovery policy unit-tested; device verification pending                     |
-| Haptics          | Best effort        | Implemented         | Not required                    | Pending      | Never blocks primary action                                                           |
-| Notifications    | Permission only    | Implemented         | Schedule/cancel contract tests  | Pending      | No exact-alarm permission                                                             |
-| File picker      | Browser input      | SAF Open Document   | Adapter + native policy tests   | Pending      | Metadata/content URI only; no broad permissions                                       |
-| File share       | Download/Web Share | Cache + Share       | Bytes/name/cache-path tests     | Pending      | Retention cleanup pending                                                             |
-| Save As          | Browser download   | SAF Create Document | Adapter + native policy tests   | Pending      | 5 MiB handoff; immediate best-effort cache cleanup                                    |
+| Adapter          | Web                | Android                           | Automated tests                 | Device tests | Notes                                                                                 |
+| ---------------- | ------------------ | --------------------------------- | ------------------------------- | ------------ | ------------------------------------------------------------------------------------- |
+| Clipboard        | Implemented        | Implemented                       | Shared contract tests           | Pending      | Android 13+ sensitive flag via custom native bridge; 1 MiB write limit both platforms |
+| Preferences      | Implemented        | Implemented                       | Shared contract tests           | Pending      | Foundation values only; durable schema still pending                                  |
+| Secure random    | Implemented        | Same implementation               | Shared utility tests            | Pending      | Web Crypto only                                                                       |
+| Network state    | Implemented        | Implemented                       | Shared contract tests           | Pending      | Connectivity is not reachability                                                      |
+| External browser | Implemented        | Implemented                       | Shared URL/adapter tests        | Pending      | HTTPS only; embedded credentials rejected                                             |
+| Lifecycle        | Implemented        | Implemented                       | Listener cleanup partly covered | Pending      | Renderer recovery policy unit-tested; device verification pending                     |
+| Haptics          | Best effort        | Implemented                       | Not required                    | Pending      | Never blocks primary action                                                           |
+| Notifications    | Permission only    | Implemented                       | Schedule/cancel contract tests  | Pending      | No exact-alarm permission                                                             |
+| File picker      | Browser input      | SAF Open Document                 | Adapter + native policy tests   | Pending      | Metadata/content URI only; no broad permissions                                       |
+| Content reads    | Browser File reads | Native digest stream/bounded copy | Contract + SHA policy tests     | Pending      | 1 GiB digest cap; 16 MiB read cap; single-flight                                      |
+| File share       | Download/Web Share | Cache + Share                     | Bytes/name/cache-path tests     | Pending      | Retention cleanup pending                                                             |
+| Save As          | Browser download   | SAF Create Document               | Adapter + native policy tests   | Pending      | 5 MiB handoff; immediate best-effort cache cleanup                                    |
 
 ## 6. Quality-gate evidence
 
@@ -266,15 +268,19 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 | 2026-09-06 19:21                                                                                                                                                                                                                                                                                                                                                                                             | Markdown Preview batch    | `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`                                             | PASS    | Markdown lazy chunk 73.78 kB/25.09 kB gzip; 12 E2E scenarios; assets synced                   |
 | 2026-09-06 19:23                                                                                                                                                                                                                                                                                                                                                                                             | Markdown Preview batch    | `testDebugUnitTest`, `lintDebug`, all variants                                             | PASS    | 27 native tests; zero lint errors; debug/internal APKs and minified release AAB built         |
 | 2026-09-06 19:24                                                                                                                                                                                                                                                                                                                                                                                             | Markdown Preview batch    | Manifest checks, APK v2, AAB `.so`, work-items/actions, `git diff --check`                 | PASS    | Six permissions/variant; one exported Activity; unsigned AAB with no `.so`; audits valid      |
+| 2026-09-06 20:20                                                                                                                                                                                                                                                                                                                                                                                             | Content-read batch        | `pnpm format:check`, `pnpm typecheck`, `pnpm lint`, `pnpm test`                            | PASS    | Formatting accepted; strict types and zero lint warnings; 14 files/93 tests                   |
+| 2026-09-06 20:21                                                                                                                                                                                                                                                                                                                                                                                             | Content-read batch        | `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`                                             | PASS    | Main JS 250.70 kB/79.28 kB gzip; 12 E2E scenarios; assets synced                              |
+| 2026-09-06 20:22                                                                                                                                                                                                                                                                                                                                                                                             | Content-read batch        | `testDebugUnitTest`, `lintDebug`, all variants                                             | PASS    | 11 new ContentReadPolicy tests (38 native tests); zero lint errors; all variants built        |
+| 2026-09-06 20:23                                                                                                                                                                                                                                                                                                                                                                                             | Content-read batch        | Manifest checks, APK v2, AAB `.so`, work-items/actions, `git diff --check`                 | PASS    | Six permissions/variant; one exported Activity; unsigned AAB with no `.so`; audits valid      |
 | Android Lint currently reports warnings, not errors: generated Capacitor launcher/splash resources need final replacement/cleanup; some generated resources appear unused; Gradle 8.14.5 and AppCompat 1.8.0 updates are available; generated `flatDir`/Gradle 9 deprecation and Capacitor Filesystem deprecation notices remain. Review rather than suppress them during the relevant dependency/icon pass. |
 
 ## 7. Artifact inventory
 
 | Artifact     | Package/role              |     Bytes | SHA-256                                                            | Signing/status                           |
 | ------------ | ------------------------- | --------: | ------------------------------------------------------------------ | ---------------------------------------- |
-| Debug APK    | `dev.yash.tools.debug`    | 5,445,131 | `2a622e3fafb25cf7c1473e1fc20f75345a46066ca4c42db8bfa5e45006605f95` | Local debug key; APK v2 verified         |
-| Internal APK | `dev.yash.tools.internal` | 5,447,023 | `de2eb0f924a991e724c65f6d39301a658f02171d654314e07e55a1b454ff2704` | Local debug key; APK v2 verified         |
-| Release AAB  | `dev.yash.tools`          | 2,214,033 | `84c04da8939f00a85845d7c4d72d9b262ca6e66a36174a52b945533f209739a4` | Build proof only; intentionally unsigned |
+| Debug APK    | `dev.yash.tools.debug`    | 5,445,131 | `b24af37d8a2054738f67710cd92b58a326ab72e6d3cd098d35ce593a79262bd2` | Local debug key; APK v2 verified         |
+| Internal APK | `dev.yash.tools.internal` | 5,447,023 | `1c7dac35e93bf09426bfc9c491ea07c4034e3340b1844ba96814b63aa93545b5` | Local debug key; APK v2 verified         |
+| Release AAB  | `dev.yash.tools`          | 2,218,800 | `c7437cb2722d030ba7e2b1db25a862097471f9d5d4dd659a6cc23fea25dec004` | Build proof only; intentionally unsigned |
 
 These are reproducibility evidence, not publication candidates. Rebuild after any source/config change and never distribute a debug-key artifact as production.
 
@@ -301,15 +307,13 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 
 1. Configure the recommended saved Project views in GitHub's UI; upgrade the account plan before completing protected-main issue #129.
 2. Add process-recreation, permission, picker, Save As, share, notification, and renderer-recovery instrumentation/UI Automator coverage.
-3. Add process-recreation, permission, picker, Save As, share, and notification instrumentation/UI Automator coverage.
-4. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
-5. Add a bounded or streamed `content://` read path alongside the first file-consuming tool that needs it.
-6. Port Regex Tester into a terminable Worker with hostile-input time budgets.
-7. Complete and Android-validate all 12 tools in the architecture milestone.
-8. Migrate the remaining 75 audited tools in controlled, risk-ordered batches until all 87 pass their Definition of Done.
-9. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval.
-10. Approve or revise the provisional app name, application ID, bundled origin, and privacy posture before release work; public v1 tool count is resolved at 87 by ADR 0004.
-11. Freeze release-signing/key-custody strategy without committing secrets.
+3. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
+4. Port Regex Tester into a terminable Worker with hostile-input time budgets.
+5. Complete and Android-validate all 12 tools in the architecture milestone.
+6. Migrate the remaining 75 audited tools in controlled, risk-ordered batches until all 87 pass their Definition of Done.
+7. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval.
+8. Approve or revise the provisional app name, application ID, bundled origin, and privacy posture before release work; public v1 tool count is resolved at 87 by ADR 0004.
+9. Freeze release-signing/key-custody strategy without committing secrets.
 
 ## 10. Release-gate snapshot
 
@@ -476,3 +480,13 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Merged PR #135 into `main` as `9f08c2f`, closing issue #55; the Project item is Done. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
 - Four tools are now enabled (Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview); 83 of the approved 87 remain.
 - Next executable item: issue #19, bounded/streamed `content://` reads, which unblocks the first file-consuming tools.
+
+### 2026-09-06 — Bounded/streamed content-URI read batch
+
+- Extended the version-1 `DocumentFiles` bridge with `digestContent`, `cancelDigest`, and `readContent`, all natively validated and restricted to content URIs the picker returned in this process through a process-local `PickedUriRegistry`, so the bridge can never read an arbitrary provider URI.
+- Native digest streaming hashes in 64 KiB chunks on a background thread and never sends file bytes over the bridge; the stream enforces a 1 GiB cap and a cancellation flag between chunks (`cancelDigest`, idempotent). Supported algorithms are SHA-1/SHA-256/SHA-512; MD5 remains excluded.
+- Native bounded reads copy a picked document into memory with a 16 MiB hard cap (tools may pass smaller limits) and return Base64; oversized content is rejected, never truncated. Content operations are single-flight across digest and read.
+- Added typed `FILE_READ_FAILED` and `FILE_READ_CANCELLED` codes plus the cancellation contract; added `readContent`/`digestContent` to the platform `FileService` contract with `AbortSignal` cancellation, a same-cap web `File` implementation, and a Web Crypto web digest implementation with the documented 50 MiB JavaScript limit.
+- Added 11 pure `ContentReadPolicyTest` native cases with real SHA vectors (empty stream, `abc` vectors, multi-chunk streams, oversized rejection, mid-stream cancellation, hex encoding) and shared/native/web adapter contract cases (bounded reads, digest vectors, invalid limits/URIs/algorithms, pre-aborted signals, mid-flight cancellation wiring, native failure mapping).
+- Added ADR 0009 and updated the architecture overview and provenance. Provider interoperability and process-interruption behavior with real DocumentsProviders remains assigned to issues #17/#18.
+- Passed formatting, strict typecheck, zero-warning lint, 93 web tests (14 files), 12 E2E scenarios, production build, Capacitor sync, 38 native policy tests, Android Lint, debug/internal APK and minified release AAB builds, three manifest budgets, APK v2 signatures, AAB native-library inspection, work-item/action audits, and `git diff --check`.

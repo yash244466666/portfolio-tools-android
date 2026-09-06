@@ -16,6 +16,8 @@ export type PlatformErrorCode =
   | "FILE_SAVE_CANCELLED"
   | "FILE_SAVE_UNAVAILABLE"
   | "FILE_SAVE_FAILED"
+  | "FILE_READ_FAILED"
+  | "FILE_READ_CANCELLED"
   | "NOTIFICATION_DENIED"
   | "NOTIFICATION_SCHEDULE_FAILED"
   | "EXTERNAL_URL_REJECTED"
@@ -47,6 +49,7 @@ export function isCancellationError(error: unknown): boolean {
       ("code" in error &&
         ((error as { code?: unknown }).code === "FILE_PICK_CANCELLED" ||
           (error as { code?: unknown }).code === "FILE_SHARE_CANCELLED" ||
-          (error as { code?: unknown }).code === "FILE_SAVE_CANCELLED")))
+          (error as { code?: unknown }).code === "FILE_SAVE_CANCELLED" ||
+          (error as { code?: unknown }).code === "FILE_READ_CANCELLED")))
   )
 }

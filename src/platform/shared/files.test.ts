@@ -1,4 +1,5 @@
 import {
+  bytesToBase64,
   generatedFileBytes,
   maximumBridgeGeneratedFileBytes,
   sanitizeGeneratedFileName,
@@ -52,5 +53,15 @@ describe("generated file safety", () => {
         encoding: "utf8",
       }),
     ).toThrow(RangeError)
+  })
+})
+
+describe("bytesToBase64", () => {
+  it("encodes standard vectors across chunk boundaries", () => {
+    expect(bytesToBase64(new TextEncoder().encode("abc"))).toBe("YWJj")
+    expect(bytesToBase64(new Uint8Array([0, 255, 128]))).toBe("AP+A")
+    const large = new Uint8Array(0x8000 + 17)
+    for (let index = 0; index < large.length; index++) large[index] = index % 256
+    expect(atob(bytesToBase64(large)).length).toBe(large.length)
   })
 })
