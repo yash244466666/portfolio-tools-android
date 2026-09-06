@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 15:05 Europe/Berlin
+> Last updated: 2026-09-06 15:30 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -450,3 +450,10 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Recorded a new toolchain observation: two builds of an identical committed web tree can produce different Vite 8/Rolldown bundle hashes with near-identical sizes. Generated `android/app/src/main/assets/public/` is gitignored, so this does not affect commits; artifact SHA-256 evidence remains per-build-run.
 - Passed strict typecheck, zero-warning lint, 66 web tests (12 files), 10 E2E scenarios, production build, Capacitor sync, 27 native policy tests, Android Lint, debug/internal APK and minified release AAB builds, three manifest budgets, APK v2 signatures, AAB native-library inspection, the work-item audit, and `git diff --check`.
 - Installed-artifact renderer-gone behavior (overlay, loop bounds, TalkBack) remains assigned to issues #17 and #18 and is not claimed here.
+
+### 2026-09-06 — Foundation P0 merge reconciliation
+
+- Merged and reconciled PR #132 (sensitive clipboard, issue #14), PR #133 (generated-cache cleanup, issue #15), and PR #134 (renderer recovery/safe mode, issue #16) into `main` as `e6241df`, `306bda6`, and `b112128`; all three issues closed by their pull requests and their Project items were mapped to Done.
+- Verified `main` == `origin/main` with a clean worktree, all three hosted CI jobs green on each PR before merge, and no open pull requests remaining.
+- Confirmed no physical device or configured emulator is connected (`adb devices -l` empty; no AVD present), so issues #17 and #18 remain hardware-blocked.
+- Next executable item: the Markdown Preview tool migration; the foundation gates required before it (sensitive clipboard, cache cleanup, renderer recovery) are complete.
