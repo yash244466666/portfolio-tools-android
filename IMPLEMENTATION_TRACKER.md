@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-06 19:25 Europe/Berlin
+> Last updated: 2026-09-06 19:45 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -470,3 +470,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Updated the operating guides, README, tool table, and tracker counts to four enabled tools (83 remaining of the approved 87); synchronized `AGENT.md` and `CLAUDE.md` and refreshed their stale status warnings for this session's completed foundation work.
 - Added ADR 0008 and provenance entries. Physical-device interaction evidence for Markdown Preview and the other enabled tools remains assigned to issue #18.
 - Passed formatting, strict typecheck, zero-warning lint, 80 web tests (14 files), 12 E2E scenarios, production build, Capacitor sync, 27 native policy tests, Android Lint, debug/internal APK and minified release AAB builds, three manifest budgets, APK v2 signatures, AAB native-library inspection, work-item/action audits, and `git diff --check`.
+
+### 2026-09-06 — Markdown Preview merge reconciliation
+
+- Merged PR #135 into `main` as `9f08c2f`, closing issue #55; the Project item is Done. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
+- Four tools are now enabled (Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview); 83 of the approved 87 remain.
+- Next executable item: issue #19, bounded/streamed `content://` reads, which unblocks the first file-consuming tools.
