@@ -107,3 +107,25 @@ test("qr generator renders a symbol with consistent output dimensions", async ({
   await expect(page.getByText(/QR text is limited to 4000 bytes/)).toBeVisible()
   await expect(page.getByText("Shorten the text to generate a QR code.")).toBeVisible()
 })
+
+test("json editor validates, formats, and inspects documents", async ({ page }) => {
+  await page.goto("/#/tool/json-editor")
+  await expect(page.getByRole("heading", { name: "JSON Editor" })).toBeVisible()
+
+  await page.getByLabel("JSON input").fill('{"a":[1,2]}')
+  await expect(page.getByText("Valid JSON")).toBeVisible()
+  await page.getByRole("button", { name: "Format" }).click()
+  await expect(page.getByLabel("JSON input")).toHaveValue('{\n  "a": [\n    1,\n    2\n  ]\n}')
+
+  await page.getByLabel("JSON input").fill("{")
+  await expect(page.getByText("Invalid JSON")).toBeVisible()
+  await expect(page.getByRole("button", { name: "Format" })).toBeDisabled()
+
+  // The inspector tree expands from a collapsed root.
+  await page.getByLabel("JSON input").fill('{"user":{"name":"Ada"}}')
+  await page.getByRole("tab", { name: "Tree" }).click()
+  await page.getByRole("button", { name: "root" }).click()
+  await expect(page.getByRole("button", { name: "user" })).toBeVisible()
+  await page.getByRole("button", { name: "user" }).click()
+  await expect(page.getByText(/string · "Ada"/)).toBeVisible()
+})
