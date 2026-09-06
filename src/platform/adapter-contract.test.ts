@@ -14,6 +14,7 @@ const pluginMocks = vi.hoisted(() => ({
   documentDiscardSave: vi.fn<(options: NativeSaveOptions) => Promise<void>>(),
   documentPick: vi.fn<(options: NativePickOptions) => Promise<NativePickResult>>(),
   documentSave: vi.fn<(options: NativeSaveOptions) => Promise<void>>(),
+  generatedCacheCleanup: vi.fn<(options: { contractVersion: number }) => Promise<unknown>>(),
   sensitiveClipboardWrite: vi.fn<(options: NativeClipboardWriteOptions) => Promise<void>>(),
   filesystemRmdir:
     vi.fn<(options: { path: string; directory: string; recursive: boolean }) => Promise<void>>(),
@@ -79,11 +80,13 @@ vi.mock("@capacitor/core", () => ({
   registerPlugin: (name: string) =>
     name === "SensitiveClipboard"
       ? { write: pluginMocks.sensitiveClipboardWrite }
-      : {
-          discardSave: pluginMocks.documentDiscardSave,
-          pickDocuments: pluginMocks.documentPick,
-          saveDocument: pluginMocks.documentSave,
-        },
+      : name === "GeneratedCache"
+        ? { cleanup: pluginMocks.generatedCacheCleanup }
+        : {
+            discardSave: pluginMocks.documentDiscardSave,
+            pickDocuments: pluginMocks.documentPick,
+            saveDocument: pluginMocks.documentSave,
+          },
 }))
 vi.mock("@capacitor/filesystem", () => ({
   Directory: { Cache: "CACHE" },
@@ -238,6 +241,12 @@ function configureNativeMocks() {
     ],
   }))
   pluginMocks.documentSave.mockResolvedValue(undefined)
+  pluginMocks.generatedCacheCleanup.mockResolvedValue({
+    contractVersion: 1,
+    deletedFiles: 0,
+    deletedDirectories: 0,
+    freedBytes: 0,
+  })
   pluginMocks.filesystemRmdir.mockResolvedValue(undefined)
   pluginMocks.filesystemWriteFile.mockResolvedValue({ uri: "file:///cache/share/output.txt" })
   pluginMocks.hapticsImpact.mockResolvedValue(undefined)
@@ -472,6 +481,31 @@ describe("web-specific adapter behavior", () => {
 })
 
 describe("Capacitor-specific adapter behavior", () => {
+  it("requests a bounded cleanup pass before generated-file operations without blocking them", async () => {
+    await capacitorPlatformServices.files.share({
+      name: "output.txt",
+      mimeType: "text/plain",
+      data: "safe fixture",
+      encoding: "utf8",
+    })
+    expect(pluginMocks.generatedCacheCleanup).toHaveBeenCalledWith({ contractVersion: 1 })
+
+    pluginMocks.generatedCacheCleanup.mockRejectedValueOnce({
+      code: "CACHE_CLEANUP_IN_PROGRESS",
+    })
+    await expect(
+      capacitorPlatformServices.files.saveAs({
+        name: "output.txt",
+        mimeType: "text/plain",
+        data: "safe fixture",
+        encoding: "utf8",
+      }),
+    ).resolves.toBeUndefined()
+    expect(pluginMocks.generatedCacheCleanup).toHaveBeenLastCalledWith({ contractVersion: 1 })
+    expect(pluginMocks.filesystemWriteFile).toHaveBeenCalled()
+    expect(pluginMocks.documentSave).toHaveBeenCalled()
+  })
+
   it("routes clipboard writes through the versioned sensitive-clipboard bridge", async () => {
     await capacitorPlatformServices.clipboard.writeText("plain value")
     expect(pluginMocks.sensitiveClipboardWrite).toHaveBeenLastCalledWith({

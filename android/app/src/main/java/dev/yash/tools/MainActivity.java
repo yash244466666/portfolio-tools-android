@@ -9,6 +9,8 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         registerPlugin(DocumentFilesPlugin.class);
         registerPlugin(SensitiveClipboardPlugin.class);
+        registerPlugin(GeneratedCachePlugin.class);
         super.onCreate(savedInstanceState);
+        getBridge().addWebViewListener(new RendererRecovery(getBridge()));
     }
 }
