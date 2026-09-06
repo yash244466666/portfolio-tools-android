@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-05 19:24 Europe/Berlin
+> Last updated: 2026-09-06 07:08 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -236,6 +236,7 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 | 2026-09-05 18:49 | SAF document batch       | `pnpm build`, `pnpm test:e2e`, `pnpm cap:sync`                    | PASS    | Main JS 246.85 kB/78.32 kB gzip; 10 E2E cases; packaged config disables bridge logging        |
 | 2026-09-05 18:50 | SAF document batch       | `testDebugUnitTest`, `lintDebug`, all variant builds              | PASS    | 6 native policy tests; zero lint errors; debug/internal APK and minified release AAB built    |
 | 2026-09-05 18:51 | SAF document batch       | Manifest, signing, R8, and native-library audits                  | PASS    | Six reviewed permissions; one exported Activity; APK v2; plugin methods kept; no AAB `.so`    |
+| 2026-09-06 07:08 | PR #1 pre-merge audit    | Full web, E2E, sync, native unit/lint/variant/manifest gates      | PASS    | 58 web tests, 10 E2E; 7 native policy tests; explicit Save As truncation regression covered   |
 
 Android Lint currently reports warnings, not errors: generated Capacitor launcher/splash resources need final replacement/cleanup; some generated resources appear unused; Gradle 8.14.5 and AppCompat 1.8.0 updates are available; generated `flatDir`/Gradle 9 deprecation and Capacitor Filesystem deprecation notices remain. Review rather than suppress them during the relevant dependency/icon pass.
 
@@ -243,9 +244,9 @@ Android Lint currently reports warnings, not errors: generated Capacitor launche
 
 | Artifact     | Package/role              |     Bytes | SHA-256                                                            | Signing/status                           |
 | ------------ | ------------------------- | --------: | ------------------------------------------------------------------ | ---------------------------------------- |
-| Debug APK    | `dev.yash.tools.debug`    | 5,121,613 | `fcfd23b055d54b8c7c0ad655fa72c8ec96c01a42e45990f2487a7333aee5312c` | Local debug key; APK v2 verified         |
-| Internal APK | `dev.yash.tools.internal` | 5,123,505 | `3e9c6b91861d668b4a3e95106fedaafde32f8db8151bbc37994184eee42f0115` | Local debug key; APK v2 verified         |
-| Release AAB  | `dev.yash.tools`          | 2,113,309 | `a995a21ad866ea005d29483dfa5825756b09891bc1b09e71c7bf17c55ad81840` | Build proof only; intentionally unsigned |
+| Debug APK    | `dev.yash.tools.debug`    | 4,871,624 | `8222ec12a5fdc8d2930b859cce1317e3ffb7543c1cb10466e132b0edb2a112a1` | Local debug key; APK v2 verified         |
+| Internal APK | `dev.yash.tools.internal` | 4,872,212 | `fd7d9243f88e5e4fcb35fbbbfab2f8e7c3006b94bc4c552a0657dee72f9873a5` | Local debug key; APK v2 verified         |
+| Release AAB  | `dev.yash.tools`          | 2,113,313 | `0f5fd65d7bbcc507120489ae48162fbace47f2274202fb40c7dc7ab148ffd360` | Build proof only; intentionally unsigned |
 
 These are reproducibility evidence, not publication candidates. Rebuild after any source/config change and never distribute a debug-key artifact as production.
 
@@ -362,3 +363,10 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Replaced the earlier approximate 70-tool target and later-version deferrals with an all-87 release gate; unresolved tool-specific technical, policy, legal, privacy, accessibility, or device evidence now blocks production unless a superseding ADR explicitly changes scope.
 - Added ADR 0004 and synchronized the operating guides, architecture overview, README, roadmap, tracker, release gates, and schedule assumptions.
 - Passed `pnpm format:check`, `git diff --check`, the `AGENT.md`/`CLAUDE.md` byte-identity check, and local ADR-reference existence checks. This planning-only batch changed no application artifact; the hashes in Section 7 remain current for commit `7866734`.
+
+### 2026-09-06 — PR #1 pre-merge audit
+
+- Reviewed the scoped picker and Save As bridge, TypeScript adapter, native policy, recovery assumptions, cache boundaries, error mapping, tests, ADR, generated manifests, and hosted PR state before merge.
+- Changed the destination stream mode from generic write (`w`) to explicit write-and-truncate (`wt`) so a provider cannot retain stale trailing bytes when replacing output, and added native policy regression coverage.
+- Re-ran formatting, strict typecheck/lint, 58 unit/component tests, production build, 10 E2E scenarios, Capacitor sync, 7 native policy tests, Android Lint, debug/internal APKs, release AAB, three manifest-budget checks, APK v2 signatures, and native-library inspection successfully.
+- Physical system-picker, provider-interoperability, and process-recreation evidence remains assigned to the existing instrumentation and device issues; it is not claimed by this merge.

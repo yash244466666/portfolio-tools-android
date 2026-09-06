@@ -459,7 +459,10 @@ public final class DocumentFilesPlugin extends Plugin {
         ContentResolver resolver = getContext().getContentResolver();
         long written = 0;
         byte[] buffer = new byte[64 * 1024];
-        try (InputStream input = new FileInputStream(source); OutputStream output = resolver.openOutputStream(destination, "w")) {
+        try (
+            InputStream input = new FileInputStream(source);
+            OutputStream output = resolver.openOutputStream(destination, DocumentFilePolicy.SAVE_OUTPUT_MODE)
+        ) {
             if (output == null) {
                 return false;
             }

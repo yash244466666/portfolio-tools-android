@@ -48,6 +48,11 @@ public class DocumentFilePolicyTest {
     }
 
     @Test
+    public void truncatesExistingProviderOutputBeforeWriting() {
+        assertEquals("wt", DocumentFilePolicy.SAVE_OUTPUT_MODE);
+    }
+
+    @Test
     public void sanitizesDisplayAndOutputNames() {
         assertEquals("-private-output.txt", DocumentFilePolicy.sanitizeFileName("../private\\output.txt"));
         assertEquals("yash-tools-output", DocumentFilePolicy.sanitizeFileName("..."));
