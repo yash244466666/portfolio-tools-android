@@ -612,6 +612,10 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Passed formatting, strict typecheck, zero-warning lint, 225 web tests (28 files), 26 E2E scenarios, production build (FileHashChecker lazy chunk 3.36 kB/1.44 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
 - Next executable item: proving packaged-origin CORS behavior and porting Currency Converter (issue #43) as the first network tool — its provider, terms, and cache/stale UX must pass review before enabling.
 
+### 2026-09-07 — Formatting follow-up (PR #145)
+
+- Discovered after PR #144's reconciliation that `pnpm format:check` had been piped through `tail`, masking its failure — 11 files landed unformatted on `main`. Applied prettier to the same 11 files and merged PR #145 as `429338e` with both hosted jobs green (web-quality 2m30s, android-debug 3m48s). Gate discipline updated: quality gates must run unpiped so their real exit status is observed.
+
 ### 2026-09-07 — Currency Converter merge reconciliation
 
 - Merged PR #144 into `main` as `4af2a42`, closing issue #43; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge (web-quality 2m25s, android-debug 3m45s), and no open pull requests remain.
