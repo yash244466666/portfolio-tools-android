@@ -4,7 +4,7 @@ import { writeFileSync } from "node:fs"
 const PACKAGE = "dev.yash.tools.debug"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 29
+const enabledToolCount = 34
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -186,6 +186,36 @@ class CdpPage {
     )
     await this.evaluate(
       `[...document.querySelectorAll('button')].find(b => b.textContent.trim() === ${needle}).click()`,
+    )
+  }
+
+  /**
+   * Clicks a checkbox by its accessible name. Native checkboxes are inputs,
+   * not buttons, so the button matcher cannot reach them.
+   * @param {string} label
+   */
+  async clickCheckbox(label) {
+    const needle = JSON.stringify(label)
+    await this.waitFor(
+      `[...document.querySelectorAll('input[type=checkbox]')].some(i => i.getAttribute('aria-label') === ${needle})`,
+    )
+    await this.evaluate(
+      `[...document.querySelectorAll('input[type=checkbox]')].find(i => i.getAttribute('aria-label') === ${needle}).click()`,
+    )
+  }
+
+  /**
+   * Clicks the first button or input carrying an exact aria-label. Quick-tag
+   * buttons show a short label but expose their full name through aria-label.
+   * @param {string} label
+   */
+  async clickAriaLabel(label) {
+    const needle = JSON.stringify(label)
+    await this.waitFor(
+      `[...document.querySelectorAll('button,input')].some(e => e.getAttribute('aria-label') === ${needle})`,
+    )
+    await this.evaluate(
+      `[...document.querySelectorAll('button,input')].find(e => e.getAttribute('aria-label') === ${needle}).click()`,
     )
   }
 
@@ -683,6 +713,54 @@ async function phaseTools(page) {
           "[...document.querySelectorAll('p')].some(el => el.textContent === 'MCMXCIV')",
         )
         return "1994 converted to MCMXCIV"
+      },
+    ],
+    [
+      "password-strength-checker",
+      "Password Strength Checker",
+      async (p) => {
+        await p.setValue("#password-input", "Correct-Horse-Battery-42")
+        await p.waitFor("document.body.innerText.includes('Very Strong')")
+        return "long password rendered as Very Strong"
+      },
+    ],
+    [
+      "data-sanitizer",
+      "Data Sanitizer",
+      async (p) => {
+        await p.setValue("#sanitizer-input", "jane@corp.dev from 192.168.0.5")
+        await p.waitFor("document.body.innerText.includes('[EMAIL REDACTED] from [IP REDACTED]')")
+        return "email and IP redacted"
+      },
+    ],
+    [
+      "csp-generator",
+      "CSP Generator",
+      async (p) => {
+        await p.clickCheckbox("Enable img-src")
+        await p.clickAriaLabel("Add * to img-src")
+        await p.waitFor('document.body.innerText.includes("img-src *")')
+        return "img-src policy rendered"
+      },
+    ],
+    [
+      "cors-header-builder",
+      "CORS Header Builder",
+      async (p) => {
+        await p.clickCheckbox("Allow POST")
+        await p.waitFor("document.body.innerText.includes('GET, OPTIONS')")
+        return "method toggle rendered"
+      },
+    ],
+    [
+      "robots-txt-generator",
+      "Robots.txt Generator",
+      async (p) => {
+        await p.setValue("#robots-sitemap", "")
+        await p.waitFor(
+          "[...document.querySelectorAll('pre')].every(p => !p.textContent.includes('Sitemap:'))",
+        )
+        return "sitemap omitted from output"
       },
     ],
   ]
