@@ -4,7 +4,7 @@ import { writeFileSync } from "node:fs"
 const PACKAGE = "dev.yash.tools.debug"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 34
+const enabledToolCount = 38
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -216,6 +216,22 @@ class CdpPage {
     )
     await this.evaluate(
       `[...document.querySelectorAll('button,input')].find(e => e.getAttribute('aria-label') === ${needle}).click()`,
+    )
+  }
+
+  /**
+   * Clicks the radio input whose `value` matches. Grouped radios take their
+   * accessible name from the wrapping label element, so value is the stable
+   * hook.
+   * @param {string} value
+   */
+  async clickRadioValue(value) {
+    const needle = JSON.stringify(value)
+    await this.waitFor(
+      `[...document.querySelectorAll('input[type=radio]')].some(i => i.value === ${needle})`,
+    )
+    await this.evaluate(
+      `[...document.querySelectorAll('input[type=radio]')].find(i => i.value === ${needle}).click()`,
     )
   }
 
@@ -761,6 +777,45 @@ async function phaseTools(page) {
           "[...document.querySelectorAll('pre')].every(p => !p.textContent.includes('Sitemap:'))",
         )
         return "sitemap omitted from output"
+      },
+    ],
+    [
+      "age-calculator",
+      "Age Calculator",
+      async (p) => {
+        await p.setValue("#age-birth-date", "1990-05-20")
+        await p.waitFor("document.body.innerText.includes('Next birthday in')")
+        return "age, totals, and next birthday rendered"
+      },
+    ],
+    [
+      "bitwise-calculator",
+      "Bitwise Calculator",
+      async (p) => {
+        await p.clickRadioValue("NOT")
+        await p.waitFor("document.body.innerText.includes('-256')")
+        return "NOT 255 rendered as -256"
+      },
+    ],
+    [
+      "color-blindness-simulator",
+      "Color Blindness Simulator",
+      async (p) => {
+        await p.clickRadioValue("achromatopsia")
+        await p.waitFor("document.body.innerText.includes('#7F7F7F')")
+        return "achromatopsia gray rendered"
+      },
+    ],
+    [
+      "calculator",
+      "Scientific Calculator",
+      async (p) => {
+        await p.clickButton("2")
+        await p.clickAriaLabel("Add")
+        await p.clickButton("3")
+        await p.clickAriaLabel("Equals")
+        await p.waitFor("document.body.innerText.includes('Display 5')")
+        return "2 + 3 rendered as 5"
       },
     ],
   ]
