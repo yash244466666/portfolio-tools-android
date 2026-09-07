@@ -1039,3 +1039,87 @@ test("emoji picker searches the bundled catalog by name", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Food" })).toBeVisible()
   await expect(page.getByRole("heading", { name: "Smileys" })).toHaveCount(0)
 })
+
+test("flexbox playground rebuilds the container declaration", async ({ page }) => {
+  await page.goto("/#/tool/flexbox-playground")
+  await expect(page.getByRole("heading", { name: "Flexbox Playground" })).toBeVisible()
+
+  await expect(page.locator("pre")).toHaveText(
+    "display: flex;\nflex-direction: row;\njustify-content: flex-start;\nalign-items: stretch;\nflex-wrap: nowrap;\ngap: 8px;",
+  )
+
+  await page.getByRole("radio", { name: "column", exact: true }).check()
+  await page.getByRole("radio", { name: "space-evenly" }).check()
+  await page.getByLabel("Gap (px)").evaluate((el, value) => {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.bind(el)
+    setter(value)
+    el.dispatchEvent(new Event("input", { bubbles: true }))
+  }, "24")
+  await expect(page.locator("pre")).toContainText("justify-content: space-evenly;")
+  await expect(page.locator("pre")).toContainText("gap: 24px;")
+})
+
+test("grid generator emits placements and skips emptied templates", async ({ page }) => {
+  await page.goto("/#/tool/grid-generator")
+  await expect(page.getByRole("heading", { name: "Grid Generator" })).toBeVisible()
+
+  await expect(page.locator("pre")).toContainText("grid-template-columns: 1fr 1fr 1fr;")
+
+  await page.getByLabel("grid-column for Item 1").fill("1 / 3")
+  await page.getByLabel("grid-row for Item 2").fill("2")
+  await expect(page.locator("pre")).toContainText("/* Item 1 */ grid-column: 1 / 3;")
+  await expect(page.locator("pre")).toContainText("/* Item 2 */ grid-row: 2;")
+
+  await page.getByLabel("Rows").fill("  ")
+  await expect(page.locator("pre")).not.toContainText("grid-template-rows")
+})
+
+test("css animation generator switches types and clamps timing", async ({ page }) => {
+  await page.goto("/#/tool/css-animation-generator")
+  await expect(page.getByRole("heading", { name: "CSS Animation Generator" })).toBeVisible()
+
+  await expect(page.locator("pre")).toContainText("animation: fadeIn 1s ease 0s 1;")
+
+  await page.getByRole("radio", { name: "Rotate" }).check()
+  await page.getByRole("radio", { name: "linear" }).check()
+  await page.getByLabel("Duration (s)").evaluate((el, value) => {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.bind(el)
+    setter(value)
+    el.dispatchEvent(new Event("input", { bubbles: true }))
+  }, "9")
+  await page.getByLabel("Iterations").fill("0")
+  await expect(page.locator("pre")).toContainText("animation: rotate 5s linear 0s infinite;")
+  await expect(page.locator("pre")).toContainText("@keyframes rotate {")
+})
+
+test("glassmorphism generator rejects invalid colors and recovers", async ({ page }) => {
+  await page.goto("/#/tool/glassmorphism-generator")
+  await expect(page.getByRole("heading", { name: "Glassmorphism Generator" })).toBeVisible()
+
+  await expect(page.locator("pre")).toContainText("backdrop-filter: blur(10px);")
+  await expect(page.locator("pre")).toContainText("-webkit-backdrop-filter: blur(10px);")
+
+  await page.getByLabel("Background color", { exact: true }).fill("#12")
+  await expect(page.getByText(/Fix both colors to six-digit hex values/)).toBeVisible()
+
+  await page.getByLabel("Background color", { exact: true }).fill("#123456")
+  await expect(page.locator("pre")).toContainText("background: rgba(18, 52, 86, 0.2);")
+})
+
+test("neumorphism generator switches to the pressed variant", async ({ page }) => {
+  await page.goto("/#/tool/neumorphism-generator")
+  await expect(page.getByRole("heading", { name: "Neumorphism Generator" })).toBeVisible()
+
+  await expect(page.locator("pre")).toContainText(
+    "box-shadow: 8px 8px 16px rgb(12, 12, 12), -8px -8px 16px rgb(72, 72, 72);",
+  )
+
+  await page.getByRole("radio", { name: "Pressed" }).check()
+  await expect(page.locator("pre")).toContainText(
+    "box-shadow: inset 8px 8px 16px rgb(12, 12, 12), inset -8px -8px 16px rgb(72, 72, 72);",
+  )
+  await expect(page.locator("pre")).not.toContainText("linear-gradient")
+
+  await page.getByLabel("Base color", { exact: true }).fill("zzz")
+  await expect(page.getByText(/Fix the base color to a six-digit hex value/)).toBeVisible()
+})

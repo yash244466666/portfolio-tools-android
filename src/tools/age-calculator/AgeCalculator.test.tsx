@@ -1,8 +1,20 @@
 import { fireEvent, render, screen } from "@testing-library/react"
+import { vi } from "vitest"
 import { PlatformProvider } from "@/platform/platform-context"
 import AgeCalculator from "@/tools/age-calculator/AgeCalculator"
 
 describe("Age Calculator interactions", () => {
+  beforeEach(() => {
+    // The expectations below are pinned to this instant; without the fake
+    // clock the days component rolls over at every midnight boundary.
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date("2026-09-07T12:00:00Z"))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it("computes the age, totals, and next birthday as the date is typed", () => {
     render(
       <PlatformProvider>

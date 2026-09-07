@@ -5,7 +5,7 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 68
+const enabledToolCount = 73
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -1205,6 +1205,76 @@ async function phaseTools(page) {
           "[...document.querySelectorAll('button')].some(b => b.getAttribute('aria-label') === 'Copy pizza') && ![...document.querySelectorAll('button')].some(b => b.getAttribute('aria-label') === 'Copy grinning')",
         )
         return "name search, empty state, and category scoping rendered"
+      },
+    ],
+    [
+      "flexbox-playground",
+      "Flexbox Playground",
+      async (p) => {
+        await p.waitFor("document.body.innerText.includes('flex-direction: row;')")
+        await p.waitFor("document.body.innerText.includes('gap: 8px;')")
+        await p.clickRadioValue("column")
+        await p.clickRadioValue("space-evenly")
+        await p.waitFor("document.body.innerText.includes('flex-direction: column;')")
+        await p.waitFor("document.body.innerText.includes('justify-content: space-evenly;')")
+        return "default and column/space-evenly declarations rendered"
+      },
+    ],
+    [
+      "grid-generator",
+      "Grid Generator",
+      async (p) => {
+        await p.waitFor("document.body.innerText.includes('grid-template-columns: 1fr 1fr 1fr;')")
+        await p.setValue("#grid-column-grid-item-1", "1 / 3")
+        await p.waitFor("document.body.innerText.includes('/* Item 1 */ grid-column: 1 / 3;')")
+        // The template hint text mentions grid-template-rows permanently, so
+        // the empty-template check is scoped to the CSS output block.
+        await p.setValue("#grid-rows", "")
+        await p.waitFor(
+          "!(document.querySelector('pre')?.textContent ?? '').includes('grid-template-rows')",
+        )
+        return "placement emitted and emptied template skipped"
+      },
+    ],
+    [
+      "css-animation-generator",
+      "CSS Animation Generator",
+      async (p) => {
+        await p.waitFor("document.body.innerText.includes('animation: fadeIn 1s ease 0s 1;')")
+        await p.clickRadioValue("rotate")
+        await p.clickRadioValue("linear")
+        await p.setValue("#css-animation-iterations", "0")
+        await p.waitFor(
+          "document.body.innerText.includes('animation: rotate 1s linear 0s infinite;')",
+        )
+        return "type, timing, and infinite iterations rendered in the shorthand"
+      },
+    ],
+    [
+      "glassmorphism-generator",
+      "Glassmorphism Generator",
+      async (p) => {
+        await p.waitFor("document.body.innerText.includes('backdrop-filter: blur(10px);')")
+        await p.waitFor("document.body.innerText.includes('-webkit-backdrop-filter: blur(10px);')")
+        await p.setValue("#glass-bg-color-text", "#123456")
+        await p.waitFor("document.body.innerText.includes('background: rgba(18, 52, 86, 0.2);')")
+        await p.setValue("#glass-bg-color-text", "#12")
+        await p.waitFor("document.body.innerText.includes('Fix both colors')")
+        return "declaration with both prefixes rendered; invalid color suppressed"
+      },
+    ],
+    [
+      "neumorphism-generator",
+      "Neumorphism Generator",
+      async (p) => {
+        await p.waitFor(
+          "document.body.innerText.includes('linear-gradient(145deg, rgb(54, 54, 54), rgb(30, 30, 30))')",
+        )
+        await p.clickRadioValue("pressed")
+        await p.waitFor("document.body.innerText.includes('inset 8px 8px 16px')")
+        await p.setValue("#neumorphism-color", "#abcdef")
+        await p.waitFor("document.body.innerText.includes('background: #abcdef;')")
+        return "convex gradient, pressed inset shadows, and recolored base rendered"
       },
     ],
   ]
