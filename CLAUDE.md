@@ -28,7 +28,7 @@ Implemented now:
 
 - React/Vite/TypeScript/Tailwind application.
 - Capacitor Android project.
-- Typed tool registry containing the initial 12-tool architecture milestone within the approved 87-tool public-release scope.
+- Typed tool registry containing the completed 12-tool architecture milestone plus reviewed post-slice batches within the approved 87-tool public-release scope.
 - Twenty-five enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, Text to Slug, Sort Lines, Add Line Numbers, Trim Whitespace, and Remove Duplicates.
 - Catalog search and category filters.
 - Favorites and recent-tool persistence.
@@ -300,7 +300,7 @@ Adapter requirements:
 - Close descriptors, streams, listeners, media tracks, Workers, and object URLs.
 - Keep native APIs narrow: no arbitrary file paths, URLs, intents, or command execution.
 
-Known foundation limitation: Android document picking and Save As deliberately throw typed unavailable errors until a Storage Access Framework plugin is implemented. Do not silently replace this with broad storage permission.
+Android document picking and Save As use the app-owned, versioned Storage Access Framework bridge. Preserve its bounded `content://`/private-handoff contracts and never replace it with broad storage permission.
 
 ## 12. State, persistence, and privacy
 
@@ -620,22 +620,12 @@ Compiling is not completion. Browser-only success is not Android completion. Vis
 
 Unless the tracker or user changes priority:
 
-1. Land the verified Android document picker/Save As branch through review.
-2. Implement sensitive clipboard metadata and deterministic share-cache cleanup.
-3. Add renderer termination, process recovery, and native safe-mode behavior.
-4. Add instrumentation coverage and execute the physical-device foundation checklist.
-5. Add bounded or streamed `content://` reads with the first file-consuming tool.
-6. Port Markdown Preview with sanitizer/CSP tests.
-7. Port Regex Tester into a terminable Worker.
-8. Port QR Generator and real Android file sharing.
-9. Port JSON Editor with compact/expanded and accessible fallback behavior.
-10. Port Notes with schema migration, export/import, and honest unencrypted-storage copy.
-11. Port Pomodoro with best-effort notifications and process reconstruction.
-12. Port Image Compressor and File Hash Checker with strict limits.
-13. Prove packaged-origin CORS and port Currency Converter.
-14. Validate the complete 12-tool architecture milestone on Android.
-15. Migrate the remaining 75 audited catalog tools in controlled, risk-ordered batches.
-16. Submit no production candidate until all 87 tools pass the Definition of Done and the release manifest, store claims, and signed artifact agree.
+1. Complete Android instrumentation/UI Automator foundation coverage through issue #17 and review.
+2. Execute the physical-device foundation checklist through issue #18 on an approved device or emulator.
+3. Validate the complete 12-tool architecture milestone and every enabled post-slice tool on bundled Android artifacts.
+4. Migrate the remaining 62 audited catalog tools in controlled, risk-ordered batches selected from Ready Project work.
+5. Complete quality, accessibility, privacy, policy, release, and closed-testing gates without weakening the all-87 scope.
+6. Submit no production candidate until all 87 tools pass the Definition of Done and the release manifest, store claims, and signed artifact agree.
 
 ## 28. Handoff checklist
 

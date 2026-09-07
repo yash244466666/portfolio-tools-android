@@ -457,6 +457,12 @@ export const capacitorPlatformServices: PlatformServices = {
     },
     async schedule(notification) {
       try {
+        await LocalNotifications.createChannel({
+          id: notification.channelId,
+          name: "Timers",
+          description: "Best-effort timer completion alerts",
+          importance: 3,
+        })
         await LocalNotifications.schedule({
           notifications: [
             {
@@ -465,6 +471,7 @@ export const capacitorPlatformServices: PlatformServices = {
               body: notification.body,
               schedule: { at: notification.at, allowWhileIdle: false },
               channelId: notification.channelId,
+              isExactNotification: false,
             },
           ],
         })

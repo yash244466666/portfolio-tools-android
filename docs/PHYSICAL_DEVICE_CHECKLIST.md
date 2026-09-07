@@ -48,12 +48,34 @@
 - [ ] Favorites and theme persist.
 - [ ] Invalid/disabled tool routes recover safely.
 
-## Foundation tools
+## Enabled tools
 
 - [ ] Unit Converter matches unit fixtures and works offline.
 - [ ] Timestamp Converter handles seconds, milliseconds, local time, and invalid input.
 - [ ] Hash Generator matches SHA vectors, handles Unicode, copies output, and works offline.
 - [ ] Leaving Hash Generator does not retain sensitive input after the approved lifecycle boundary.
+- [ ] Markdown Preview sanitizes hostile markup and remains usable offline.
+- [ ] Regex Tester enforces its deadline, cancellation, and recovery behavior.
+- [ ] QR Generator renders, shares, and saves the exact generated PNG.
+- [ ] JSON Editor validates, formats, and inspects bounded input without restoring sensitive content.
+- [ ] Notes loads, autosaves, imports, exports, and explicitly clears its bounded device-local payload.
+- [ ] Pomodoro Timer reconstructs from its wall-clock anchor and handles denied/granted best-effort alerts.
+- [ ] Image Compressor picks, bounds, re-encodes, previews, shares, and saves supported images.
+- [ ] File Hash Checker streams exact SHA-256/SHA-1/SHA-512 results and cancels cleanly.
+- [ ] Currency Converter proves live and cached/offline states with provider attribution.
+- [ ] DNS Lookup proves live, invalid, no-record, offline, and recovery states with provider attribution.
+- [ ] Word Counter matches its Unicode and limit fixtures.
+- [ ] Character Counter counts Unicode code points and spaces correctly.
+- [ ] Case Converter exposes all eight conversions and copies results accessibly.
+- [ ] Reverse Text keeps grapheme clusters intact in character mode.
+- [ ] Number Base Converter strictly validates and converts large integers.
+- [ ] Base64 Encode/Decode round-trips UTF-8 and rejects malformed input.
+- [ ] URL Encoder/Decoder handles malformed escapes and clearly labels assumed schemes.
+- [ ] Text to Slug discloses normalization, stop-word, and truncation behavior.
+- [ ] Sort Lines covers alphabetical, numeric, reverse, shuffle, blank, and duplicate options.
+- [ ] Add Line Numbers validates starts and all separator options.
+- [ ] Trim Whitespace covers per-line trim and space-run collapse.
+- [ ] Remove Duplicates covers stable, case-insensitive, and sorted output.
 
 ## Platform behavior
 
@@ -79,12 +101,12 @@
 - [ ] Low-storage behavior does not lose source/user data.
 - [ ] “Don't keep activities” flows recover safely.
 - [ ] WebView update/older supported WebView smoke test passes.
-- [ ] Renderer termination recovery test passes after that host feature is implemented.
+- [ ] Renderer termination recovers once, then shows the native safe-mode screen without looping.
 
 ## Result
 
 - Overall: **NOT RUN**
 - Blocking issues:
   - Physical device has not been selected or tested.
-  - Renderer host recovery is not implemented yet.
+  - The instrumentation suite supplements but does not replace the pending physical-device, OEM-picker/share-target, Doze, and accessibility evidence.
 - Evidence links/logs: Pending.

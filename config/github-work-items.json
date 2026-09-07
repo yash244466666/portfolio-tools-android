@@ -236,7 +236,7 @@
       "priority": "P1 High",
       "risk": "Critical",
       "estimate": 0,
-      "workflow": "Backlog",
+      "workflow": "In Progress",
       "milestone": "play-launch",
       "outcome": "Deliver all 45 audited Developer tools, including network and special-policy entries, at production quality.",
       "acceptance": [
@@ -253,7 +253,7 @@
       "priority": "P1 High",
       "risk": "High",
       "estimate": 0,
-      "workflow": "Backlog",
+      "workflow": "In Progress",
       "milestone": "play-launch",
       "outcome": "Deliver all 17 audited Text tools, including durable Notes and timer behavior, at production quality.",
       "acceptance": [
@@ -270,7 +270,7 @@
       "priority": "P1 High",
       "risk": "Critical",
       "estimate": 0,
-      "workflow": "Backlog",
+      "workflow": "In Progress",
       "milestone": "play-launch",
       "outcome": "Deliver Audio Recorder, Video to GIF, and File Hash Checker with reviewed permissions, memory limits, streaming, and device evidence.",
       "acceptance": [
@@ -467,11 +467,14 @@
       "priority": "P0 Critical",
       "risk": "High",
       "estimate": 5,
-      "workflow": "Backlog",
+      "workflow": "In Progress",
       "milestone": "foundation",
       "outcome": "Automate process recreation, permission denial, picker, Save As, sharing, notifications, Back, and recovery behavior.",
       "acceptance": [
         "Tests run against bundled Android artifacts without a development server.",
+        "Activity recreation verifies safe route/theme restoration without restoring sensitive tool input.",
+        "UI Automator verifies system Back and notification-permission denial while Espresso Intents verifies bounded picker, Save As, and read-only sharing contracts.",
+        "Instrumentation covers sensitive clipboard metadata, lazy shared-file reads, notification scheduling/cancellation, and renderer recovery/native safe mode.",
         "Permission/export budgets are not weakened to make automation pass."
       ],
       "blockedBy": ["renderer-recovery"]
@@ -966,7 +969,33 @@
     "file-hash-checker",
     "currency-converter"
   ],
-  "implementedTools": ["unit-converter", "timestamp-converter", "hash-generator"],
+  "implementedTools": [
+    "unit-converter",
+    "timestamp-converter",
+    "hash-generator",
+    "markdown-preview",
+    "regex-tester",
+    "qr-generator",
+    "json-editor",
+    "notes-scratchpad",
+    "pomodoro-timer",
+    "image-compressor",
+    "file-hash-checker",
+    "currency-converter",
+    "dns-lookup",
+    "word-counter",
+    "character-counter",
+    "case-converter",
+    "reverse-text",
+    "number-base-converter",
+    "base64-tool",
+    "url-encoder",
+    "text-to-slug",
+    "sort-lines",
+    "add-line-numbers",
+    "trim-whitespace",
+    "remove-duplicates"
+  ],
   "tier2": [
     "pdf-converter",
     "image-compressor",
