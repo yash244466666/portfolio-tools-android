@@ -307,3 +307,31 @@ test("dns lookup resolves a mocked Cloudflare DoH answer", async ({ page }) => {
   expect(requests.length).toBe(1)
   expect(requests[0]).toBe("https://cloudflare-dns.com/dns-query?name=example.com&type=A")
 })
+
+test("text batch tools count, convert, and reverse locally", async ({ page }) => {
+  await page.goto("/#/tool/word-counter")
+  await expect(page.getByRole("heading", { name: "Word Counter" })).toBeVisible()
+  await page.getByLabel("Text").fill("Hello world. Second sentence!\n\nNew paragraph?")
+  await expect(page.getByText("Words").locator("xpath=preceding-sibling::p")).toHaveText("6")
+  await expect(page.getByText("Paragraphs").locator("xpath=preceding-sibling::p")).toHaveText("2")
+
+  await page.goto("/#/tool/case-converter")
+  await expect(page.getByRole("heading", { name: "Case Converter" })).toBeVisible()
+  await page.getByLabel("Text").fill("hello world")
+  await expect(page.getByText("HELLO WORLD")).toBeVisible()
+  await expect(page.getByText("helloWorld")).toBeVisible()
+  await expect(page.getByText("hello_world")).toBeVisible()
+
+  await page.goto("/#/tool/character-counter")
+  await expect(page.getByRole("heading", { name: "Character Counter" })).toBeVisible()
+  await page.getByLabel("Text").fill("a👍b c")
+  await expect(page.getByText("Characters").locator("xpath=preceding-sibling::p")).toHaveText("5")
+
+  await page.goto("/#/tool/reverse-text")
+  await expect(page.getByRole("heading", { name: "Reverse Text" })).toBeVisible()
+  await page.getByLabel("Text").fill("a👍b")
+  await expect(page.getByText("👍a")).toBeVisible()
+  await page.getByLabel("Words").check()
+  await page.getByLabel("Text").fill("hello brave world")
+  await expect(page.getByText("world brave hello")).toBeVisible()
+})

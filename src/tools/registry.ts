@@ -1,6 +1,8 @@
 import { lazy } from "react"
 import {
+  ArrowLeftRight,
   Braces,
+  CaseSensitive,
   Clock3,
   FileCheck2,
   FileImage,
@@ -12,6 +14,8 @@ import {
   QrCode,
   Regex,
   Ruler,
+  Type,
+  WholeWord,
   Wifi,
 } from "lucide-react"
 import type { ToolCategory, ToolDefinition } from "@/tools/types"
@@ -195,6 +199,62 @@ export const tools: readonly ToolDefinition[] = [
     network: true,
     persistent: false,
     component: lazy(() => import("@/tools/dns-lookup/DnsLookup")),
+  },
+  {
+    id: "word-counter",
+    label: "Word Counter",
+    description:
+      "Count words, characters, sentences, paragraphs, and reading time as you type.",
+    category: "text",
+    tags: ["words", "count", "reading time", "offline"],
+    icon: WholeWord,
+    status: "enabled",
+    risk: "low",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/word-counter/WordCounter")),
+  },
+  {
+    id: "character-counter",
+    label: "Character Counter",
+    description:
+      "Count characters with and without spaces as you type, counting emoji correctly.",
+    category: "text",
+    tags: ["characters", "count", "offline"],
+    icon: Type,
+    status: "enabled",
+    risk: "low",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/character-counter/CharacterCounter")),
+  },
+  {
+    id: "case-converter",
+    label: "Case Converter",
+    description:
+      "Convert text between eight cases, from UPPERCASE and Title Case to camelCase and kebab-case.",
+    category: "text",
+    tags: ["case", "uppercase", "camelcase", "snake case", "offline"],
+    icon: CaseSensitive,
+    status: "enabled",
+    risk: "low",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/case-converter/CaseConverter")),
+  },
+  {
+    id: "reverse-text",
+    label: "Reverse Text",
+    description:
+      "Reverse characters, word order, or line order while keeping emoji intact.",
+    category: "text",
+    tags: ["reverse", "flip", "text", "offline"],
+    icon: ArrowLeftRight,
+    status: "enabled",
+    risk: "low",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/reverse-text/ReverseText")),
   },
 ] as const
 
