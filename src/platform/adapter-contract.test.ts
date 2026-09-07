@@ -35,6 +35,7 @@ const pluginMocks = vi.hoisted(() => ({
   hapticsImpact: vi.fn<(options: { style: string }) => Promise<void>>(),
   notificationsCancel: vi.fn<(options: unknown) => Promise<void>>(),
   notificationsCheckPermissions: vi.fn<() => Promise<{ display: string }>>(),
+  notificationsCreateChannel: vi.fn<(options: unknown) => Promise<void>>(),
   notificationsRequestPermissions: vi.fn<() => Promise<{ display: string }>>(),
   notificationsSchedule: vi.fn<(options: unknown) => Promise<void>>(),
   networkAddListener:
@@ -135,6 +136,7 @@ vi.mock("@capacitor/local-notifications", () => ({
   LocalNotifications: {
     cancel: pluginMocks.notificationsCancel,
     checkPermissions: pluginMocks.notificationsCheckPermissions,
+    createChannel: pluginMocks.notificationsCreateChannel,
     requestPermissions: pluginMocks.notificationsRequestPermissions,
     schedule: pluginMocks.notificationsSchedule,
   },
@@ -300,6 +302,7 @@ function configureNativeMocks() {
   pluginMocks.hapticsImpact.mockResolvedValue(undefined)
   pluginMocks.notificationsCancel.mockResolvedValue(undefined)
   pluginMocks.notificationsCheckPermissions.mockResolvedValue({ display: "granted" })
+  pluginMocks.notificationsCreateChannel.mockResolvedValue(undefined)
   pluginMocks.notificationsRequestPermissions.mockResolvedValue({ display: "granted" })
   pluginMocks.notificationsSchedule.mockResolvedValue(undefined)
   pluginMocks.share.mockResolvedValue(undefined)
@@ -926,10 +929,27 @@ describe("Capacitor-specific adapter behavior", () => {
     await capacitorPlatformServices.notifications.cancel(notification.id)
 
     const scheduled = pluginMocks.notificationsSchedule.mock.calls[0]?.[0] as {
-      notifications?: Array<{ id: number; schedule: { allowWhileIdle: boolean } }>
+      notifications?: Array<{
+        id: number
+        schedule: { allowWhileIdle: boolean }
+        channelId: string
+        isExactNotification: boolean
+      }>
     }
     const scheduledId = scheduled.notifications?.[0]?.id
+    expect(pluginMocks.notificationsCreateChannel).toHaveBeenCalledWith({
+      id: "timers",
+      name: "Timers",
+      description: "Best-effort timer completion alerts",
+      importance: 3,
+    })
     expect(scheduled.notifications?.[0]?.schedule.allowWhileIdle).toBe(false)
+    expect(scheduled.notifications?.[0]).toEqual(
+      expect.objectContaining({
+        channelId: "timers",
+        isExactNotification: false,
+      }),
+    )
     expect(pluginMocks.notificationsCancel).toHaveBeenCalledWith({
       notifications: [{ id: scheduledId }],
     })

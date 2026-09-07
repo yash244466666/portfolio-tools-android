@@ -40,11 +40,13 @@ The Android repository is a separate codebase. The upstream path is recorded for
 
 ## Dependency provenance
 
-| Dependency  | Version | License                 | Treatment                                                                                                                                      |
-| ----------- | ------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `marked`    | 18.0.11 | MIT                     | GFM Markdown parser, bundled offline; standard vectors test its documented behavior                                                            |
-| `dompurify` | 3.4.14  | (MPL-2.0 OR Apache-2.0) | HTML sanitizer with an explicit narrow allowlist (ADR 0008); hostile-input corpus tests the policy                                             |
-| `qrcode`    | 1.5.4   | MIT                     | QR-spec encoder used only through the pure `create()` data model (ADR 0011); spec-structure vectors test finder/timing patterns and capacities |
+| Dependency                     | Version | License                 | Treatment                                                                                                                                      |
+| ------------------------------ | ------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `marked`                       | 18.0.11 | MIT                     | GFM Markdown parser, bundled offline; standard vectors test its documented behavior                                                            |
+| `dompurify`                    | 3.4.14  | (MPL-2.0 OR Apache-2.0) | HTML sanitizer with an explicit narrow allowlist (ADR 0008); hostile-input corpus tests the policy                                             |
+| `qrcode`                       | 1.5.4   | MIT                     | QR-spec encoder used only through the pure `create()` data model (ADR 0011); spec-structure vectors test finder/timing patterns and capacities |
+| AndroidX Test Espresso Intents | 3.7.0   | Apache-2.0              | Test-APK-only inspection/stubbing of picker, Save As, and share intents; absent from production runtime                                        |
+| AndroidX Test UI Automator     | 2.3.0   | Apache-2.0              | Stable test-APK-only system Back and Android permission-dialog automation; absent from production runtime                                      |
 
 ## Platform implementation references
 
@@ -56,6 +58,8 @@ The Android repository is a separate codebase. The upstream path is recorded for
 | `GeneratedCachePlugin.java`, `GeneratedCachePolicy.java`, `GeneratedCacheRegistry.java` and their tests | Android cache-directory and share-target lifetime guidance                                       | Original deterministic retention policy and synthetic boundary fixtures; no upstream portfolio code or third-party asset used  |
 | `ContentReadPolicy.java` and its tests, `PickedUriRegistry.java`                                        | Android `ContentResolver` streaming guidance and NIST SHA test vectors                           | Original streaming/bounded read policy with real correctness vectors; no upstream portfolio code or third-party asset used     |
 | `RendererRecovery.java`, `RendererRecoveryPolicy.java` and their tests                                  | Android WebView `onRenderProcessGone` recovery guidance and Capacitor 8.5.1 `WebViewListener`    | Original loop-guard policy and native safe-mode screen; no upstream portfolio code or third-party asset used                   |
+| `androidTest` WebView harness, instrumentation cases, and `TestDocumentsProvider`                       | AndroidX ActivityScenario, Espresso Intents, UI Automator, and ContentProvider documentation     | Original test-only harness with synthetic text and a published 1×1 PNG fixture; no private/user data or production component   |
+| `MainActivity` WebView state and Back policy                                                            | Android view-state and AndroidX `OnBackPressedDispatcher` documentation                          | Original narrow host policy (ADR 0019); no tool content, route, or JavaScript result is logged                                 |
 
 ## Licensing/provenance rules
 

@@ -283,8 +283,8 @@ function validateManifest(): {
 
   const implementedTools = unique(manifest.implementedTools, "implemented tool")
   invariant(
-    implementedTools.size === 3,
-    `Expected 3 implemented tools, found ${implementedTools.size}`,
+    implementedTools.size === 25,
+    `Expected 25 implemented tools, found ${implementedTools.size}`,
   )
   for (const id of implementedTools) invariant(toolIds.has(id), `Unknown implemented tool: ${id}`)
 

@@ -23,6 +23,8 @@
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
     "cap:sync": "cap sync android",
     "android:manifest:check": "node scripts/check-android-manifest.mjs",
+    "android:test:connected": "./android/gradlew -p android :app:connectedDebugAndroidTest",
+    "android:test:process-recreation": "node scripts/test-android-process-recreation.mjs",
     "github:actions:check": "node scripts/check-github-actions.ts",
     "github:work-items:check": "node scripts/setup-github-work-management.ts",
     "github:work-items:apply": "node scripts/setup-github-work-management.ts --apply",

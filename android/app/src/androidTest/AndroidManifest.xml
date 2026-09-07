@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!--
+          Test-APK-only provider for synthetic picker and Save As results. It is not merged into
+          the production application and requires no permission. Export is required because the
+          app-under-test and test APK have different UIDs on device.
+        -->
+        <provider
+            android:name="dev.yash.tools.TestDocumentsProvider"
+            android:authorities="dev.yash.tools.test.documents"
+            android:exported="true"
+            android:grantUriPermissions="true" />
+    </application>
+</manifest>
