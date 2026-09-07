@@ -612,6 +612,12 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Passed formatting, strict typecheck, zero-warning lint, 225 web tests (28 files), 26 E2E scenarios, production build (FileHashChecker lazy chunk 3.36 kB/1.44 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
 - Next executable item: proving packaged-origin CORS behavior and porting Currency Converter (issue #43) as the first network tool — its provider, terms, and cache/stale UX must pass review before enabling.
 
+### 2026-09-07 — Currency Converter merge reconciliation
+
+- Merged PR #144 into `main` as `4af2a42`, closing issue #43; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge (web-quality 2m25s, android-debug 3m45s), and no open pull requests remain.
+- Twelve of the 87 approved tools are implemented; the 12-tool architecture milestone is code-complete with all local/CI gates green. Android artifact validation of the milestone and physical-device evidence remain open.
+- Next executable item: Android artifact validation of the complete 12-tool architecture milestone (queue item 4), then the remaining 75 tools in controlled, risk-ordered batches.
+
 ### 2026-09-07 — Currency Converter (first network tool)
 
 - Implemented the `currency-converter` tool (issue #43) from the audited upstream component onto the Frankfurter v2 endpoint, recorded in ADR 0017: HTTPS-only exact-origin requests with a 15 s timeout and contract-level cancellation, strict per-row response-schema validation before any value reaches React, typed failure states (offline/timeout/rate-limited/provider-failure/malformed/no-record/cancelled), a versioned PreferenceStore cache (at most 8 bases, 24 h TTL aligned with the provider `max-age`), stale-labeled offline fallback with reconnect guidance, a deliberately refreshed static 165-currency catalog, and per-conversion data-date freshness. The stale `api.frankfurter.app` CSP hostname moved to `api.frankfurter.dev`; the settings privacy summary now distinguishes offline tools from Currency Converter instead of claiming all enabled tools are local, and the Clear-data copy names cached exchange rates.
