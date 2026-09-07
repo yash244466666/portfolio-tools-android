@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 13:13 Europe/Berlin
+> Last updated: 2026-09-07 13:22 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -749,3 +749,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Remove Duplicates (`src/tools/remove-duplicates/dedupe.ts`) keeps first occurrences with a case-sensitivity option and replaces the upstream default-lexicographic `sort()` with locale comparison; the tab-style mode buttons become a labeled radio group with an input limit.
 - Added 20 pure tests and 13 component cases for the four tools (including the numeric-sort regression vector), four registry entries (icons ArrowDownUp, ListOrdered, Scissors, ListX), and four E2E scenarios; the suite is now 27 scenarios × 2 viewports.
 - Passed formatting (unpiped `pnpm format:check`), strict typecheck, zero-warning lint, 428 web tests (56 files), 54 E2E checks, production build with lazy tool chunks, Capacitor sync, Android Lint, debug assembly, and the debug merged-manifest policy check (no permission or exported-component changes).
+
+### 2026-09-07 — Text batch 3 merge reconciliation
+
+- Merged PR #149 into `main` as `435d435`, closing issues #105, #106, #107, and #97; all four Project items are Done and the issues carry `status:device-qa` with evidence comments. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge (web-quality 2m56s, android-debug 3m39s), and no open pull requests remain.
+- Twenty-five of the 87 approved tools are implemented; the 12-tool milestone, both tier-3 network tools, and three tier-1 text/dev batches are complete (62 remain).
+- Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
