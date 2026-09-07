@@ -29,7 +29,7 @@ Implemented now:
 - React/Vite/TypeScript/Tailwind application.
 - Capacitor Android project.
 - Typed tool registry containing the completed 12-tool architecture milestone plus reviewed post-slice batches within the approved 87-tool public-release scope.
-- Forty-eight enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, Text to Slug, Sort Lines, Add Line Numbers, Trim Whitespace, Remove Duplicates, Percentage Calculator, Tip Calculator, GCD/LCM Calculator, Roman Numeral Converter, Password Strength Checker, Data Sanitizer, CSP Generator, CORS Header Builder, Robots.txt Generator, Age Calculator, Bitwise Calculator, Color Blindness Simulator, Scientific Calculator, HTTP Status Codes, MIME Type Lookup, Meta Tag Generator, Unicode Lookup, ASCII Table, Box Shadow Generator, Border Radius Generator, Text Shadow Generator, CSS Triangle Generator, and Gradient Border Generator.
+- Fifty-three enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, Text to Slug, Sort Lines, Add Line Numbers, Trim Whitespace, Remove Duplicates, Percentage Calculator, Tip Calculator, GCD/LCM Calculator, Roman Numeral Converter, Password Strength Checker, Data Sanitizer, CSP Generator, CORS Header Builder, Robots.txt Generator, Age Calculator, Bitwise Calculator, Color Blindness Simulator, Scientific Calculator, HTTP Status Codes, MIME Type Lookup, Meta Tag Generator, Unicode Lookup, ASCII Table, Box Shadow Generator, Border Radius Generator, Text Shadow Generator, , HTML Entity Encoder, ROT13 Cipher, Morse Code Translator, HMAC Generator, and UUID Generator.
 - Catalog search and category filters.
 - Favorites and recent-tool persistence.
 - System/light/dark theme preferences.
@@ -44,7 +44,7 @@ Implemented now:
 
 Not yet implemented:
 
-- Remaining 39 catalog tools; 39 of the approved 87 are not yet implemented overall.
+- Remaining 34 catalog tools; 34 of the approved 87 are not yet implemented overall.
 - Installed-artifact device verification of the sensitive clipboard bridge, generated-file cache cleanup, and renderer recovery/safe mode.
 - Final icons, splash assets, app name, application ID approval, App Links, and Play signing.
 - Physical-device verification and Play-distributed artifact testing.

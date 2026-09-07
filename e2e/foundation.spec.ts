@@ -697,3 +697,64 @@ test("gradient border generator emits the snippet", async ({ page }) => {
   await page.getByLabel("Start color", { exact: true }).fill("#ff0000")
   await expect(page.getByText(/linear-gradient\(135deg, #ff0000, #06b6d4\)/)).toBeVisible()
 })
+
+test("html entity encoder encodes and decodes live", async ({ page }) => {
+  await page.goto("/#/tool/html-entity-encoder")
+  await expect(page.getByRole("heading", { name: "HTML Entity Encoder" })).toBeVisible()
+
+  await page.getByLabel("Input text").fill('<a href="x">')
+  await expect(page.getByLabel("Converted output")).toHaveValue("&lt;a href=&quot;x&quot;&gt;")
+  await page.getByRole("group").getByText("Decode Entities", { exact: true }).click()
+  await page.getByLabel("Input text").fill("&lt;b&gt;&amp;&lt;/b&gt; &#65;")
+  await expect(page.getByLabel("Converted output")).toHaveValue("<b>&</b> A")
+})
+
+test("rot13 cipher encodes and decodes with a chosen shift", async ({ page }) => {
+  await page.goto("/#/tool/rot13-cipher")
+  await expect(page.getByRole("heading", { name: "ROT13 Cipher" })).toBeVisible()
+
+  await page.getByLabel("Input text").fill("Hello")
+  await page.getByRole("button", { name: "Encode" }).click()
+  await expect(page.getByLabel("Converted output")).toHaveValue("Uryyb")
+  // ROT13 is self-inverse, so decoding the input yields the same cipher text.
+  await page.getByRole("button", { name: "Decode" }).click()
+  await expect(page.getByLabel("Converted output")).toHaveValue("Uryyb")
+})
+
+test("morse code translator converts both directions", async ({ page }) => {
+  await page.goto("/#/tool/morse-code-translator")
+  await expect(page.getByRole("heading", { name: "Morse Code Translator" })).toBeVisible()
+
+  await page.getByLabel("Input text").fill("SOS")
+  await page.getByRole("button", { name: "Convert" }).click()
+  await expect(page.getByLabel("Converted output")).toHaveValue("... --- ...")
+  await page.getByRole("group").getByText("Morse to Text", { exact: true }).click()
+  await page.getByLabel("Input text").fill("... --- ...")
+  await page.getByRole("button", { name: "Convert" }).click()
+  await expect(page.getByLabel("Converted output")).toHaveValue("SOS")
+})
+
+test("hmac generator signs with web crypto", async ({ page }) => {
+  await page.goto("/#/tool/hmac-generator")
+  await expect(page.getByRole("heading", { name: "HMAC Generator" })).toBeVisible()
+
+  await page.getByLabel("Message").fill("what do ya want for nothing?")
+  await page.getByLabel("Secret key").fill("Jefe")
+  await page.getByRole("button", { name: "Generate HMAC" }).click()
+  await expect(
+    page.getByText("5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843"),
+  ).toBeVisible()
+})
+
+test("uuid generator produces a batch of version-4 values", async ({ page }) => {
+  await page.goto("/#/tool/uuid-generator")
+  await expect(page.getByRole("heading", { name: "UUID Generator" })).toBeVisible()
+
+  await page.getByLabel("Count").fill("3")
+  await page.getByRole("button", { name: "Generate UUIDs" }).click()
+  await expect(page.getByRole("heading", { name: "Generated UUIDs (3)" })).toBeVisible()
+  const output = await page.getByLabel("Generated UUIDs").inputValue()
+  for (const line of output.split("\n")) {
+    expect(line).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+  }
+})
