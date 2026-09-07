@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 02:10 Europe/Berlin
+> Last updated: 2026-09-07 02:45 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -578,6 +578,12 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Passed formatting, strict typecheck, zero-warning lint, 196 web tests (25 files), 22 E2E scenarios, production build (PomodoroTimer lazy chunk 8.13 kB/2.85 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
 - Next executable item: the Image Compressor tool migration (issue #48) with strict decoded-pixel limits, the SAF picker, and the bounded content-read bridge.
 
+### 2026-09-07 — Pomodoro Timer merge reconciliation
+
+- Merged PR #141 into `main` as `f00f2b2`, closing issue #101; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
+- Nine of the 87 approved tools are implemented. The vertical slice still needs Image Compressor, File Hash Checker, and Currency Converter.
+- Next executable item: the Image Compressor tool migration (issue #48) with strict decoded-pixel limits, the SAF picker, EXIF orientation normalization, and the bounded content-read bridge.
+
 ### 2026-09-06 — JSON Editor merge reconciliation
 
 - Merged PR #139 into `main` as `d900561`, closing issue #49; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
@@ -606,3 +612,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Added 12 pure cases (duration clamps, anchor arithmetic including backwards-clock protection, ceiling clock format, migration round-trip/newer-schema/15-entry corrupt corpus, reconstruction in-progress/expired-work/expired-break/paused) and 9 component cases (default phase, run and persist, pause/resume without drift, phase completion with session counting, reset, denied permission, granted scheduling with exact `at` time and deterministic cancel, expired-while-away reconstruction, in-progress reconstruction). E2E grew to 22 scenarios covering run, pause-freeze, resume, reset, and the permission flow on both device profiles.
 - Passed formatting, strict typecheck, zero-warning lint, 196 web tests (25 files), 22 E2E scenarios, production build (PomodoroTimer lazy chunk 8.13 kB/2.85 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
 - Next executable item: the Image Compressor tool migration (issue #48) with strict decoded-pixel limits, the SAF picker, and the bounded content-read bridge.
+
+### 2026-09-07 — Pomodoro Timer merge reconciliation
+
+- Merged PR #141 into `main` as `f00f2b2`, closing issue #101; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
+- Nine of the 87 approved tools are implemented. The vertical slice still needs Image Compressor, File Hash Checker, and Currency Converter.
+- Next executable item: the Image Compressor tool migration (issue #48) with strict decoded-pixel limits, the SAF picker, EXIF orientation normalization, and the bounded content-read bridge.
