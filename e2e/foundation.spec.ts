@@ -389,3 +389,40 @@ test("text to slug generates a slug with options", async ({ page }) => {
   await expect(page.getByText("hello_world").first()).toBeVisible()
   await expect(page.getByText("Conversion steps")).toBeVisible()
 })
+
+test("sort lines orders lines across modes", async ({ page }) => {
+  await page.goto("/#/tool/sort-lines")
+  await expect(page.getByRole("heading", { name: "Sort Lines" })).toBeVisible()
+  await page.getByRole("textbox", { name: "Lines" }).fill("banana\nApple\ncherry")
+  await expect(page.locator("p.font-mono")).toHaveText("Apple\nbanana\ncherry")
+  await page.getByText("Z → A").click()
+  await expect(page.locator("p.font-mono")).toHaveText("cherry\nbanana\nApple")
+})
+
+test("add line numbers numbers lines with padding", async ({ page }) => {
+  await page.goto("/#/tool/add-line-numbers")
+  await expect(page.getByRole("heading", { name: "Add Line Numbers" })).toBeVisible()
+  await page.getByLabel("Text").fill("a\nb\nc\nd\ne\nf\ng\nh\ni\nj")
+  await expect(page.getByText(" 1. a")).toBeVisible()
+  await expect(page.getByText("10. j")).toBeVisible()
+})
+
+test("trim whitespace trims and reports savings", async ({ page }) => {
+  await page.goto("/#/tool/trim-whitespace")
+  await expect(page.getByRole("heading", { name: "Trim Whitespace" })).toBeVisible()
+  await page.getByLabel("Text").fill("  a  \n\tb\t")
+  await expect(page.locator("p.font-mono")).toHaveText("a\nb")
+  await expect(page.getByText(/Saved: 6 characters/)).toBeVisible()
+})
+
+test("remove duplicates dedupes lines case-sensitively", async ({ page }) => {
+  await page.goto("/#/tool/remove-duplicates")
+  await expect(page.getByRole("heading", { name: "Remove Duplicates" })).toBeVisible()
+  await page.getByRole("textbox", { name: "Lines" }).fill("b\na\nb\na\nc")
+  await expect(page.locator("p.font-mono")).toHaveText("b\na\nc")
+  await expect(page.getByText(/5 in; 3 unique; 2 removed/)).toBeVisible()
+  await page.getByRole("radio", { name: "Words" }).click()
+  await page.getByRole("textbox", { name: "Words" }).fill("the cat THE cat")
+  await page.getByRole("checkbox", { name: "Case sensitive" }).uncheck()
+  await expect(page.locator("p.font-mono")).toHaveText("the cat")
+})
