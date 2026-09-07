@@ -307,3 +307,40 @@ test("dns lookup resolves a mocked Cloudflare DoH answer", async ({ page }) => {
   expect(requests.length).toBe(1)
   expect(requests[0]).toBe("https://cloudflare-dns.com/dns-query?name=example.com&type=A")
 })
+
+test("word counter counts words, sentences, and paragraphs", async ({ page }) => {
+  await page.goto("/#/tool/word-counter")
+  await expect(page.getByRole("heading", { name: "Word Counter" })).toBeVisible()
+  await page.getByLabel("Text").fill("Hello world. Second sentence!\n\nNew paragraph?")
+  await expect(page.getByText("Words").locator("xpath=preceding-sibling::p")).toHaveText("6")
+  await expect(page.getByText("Paragraphs").locator("xpath=preceding-sibling::p")).toHaveText("2")
+})
+
+test("case converter shows all eight conversions", async ({ page }) => {
+  await page.goto("/#/tool/case-converter")
+  await expect(page.getByRole("heading", { name: "Case Converter" })).toBeVisible()
+  await page.getByLabel("Text").fill("hello world")
+  const conversions = page.getByRole("list").locator(":scope > li")
+  await expect(conversions).toHaveCount(8)
+  const conversionText = conversions.locator("p.font-mono")
+  await expect(conversionText.filter({ hasText: /^HELLO WORLD$/ })).toBeVisible()
+  await expect(conversionText.filter({ hasText: /^helloWorld$/ })).toBeVisible()
+  await expect(conversionText.filter({ hasText: /^hello_world$/ })).toBeVisible()
+})
+
+test("character counter counts code points", async ({ page }) => {
+  await page.goto("/#/tool/character-counter")
+  await expect(page.getByRole("heading", { name: "Character Counter" })).toBeVisible()
+  await page.getByLabel("Text").fill("a👍b c")
+  await expect(page.getByText("Characters").locator("xpath=preceding-sibling::p")).toHaveText("5")
+})
+
+test("reverse text keeps emoji intact and switches modes", async ({ page }) => {
+  await page.goto("/#/tool/reverse-text")
+  await expect(page.getByRole("heading", { name: "Reverse Text" })).toBeVisible()
+  await page.getByLabel("Text").fill("a👍b")
+  await expect(page.getByText("👍a")).toBeVisible()
+  await page.getByLabel("Words").check()
+  await page.getByLabel("Text").fill("hello brave world")
+  await expect(page.getByText("world brave hello")).toBeVisible()
+})
