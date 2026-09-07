@@ -467,3 +467,63 @@ test("roman numeral converter round-trips both directions", async ({ page }) => 
   await page.getByLabel("Roman numeral").fill("XLII")
   await expect(page.locator("p.font-mono.text-3xl")).toHaveText("42")
 })
+
+test("password strength checker reports bands and requirements", async ({ page }) => {
+  await page.goto("/#/tool/password-strength-checker")
+  await expect(page.getByRole("heading", { name: "Password Strength Checker" })).toBeVisible()
+
+  await page.getByLabel("Password to analyze").fill("abcdefgh")
+  await expect(page.getByText("Weak", { exact: true })).toBeVisible()
+  await expect(page.getByText("Minutes to hours")).toBeVisible()
+  await expect(page.getByText("38 bits", { exact: true })).toBeVisible()
+
+  await page.getByLabel("Password to analyze").fill("Correct-Horse-Battery-42")
+  await expect(page.getByText("Very Strong", { exact: true })).toBeVisible()
+  await expect(page.getByText("Centuries+")).toBeVisible()
+})
+
+test("data sanitizer redacts selected PII types", async ({ page }) => {
+  await page.goto("/#/tool/data-sanitizer")
+  await expect(page.getByRole("heading", { name: "Data Sanitizer" })).toBeVisible()
+
+  await page.getByLabel("Text with sensitive data").fill("jane@corp.dev from 192.168.0.5")
+  await expect(page.getByText("[EMAIL REDACTED] from [IP REDACTED]")).toBeVisible()
+
+  await page.getByRole("checkbox", { name: "IP Addresses" }).uncheck()
+  await expect(page.getByText("[EMAIL REDACTED] from 192.168.0.5")).toBeVisible()
+})
+
+test("csp generator builds a policy from directives", async ({ page }) => {
+  await page.goto("/#/tool/csp-generator")
+  await expect(page.getByRole("heading", { name: "CSP Generator" })).toBeVisible()
+  await expect(page.getByText("default-src 'self'")).toBeVisible()
+
+  await page.getByRole("checkbox", { name: "Enable img-src" }).click()
+  await page.getByRole("button", { name: "Add * to img-src" }).click()
+  await expect(page.getByText("default-src 'self'; img-src *")).toBeVisible()
+})
+
+test("cors header builder emits and omits access headers", async ({ page }) => {
+  await page.goto("/#/tool/cors-header-builder")
+  await expect(page.getByRole("heading", { name: "CORS Header Builder" })).toBeVisible()
+  await expect(page.locator("dl")).toContainText("Access-Control-Allow-Methods: GET, POST, OPTIONS")
+
+  await page.getByText("POST", { exact: true }).click()
+  await expect(page.locator("dl")).toContainText("Access-Control-Allow-Methods: GET, OPTIONS")
+
+  await page.getByLabel("Max age (seconds)").fill("")
+  await expect(page.locator("dl")).not.toContainText("Access-Control-Max-Age")
+})
+
+test("robots txt generator composes groups and rules", async ({ page }) => {
+  await page.goto("/#/tool/robots-txt-generator")
+  await expect(page.getByRole("heading", { name: "Robots.txt Generator" })).toBeVisible()
+
+  const output = page.locator("pre")
+  await expect(output).toContainText("User-agent: *")
+  await expect(output).toContainText("Disallow: /admin/")
+  await expect(output).toContainText("Sitemap: https://example.com/sitemap.xml")
+
+  await page.getByLabel("Sitemap URL").fill("")
+  await expect(output).not.toContainText("Sitemap:")
+})
