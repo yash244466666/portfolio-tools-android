@@ -1,10 +1,10 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 23:35 Europe/Berlin
+> Last updated: 2026-09-07 23:47 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **all 87 audited catalog tools; 63 implemented, 24 remaining**
+> Approved public version 1 scope: **all 87 audited catalog tools; 68 implemented, 19 remaining**
 > Public release readiness: **NO — foundation only**
 
 This is the living operational record for what is implemented, what is verified, what remains, and what is blocked. Update it in every implementation session. A checked item requires evidence; generated or coded does not automatically mean tested.
@@ -924,3 +924,16 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Squash-merged PR #159 into `main` as `c471eba`, closing issues #52, #59, #63, #64, and #96; all five Project items are Done and the issues carry `status:device-qa` with evidence comments (stale `status:triage` labels removed). `main` == `origin/main` with a clean worktree, both hosted PR CI jobs green before merge (android-debug 4m6s, web-quality 5m46s). No open pull requests remain.
 - Registry now has 63 enabled entries; 24 of the approved 87 remain.
 - Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
+
+### 2026-09-07 — Dev batch 6 tool migration (Color Picker, CSS Gradient Generator, XML Formatter, SQL Formatter, Emoji Picker)
+
+- Implemented the next five tier-1 tools (issues #53, #61, #65, #66, and #99) as one batch on `feat/53-dev-batch-6`, all offline, non-persistent, lazy-loaded, and built only on the platform service contracts and shared UI primitives.
+- Color Picker (`src/tools/color-picker/`) ports the upstream `color-utils` conversions with strict validation (malformed hex yields an explicit error instead of NaN), clamped channels in every direction, hue-wrapped harmony palettes, and a WCAG contrast verdict that states pass/fail in words and shows a sample rendering; reference ratios (black/white 21:1, the #777777/#757575 AA boundary) come from computed independent vectors.
+- CSS Gradient Generator (`src/tools/css-gradient-generator/`) requires at least two validated hex stops before emitting any declaration (upstream joined whatever was typed, producing one-stop gradients that are not valid CSS), clamps angles to 0–360, makes the optional third color explicit, and drives the preview from the same value as the copied declaration.
+- XML Formatter (`src/tools/xml-formatter/`) validates with the standard DOMParser but replaces the upstream parsererror echo (which can reproduce user input) with a fixed message; upstream minify collapsed whitespace inside text nodes and silently changed document content, so this minify collapses only whitespace between tags, and both actions fail closed on malformed input.
+- SQL Formatter (`src/tools/sql-formatter/`) adds sql-formatter 15.7.3 as an exact pin; failures produce a fixed message instead of the upstream raw library error text (tokenizer diagnostics echo input fragments), and minify joins the formatter's inserted newlines rather than collapsing all whitespace so spacing inside single-line string literals survives.
+- Emoji Picker (`src/tools/emoji-picker/`) bundles the upstream catalog as static data with a pure search filter; copies go through the platform ClipboardService with a status announcement instead of direct `navigator.clipboard` use, every grid button carries its emoji name as an accessible label, and the upstream "middle finger" entry is intentionally not carried over.
+- Registry now has 68 enabled entries; 19 of the approved 87 remain. Tests: 10 suites (5 pure + 5 component, 89 new cases; the suite is now 141 files / 1029 tests) and 5 new E2E scenarios (70 scenarios × 2 viewports = 140 checks).
+- Dependency added: `sql-formatter` 15.7.3, exact-pinned with its MIT license recorded in the provenance dependency table; lockfile changed only through pnpm.
+- The emulator checklist driver was extended to the 68-tool catalog count with five new per-tool checks. Validation gates ran unpiped: formatting, strict typecheck, zero-warning lint, 1029 web tests (141 files), 140 E2E checks, production build with lazy tool chunks (new chunks ColorPicker 9.1 kB, EmojiPicker 7.1 kB; SqlFormatter 264.4 kB / 75.5 kB gzip including sql-formatter), Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes). Three intermediate driver iterations exposed test-harness gaps of mine (setValue's landed-value check conflicts with the canonical-rewrite input, emoji names are accessible-label-only so innerText probes never see them, and a stale search state broke a category scoping probe); after fixing, a green run against the installed rebuilt artifact verified all 68 enabled tools — 82 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug, artifact SHA-256 5d740ff277369e261dc910d70e58e6670cafc8c160b06c1d84c1f8f19259ad2a.
+- Next executable item: commit, open the PR closing issues #53, #61, #65, #66, and #99, review hosted CI, merge, and reconcile; then continue the tier-1 batch queue with the next risk-ordered batch. Android artifact validation of all enabled tools remains queue item 4.

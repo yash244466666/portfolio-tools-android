@@ -936,3 +936,106 @@ test("text diff counts lines and marks changes without color", async ({ page }) 
   await page.getByLabel("Modified text").fill("a\nb\nc")
   await expect(page.getByText("The texts are identical.")).toBeVisible()
 })
+
+test("color picker converts channels and checks contrast", async ({ page }) => {
+  await page.goto("/#/tool/color-picker")
+  await expect(page.getByRole("heading", { name: "Color Picker" })).toBeVisible()
+
+  // A three-digit hex entry expands into canonical channels.
+  await page.getByLabel("Hex", { exact: true }).fill("#0af")
+  await expect(page.getByRole("spinbutton", { name: "R" })).toHaveValue("0")
+  await expect(page.getByRole("spinbutton", { name: "G" })).toHaveValue("170")
+  await expect(page.getByRole("spinbutton", { name: "B" })).toHaveValue("255")
+
+  await page.getByLabel("Compare against").fill("#000000")
+  await expect(page.getByRole("status", { name: "Contrast verdict" })).toContainText("on #000000")
+
+  // Adopting a harmony swatch makes it the current color.
+  await page.getByLabel("Hex", { exact: true }).fill("#6366f1")
+  await page.getByRole("button", { name: /Use complementary / }).click()
+  await expect(page.getByLabel("Hex", { exact: true })).not.toHaveValue("#6366f1")
+})
+
+test("css gradient generator switches types and validates colors", async ({ page }) => {
+  await page.goto("/#/tool/css-gradient-generator")
+  await expect(page.getByRole("heading", { name: "CSS Gradient Generator" })).toBeVisible()
+
+  await expect(
+    page.getByText("background: linear-gradient(135deg, #6366f1, #06b6d4);"),
+  ).toBeVisible()
+
+  await page.getByLabel("conic").check()
+  await expect(
+    page.getByText("background: conic-gradient(from 135deg, #6366f1, #06b6d4);"),
+  ).toBeVisible()
+  await expect(page.getByLabel("Angle")).toBeVisible()
+
+  await page.getByLabel("radial").check()
+  await expect(
+    page.getByText("background: radial-gradient(circle, #6366f1, #06b6d4);"),
+  ).toBeVisible()
+
+  // Upstream emitted one-stop gradients that are not valid CSS.
+  await page.getByLabel("Color 1", { exact: true }).fill("")
+  await expect(page.locator("pre")).toHaveText("Add at least two colors.")
+})
+
+test("xml formatter indents, minifies, and rejects malformed input", async ({ page }) => {
+  await page.goto("/#/tool/xml-formatter")
+  await expect(page.getByRole("heading", { name: "XML Formatter" })).toBeVisible()
+
+  await page.getByLabel("XML input").fill("<root><child><leaf>text</leaf></child></root>")
+  await page.getByRole("button", { name: "Format" }).click()
+  await expect(page.locator("pre")).toHaveText(
+    "<root>\n  <child>\n    <leaf>text</leaf>\n  </child>\n</root>",
+  )
+
+  await page.getByRole("button", { name: "Minify" }).click()
+  await expect(page.locator("pre")).toHaveText("<root><child><leaf>text</leaf></child></root>")
+
+  await page.getByLabel("XML input").fill("<root><child></root>")
+  await page.getByRole("button", { name: "Format" }).click()
+  await expect(page.getByText("The XML is not well-formed.")).toBeVisible()
+})
+
+test("sql formatter formats and minifies in a chosen dialect", async ({ page }) => {
+  await page.goto("/#/tool/sql-formatter")
+  await expect(page.getByRole("heading", { name: "SQL Formatter" })).toBeVisible()
+
+  await page.getByLabel("SQL input").fill("select id, name from users where active = 1")
+  await page.getByRole("button", { name: "Format" }).click()
+  await expect(page.locator("pre")).toHaveText(
+    "select\n  id,\n  name\nfrom\n  users\nwhere\n  active = 1",
+  )
+
+  // PostgreSQL accepts dollar-quoted strings; standard SQL does not.
+  await page.getByLabel("PostgreSQL").check()
+  await page.getByLabel("SQL input").fill("select $$tagged$$ from t")
+  await page.getByRole("button", { name: "Format" }).click()
+  await expect(page.locator("pre")).toContainText("$$tagged$$")
+
+  await page.getByLabel("SQL input").fill("select 'oops from t")
+  await page.getByRole("button", { name: "Format" }).click()
+  await expect(page.getByText("The SQL could not be parsed for formatting.")).toBeVisible()
+})
+
+test("emoji picker searches the bundled catalog by name", async ({ page }) => {
+  await page.goto("/#/tool/emoji-picker")
+  await expect(page.getByRole("heading", { name: "Emoji Picker" })).toBeVisible()
+
+  await expect(page.getByRole("button", { name: "Copy thumbs up" })).toBeVisible()
+
+  await page.getByLabel("Search").fill("fire")
+  await expect(page.getByRole("heading", { name: "Nature" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "Copy fire" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "Copy joy" })).toHaveCount(0)
+
+  await page.getByLabel("Search").fill("zzzzz")
+  await expect(page.getByText(/No emojis match/)).toBeVisible()
+
+  // Clearing the search and filtering by category restores the scoping.
+  await page.getByLabel("Search").fill("")
+  await page.getByRole("button", { name: "Food" }).click()
+  await expect(page.getByRole("heading", { name: "Food" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Smileys" })).toHaveCount(0)
+})

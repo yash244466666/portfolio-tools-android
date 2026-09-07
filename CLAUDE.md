@@ -29,7 +29,7 @@ Implemented now:
 - React/Vite/TypeScript/Tailwind application.
 - Capacitor Android project.
 - Typed tool registry containing the completed 12-tool architecture milestone plus reviewed post-slice batches within the approved 87-tool public-release scope.
-- Sixty-three enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, Text to Slug, Sort Lines, Add Line Numbers, Trim Whitespace, Remove Duplicates, Percentage Calculator, Tip Calculator, GCD/LCM Calculator, Roman Numeral Converter, Password Strength Checker, Data Sanitizer, CSP Generator, CORS Header Builder, Robots.txt Generator, Age Calculator, Bitwise Calculator, Color Blindness Simulator, Scientific Calculator, HTTP Status Codes, MIME Type Lookup, Meta Tag Generator, Unicode Lookup, ASCII Table, Box Shadow Generator, Border Radius Generator, Text Shadow Generator, HTML Entity Encoder, ROT13 Cipher, Morse Code Translator, HMAC Generator, UUID Generator, Find & Replace, Invisible Character Detector, Hash Diff, Cron Expression Builder, Lorem Ipsum Generator, Password Generator, JWT Decoder, CSV to JSON, YAML to JSON, and Text Diff.
+- Sixty-eight enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, Text to Slug, Sort Lines, Add Line Numbers, Trim Whitespace, Remove Duplicates, Percentage Calculator, Tip Calculator, GCD/LCM Calculator, Roman Numeral Converter, Password Strength Checker, Data Sanitizer, CSP Generator, CORS Header Builder, Robots.txt Generator, Age Calculator, Bitwise Calculator, Color Blindness Simulator, Scientific Calculator, HTTP Status Codes, MIME Type Lookup, Meta Tag Generator, Unicode Lookup, ASCII Table, Box Shadow Generator, Border Radius Generator, Text Shadow Generator, HTML Entity Encoder, ROT13 Cipher, Morse Code Translator, HMAC Generator, UUID Generator, Find & Replace, Invisible Character Detector, Hash Diff, Cron Expression Builder, Lorem Ipsum Generator, Password Generator, JWT Decoder, CSV to JSON, YAML to JSON, Text Diff, Color Picker, CSS Gradient Generator, XML Formatter, SQL Formatter, and Emoji Picker.
 - Catalog search and category filters.
 - Favorites and recent-tool persistence.
 - System/light/dark theme preferences.
@@ -44,7 +44,7 @@ Implemented now:
 
 Not yet implemented:
 
-- Remaining 24 catalog tools; 24 of the approved 87 are not yet implemented overall.
+- Remaining 19 catalog tools; 19 of the approved 87 are not yet implemented overall.
 - Installed-artifact device verification of the sensitive clipboard bridge, generated-file cache cleanup, and renderer recovery/safe mode.
 - Final icons, splash assets, app name, application ID approval, App Links, and Play signing.
 - Physical-device verification and Play-distributed artifact testing.
@@ -623,7 +623,7 @@ Unless the tracker or user changes priority:
 1. Complete Android instrumentation/UI Automator foundation coverage through issue #17 and review.
 2. Execute the physical-device foundation checklist through issue #18 on an approved device or emulator.
 3. Validate the complete 12-tool architecture milestone and every enabled post-slice tool on bundled Android artifacts.
-4. Migrate the remaining 62 audited catalog tools in controlled, risk-ordered batches selected from Ready Project work.
+4. Migrate the remaining 19 audited catalog tools in controlled, risk-ordered batches selected from Ready Project work.
 5. Complete quality, accessibility, privacy, policy, release, and closed-testing gates without weakening the all-87 scope.
 6. Submit no production candidate until all 87 tools pass the Definition of Done and the release manifest, store claims, and signed artifact agree.
 
