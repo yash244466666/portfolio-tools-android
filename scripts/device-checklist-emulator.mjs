@@ -5,7 +5,7 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 63
+const enabledToolCount = 68
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -1122,6 +1122,89 @@ async function phaseTools(page) {
         await p.setValue("#text-diff-modified", "a\nb\nc")
         await p.waitFor("document.body.innerText.includes('The texts are identical.')")
         return "counts summary, markers, and identical state rendered"
+      },
+    ],
+    [
+      "color-picker",
+      "Color Picker",
+      async (p) => {
+        // The tool rewrites partial input to its canonical form, so setValue
+        // lands the already-canonical six-digit value; the web e2e covers the
+        // three-digit normalization path.
+        await p.setValue("#color-picker-hex", "#00aaff")
+        await p.waitFor(
+          "(document.querySelector('#color-picker-red') ?? {value:''}).value === '0' && (document.querySelector('#color-picker-green') ?? {value:''}).value === '170'",
+        )
+        await p.setValue("#color-picker-contrast", "#000000")
+        await p.waitFor("document.body.innerText.includes('on #000000')")
+        return "hex expanded to channels and contrast verdict rendered"
+      },
+    ],
+    [
+      "css-gradient-generator",
+      "CSS Gradient Generator",
+      async (p) => {
+        await p.waitFor(
+          "document.body.innerText.includes('background: linear-gradient(135deg, #6366f1, #06b6d4);')",
+        )
+        await p.clickRadioValue("conic")
+        await p.waitFor(
+          "document.body.innerText.includes('background: conic-gradient(from 135deg, #6366f1, #06b6d4);')",
+        )
+        await p.setValue("#css-gradient-color-0", "")
+        await p.waitFor("document.body.innerText.includes('Add at least two colors.')")
+        return "linear and conic declarations rendered; one-stop gradient rejected"
+      },
+    ],
+    [
+      "xml-formatter",
+      "XML Formatter",
+      async (p) => {
+        await p.setValue("#xml-formatter-input", "<root><child><leaf>text</leaf></child></root>")
+        await p.clickButton("Format")
+        await p.waitFor("document.body.innerText.includes('    <leaf>text</leaf>')")
+        await p.setValue("#xml-formatter-input", "<root><child></root>")
+        await p.clickButton("Format")
+        await p.waitFor("document.body.innerText.includes('The XML is not well-formed.')")
+        return "indentation rendered and malformed input rejected without echoing it"
+      },
+    ],
+    [
+      "sql-formatter",
+      "SQL Formatter",
+      async (p) => {
+        await p.setValue("#sql-formatter-input", "select id, name from users where active = 1")
+        await p.clickButton("Format")
+        await p.waitFor("document.body.innerText.includes('id,\\n  name')")
+        await p.setValue("#sql-formatter-input", "select 'oops from t")
+        await p.clickButton("Format")
+        await p.waitFor(
+          "document.body.innerText.includes('The SQL could not be parsed for formatting.')",
+        )
+        return "clause indentation rendered; parse failure message without echoed input"
+      },
+    ],
+    [
+      "emoji-picker",
+      "Emoji Picker",
+      async (p) => {
+        // Emoji buttons carry their names as accessible labels only, so the
+        // driver probes the aria-labels directly.
+        await p.waitFor(
+          "[...document.querySelectorAll('button')].some(b => b.getAttribute('aria-label') === 'Copy thumbs up')",
+        )
+        await p.setValue("#emoji-picker-search", "fire")
+        await p.waitFor(
+          "[...document.querySelectorAll('button')].some(b => b.getAttribute('aria-label') === 'Copy fire') && ![...document.querySelectorAll('button')].some(b => b.getAttribute('aria-label') === 'Copy joy')",
+        )
+        await p.setValue("#emoji-picker-search", "zzzzz")
+        await p.waitFor("document.body.innerText.includes('No emojis match')")
+        await p.setValue("#emoji-picker-search", "")
+        await p.clickButton("Food")
+        await p.waitFor(
+          "[...document.querySelectorAll('button')].some(b => b.getAttribute('aria-label') === 'Copy pizza') && ![...document.querySelectorAll('button')].some(b => b.getAttribute('aria-label') === 'Copy grinning')",
+        )
+        return "name search, empty state, and category scoping rendered"
       },
     ],
   ]
