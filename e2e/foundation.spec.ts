@@ -1,3 +1,6 @@
+import { writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import { expect, test } from "@playwright/test"
 
 test("catalog search is usable", async ({ page }) => {
@@ -175,4 +178,30 @@ test("pomodoro timer runs, pauses, and resets from the device clock", async ({ p
   await page.getByRole("button", { name: "Alert me at phase end" }).click()
   await expect(page.getByRole("status")).toContainText(/notification/i)
   await expect(page.getByRole("button", { name: /Alerts on|Alert me/ })).toBeVisible()
+})
+
+test("image compressor compresses a picked image end to end", async ({ page }) => {
+  await page.goto("/#/tool/image-compressor")
+  await expect(page.getByRole("heading", { name: "Image Compressor" })).toBeVisible()
+
+  // A synthetic 1x1 PNG exercises the real picker, decode, canvas, and PNG re-encode.
+  const pngPath = join(tmpdir(), "yash-tools-e2e-image.png")
+  writeFileSync(
+    pngPath,
+    Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+      "base64",
+    ),
+  )
+
+  const [fileChooser] = await Promise.all([
+    page.waitForEvent("filechooser"),
+    page.getByRole("button", { name: "Choose image" }).click(),
+  ])
+  await fileChooser.setFiles(pngPath)
+  await expect(page.getByText(/Selected:/)).toBeVisible()
+
+  await page.getByRole("button", { name: "Compress image" }).click()
+  await expect(page.getByText(/1 by 1 pixels ·/)).toBeVisible({ timeout: 10_000 })
+  await expect(page.getByAltText("Compressed image preview, 1 by 1 pixels")).toBeVisible()
 })
