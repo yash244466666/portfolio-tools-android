@@ -205,3 +205,36 @@ test("image compressor compresses a picked image end to end", async ({ page }) =
   await expect(page.getByText(/1 by 1 pixels ·/)).toBeVisible({ timeout: 10_000 })
   await expect(page.getByAltText("Compressed image preview, 1 by 1 pixels")).toBeVisible()
 })
+
+test("file hash checker computes real digests for a picked file", async ({ page }) => {
+  await page.goto("/#/tool/file-hash-checker")
+  await expect(page.getByRole("heading", { name: "File Hash Checker" })).toBeVisible()
+
+  const pngPath = join(tmpdir(), "yash-tools-e2e-hash.png")
+  writeFileSync(
+    pngPath,
+    Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+      "base64",
+    ),
+  )
+
+  const [fileChooser] = await Promise.all([
+    page.waitForEvent("filechooser"),
+    page.getByRole("button", { name: "Choose file" }).click(),
+  ])
+  await fileChooser.setFiles(pngPath)
+
+  // Independent oracle: the known SHA-256, SHA-1, and SHA-512 of this exact fixture.
+  await expect(page.getByText("Computed 3 digests locally.")).toBeVisible({ timeout: 10_000 })
+  await expect(
+    page.getByText("c414cd0e204de974f73753c7e28d7638e7b3691bb8b1a2bab6b25bb7fed7ce77"),
+  ).toBeVisible()
+  await expect(page.getByText("b2bbe763c7e1828c750d53f78550709a6fea19be")).toBeVisible()
+  await expect(
+    page.getByText(
+      "fcba48f85167b732f75c33a2232a87e393441948350f265737a483c8b4923fbc2d7dd4ea1ebf00bb774d8cb09c016610abfbc3d4597ebe2d16e81bb92cb3aa48",
+    ),
+  ).toBeVisible()
+  await expect(page.getByText(/Legacy — not collision-secure/)).toBeVisible()
+})
