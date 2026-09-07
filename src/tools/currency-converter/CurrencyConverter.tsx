@@ -45,8 +45,7 @@ const failureMessages: Record<LoadFailure, string> = {
   offline:
     "Rates could not be fetched. Cached rates are shown when available; check the connection and refresh.",
   timeout: "The rate request timed out. Check the connection and try again.",
-  "rate-limited":
-    "The rate provider is limiting requests right now. Wait a little and try again.",
+  "rate-limited": "The rate provider is limiting requests right now. Wait a little and try again.",
   "provider-failure": "The rate provider returned an error. Try again in a moment.",
   malformed: "The provider response could not be understood. Try again in a moment.",
   "no-record": "No rates were returned for this currency. Pick another currency to convert from.",
@@ -353,8 +352,8 @@ export default function CurrencyConverter() {
             <Wifi aria-hidden="true" size={16} /> This tool requires internet for exchange rates.
           </p>
           <p>
-            Rates come from {providerName}, a free and open-source exchange-rate API. When you
-            fetch rates, only the selected base currency code (for example{" "}
+            Rates come from {providerName}, a free and open-source exchange-rate API. When you fetch
+            rates, only the selected base currency code (for example{" "}
             <span className="font-mono">{from}</span>) is sent to{" "}
             <span className="font-mono">api.frankfurter.dev</span>. Your amounts and conversions
             never leave this device. Rates are cached on this installation for up to 24 hours.

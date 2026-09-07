@@ -73,8 +73,7 @@ export interface StoredRatesCache {
   entries: Record<string, CachedBaseRates>
 }
 
-export type CacheMigrationResult =
-  { status: "ok"; cache: StoredRatesCache } | { status: "invalid" }
+export type CacheMigrationResult = { status: "ok"; cache: StoredRatesCache } | { status: "invalid" }
 
 export function emptyRatesCache(): StoredRatesCache {
   return { schemaVersion: currencySchemaVersion, entries: {} }
