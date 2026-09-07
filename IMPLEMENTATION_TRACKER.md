@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 23:23 Europe/Berlin
+> Last updated: 2026-09-07 23:35 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -918,3 +918,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - The emulator checklist driver was extended to the 63-tool catalog count with five new per-tool checks, and its recorded APK hash is now computed from the actual artifact on disk instead of a stale hardcoded value (it had silently gone stale from batch 4). Two intermediate driver runs exposed one escape-depth error of mine (the CSV multi-line assertion compares against the JSON-escaped `\n` in the output textarea, which needs a double escape through the driver's expression layer) plus the known transient theme-persistence FAIL after a cold relaunch; after fixing, a green run against the rebuilt installed artifact verified all 63 enabled tools — 77 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug, artifact SHA-256 3f3c11183cea32564c9a9d6660d425a68832c9b6e5b350806f47e175610727ef.
 - Passed formatting (unpiped `pnpm format:check`), strict typecheck (after fixing a null-guard simplification in the JWT component), zero-warning lint (after fixing an unsafe `any` assignment, an unnecessary type assertion in the YAML module, unnecessary DOM assertions in a test, and moving the device-clock read out of render for the react-hooks purity rule), 940 web tests (131 files), 130 E2E checks, production build with lazy tool chunks (largest new chunk YamlJsonConverter 42.7 kB / 14.4 kB gzip including js-yaml), Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes).
 - Next executable item: commit, open the PR closing issues #52, #59, #63, #64, and #96, review hosted CI, merge, and reconcile; then continue the tier-1 batch queue with the next risk-ordered batch. Android artifact validation of all enabled tools remains queue item 4.
+
+### 2026-09-07 — Dev batch 5 merge reconciliation
+
+- Squash-merged PR #159 into `main` as `c471eba`, closing issues #52, #59, #63, #64, and #96; all five Project items are Done and the issues carry `status:device-qa` with evidence comments (stale `status:triage` labels removed). `main` == `origin/main` with a clean worktree, both hosted PR CI jobs green before merge (android-debug 4m6s, web-quality 5m46s). No open pull requests remain.
+- Registry now has 63 enabled entries; 24 of the approved 87 remain.
+- Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
