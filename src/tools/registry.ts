@@ -170,14 +170,16 @@ export const tools: readonly ToolDefinition[] = [
   {
     id: "currency-converter",
     label: "Currency Converter",
-    description: "Convert currencies using clearly labeled live or cached exchange rates.",
+    description:
+      "Convert between 165 currencies with clearly labeled Frankfurter exchange rates. Requires internet; cached rates work offline.",
     category: "core",
-    tags: ["currency", "network", "offline cache"],
+    tags: ["currency", "exchange rate", "frankfurter", "network"],
     icon: Wifi,
-    status: "planned",
+    status: "enabled",
     risk: "medium",
     network: true,
     persistent: true,
+    component: lazy(() => import("@/tools/currency-converter/CurrencyConverter")),
   },
 ] as const
 
