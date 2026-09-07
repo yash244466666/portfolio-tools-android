@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 03:40 Europe/Berlin
+> Last updated: 2026-09-07 04:15 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -595,6 +595,12 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Passed formatting, strict typecheck, zero-warning lint, 217 web tests (27 files), 24 E2E scenarios, production build (ImageCompressor lazy chunk 6.54 kB/2.67 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
 - Next executable item: the File Hash Checker tool migration with native streaming digests over the content-read bridge.
 
+### 2026-09-07 — Image Compressor merge reconciliation
+
+- Merged PR #142 into `main` as `f3b20d3`, closing issue #48; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
+- Ten of the 87 approved tools are implemented. The vertical slice still needs File Hash Checker and Currency Converter.
+- Next executable item: the File Hash Checker tool migration (locate its issue by title) with native streaming digests over the content-read bridge.
+
 ### 2026-09-06 — JSON Editor merge reconciliation
 
 - Merged PR #139 into `main` as `d900561`, closing issue #49; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
@@ -636,3 +642,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Added 13 pure cases (input/decoded-pixel bounds at the 24 MP boundary, MIME allowlist, resize planning including aspect preservation/never-upscale/one-pixel floor, output format planning, name derivation, quality clamp, byte formatting, savings math) and 9 component cases (initial state, pick and report, cancelled pick, unsupported/oversized rejection, compress+share payload with exact bytes, bitmap close on pixel-limit rejection, decode failure recovery, unmount URL revocation, reset). E2E grew to 24 scenarios and proves the real file chooser → decode → canvas → PNG re-encode path end to end on both device profiles.
 - Passed formatting, strict typecheck, zero-warning lint, 217 web tests (27 files), 24 E2E scenarios, production build (ImageCompressor lazy chunk 6.54 kB/2.67 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
 - Next executable item: the File Hash Checker tool migration with native streaming digests over the content-read bridge.
+
+### 2026-09-07 — Image Compressor merge reconciliation
+
+- Merged PR #142 into `main` as `f3b20d3`, closing issue #48; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
+- Ten of the 87 approved tools are implemented. The vertical slice still needs File Hash Checker and Currency Converter.
+- Next executable item: the File Hash Checker tool migration (locate its issue by title) with native streaming digests over the content-read bridge.
