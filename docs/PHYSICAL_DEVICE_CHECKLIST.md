@@ -1,6 +1,6 @@
 # Physical Android Device Checklist
 
-> Status: not yet executed  
+> Status: not yet executed on a physical device; automated emulator pre-verification executed 2026-09-07  
 > Do not check an item without recording device/API/WebView/build evidence.
 
 ## Test record
@@ -17,6 +17,66 @@
 | Android System WebView version | Pending                              |
 | Navigation mode                | Pending                              |
 | Available storage/memory class | Pending                              |
+
+## Automated emulator pre-verification (2026-09-07)
+
+Executed with `scripts/device-checklist-emulator.mjs`, which drives the installed
+debug artifact's WebView over the Chrome DevTools Protocol (raw page-target
+WebSocket; Android WebView does not support Playwright's `connectOverCDP`).
+Every CDP command is bounded, cold launches are verified and retried, and the
+driver reconnects after Activity-recreating configuration changes. Two
+consecutive runs of the final driver completed green.
+
+| Field                          | Value                                                                                              |
+| ------------------------------ | -------------------------------------------------------------------------------------------------- |
+| Date/time                      | 2026-09-07 (two consecutive green runs of the final driver)                                        |
+| Tester                         | Automated driver script, orchestrated by the coding agent                                          |
+| Git commit                     | The change introducing the driver (branch `test/18-device-checklist`; artifact built at `e6620e1`) |
+| APK hash                       | SHA-256 `4405784099c87b35faf1c762fed3715770a25ed43488e72da273d51b9a3b4543` (`app-debug.apk`)       |
+| Install source                 | Local Gradle debug build via `adb install -r`                                                      |
+| Device model                   | `sdk_gphone64_x86_64` (Android Studio AVD `yash_tools_api35_test`)                                 |
+| Android/API                    | Android 15 (SDK 35)                                                                                |
+| Android System WebView version | 124.0.6367.219                                                                                     |
+| Security patch                 | 2024-09-05                                                                                         |
+| Result                         | 39 PASS, 6 INFO, 4 PENDING_PHYSICAL, 0 FAIL (49 records)                                           |
+
+Automated coverage that passed:
+
+- Cold launch on the bundled production origin `https://app.yash.tools`
+  (`isSecureContext` true, no route), catalog rendering all 25 enabled tool
+  cards, catalog search filtering, labeled primary navigation with
+  `aria-current`, system Back returning from a tool to the catalog, and theme
+  choice restoring across process reconnect.
+- Per-tool interaction for all 25 enabled tools on the installed artifact,
+  including standard vectors on the artifact (SHA-256 of `abc`, epoch 0 →
+  1970, Base64/percent-encoding vectors), Markdown sanitization (inline
+  `<script>` stripped), QR canvas render, JSON format/invalid states, Notes
+  autosave accounting, Pomodoro start/reset, and live Currency/DNS provider
+  calls with attribution.
+- Offline behavior under airplane mode (Currency Converter and DNS Lookup
+  show offline state; local tools remain usable) and recovery after
+  connectivity returns.
+- Process death: force-stop then relaunch restores the durable theme and
+  starts sensitive tool input empty.
+- Landscape rotation (auto-rotate disabled, user rotation lock) relayouts
+  without horizontal overflow; 200% font scale relayouts without horizontal
+  overflow; "Don't keep activities" home/relaunch recovers with theme intact.
+
+Recorded as INFO, not PASS, on this emulator image:
+
+- Soft-IME appearance on focus (hardware-keyboard AVD profile suppresses the
+  soft keyboard; requires physical-device IME verification).
+
+Recorded as PENDING_PHYSICAL (not automatable on this emulator image):
+
+- TalkBack reading order and spoken feedback.
+- Real Doze and OEM battery behavior for timer alerts.
+- OEM split-screen/multi-window behavior.
+- WebView version-update smoke matrix.
+
+This emulator record supplements but does not replace the physical-device
+checklist below; every checkbox remains unchecked until physical-device
+evidence exists.
 
 ## Installation and startup
 
@@ -105,8 +165,9 @@
 
 ## Result
 
-- Overall: **NOT RUN**
+- Overall: **PARTIAL — emulator pre-verification passed; physical device pending**
+- Emulator evidence: 2026-09-07 automated run (39 PASS / 0 FAIL / 4 PENDING_PHYSICAL) on Android 15 SDK 35, WebView 124.0.6367.219, debug artifact `4405784…`; see "Automated emulator pre-verification" above.
 - Blocking issues:
   - Physical device has not been selected or tested.
-  - The instrumentation suite supplements but does not replace the pending physical-device, OEM-picker/share-target, Doze, and accessibility evidence.
-- Evidence links/logs: Pending.
+  - The instrumentation suite and the emulator checklist driver supplement but do not replace the pending physical-device, OEM-picker/share-target, Doze, TalkBack, and WebView-update evidence.
+- Evidence links/logs: `/tmp/device-checklist-results.json` (single-run record; regenerate with `node scripts/device-checklist-emulator.mjs` against an installed debug artifact).
