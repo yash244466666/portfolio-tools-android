@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 19:09 Europe/Berlin
+> Last updated: 2026-09-07 19:24 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -782,6 +782,11 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Final hardening: the lint/type-cleanup pass had silently inverted the CDP `Runtime.evaluate` response shape (`result.result.value` was flattened to `result.value`), which made every `waitFor` poll observe `undefined` and the first cold-launch `h1` wait fail deterministically; the response typedef now matches the protocol, every CDP command is bounded by a 15-second response timeout so a wedged renderer fails fast instead of hanging the run, cold launches are verified against a rendered `h1` and retried up to three times, and the 200% font-scale step reconnects after the Activity-recreating configuration change instead of talking into a dead page connection.
 - Result on the installed debug artifact (SHA-256 `4405784…`, WebView 124.0.6367.219): two consecutive green runs of the final driver, 39 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL. Recorded in `docs/PHYSICAL_DEVICE_CHECKLIST.md` as "Automated emulator pre-verification"; every physical-device checkbox remains unchecked and issue #18 stays open for physical-device evidence.
 - Next executable item: continue the tier-1 batch queue with the next risk-ordered batch of remaining catalog tools; issue #18 remains open pending an approved physical device.
+
+### 2026-09-07 — Math batch 1 merge reconciliation
+
+- Merged PR #152 into `main` as `47e1569`, closing issues #119, #121, #122, and #123; all four Project items are Done and the issues carry `status:device-qa` with evidence comments. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge (android-debug 4m01s, web-quality 2m21s), and no open pull requests remain.
+- Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
 
 ### 2026-09-07 — Math batch 1 tool migration (Percentage, Tip, GCD/LCM, Roman Numeral)
 
