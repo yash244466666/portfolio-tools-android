@@ -203,8 +203,7 @@ export const tools: readonly ToolDefinition[] = [
   {
     id: "word-counter",
     label: "Word Counter",
-    description:
-      "Count words, characters, sentences, paragraphs, and reading time as you type.",
+    description: "Count words, characters, sentences, paragraphs, and reading time as you type.",
     category: "text",
     tags: ["words", "count", "reading time", "offline"],
     icon: WholeWord,
@@ -217,8 +216,7 @@ export const tools: readonly ToolDefinition[] = [
   {
     id: "character-counter",
     label: "Character Counter",
-    description:
-      "Count characters with and without spaces as you type, counting emoji correctly.",
+    description: "Count characters with and without spaces as you type, counting emoji correctly.",
     category: "text",
     tags: ["characters", "count", "offline"],
     icon: Type,
@@ -245,8 +243,7 @@ export const tools: readonly ToolDefinition[] = [
   {
     id: "reverse-text",
     label: "Reverse Text",
-    description:
-      "Reverse characters, word order, or line order while keeping emoji intact.",
+    description: "Reverse characters, word order, or line order while keeping emoji intact.",
     category: "text",
     tags: ["reverse", "flip", "text", "offline"],
     icon: ArrowLeftRight,

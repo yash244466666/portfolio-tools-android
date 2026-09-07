@@ -8,14 +8,7 @@
  */
 
 export type CaseKind =
-  | "upper"
-  | "lower"
-  | "title"
-  | "sentence"
-  | "camel"
-  | "pascal"
-  | "snake"
-  | "kebab"
+  "upper" | "lower" | "title" | "sentence" | "camel" | "pascal" | "snake" | "kebab"
 
 /** Input bound; eight conversions run per keystroke, so the input is rejected above it. */
 export const maximumCaseChars = 100_000
@@ -32,8 +25,9 @@ const wordPattern = /[\p{L}\p{N}]+/gu
 function capitalize(word: string): string {
   // The /u flag makes the group capture a whole code point, so astral letters
   // (e.g. mathematical alphanumerics) are uppercased instead of a lone surrogate.
-  return word.replace(/^(\p{L})([\s\S]*)$/u, (_match, first: string, rest: string) =>
-    first.toUpperCase() + rest,
+  return word.replace(
+    /^(\p{L})([\s\S]*)$/u,
+    (_match, first: string, rest: string) => first.toUpperCase() + rest,
   )
 }
 

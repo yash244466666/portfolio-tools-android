@@ -37,17 +37,11 @@ export function computeTextStats(text: string): TextStats {
 
   const words = text.trim().split(/\s+/).filter(Boolean).length
   const characters = codePoints.length
-  const charactersWithoutSpaces = codePoints.filter(
-    (codePoint) => !/\s/u.test(codePoint),
-  ).length
+  const charactersWithoutSpaces = codePoints.filter((codePoint) => !/\s/u.test(codePoint)).length
   // Simple heuristic: a run of sentence punctuation ends one sentence. Abbreviations
   // such as "Mr." count as a boundary; this is disclosed as a heuristic in the UI.
-  const sentences = text
-    .split(/[.!?]+/)
-    .filter((segment) => /\S/u.test(segment)).length
-  const paragraphs = text
-    .split(/\n\s*\n/)
-    .filter((paragraph) => paragraph.trim().length > 0).length
+  const sentences = text.split(/[.!?]+/).filter((segment) => /\S/u.test(segment)).length
+  const paragraphs = text.split(/\n\s*\n/).filter((paragraph) => paragraph.trim().length > 0).length
 
   let readingTimeLabel: string
   if (words === 0) {

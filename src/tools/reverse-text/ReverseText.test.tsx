@@ -27,8 +27,8 @@ describe("Reverse Text interactions", () => {
     fireEvent.click(screen.getByLabelText("Lines"))
     typeText("one\ntwo")
     // The result spans lines, so assert its raw text rather than a string query.
-    const resultParagraph = screen.getByText((_, element) =>
-      element?.classList.contains("font-mono") === true,
+    const resultParagraph = screen.getByText(
+      (_, element) => element?.classList.contains("font-mono") === true,
     )
     expect(resultParagraph.textContent).toBe("two\none")
   })
@@ -55,5 +55,4 @@ describe("Reverse Text interactions", () => {
     expect(screen.getAllByRole("alert")[0]).toHaveTextContent("1,000,000 character limit")
     expect(screen.queryByRole("button", { name: /copy/i })).not.toBeInTheDocument()
   })
-
 })

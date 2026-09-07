@@ -11,7 +11,13 @@ export default function CaseConverter() {
   // Eight conversions per keystroke is bounded work by construction: the input is
   // rejected above the limit instead of being converted.
   const results = useMemo(
-    () => (overLimit ? null : caseConversions.map((conversion) => ({ ...conversion, output: conversion.convert(text) }))),
+    () =>
+      overLimit
+        ? null
+        : caseConversions.map((conversion) => ({
+            ...conversion,
+            output: conversion.convert(text),
+          })),
     [text, overLimit],
   )
   const limitLabel = maximumCaseChars.toLocaleString("en-US")
@@ -20,7 +26,11 @@ export default function CaseConverter() {
     <div className="grid gap-4">
       <ToolPanel title="Input">
         <Field
-          error={overLimit ? `The text exceeds the ${limitLabel} character limit. Shorten it to convert.` : undefined}
+          error={
+            overLimit
+              ? `The text exceeds the ${limitLabel} character limit. Shorten it to convert.`
+              : undefined
+          }
           hint={`Conversions update as you type, up to ${limitLabel} characters.`}
           htmlFor="case-input"
           label="Text"

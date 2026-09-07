@@ -2,7 +2,12 @@ import { useMemo, useState } from "react"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
-import { computeTextStats, maximumCounterChars, readingWordsPerMinute, type TextStats } from "./text-stats"
+import {
+  computeTextStats,
+  maximumCounterChars,
+  readingWordsPerMinute,
+  type TextStats,
+} from "./text-stats"
 
 interface StatCard {
   label: string
@@ -31,10 +36,7 @@ export default function TextCounter({ emphasizeCharacters }: { emphasizeCharacte
   const possiblyOverLimit = text.length > maximumCounterChars
   const overLimit = possiblyOverLimit && [...text].length > maximumCounterChars
   // Counting is bounded work by construction: the input is rejected above the limit.
-  const stats = useMemo(
-    () => (overLimit ? null : computeTextStats(text)),
-    [text, overLimit],
-  )
+  const stats = useMemo(() => (overLimit ? null : computeTextStats(text)), [text, overLimit])
   const cards = buildCards(stats, emphasizeCharacters)
 
   return (

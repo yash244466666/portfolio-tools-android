@@ -14,9 +14,7 @@ describe("Case Converter interactions", () => {
       </PlatformProvider>,
     )
 
-    expect(
-      screen.getByText(/Enter text above to see it as UPPERCASE/i),
-    ).toBeVisible()
+    expect(screen.getByText(/Enter text above to see it as UPPERCASE/i)).toBeVisible()
 
     typeText("hello world")
     expect(screen.getByText("helloWorld")).toBeVisible()

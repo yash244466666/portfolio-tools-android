@@ -65,19 +65,9 @@ export function reverseText(text: string, mode: ReverseMode): string {
       // collapse inner whitespace runs to single spaces.
       return text
         .split(/\r?\n/)
-        .map((line) =>
-          line
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean)
-            .reverse()
-            .join(" "),
-        )
+        .map((line) => line.trim().split(/\s+/).filter(Boolean).reverse().join(" "))
         .join("\n")
     case "lines":
-      return text
-        .split(/\r?\n/)
-        .reverse()
-        .join("\n")
+      return text.split(/\r?\n/).reverse().join("\n")
   }
 }

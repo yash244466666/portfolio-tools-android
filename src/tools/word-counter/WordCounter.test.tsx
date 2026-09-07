@@ -11,7 +11,9 @@ describe("Word Counter interactions", () => {
     )
 
     const input = screen.getByLabelText("Text")
-    fireEvent.change(input, { target: { value: "Hello world. Second sentence!\n\nNew paragraph?" } })
+    fireEvent.change(input, {
+      target: { value: "Hello world. Second sentence!\n\nNew paragraph?" },
+    })
 
     expect(screen.getByText("Words").previousElementSibling).toHaveTextContent("6")
     expect(screen.getByText("Sentences").previousElementSibling).toHaveTextContent("3")

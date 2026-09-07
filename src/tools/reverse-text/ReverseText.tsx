@@ -2,7 +2,13 @@ import { useMemo, useState } from "react"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
-import { getReverseOption, maximumReverseChars, reverseOptions, reverseText, type ReverseMode } from "./reverse"
+import {
+  getReverseOption,
+  maximumReverseChars,
+  reverseOptions,
+  reverseText,
+  type ReverseMode,
+} from "./reverse"
 
 export default function ReverseText() {
   const [text, setText] = useState("")
@@ -21,7 +27,11 @@ export default function ReverseText() {
     <div className="grid gap-4">
       <ToolPanel title="Input">
         <Field
-          error={overLimit ? `The text exceeds the ${limitLabel} character limit. Shorten it to reverse.` : undefined}
+          error={
+            overLimit
+              ? `The text exceeds the ${limitLabel} character limit. Shorten it to reverse.`
+              : undefined
+          }
           hint={`Reversal updates as you type, up to ${limitLabel} characters.`}
           htmlFor="reverse-input"
           label="Text"
@@ -59,7 +69,9 @@ export default function ReverseText() {
               </label>
             ))}
           </div>
-          <p className="text-xs leading-5 text-[var(--text-secondary)]">{activeOption.description}</p>
+          <p className="text-xs leading-5 text-[var(--text-secondary)]">
+            {activeOption.description}
+          </p>
         </fieldset>
       </ToolPanel>
 
@@ -72,7 +84,9 @@ export default function ReverseText() {
         title="Result"
       >
         {overLimit ? (
-          <p role="alert">The text exceeds the {limitLabel} character limit. Shorten it to reverse.</p>
+          <p role="alert">
+            The text exceeds the {limitLabel} character limit. Shorten it to reverse.
+          </p>
         ) : text.length === 0 ? (
           <p className="text-sm text-[var(--text-secondary)]">
             Enter text above and pick a mode to see it reversed.
