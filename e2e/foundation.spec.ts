@@ -527,3 +527,50 @@ test("robots txt generator composes groups and rules", async ({ page }) => {
   await page.getByLabel("Sitemap URL").fill("")
   await expect(output).not.toContainText("Sitemap:")
 })
+
+test("age calculator computes age, totals, and next birthday", async ({ page }) => {
+  await page.goto("/#/tool/age-calculator")
+  await expect(page.getByRole("heading", { name: "Age Calculator" })).toBeVisible()
+
+  await page.getByLabel("Birth date").fill("1990-05-20")
+  await expect(page.getByLabel("Computed age")).toContainText("years")
+  await expect(page.getByText("Next birthday in")).toBeVisible()
+  await expect(page.getByText(/Turning 37 years old on 2027-05-20/)).toBeVisible()
+})
+
+test("bitwise calculator computes 32-bit operations", async ({ page }) => {
+  await page.goto("/#/tool/bitwise-calculator")
+  await expect(page.getByRole("heading", { name: "Bitwise Calculator" })).toBeVisible()
+
+  await expect(page.getByLabel("Decimal result", { exact: true })).toHaveText("15")
+  await expect(page.getByLabel("Hexadecimal result", { exact: true })).toHaveText("0xF")
+
+  await page.getByText("NOT", { exact: true }).click()
+  await expect(page.getByLabel("Decimal result", { exact: true })).toHaveText("-256")
+  await expect(page.getByLabel("Hexadecimal result", { exact: true })).toHaveText("0xFFFFFF00")
+})
+
+test("color blindness simulator approximates vision types", async ({ page }) => {
+  await page.goto("/#/tool/color-blindness-simulator")
+  await expect(page.getByRole("heading", { name: "Color Blindness Simulator" })).toBeVisible()
+
+  await expect(page.getByText(/Original: RGB\(66, 135, 245\)/)).toBeVisible()
+  await expect(page.getByText(/Protanopia: RGB\(96, 96, 218\)/)).toBeVisible()
+  await expect(page.getByText(/not a medical diagnostic tool/)).toBeVisible()
+})
+
+test("scientific calculator evaluates precedence and functions", async ({ page }) => {
+  await page.goto("/#/tool/calculator")
+  await expect(page.getByRole("heading", { name: "Scientific Calculator" })).toBeVisible()
+
+  for (const name of ["2", "Multiply", "3", "Add", "4", "Equals"]) {
+    await page.getByRole("button", { name, exact: true }).click()
+  }
+  await expect(page.getByRole("status")).toContainText("Display 10")
+
+  await page.getByRole("button", { name: "Clear", exact: true }).click()
+  await page.getByRole("button", { name: "Scientific" }).click()
+  await page.getByRole("button", { name: "9", exact: true }).click()
+  await page.getByRole("button", { name: "Square root" }).click()
+  await expect(page.getByRole("status")).toContainText("Display 3")
+})
