@@ -4,7 +4,7 @@ import { writeFileSync } from "node:fs"
 const PACKAGE = "dev.yash.tools.debug"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 43
+const enabledToolCount = 48
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -861,6 +861,56 @@ async function phaseTools(page) {
         await p.setValue("#ascii-search", "0x41")
         await p.waitFor("document.body.innerText.includes('Uppercase A')")
         return "hex query 0x41 rendered Uppercase A"
+      },
+    ],
+    [
+      "box-shadow-generator",
+      "Box Shadow Generator",
+      async (p) => {
+        await p.setValue("#box-blur", "30")
+        await p.waitFor(
+          "document.body.innerText.includes('box-shadow: 4px 4px 30px 0px rgba(99, 102, 241, 0.3);')",
+        )
+        return "blur change rebuilt the declaration"
+      },
+    ],
+    [
+      "border-radius-generator",
+      "Border Radius Generator",
+      async (p) => {
+        await p.clickCheckbox("Link corners")
+        await p.setValue("#border-radius-topLeft", "24")
+        await p.waitFor("document.body.innerText.includes('border-radius: 24px;')")
+        return "linked corners updated the declaration"
+      },
+    ],
+    [
+      "text-shadow-generator",
+      "Text Shadow Generator",
+      async (p) => {
+        await p.clickButton("Add shadow layer")
+        await p.waitFor("document.body.innerText.includes(', 2px 2px 4px #6366f1;')")
+        await p.clickAriaLabel("Remove layer 2")
+        await p.waitFor("document.body.innerText.includes('text-shadow: 2px 2px 4px #6366f1;')")
+        return "layer added and removed"
+      },
+    ],
+    [
+      "triangle-generator",
+      "CSS Triangle Generator",
+      async (p) => {
+        await p.clickRadioValue("right")
+        await p.waitFor("document.body.innerText.includes('border-left: 100px solid #6366f1;')")
+        return "right triangle rendered"
+      },
+    ],
+    [
+      "gradient-border-generator",
+      "Gradient Border Generator",
+      async (p) => {
+        await p.setValue("#gradient-border-width", "10")
+        await p.waitFor("document.body.innerText.includes('padding: 10px;')")
+        return "border width updated the snippet"
       },
     ],
   ]

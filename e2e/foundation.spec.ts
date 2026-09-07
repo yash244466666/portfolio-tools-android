@@ -637,3 +637,63 @@ test("ascii table shows codes with base conversions", async ({ page }) => {
   await page.getByLabel("Search ASCII").fill("delete")
   await expect(page.getByText("Delete")).toBeVisible()
 })
+
+test("box shadow generator rebuilds its declaration", async ({ page }) => {
+  await page.goto("/#/tool/box-shadow-generator")
+  await expect(page.getByRole("heading", { name: "Box Shadow Generator" })).toBeVisible()
+
+  await expect(
+    page.getByText("box-shadow: 4px 4px 12px 0px rgba(99, 102, 241, 0.3);"),
+  ).toBeVisible()
+  await page.getByLabel("Blur", { exact: true }).fill("30")
+  await expect(
+    page.getByText("box-shadow: 4px 4px 30px 0px rgba(99, 102, 241, 0.3);"),
+  ).toBeVisible()
+  await page.getByLabel("Color", { exact: true }).fill("#000000")
+  await expect(page.getByText("box-shadow: 4px 4px 30px 0px rgba(0, 0, 0, 0.3);")).toBeVisible()
+})
+
+test("border radius generator links corners and switches units", async ({ page }) => {
+  await page.goto("/#/tool/border-radius-generator")
+  await expect(page.getByRole("heading", { name: "Border Radius Generator" })).toBeVisible()
+
+  await expect(page.getByText("border-radius: 16px;")).toBeVisible()
+  await page.getByLabel("Link corners").check()
+  await page.getByLabel("Top left", { exact: true }).fill("24")
+  await expect(page.getByText("border-radius: 24px;")).toBeVisible()
+  await page.getByRole("group").getByText("rem", { exact: true }).click()
+  await expect(page.getByText("border-radius: 10rem;")).toBeVisible()
+})
+
+test("text shadow generator stacks layers", async ({ page }) => {
+  await page.goto("/#/tool/text-shadow-generator")
+  await expect(page.getByRole("heading", { name: "Text Shadow Generator" })).toBeVisible()
+
+  await expect(page.getByText("text-shadow: 2px 2px 4px #6366f1;")).toBeVisible()
+  await page.getByRole("button", { name: "Add shadow layer" }).click()
+  await expect(page.getByText(/, 2px 2px 4px #6366f1;/)).toBeVisible()
+  await page.getByRole("button", { name: "Remove layer 2" }).click()
+  await expect(page.getByText("text-shadow: 2px 2px 4px #6366f1;")).toBeVisible()
+})
+
+test("triangle generator switches direction and size", async ({ page }) => {
+  await page.goto("/#/tool/triangle-generator")
+  await expect(page.getByRole("heading", { name: "CSS Triangle Generator" })).toBeVisible()
+
+  await expect(page.getByText(/border-bottom: 100px solid #6366f1;/)).toBeVisible()
+  await page.getByRole("group").getByText("Right", { exact: true }).click()
+  await expect(page.getByText(/border-left: 100px solid #6366f1;/)).toBeVisible()
+  await page.getByLabel("Width").fill("60")
+  await expect(page.getByText(/border-left: 60px solid #6366f1;/)).toBeVisible()
+})
+
+test("gradient border generator emits the snippet", async ({ page }) => {
+  await page.goto("/#/tool/gradient-border-generator")
+  await expect(page.getByRole("heading", { name: "Gradient Border Generator" })).toBeVisible()
+
+  await expect(page.getByText(/linear-gradient\(135deg, #6366f1, #06b6d4\)/)).toBeVisible()
+  await page.getByLabel("Border width").fill("10")
+  await expect(page.getByText(/padding: 10px;/)).toBeVisible()
+  await page.getByLabel("Start color", { exact: true }).fill("#ff0000")
+  await expect(page.getByText(/linear-gradient\(135deg, #ff0000, #06b6d4\)/)).toBeVisible()
+})
