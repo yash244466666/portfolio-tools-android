@@ -426,3 +426,44 @@ test("remove duplicates dedupes lines case-sensitively", async ({ page }) => {
   await page.getByRole("checkbox", { name: "Case sensitive" }).uncheck()
   await expect(page.locator("p.font-mono")).toHaveText("the cat")
 })
+
+test("percentage calculator computes percent of and percent change", async ({ page }) => {
+  await page.goto("/#/tool/percentage-calculator")
+  await expect(page.getByRole("heading", { name: "Percentage Calculator" })).toBeVisible()
+  await page.getByLabel("Percentage (X %)").fill("25")
+  await page.getByLabel("Of value (Y)").fill("200")
+  await expect(page.locator("p.font-mono.text-3xl")).toHaveText("50")
+  await page.getByRole("radio", { name: "% Change" }).click()
+  await page.getByLabel("New value").fill("12")
+  await page.getByLabel("Old value").fill("8")
+  await expect(page.locator("p.font-mono.text-3xl")).toHaveText("50%")
+})
+
+test("tip calculator computes tip and splits the bill", async ({ page }) => {
+  await page.goto("/#/tool/tip-calculator")
+  await expect(page.getByRole("heading", { name: "Tip Calculator" })).toBeVisible()
+  await page.getByLabel("Bill amount").fill("100")
+  await page.getByRole("button", { name: "20%" }).click()
+  await expect(page.getByText("20.00", { exact: true })).toBeVisible()
+  await expect(page.getByText("120.00", { exact: true })).toBeVisible()
+  await page.getByLabel("Split between").fill("3")
+  await expect(page.getByText("40.00", { exact: true })).toBeVisible()
+})
+
+test("gcd lcm calculator computes exact results with steps", async ({ page }) => {
+  await page.goto("/#/tool/gcd-lcm-calculator")
+  await expect(page.getByRole("heading", { name: "GCD/LCM Calculator" })).toBeVisible()
+  await page.getByLabel("Numbers").fill("48, 18, 12")
+  await expect(page.getByText("144")).toBeVisible()
+  await expect(page.getByText(/gcd\(48, 18\)/)).toBeVisible()
+})
+
+test("roman numeral converter round-trips both directions", async ({ page }) => {
+  await page.goto("/#/tool/roman-numeral-converter")
+  await expect(page.getByRole("heading", { name: "Roman Numeral Converter" })).toBeVisible()
+  await page.getByLabel("Arabic number (1–3999)").fill("1994")
+  await expect(page.locator("p.font-mono.text-3xl")).toHaveText("MCMXCIV")
+  await page.getByRole("radio", { name: "Roman to Arabic" }).click()
+  await page.getByLabel("Roman numeral").fill("XLII")
+  await expect(page.locator("p.font-mono.text-3xl")).toHaveText("42")
+})

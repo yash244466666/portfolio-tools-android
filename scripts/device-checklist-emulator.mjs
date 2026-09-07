@@ -3,6 +3,8 @@ import { writeFileSync } from "node:fs"
 
 const PACKAGE = "dev.yash.tools.debug"
 const CDP_HOST = "http://127.0.0.1:9222"
+/** Enabled tools the catalog must list; keep in step with the registry. */
+const enabledToolCount = 29
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -328,10 +330,10 @@ async function phaseShell() {
   )
   record(
     "shell.catalogRendersAllEnabledTools",
-    cards >= 25 ? "PASS" : "FAIL",
+    cards >= enabledToolCount ? "PASS" : "FAIL",
     `${cards} enabled tool cards`,
   )
-  if (cards < 25) {
+  if (cards < enabledToolCount) {
     await page.navigate("#/")
     await page.waitFor('document.querySelector("label.search-field input") !== null', 15_000)
   }
@@ -643,6 +645,46 @@ async function phaseTools(page) {
         return "dedupe rendered"
       },
     ],
+    [
+      "percentage-calculator",
+      "Percentage Calculator",
+      async (p) => {
+        await p.setValue("#percentage-a", "25")
+        await p.setValue("#percentage-b", "200")
+        await p.waitFor("[...document.querySelectorAll('p')].some(el => el.textContent === '50')")
+        return "25% of 200 rendered as 50"
+      },
+    ],
+    [
+      "tip-calculator",
+      "Tip Calculator",
+      async (p) => {
+        await p.setValue("#tip-bill", "100")
+        await p.clickButton("20%")
+        await p.waitFor("[...document.querySelectorAll('dd')].some(d => d.textContent === '20.00')")
+        return "20% tip on 100 rendered"
+      },
+    ],
+    [
+      "gcd-lcm-calculator",
+      "GCD/LCM Calculator",
+      async (p) => {
+        await p.setValue("#gcd-input", "48, 18, 12")
+        await p.waitFor("[...document.querySelectorAll('p')].some(el => el.textContent === '144')")
+        return "GCD/LCM of 48, 18, 12 rendered"
+      },
+    ],
+    [
+      "roman-numeral-converter",
+      "Roman Numeral Converter",
+      async (p) => {
+        await p.setValue("#roman-input", "1994")
+        await p.waitFor(
+          "[...document.querySelectorAll('p')].some(el => el.textContent === 'MCMXCIV')",
+        )
+        return "1994 converted to MCMXCIV"
+      },
+    ],
   ]
 
   for (const [toolId, label, check] of checks) {
@@ -681,9 +723,20 @@ async function phaseOffline(page) {
   try {
     // Navigation remounts the tool, so the query input starts empty regardless
     // of what was typed before airplane mode; fill it before recovering.
+    // Connectivity may still be coming back when the first lookup runs, so the
+    // lookup is retried until the offline state clears or the deadline passes.
     await page.setValue("#dns-name", "example.com")
-    await page.clickButton("Look up")
-    await page.waitFor("!document.body.innerText.includes('Offline')", 30_000)
+    const deadline = Date.now() + 60_000
+    for (;;) {
+      await page.clickButton("Look up")
+      try {
+        await page.waitFor("!document.body.innerText.includes('Offline')", 10_000)
+        break
+      } catch {
+        if (Date.now() > deadline) throw new Error("Offline state did not clear within 60s.")
+        spawnSync("sleep", ["2"])
+      }
+    }
     record(
       "offline.recoveryAfterAirplaneOff",
       "PASS",
