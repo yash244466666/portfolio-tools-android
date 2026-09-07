@@ -693,3 +693,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Added 31 pure tests (label validation vectors, URL building, rcode descriptions, hostile-row corpus, CNAME chains, record cap, copy format, response-body bound) and 15 component cases (happy path with exact request URL and accept header, Enter-key submit, invalid domain without a fetch, NXDOMAIN, no-record, chain labels, record cap, 400/429/500/malformed/offline/timeout mappings, offline-disabled state, idle guidance, reset). E2E grew to 30 scenarios and intercepts the exact request URL `https://cloudflare-dns.com/dns-query?name=example.com&type=A` on both device profiles.
 - Passed formatting (unpiped `pnpm format:check`), strict typecheck, zero-warning lint, 313 web tests (33 files), 30 E2E scenarios, production build (DnsLookup lazy chunk 10.96 kB/4.06 kB gzip), Capacitor sync, Android Lint, and debug assembly.
 - Next executable item: continue the post-slice tool batches per the issue queue; Android artifact validation of all enabled tools remains queue item 4.
+
+### 2026-09-07 — DNS Lookup merge reconciliation
+
+- Merged PR #146 into `main` as `2f375b4`, closing issue #81; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge (web-quality 2m29s, android-debug 4m04s), and no open pull requests remain.
+- Thirteen of the 87 approved tools are implemented; the 12-tool architecture milestone is complete and DNS Lookup is the first post-slice tool (74 remain).
+- Next executable item: continue the post-slice tool batches per the issue queue; Android artifact validation of all enabled tools remains queue item 4.
