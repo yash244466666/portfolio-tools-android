@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 12:51 Europe/Berlin
+> Last updated: 2026-09-07 12:58 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -730,3 +730,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Text to Slug (`src/tools/text-to-slug/slug.ts`) runs a disclosed step list — original, NFD diacritic strip, non-alphanumeric replacement, edge trim, lowercase, optional stop-word removal, boundary-safe truncation to the last separator (no dynamic-regex hazards) — with a 200-character slug cap; the UI honestly discloses that non-Latin scripts are removed rather than transliterated.
 - Added 32 pure tests and 19 component cases for the four tools (including regression vectors for each upstream bug), four registry entries (icons Binary, Code, Link2, Link), and four E2E scenarios; the suite is now 23 scenarios × 2 viewports.
 - Passed formatting (unpiped `pnpm format:check`), strict typecheck, zero-warning lint, 395 web tests (48 files), 46 E2E checks, production build with lazy tool chunks, Capacitor sync, Android Lint, debug assembly, and the debug merged-manifest policy check (no permission or exported-component changes).
+
+### 2026-09-07 — Dev/text batch 2 merge reconciliation
+
+- Merged PR #148 into `main` as `a18d1ff`, closing issues #46, #50, #57, and #84; all four Project items are Done and the issues carry `status:device-qa` with evidence comments. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge (web-quality 2m59s, android-debug 4m31s), and no open pull requests remain.
+- Twenty-one of the 87 approved tools are implemented; the 12-tool milestone, both tier-3 network tools, and both tier-1 text/dev batches are complete (66 remain).
+- Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
