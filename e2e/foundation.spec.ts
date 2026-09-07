@@ -574,3 +574,66 @@ test("scientific calculator evaluates precedence and functions", async ({ page }
   await page.getByRole("button", { name: "Square root" }).click()
   await expect(page.getByRole("status")).toContainText("Display 3")
 })
+
+test("http status codes lists and filters the reference", async ({ page }) => {
+  await page.goto("/#/tool/http-status-codes")
+  await expect(page.getByRole("heading", { name: "HTTP Status Codes" })).toBeVisible()
+
+  await expect(page.getByText("Not Found", { exact: true })).toBeVisible()
+  await page.getByLabel("Search status codes").fill("teapot")
+  await expect(page.getByText("I'm a Teapot")).toBeVisible()
+  await expect(page.getByText("Not Found", { exact: true })).toBeHidden()
+
+  await page.getByLabel("Search status codes").fill("")
+  await page.getByRole("group").getByText("5xx", { exact: true }).click()
+  await expect(page.getByText("Service Unavailable")).toBeVisible()
+  await expect(page.getByText("Not Found", { exact: true })).toBeHidden()
+})
+
+test("mime type lookup maps extensions and mime types", async ({ page }) => {
+  await page.goto("/#/tool/mime-type-lookup")
+  await expect(page.getByRole("heading", { name: "MIME Type Lookup" })).toBeVisible()
+
+  await expect(page.getByText(".pdf → application/pdf")).toBeVisible()
+  await page.getByLabel("Search extensions").fill("png")
+  await expect(page.getByText(".png → image/png")).toBeVisible()
+  await expect(page.getByText(".pdf → application/pdf")).toBeHidden()
+
+  await page.getByText("MIME to Extension", { exact: true }).click()
+  await page.getByLabel("Search MIME types").fill("image/jpeg")
+  await expect(page.getByText(".jpg → image/jpeg")).toBeVisible()
+})
+
+test("meta tag generator emits and escapes meta tags", async ({ page }) => {
+  await page.goto("/#/tool/meta-tag-generator")
+  await expect(page.getByRole("heading", { name: "Meta Tag Generator" })).toBeVisible()
+
+  await page.getByLabel("Title", { exact: true }).fill('My "Site"')
+  await expect(page.getByText(/<title>My &quot;Site&quot;<\/title>/)).toBeVisible()
+
+  await page.getByLabel("og:image").fill("https://example.com/image.png")
+  await expect(page.getByText(/<!-- Open Graph \/ Facebook -->/)).toBeVisible()
+})
+
+test("unicode lookup searches and lists characters", async ({ page }) => {
+  await page.goto("/#/tool/unicode-lookup")
+  await expect(page.getByRole("heading", { name: "Unicode Lookup" })).toBeVisible()
+
+  await page.getByLabel("Search characters").fill("infinity")
+  await expect(page.getByRole("button", { name: "Copy Infinity (U+221E)" })).toBeVisible()
+
+  await page.getByLabel("Search characters").fill("U+221E")
+  await expect(page.getByRole("button", { name: "Copy Infinity (U+221E)" })).toBeVisible()
+})
+
+test("ascii table shows codes with base conversions", async ({ page }) => {
+  await page.goto("/#/tool/ascii-table")
+  await expect(page.getByRole("heading", { name: "ASCII Table" })).toBeVisible()
+
+  await expect(page.getByRole("table")).toBeVisible()
+  await expect(page.getByText("Uppercase A")).toBeVisible()
+  await page.getByLabel("Search ASCII").fill("0x41")
+  await expect(page.getByText("Uppercase A")).toBeVisible()
+  await page.getByLabel("Search ASCII").fill("delete")
+  await expect(page.getByText("Delete")).toBeVisible()
+})

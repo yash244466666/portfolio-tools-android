@@ -4,7 +4,7 @@ import { writeFileSync } from "node:fs"
 const PACKAGE = "dev.yash.tools.debug"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 38
+const enabledToolCount = 43
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -816,6 +816,51 @@ async function phaseTools(page) {
         await p.clickAriaLabel("Equals")
         await p.waitFor("document.body.innerText.includes('Display 5')")
         return "2 + 3 rendered as 5"
+      },
+    ],
+    [
+      "http-status-codes",
+      "HTTP Status Codes",
+      async (p) => {
+        await p.setValue("#http-status-search", "teapot")
+        await p.waitFor('document.body.innerText.includes("I\'m a Teapot")')
+        return "teapot search rendered 418"
+      },
+    ],
+    [
+      "mime-type-lookup",
+      "MIME Type Lookup",
+      async (p) => {
+        await p.setValue("#mime-search", "png")
+        await p.waitFor("document.body.innerText.includes('.png → image/png')")
+        return "png extension mapped to image/png"
+      },
+    ],
+    [
+      "meta-tag-generator",
+      "Meta Tag Generator",
+      async (p) => {
+        await p.setValue("#meta-title", 'My "Site"')
+        await p.waitFor("document.body.innerText.includes('&quot;')")
+        return "title tag escaped quotes in output"
+      },
+    ],
+    [
+      "unicode-lookup",
+      "Unicode Lookup",
+      async (p) => {
+        await p.setValue("#unicode-search", "infinity")
+        await p.waitFor("document.body.innerText.includes('U+221E')")
+        return "infinity character listed with its code point"
+      },
+    ],
+    [
+      "ascii-table",
+      "ASCII Table",
+      async (p) => {
+        await p.setValue("#ascii-search", "0x41")
+        await p.waitFor("document.body.innerText.includes('Uppercase A')")
+        return "hex query 0x41 rendered Uppercase A"
       },
     ],
   ]
