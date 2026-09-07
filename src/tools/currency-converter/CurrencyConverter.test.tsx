@@ -12,9 +12,7 @@ const fixtureUsdRates = [
 ]
 
 const fetchMock = vi.hoisted(() => vi.fn())
-const networkState = vi.hoisted(
-  (): NetworkState => ({ connected: true, connectionType: "wifi" }),
-)
+const networkState = vi.hoisted((): NetworkState => ({ connected: true, connectionType: "wifi" }))
 
 vi.mock("@/platform/services", async (importOriginal) => {
   const actual = await importOriginal<typeof platformModule>()

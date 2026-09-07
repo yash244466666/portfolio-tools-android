@@ -93,9 +93,10 @@ describe("parseRatesResponse", () => {
 
   it("reports no-record when the base has no valid rows", () => {
     expect(parseRatesResponse([], "USD")).toEqual({ status: "no-record", base: "USD" })
-    expect(parseRatesResponse([{ date: "2026-09-07", base: "EUR", quote: "USD", rate: 1 }], "USD").status).toBe(
-      "no-record",
-    )
+    expect(
+      parseRatesResponse([{ date: "2026-09-07", base: "EUR", quote: "USD", rate: 1 }], "USD")
+        .status,
+    ).toBe("no-record")
   })
 
   it("drops rows that fail validation instead of trusting them", () => {

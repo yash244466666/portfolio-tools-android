@@ -176,4 +176,5 @@ export const currencyCatalog: readonly CurrencyEntry[] = [
   { code: "YER", name: "Yemeni Rial" },
   { code: "ZAR", name: "South African Rand" },
   { code: "ZMW", name: "Zambian Kwacha" },
-  { code: "ZWG", name: "Zimbabwe Gold" },]
+  { code: "ZWG", name: "Zimbabwe Gold" },
+]

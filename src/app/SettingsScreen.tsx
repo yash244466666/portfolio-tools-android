@@ -84,8 +84,8 @@ export function SettingsScreen({
             <div>
               <p className="text-sm leading-6 text-[var(--text-secondary)]">
                 Clear local data from this installation. This removes favorites, recents, theme,
-                your saved scratchpad note, and cached exchange rates. Notes are stored
-                unencrypted and are not recoverable after clearing.
+                your saved scratchpad note, and cached exchange rates. Notes are stored unencrypted
+                and are not recoverable after clearing.
               </p>
               <Button className="mt-4" onClick={() => void onClearPreferences()} variant="danger">
                 Clear local preferences
@@ -104,8 +104,8 @@ export function SettingsScreen({
             <ul className="grid gap-2 text-sm leading-6 text-[var(--text-secondary)]">
               <li>No account, ads, analytics, or automatic crash uploads.</li>
               <li>
-                Most enabled tools work offline and process input on this device. Currency
-                Converter is labeled in the catalog as requiring internet.
+                Most enabled tools work offline and process input on this device. Currency Converter
+                is labeled in the catalog as requiring internet.
               </li>
               <li>
                 Currency Converter sends only the selected base currency code to Frankfurter

@@ -259,9 +259,7 @@ test("currency converter fetches mocked Frankfurter rates and converts", async (
   await expect(page.getByRole("heading", { name: "Currency Converter" })).toBeVisible()
 
   await expect(page.locator("#currency-result")).toHaveText("0.8604 EUR", { timeout: 10_000 })
-  await expect(
-    page.getByText(/1 USD = 0.8604 EUR · provider data date 2026-09-07/),
-  ).toBeVisible()
+  await expect(page.getByText(/1 USD = 0.8604 EUR · provider data date 2026-09-07/)).toBeVisible()
   await expect(page.getByText(/Fresh rates fetched/)).toBeVisible()
   await expect(page.getByText(/Rates come from Frankfurter/)).toBeVisible()
   await expect(page.getByText(/only the selected base currency code/)).toBeVisible()
