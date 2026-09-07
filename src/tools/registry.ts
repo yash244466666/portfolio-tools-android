@@ -118,14 +118,15 @@ export const tools: readonly ToolDefinition[] = [
   {
     id: "notes-scratchpad",
     label: "Notes",
-    description: "Keep device-local plain-text notes with explicit export and deletion.",
+    description: "Keep a device-local plain-text scratchpad with explicit export and deletion.",
     category: "text",
-    tags: ["notes", "local", "productivity"],
+    tags: ["notes", "local", "productivity", "offline"],
     icon: NotebookPen,
-    status: "planned",
+    status: "enabled",
     risk: "medium",
     network: false,
     persistent: true,
+    component: lazy(() => import("@/tools/notes-scratchpad/NotesScratchpad")),
   },
   {
     id: "pomodoro-timer",

@@ -51,7 +51,9 @@ export function App() {
   }, [setRecents])
 
   async function clearPreferences() {
-    const confirmed = window.confirm("Clear favorites, recents, and theme from this installation?")
+    const confirmed = window.confirm(
+      "Clear favorites, recents, theme, and your saved scratchpad note from this installation?",
+    )
     if (!confirmed) return
     await platform.preferences.clear()
     setFavorites([])
