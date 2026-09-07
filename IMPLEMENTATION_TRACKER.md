@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 05:05 Europe/Berlin
+> Last updated: 2026-09-07 05:45 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -611,6 +611,12 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Added 8 component cases (initial state, all three digests with the exact known fixture vectors, SHA-1 legacy labeling, contract algorithm ordering, cancelled pick, aborted hashing with distinct cancelled state, digest failure recovery, reset) — the same synthetic fixture and its independently computed digests drive the E2E oracle. E2E grew to 26 scenarios and asserts the exact SHA-256/SHA-1/SHA-512 of the fixture through the real web adapter on both device profiles.
 - Passed formatting, strict typecheck, zero-warning lint, 225 web tests (28 files), 26 E2E scenarios, production build (FileHashChecker lazy chunk 3.36 kB/1.44 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
 - Next executable item: proving packaged-origin CORS behavior and porting Currency Converter (issue #43) as the first network tool — its provider, terms, and cache/stale UX must pass review before enabling.
+
+### 2026-09-07 — File Hash Checker merge reconciliation
+
+- Merged PR #143 into `main` as `1e5379a`, closing issue #113; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
+- Eleven of the 87 approved tools are implemented. The vertical slice needs only Currency Converter, which is also the first network tool and carries extra gates (packaged-origin CORS proof, provider terms/privacy review, cache/stale UX).
+- Next executable item: the Currency Converter tool migration (issue #43) with the Frankfurter provider review and packaged-origin CORS proof.
 
 ### 2026-09-06 — JSON Editor merge reconciliation
 
