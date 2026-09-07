@@ -4,7 +4,7 @@ import { writeFileSync } from "node:fs"
 const PACKAGE = "dev.yash.tools.debug"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 48
+const enabledToolCount = 53
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -911,6 +911,64 @@ async function phaseTools(page) {
         await p.setValue("#gradient-border-width", "10")
         await p.waitFor("document.body.innerText.includes('padding: 10px;')")
         return "border width updated the snippet"
+      },
+    ],
+    [
+      "html-entity-encoder",
+      "HTML Entity Encoder",
+      async (p) => {
+        await p.setValue("#html-entity-input", '<a href="x">')
+        await p.waitFor(
+          "(document.querySelector('#html-entity-output') ?? {value:''}).value.includes('&lt;a href=&quot;x&quot;&gt;')",
+        )
+        return "encode mode converted live input"
+      },
+    ],
+    [
+      "rot13-cipher",
+      "ROT13 Cipher",
+      async (p) => {
+        await p.setValue("#rot13-input", "Hello")
+        await p.clickButton("Encode")
+        await p.waitFor("(document.querySelector('#rot13-output') ?? {value:''}).value === 'Uryyb'")
+        return "ROT13 vector rendered"
+      },
+    ],
+    [
+      "morse-code-translator",
+      "Morse Code Translator",
+      async (p) => {
+        await p.setValue("#morse-input", "SOS")
+        await p.clickButton("Convert")
+        await p.waitFor(
+          "(document.querySelector('#morse-output') ?? {value:''}).value.includes('... --- ...')",
+        )
+        return "SOS Morse vector rendered"
+      },
+    ],
+    [
+      "hmac-generator",
+      "HMAC Generator",
+      async (p) => {
+        await p.setValue("#hmac-secret", "Jefe")
+        await p.setValue("#hmac-message", "what do ya want for nothing?")
+        await p.clickButton("Generate HMAC")
+        await p.waitFor(
+          "document.body.innerText.includes('5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843')",
+        )
+        return "RFC 4231 test case 2 vector rendered"
+      },
+    ],
+    [
+      "uuid-generator",
+      "UUID Generator",
+      async (p) => {
+        await p.setValue("#uuid-count", "3")
+        await p.clickButton("Generate UUIDs")
+        await p.waitFor(
+          "(document.querySelector('#uuid-output') ?? {value:''}).value.length === 110",
+        )
+        return "three UUIDs rendered into the output panel"
       },
     ],
   ]

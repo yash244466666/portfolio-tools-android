@@ -1,10 +1,10 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 21:15 Europe/Berlin
+> Last updated: 2026-09-07 22:35 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **all 87 audited catalog tools; 48 implemented, 39 remaining**
+> Approved public version 1 scope: **all 87 audited catalog tools; 53 implemented, 34 remaining**
 > Public release readiness: **NO — foundation only**
 
 This is the living operational record for what is implemented, what is verified, what remains, and what is blocked. Update it in every implementation session. A checked item requires evidence; generated or coded does not automatically mean tested.
@@ -866,3 +866,16 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 
 - Squash-merged PR #156 into `main` as `2a991d1`, closing issues #73, #74, #75, #78, and #88; all five Project items are Done and the issues carry `status:device-qa` with evidence comments. `main` == `origin/main` with a clean worktree, both hosted PR CI jobs green before merge (android-debug 4m4s, web-quality 4m46s), and the post-merge `main` CI run is green. No open pull requests remain.
 - Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
+
+### 2026-09-07 — Dev batch 3 tool migration (HTML Entity Encoder, ROT13 Cipher, Morse Code Translator, HMAC Generator, UUID Generator)
+
+- Implemented the next five tier-1 text/security tools (issues #58, #69, #70, #71, and #72) as one batch on `feat/dev-batch-3`, all offline, non-persistent, lazy-loaded, and built only on the platform service contracts.
+- HTML Entity Encoder (`src/tools/html-entity-encoder/`) replaces the upstream decode-through-hidden-`textarea.innerHTML` (live HTML parsing in the output path) with a bounded pure entity decoder covering the five reserved entities, 24 common named entities, and numeric references; unknown and malformed sequences are left unchanged, the upstream apostrophe-leaving Escape HTML mode is preserved, and the mode difference is disclosed in the interface.
+- ROT13 Cipher (`src/tools/rot13-cipher/`) keeps the upstream `caesarShift` verbatim, expresses decode as an explicit 26-shift, clamps the shift into 1-25 behind a labeled slider with `ROT<shift>` `aria-valuetext`, and discloses that Caesar ciphers are reversible and must not protect secrets.
+- Morse Code Translator (`src/tools/morse-code-translator/`) copies the 54-entry letter/code dataset verbatim, replaces the upstream silent drop of unsupported characters with a disclosed diagnostics summary, accepts bare `/` word separators on decode (more lenient than upstream `/`), and omits the upstream `AudioContext` playback pending the audio device review rather than shipping it unverified.
+- HMAC Generator (`src/tools/hmac-generator/`) keeps only the Web Crypto `crypto.subtle` path (the upstream js-sha packages and insecure-context fallback are intentionally not copied, matching the Hash Generator precedent), disables autofill/spellcheck on the secret field, never stores or logs the secret, and clears it with the Clear action; RFC 4231 test cases are the correctness oracle.
+- UUID Generator (`src/tools/uuid-generator/`) routes generation through the platform `RandomService` instead of a direct `crypto.randomUUID()`, clamps batch size into the tested 1-100 range, and verifies RFC 4122 version/variant shape by pattern.
+- Registry now has 53 enabled entries. Tests: 5 pure + 5 component suites (40 new cases; the suite is now 112 files / 792 tests) and 5 new E2E scenarios (55 scenarios × 2 viewports = 110 checks).
+- The emulator checklist driver was extended to the 53-tool catalog count with five new per-tool checks. One intermediate run exposed a driver arithmetic mistake in the UUID output-length assertion (3×36+2 separators is 110, not 71) plus the known transient theme-persistence FAIL after a cold relaunch; after fixing the driver, a green run against the rebuilt installed artifact verified all 53 enabled tools — 67 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug.
+- Passed formatting (unpiped `pnpm format:check`), strict typecheck, zero-warning lint, 792 web tests (112 files), 110 E2E checks, production build with lazy tool chunks (largest new chunk MorseCodeTranslator 4.01 kB / 1.69 kB gzip), Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes).
+- Next executable item: commit, open the PR closing issues #58, #69, #70, #71, and #72, review hosted CI, merge, and reconcile; then continue the tier-1 batch queue with the next risk-ordered batch. Android artifact validation of all enabled tools remains queue item 4.
