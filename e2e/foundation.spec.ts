@@ -344,3 +344,48 @@ test("reverse text keeps emoji intact and switches modes", async ({ page }) => {
   await page.getByLabel("Text").fill("hello brave world")
   await expect(page.getByText("world brave hello")).toBeVisible()
 })
+
+test("number base converter converts across bases exactly", async ({ page }) => {
+  await page.goto("/#/tool/number-base-converter")
+  await expect(page.getByRole("heading", { name: "Number Base Converter" })).toBeVisible()
+  await page.getByLabel("Decimal (radix 10)").fill("255")
+  await expect(page.getByLabel("Hexadecimal (radix 16)")).toHaveValue("FF")
+  await expect(page.getByLabel("Binary (radix 2)")).toHaveValue("11111111")
+  await page.getByLabel("Hexadecimal (radix 16)").fill("10")
+  await expect(page.getByLabel("Decimal (radix 10)")).toHaveValue("16")
+})
+
+test("base64 tool encodes and decodes UTF-8 text", async ({ page }) => {
+  await page.goto("/#/tool/base64-tool")
+  await expect(page.getByRole("heading", { name: "Base64 Encode/Decode" })).toBeVisible()
+  await page.getByLabel("Input").fill("foo")
+  await page.getByRole("button", { name: "Encode" }).click()
+  await expect(page.getByText("Zm9v")).toBeVisible()
+  await page.getByRole("button", { name: "Clear" }).click()
+  await page.getByLabel("Input").fill("Zm9vYmFy")
+  await page.getByRole("button", { name: "Decode" }).click()
+  await expect(page.getByText("foobar")).toBeVisible()
+  await page.getByLabel("Input").fill("not base64 at all !!!")
+  await page.getByRole("button", { name: "Decode" }).click()
+  await expect(page.getByText(/not valid Base64/)).toBeVisible()
+})
+
+test("url encoder encodes, decodes, and breaks down a URL", async ({ page }) => {
+  await page.goto("/#/tool/url-encoder")
+  await expect(page.getByRole("heading", { name: "URL Encoder/Decoder" })).toBeVisible()
+  await page.getByLabel("Input").fill("https://example.com:8443/path?q=1#top")
+  await page.getByRole("button", { name: "Encode" }).click()
+  await expect(page.getByText("https%3A%2F%2Fexample.com")).toBeVisible()
+  await expect(page.getByText("URL parts")).toBeVisible()
+  await expect(page.getByText("8443", { exact: true })).toBeVisible()
+})
+
+test("text to slug generates a slug with options", async ({ page }) => {
+  await page.goto("/#/tool/text-to-slug")
+  await expect(page.getByRole("heading", { name: "Text to Slug" })).toBeVisible()
+  await page.getByLabel("Text").fill("Hello, World!")
+  await expect(page.getByText("hello-world").first()).toBeVisible()
+  await page.getByText("_", { exact: true }).click()
+  await expect(page.getByText("hello_world").first()).toBeVisible()
+  await expect(page.getByText("Conversion steps")).toBeVisible()
+})
