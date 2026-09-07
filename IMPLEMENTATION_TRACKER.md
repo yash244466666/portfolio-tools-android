@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 23:47 Europe/Berlin
+> Last updated: 2026-09-08 00:18 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -937,3 +937,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Dependency added: `sql-formatter` 15.7.3, exact-pinned with its MIT license recorded in the provenance dependency table; lockfile changed only through pnpm.
 - The emulator checklist driver was extended to the 68-tool catalog count with five new per-tool checks. Validation gates ran unpiped: formatting, strict typecheck, zero-warning lint, 1029 web tests (141 files), 140 E2E checks, production build with lazy tool chunks (new chunks ColorPicker 9.1 kB, EmojiPicker 7.1 kB; SqlFormatter 264.4 kB / 75.5 kB gzip including sql-formatter), Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes). Three intermediate driver iterations exposed test-harness gaps of mine (setValue's landed-value check conflicts with the canonical-rewrite input, emoji names are accessible-label-only so innerText probes never see them, and a stale search state broke a category scoping probe); after fixing, a green run against the installed rebuilt artifact verified all 68 enabled tools — 82 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug, artifact SHA-256 5d740ff277369e261dc910d70e58e6670cafc8c160b06c1d84c1f8f19259ad2a.
 - Next executable item: commit, open the PR closing issues #53, #61, #65, #66, and #99, review hosted CI, merge, and reconcile; then continue the tier-1 batch queue with the next risk-ordered batch. Android artifact validation of all enabled tools remains queue item 4.
+
+### 2026-09-08 — Dev batch 6 merge reconciliation
+
+- Squash-merged PR #160 into `main` as `ea6d98b`, closing issues #53, #61, #65, and #66 plus #99; all five Project items are Done and the issues carry `status:device-qa` with evidence comments (stale `status:triage` labels removed). Both hosted PR CI jobs were green before merge (android-debug 3m43s, web-quality 6m17s). No open pull requests remain.
+- Registry now has 68 enabled entries; 19 of the approved 87 remain.
+- Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
