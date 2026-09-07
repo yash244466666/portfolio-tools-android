@@ -22,6 +22,7 @@ The Android repository is a separate codebase. The upstream path is recorded for
 | `src/tools/notes-scratchpad/`        | `components/tools/text/notes-scratchpad.tsx`                                          | Reworked into a versioned durable-storage model plus migration gate (ADR 0013); localStorage replaced with the platform PreferenceStore, load-before-save autosave, two-step clear, and bridge-only export/import |
 | `src/tools/pomodoro-timer/`          | `components/tools/text/pomodoro-timer.tsx`                                            | Reworked into a wall-clock anchor model with durable reconstruction and best-effort contract alerts (ADR 0014); tick counting and direct Notification use are intentionally not copied                            |
 | `src/tools/image-compressor/`        | `components/tools/core/image-compressor.tsx`                                          | Reworked into a limited decode/re-encode pipeline over the content-read and share/save bridges (ADR 0015); EXIF orientation normalized, pixel bound enforced, hidden download anchor and dropzone not copied      |
+| `src/tools/file-hash-checker/`       | `components/tools/media/file-hash-checker.tsx`                                        | Reworked onto the native streaming `digestContent` contract (ADR 0016); full-file ArrayBuffer reads and the dropzone are intentionally not copied; SHA-1 labeled legacy                                           |
 
 ## Dependency provenance
 
