@@ -123,11 +123,7 @@ export default function FindReplace() {
 
   const regexFailed = regexMode && (state.invalidMessage !== "" || state.timedOut)
   const activeState: FindReplaceState =
-    literal !== null
-      ? { ...clearedState, ...literal }
-      : regexFailed
-        ? clearedState
-        : state
+    literal !== null ? { ...clearedState, ...literal } : regexFailed ? clearedState : state
 
   function applyChanges() {
     setSource(activeState.output)
@@ -275,14 +271,11 @@ export default function FindReplace() {
 
       {searchActive && !regexFailed ? (
         <ToolPanel
-          title={
-            activeState.matchCount === 1 ? "1 match" : `${activeState.matchCount} matches`
-          }
+          title={activeState.matchCount === 1 ? "1 match" : `${activeState.matchCount} matches`}
         >
           {activeState.truncated ? (
             <p className="mb-3 text-sm text-[var(--text-secondary)]">
-              Showing the first {activeState.matches.length} matches; applying replaces only
-              those.
+              Showing the first {activeState.matches.length} matches; applying replaces only those.
             </p>
           ) : null}
           <label className="sr-only" htmlFor="find-replace-output">

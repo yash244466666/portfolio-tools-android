@@ -2,9 +2,10 @@ import { spawnSync } from "node:child_process"
 import { writeFileSync } from "node:fs"
 
 const PACKAGE = "dev.yash.tools.debug"
+const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 58
+const enabledToolCount = 63
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -1043,6 +1044,86 @@ async function phaseTools(page) {
         return "three paragraphs then four sentences generated"
       },
     ],
+    [
+      "password-generator",
+      "Password Generator",
+      async (p) => {
+        await p.setValue("#password-generator-length", "32")
+        await p.clickButton("Generate")
+        await p.waitFor(
+          "(() => { const el = document.querySelector('[aria-label=\"Generated password\"]'); return el && el.textContent.length === 32 })()",
+        )
+        await p.waitFor("document.body.innerText.includes('Strength:')")
+        return "32-character password generated with a strength band"
+      },
+    ],
+    [
+      "jwt-decoder",
+      "JWT Decoder",
+      async (p) => {
+        await p.setValue(
+          "#jwt-decoder-token",
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjQxMDI0NDQ4MDAsImlzcyI6ImV4YW1wbGUifQ.dBjftJeZ4CJP-mB6Kxth",
+        )
+        await p.waitFor('document.body.innerText.includes(\'"iss": "example"\')')
+        await p.waitFor("document.body.innerText.includes('Active — the exp claim')")
+        await p.setValue("#jwt-decoder-token", "abc.def")
+        await p.waitFor("document.body.innerText.includes('three dot-separated parts')")
+        return "header, payload, and expiry decoded; malformed token rejected"
+      },
+    ],
+    [
+      "csv-json",
+      "CSV to JSON",
+      async (p) => {
+        await p.setValue("#csv-json-input", 'note,text\n"two\nlines",ok')
+        await p.waitFor(
+          "(document.querySelector('#csv-json-output') ?? {value:''}).value.includes('two\\\\nlines')",
+        )
+        await p.setValue("#csv-json-input", "a,b\n1,2,3")
+        await p.waitFor("document.body.innerText.includes('1 row had a different cell count')")
+        await p.clickRadioValue("json-to-csv")
+        await p.setValue("#csv-json-input", '[{"cmd":"=rm -rf"}]')
+        await p.waitFor(
+          "(document.querySelector('#csv-json-output') ?? {value:''}).value.includes(\"'=rm -rf\")",
+        )
+        return "multi-line quotes, uneven rows, and formula neutralization rendered"
+      },
+    ],
+    [
+      "yaml-json-converter",
+      "YAML to JSON",
+      async (p) => {
+        await p.setValue("#yaml-json-input", "name: Ada\nage: 36")
+        await p.waitFor(
+          "(document.querySelector('#yaml-json-output') ?? {value:''}).value.includes('\"name\": \"Ada\"')",
+        )
+        await p.clickRadioValue("json-to-yaml")
+        await p.setValue("#yaml-json-input", '{"name":"Ada"}')
+        await p.waitFor(
+          "(document.querySelector('#yaml-json-output') ?? {value:''}).value === 'name: Ada\\n'",
+        )
+        await p.clickRadioValue("yaml-to-json")
+        await p.setValue("#yaml-json-input", "!!python/object:os.system\nx: 1")
+        await p.waitFor("document.body.innerText.includes('The YAML is not valid')")
+        return "both directions converted; safe schema rejected an executable type"
+      },
+    ],
+    [
+      "text-diff",
+      "Text Diff",
+      async (p) => {
+        await p.setValue("#text-diff-original", "a\nb\nc")
+        await p.setValue("#text-diff-modified", "a\nx\nc\nnew")
+        await p.waitFor(
+          "document.body.innerText.includes('3 lines added, 2 lines removed, 1 line unchanged.')",
+        )
+        await p.waitFor("document.body.innerText.includes('+ new')")
+        await p.setValue("#text-diff-modified", "a\nb\nc")
+        await p.waitFor("document.body.innerText.includes('The texts are identical.')")
+        return "counts summary, markers, and identical state rendered"
+      },
+    ],
   ]
 
   for (const [toolId, label, check] of checks) {
@@ -1225,10 +1306,13 @@ async function main() {
   )
   record("device.webViewVersion", "INFO", webView.replace(/^.*=/, ""))
   record("device.securityPatch", "INFO", adb("getprop", "ro.build.version.security_patch"))
+  // Hash the actual artifact on disk so the recorded value cannot silently
+  // go stale after a rebuild.
+  const artifactHash = spawnSync("sha256sum", [ARTIFACT_PATH], { encoding: "utf8" })
   record(
     "device.artifactSha256",
     "INFO",
-    "4405784099c87b35faf1c762fed3715770a25ed43488e72da273d51b9a3b4543 (app-debug.apk)",
+    `${(artifactHash.stdout ?? "").trim().split(" ")[0] ?? "unavailable"} (app-debug.apk)`,
   )
 
   record(

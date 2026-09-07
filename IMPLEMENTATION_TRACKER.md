@@ -1,10 +1,10 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 00:29 Europe/Berlin
+> Last updated: 2026-09-07 23:23 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **all 87 audited catalog tools; 58 implemented, 29 remaining**
+> Approved public version 1 scope: **all 87 audited catalog tools; 63 implemented, 24 remaining**
 > Public release readiness: **NO — foundation only**
 
 This is the living operational record for what is implemented, what is verified, what remains, and what is blocked. Update it in every implementation session. A checked item requires evidence; generated or coded does not automatically mean tested.
@@ -904,3 +904,17 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Squash-merged PR #158 into `main` as `1404f7a`, closing issues #103, #108, #100, #102, and #54; all five Project items are Done and the issues carry `status:device-qa` with evidence comments. `main` == `origin/main` with a clean worktree, both hosted PR CI jobs green before merge (android-debug 3m56s, web-quality 5m7s). No open pull requests remain.
 - Registry now has 58 enabled entries; 29 of the approved 87 remain.
 - Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
+
+### 2026-09-07 — Dev batch 5 tool migration (Password Generator, JWT Decoder, CSV to JSON, YAML to JSON, Text Diff)
+
+- Implemented the next five tier-1 tools (issues #52, #59, #63, #64, and #96) as one batch on `feat/dev-batch-5`, all offline, non-persistent, lazy-loaded, and built only on the platform service contracts and shared UI primitives.
+- Password Generator (`src/tools/password-generator/`) fixes the upstream modulo bias by drawing each character with rejection sampling over the platform secure-random bytes, replaces the silent lowercase fallback with an explicit no-set error state, clamps lengths into 4–128, and reuses the shared `analyzePassword` model from Password Strength Checker for its entropy/strength readout.
+- JWT Decoder (`src/tools/jwt-decoder/`) keeps decoding-only behavior with the decode-not-verify disclosure permanently visible, replaces the upstream lossy atob+decodeURIComponent UTF-8 path with atob bytes plus TextDecoder, requires finite numbers before any exp/iat/nbf verdict, formats dates in locale-stable UTC ISO, and refreshes the expiry verdict from the device clock through a non-render clock read.
+- CSV to JSON (`src/tools/csv-json/`) replaces the upstream per-line parser (which broke RFC 4180 records with multi-line quoted fields) with a whole-text quoted-field state machine, keeps extra cells beyond the header count under generated column-N names instead of silently dropping them, serializes nested values as JSON text instead of "[object Object]", and prefixes =, +, -, @, tab, and CR cells with a single quote on export against spreadsheet formula injection, disclosed in the interface with a count.
+- YAML to JSON (`src/tools/yaml-json-converter/`) adds js-yaml 4.1.1 as an exact pin, uses the safe schema explicitly so executable YAML types are rejected, bounds input at 50,000 characters, caps converted output at 256 KiB (tested with an alias-expansion case), dumps with `noRefs`, and reports too-deep JSON nesting as an explicit state.
+- Text Diff (`src/tools/text-diff/`) adds diff 9.0.0 as an exact pin, fixes the upstream count precedence bug (`s + p.count || 0`) with explicit accumulation over the change list, marks every line with +/- so the diff reads without color, and bounds both sides to 10,000 characters and 2,000 lines.
+- Registry now has 63 enabled entries; 24 of the approved 87 remain. Tests: 10 suites (5 pure + 5 component, 78 new cases; the suite is now 131 files / 940 tests) and 5 new E2E scenarios (65 scenarios × 2 viewports = 130 checks).
+- Dependencies added: `diff` 9.0.0, `js-yaml` 4.1.1, and dev-only `@types/js-yaml` 4.0.9, all exact-pinned with MIT licenses recorded in the provenance dependency table; lockfile changed only through pnpm.
+- The emulator checklist driver was extended to the 63-tool catalog count with five new per-tool checks, and its recorded APK hash is now computed from the actual artifact on disk instead of a stale hardcoded value (it had silently gone stale from batch 4). Two intermediate driver runs exposed one escape-depth error of mine (the CSV multi-line assertion compares against the JSON-escaped `\n` in the output textarea, which needs a double escape through the driver's expression layer) plus the known transient theme-persistence FAIL after a cold relaunch; after fixing, a green run against the rebuilt installed artifact verified all 63 enabled tools — 77 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug, artifact SHA-256 3f3c11183cea32564c9a9d6660d425a68832c9b6e5b350806f47e175610727ef.
+- Passed formatting (unpiped `pnpm format:check`), strict typecheck (after fixing a null-guard simplification in the JWT component), zero-warning lint (after fixing an unsafe `any` assignment, an unnecessary type assertion in the YAML module, unnecessary DOM assertions in a test, and moving the device-clock read out of render for the react-hooks purity rule), 940 web tests (131 files), 130 E2E checks, production build with lazy tool chunks (largest new chunk YamlJsonConverter 42.7 kB / 14.4 kB gzip including js-yaml), Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes).
+- Next executable item: commit, open the PR closing issues #52, #59, #63, #64, and #96, review hosted CI, merge, and reconcile; then continue the tier-1 batch queue with the next risk-ordered batch. Android artifact validation of all enabled tools remains queue item 4.

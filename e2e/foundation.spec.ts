@@ -843,3 +843,96 @@ test("lorem ipsum generator produces the requested unit counts", async ({ page }
   const sentences = await page.locator("#lorem-output").inputValue()
   expect(sentences.split(".")).toHaveLength(5)
 })
+
+test("csv json converts with rfc 4180 quoting and formula protection", async ({ page }) => {
+  await page.goto("/#/tool/csv-json")
+  await expect(page.getByRole("heading", { name: "CSV to JSON" })).toBeVisible()
+
+  // A quoted field with an embedded newline stays one row (RFC 4180).
+  await page.getByLabel("CSV text").fill('note,text\n"two\nlines",ok')
+  await expect(page.getByLabel("Conversion result")).toHaveValue(
+    '[\n  {\n    "note": "two\\nlines",\n    "text": "ok"\n  }\n]',
+  )
+
+  // Regression: upstream silently dropped cells beyond the header count.
+  await page.getByLabel("CSV text").fill("a,b\n1,2,3")
+  await expect(page.getByText(/1 row had a different cell count/)).toBeVisible()
+
+  // JSON to CSV neutralizes formula-trigger cells.
+  await page.getByLabel("JSON to CSV").check()
+  await page.getByLabel("JSON text").fill('[{"cmd":"=rm -rf"}]')
+  await expect(page.getByLabel("Conversion result")).toHaveValue("cmd\n'=rm -rf")
+  await expect(page.getByText(/1 cell starting with/)).toBeVisible()
+})
+
+test("jwt decoder decodes without claiming verification", async ({ page }) => {
+  await page.goto("/#/tool/jwt-decoder")
+  await expect(page.getByRole("heading", { name: "JWT Decoder" })).toBeVisible()
+
+  await expect(page.getByText("Decoding is not verification.")).toBeVisible()
+
+  await page
+    .getByLabel("Encoded token")
+    .fill(
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjQxMDI0NDQ4MDAsImlzcyI6ImV4YW1wbGUifQ.dBjftJeZ4CJP-mB6Kxth",
+    )
+  await expect(page.getByText(/"iss": "example"/)).toBeVisible()
+  await expect(page.getByText(/"alg": "HS256"/)).toBeVisible()
+  await expect(page.getByText(/Active — the exp claim/)).toBeVisible()
+
+  await page.getByLabel("Encoded token").fill("abc.def")
+  await expect(page.getByText(/three dot-separated parts/)).toBeVisible()
+})
+
+test("password generator uses the selected sets and secure random", async ({ page }) => {
+  await page.goto("/#/tool/password-generator")
+  await expect(page.getByRole("heading", { name: "Password Generator" })).toBeVisible()
+
+  await page.getByLabel("Length").fill("32")
+  await page.getByRole("button", { name: "Generate" }).click()
+  const password = await page.getByLabel("Generated password").textContent()
+  expect(password).toHaveLength(32)
+  expect(password).toMatch(/^[A-Za-z0-9!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]+$/)
+  await expect(page.getByText(/Strength: /)).toBeVisible()
+
+  // Regression: upstream silently fell back to lowercase when nothing was selected.
+  await page.getByLabel("Lowercase letters").uncheck()
+  await page.getByLabel("Uppercase letters").uncheck()
+  await page.getByLabel("Numbers").uncheck()
+  await page.getByLabel("Symbols").uncheck()
+  await expect(page.getByText(/Select at least one character set/)).toBeVisible()
+  await expect(page.getByRole("button", { name: "Generate" })).toBeDisabled()
+})
+
+test("yaml json converter rejects unsafe types and converts both ways", async ({ page }) => {
+  await page.goto("/#/tool/yaml-json-converter")
+  await expect(page.getByRole("heading", { name: "YAML to JSON" })).toBeVisible()
+
+  await page.getByLabel("YAML text").fill("name: Ada\nage: 36")
+  await expect(page.getByLabel("Conversion result")).toHaveValue(
+    '{\n  "name": "Ada",\n  "age": 36\n}',
+  )
+
+  await page.getByLabel("JSON to YAML").check()
+  await page.getByLabel("JSON text").fill('{"name":"Ada"}')
+  await expect(page.getByLabel("Conversion result")).toHaveValue("name: Ada\n")
+
+  // The safe schema rejects executable YAML types instead of evaluating them.
+  await page.getByLabel("YAML to JSON").check()
+  await page.getByLabel("YAML text").fill("!!python/object:os.system\nx: 1")
+  await expect(page.getByText(/The YAML is not valid/)).toBeVisible()
+})
+
+test("text diff counts lines and marks changes without color", async ({ page }) => {
+  await page.goto("/#/tool/text-diff")
+  await expect(page.getByRole("heading", { name: "Text Diff" })).toBeVisible()
+
+  await page.getByLabel("Original text").fill("a\nb\nc")
+  await page.getByLabel("Modified text").fill("a\nx\nc\nnew")
+  await expect(page.getByText("3 lines added, 2 lines removed, 1 line unchanged.")).toBeVisible()
+  await expect(page.getByText("+ new")).toBeVisible()
+  await expect(page.getByText("- b")).toBeVisible()
+
+  await page.getByLabel("Modified text").fill("a\nb\nc")
+  await expect(page.getByText("The texts are identical.")).toBeVisible()
+})
