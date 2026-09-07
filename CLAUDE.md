@@ -29,7 +29,7 @@ Implemented now:
 - React/Vite/TypeScript/Tailwind application.
 - Capacitor Android project.
 - Typed tool registry containing the initial 12-tool architecture milestone within the approved 87-tool public-release scope.
-- Seventeen enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, and Reverse Text.
+- Twenty-one enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, and Text to Slug.
 - Catalog search and category filters.
 - Favorites and recent-tool persistence.
 - System/light/dark theme preferences.
@@ -44,7 +44,7 @@ Implemented now:
 
 Not yet implemented:
 
-- Remaining 70 catalog tools; 70 of the approved 87 are not yet implemented overall.
+- Remaining 66 catalog tools; 66 of the approved 87 are not yet implemented overall.
 - Installed-artifact device verification of the sensitive clipboard bridge, generated-file cache cleanup, and renderer recovery/safe mode.
 - Final icons, splash assets, app name, application ID approval, App Links, and Play signing.
 - Physical-device verification and Play-distributed artifact testing.
