@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/Button"
 import { ToolPanel } from "@/components/ui/ToolPanel"
 import type { PlatformKind } from "@/platform/contracts"
 import { usePlatform } from "@/platform/platform-context"
+import { isEnabledTool, tools } from "@/tools/registry"
+
+const enabledToolCount = tools.filter(isEnabledTool).length
 
 interface SettingsScreenProps {
   platform: PlatformKind
@@ -40,8 +43,8 @@ export function SettingsScreen({
           Your app, your device
         </h1>
         <p className="mt-3 max-w-2xl leading-7 text-[var(--text-secondary)]">
-          The foundation stores only theme, favorites, and recent-tool IDs. Tool input is not saved
-          automatically.
+          This device stores theme, favorites, recent-tool IDs, and — if you use it — your
+          scratchpad note. Other tool input is not saved automatically.
         </p>
       </header>
 
@@ -80,8 +83,9 @@ export function SettingsScreen({
             />
             <div>
               <p className="text-sm leading-6 text-[var(--text-secondary)]">
-                Clear foundation preferences from this installation. This currently removes
-                favorites, recents, and theme only.
+                Clear local data from this installation. This removes favorites, recents, theme, and
+                your saved scratchpad note. Notes are stored unencrypted and are not recoverable
+                after clearing.
               </p>
               <Button className="mt-4" onClick={() => void onClearPreferences()} variant="danger">
                 Clear local preferences
@@ -115,7 +119,7 @@ export function SettingsScreen({
             <dt className="text-[var(--text-secondary)]">Manifest</dt>
             <dd>Foundation v1</dd>
             <dt className="text-[var(--text-secondary)]">Enabled tools</dt>
-            <dd>3</dd>
+            <dd>{enabledToolCount}</dd>
           </dl>
         </ToolPanel>
 

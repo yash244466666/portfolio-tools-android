@@ -129,3 +129,23 @@ test("json editor validates, formats, and inspects documents", async ({ page }) 
   await page.getByRole("button", { name: "user" }).click()
   await expect(page.getByText(/string · "Ada"/)).toBeVisible()
 })
+
+test("notes scratchpad survives a reload and clears explicitly", async ({ page }) => {
+  await page.goto("/#/tool/notes-scratchpad")
+  await expect(page.getByRole("heading", { name: "Notes" })).toBeVisible()
+
+  await page.getByLabel("Scratchpad").fill("durable across reload")
+  await expect(page.getByText(/Last saved/)).toBeVisible({ timeout: 10_000 })
+
+  // The note is durable device data: it must survive a full reload.
+  await page.reload()
+  await expect(page.getByRole("heading", { name: "Notes" })).toBeVisible()
+  await expect(page.getByLabel("Scratchpad")).toHaveValue("durable across reload")
+
+  // Clearing requires the explicit two-step confirmation.
+  await page.getByRole("button", { name: "Clear note" }).click()
+  await expect(page.getByLabel("Scratchpad")).toHaveValue("durable across reload")
+  await page.getByRole("button", { name: "Tap again to confirm" }).click()
+  await expect(page.getByLabel("Scratchpad")).toHaveValue("")
+  await expect(page.getByText("Note cleared from this device.")).toBeVisible()
+})
