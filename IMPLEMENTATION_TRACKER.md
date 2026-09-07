@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 23:59 Europe/Berlin
+> Last updated: 2026-09-08 00:29 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -898,3 +898,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - The emulator checklist driver was extended to the 58-tool catalog count with five new per-tool checks. Two intermediate runs exposed three driver expectation errors of mine (replacement-case and space-count arithmetic in the find-replace and invisible-character assertions) plus the known transient theme-persistence FAIL after a cold relaunch; after fixing the driver, a green run against the rebuilt installed artifact verified all 58 enabled tools — 72 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug.
 - Passed formatting (unpiped `pnpm format:check`), strict typecheck (after fixing a Worker-result narrowing error, unused imports, and a possibly-undefined destructure), zero-warning lint (after replacing a setState-in-effect pattern with render-derived literal results, removing raw irregular-whitespace literals from a test, and dropping an unused assignment), 853 web tests (121 files), 120 E2E checks, production build with lazy tool chunks (largest new chunk CronBuilder 7.14 kB / 2.65 kB gzip), Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes).
 - Next executable item: commit, open the PR closing issues #103, #108, #100, #102, and #54, review hosted CI, merge, and reconcile; then continue the tier-1 batch queue with the next risk-ordered batch. Android artifact validation of all enabled tools remains queue item 4.
+
+### 2026-09-07 — Dev batch 4 merge reconciliation
+
+- Squash-merged PR #158 into `main` as `1404f7a`, closing issues #103, #108, #100, #102, and #54; all five Project items are Done and the issues carry `status:device-qa` with evidence comments. `main` == `origin/main` with a clean worktree, both hosted PR CI jobs green before merge (android-debug 3m56s, web-quality 5m7s). No open pull requests remain.
+- Registry now has 58 enabled entries; 29 of the approved 87 remain.
+- Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
