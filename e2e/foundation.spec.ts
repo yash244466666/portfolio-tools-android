@@ -149,3 +149,30 @@ test("notes scratchpad survives a reload and clears explicitly", async ({ page }
   await expect(page.getByLabel("Scratchpad")).toHaveValue("")
   await expect(page.getByText("Note cleared from this device.")).toBeVisible()
 })
+
+test("pomodoro timer runs, pauses, and resets from the device clock", async ({ page }) => {
+  await page.goto("/#/tool/pomodoro-timer")
+  await expect(page.getByRole("heading", { name: "Pomodoro Timer" })).toBeVisible()
+  await expect(page.getByRole("timer")).toHaveText("25:00")
+
+  await page.getByRole("button", { name: "Start" }).click()
+  await expect(page.getByText("Focus session running.")).toBeVisible()
+  // Remaining time derives from the wall clock, not from counted ticks.
+  await expect(page.getByRole("timer")).not.toHaveText("25:00", { timeout: 5000 })
+
+  await page.getByRole("button", { name: "Pause" }).click()
+  const frozen = await page.getByRole("timer").textContent()
+  await page.waitForTimeout(1500)
+  await expect(page.getByRole("timer")).toHaveText(frozen ?? "")
+  await expect(page.getByText("Timer paused.")).toBeVisible()
+
+  await page.getByRole("button", { name: "Resume" }).click()
+  await page.getByRole("button", { name: "Reset" }).click()
+  await expect(page.getByRole("timer")).toHaveText("25:00")
+  await expect(page.getByText("Timer reset.")).toBeVisible()
+
+  // Enabling alerts requests permission first and never crashes when unavailable.
+  await page.getByRole("button", { name: "Alert me at phase end" }).click()
+  await expect(page.getByRole("status")).toContainText(/notification/i)
+  await expect(page.getByRole("button", { name: /Alerts on|Alert me/ })).toBeVisible()
+})
