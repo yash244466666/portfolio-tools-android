@@ -270,3 +270,40 @@ test("currency converter fetches mocked Frankfurter rates and converts", async (
   await page.getByLabel("Amount").fill("2")
   await expect(page.locator("#currency-result")).toHaveText("1.7209 EUR")
 })
+
+test("dns lookup resolves a mocked Cloudflare DoH answer", async ({ page }) => {
+  // The provider response is mocked so the E2E run is deterministic; the request shape
+  // (exact origin, name and type parameters) is asserted below as the contract.
+  const requests: string[] = []
+  await page.route("**/cloudflare-dns.com/dns-query**", (route) => {
+    void requests.push(route.request().url())
+    return route.fulfill({
+      status: 200,
+      contentType: "application/dns-json",
+      body: JSON.stringify({
+        Status: 0,
+        Question: [{ name: "example.com", type: 1 }],
+        Answer: [
+          { name: "example.com", type: 1, TTL: 116, data: "172.66.147.243" },
+          { name: "example.com", type: 1, TTL: 116, data: "104.20.23.154" },
+        ],
+      }),
+    })
+  })
+
+  await page.goto("/#/tool/dns-lookup")
+  await expect(page.getByRole("heading", { name: "DNS Lookup" })).toBeVisible()
+
+  await page.getByLabel("Domain name").fill("example.com")
+  await page.getByRole("button", { name: "Look up" }).click()
+
+  await expect(page.getByText("2 records for example.com · answered by Cloudflare")).toBeVisible({
+    timeout: 10_000,
+  })
+  await expect(page.getByText("172.66.147.243")).toBeVisible()
+  await expect(page.getByText("104.20.23.154")).toBeVisible()
+  await expect(page.getByText(/only the domain name and record type/)).toBeVisible()
+
+  expect(requests.length).toBe(1)
+  expect(requests[0]).toBe("https://cloudflare-dns.com/dns-query?name=example.com&type=A")
+})

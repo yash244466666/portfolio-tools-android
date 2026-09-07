@@ -16,6 +16,7 @@ describe("tool registry", () => {
   it("labels all network behavior in metadata", () => {
     expect(tools.filter((tool) => tool.network).map((tool) => tool.id)).toEqual([
       "currency-converter",
+      "dns-lookup",
     ])
   })
 })

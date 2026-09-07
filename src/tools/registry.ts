@@ -6,6 +6,7 @@ import {
   FileImage,
   FileText,
   Gauge,
+  Globe,
   Hash,
   NotebookPen,
   QrCode,
@@ -180,6 +181,20 @@ export const tools: readonly ToolDefinition[] = [
     network: true,
     persistent: true,
     component: lazy(() => import("@/tools/currency-converter/CurrencyConverter")),
+  },
+  {
+    id: "dns-lookup",
+    label: "DNS Lookup",
+    description:
+      "Look up DNS records for a domain through encrypted Cloudflare DoH. Requires internet.",
+    category: "dev",
+    tags: ["dns", "domain", "network", "records"],
+    icon: Globe,
+    status: "enabled",
+    risk: "medium",
+    network: true,
+    persistent: false,
+    component: lazy(() => import("@/tools/dns-lookup/DnsLookup")),
   },
 ] as const
 

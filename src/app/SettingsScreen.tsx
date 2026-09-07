@@ -105,11 +105,15 @@ export function SettingsScreen({
               <li>No account, ads, analytics, or automatic crash uploads.</li>
               <li>
                 Most enabled tools work offline and process input on this device. Currency Converter
-                is labeled in the catalog as requiring internet.
+                and DNS Lookup are labeled in the catalog as requiring internet.
               </li>
               <li>
                 Currency Converter sends only the selected base currency code to Frankfurter
                 (api.frankfurter.dev); amounts never leave this device.
+              </li>
+              <li>
+                DNS Lookup sends only the queried domain name and record type to Cloudflare
+                (cloudflare-dns.com); lookups are not stored by this app.
               </li>
               <li>Android backup exclusions are configured for app-private data.</li>
             </ul>
