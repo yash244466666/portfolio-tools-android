@@ -758,3 +758,88 @@ test("uuid generator produces a batch of version-4 values", async ({ page }) => 
     expect(line).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
   }
 })
+
+test("find and replace replaces literal matches and reports the count", async ({ page }) => {
+  await page.goto("/#/tool/find-replace")
+  await expect(page.getByRole("heading", { name: "Find & Replace" })).toBeVisible()
+
+  // Literal mode replaces every occurrence, case-insensitive by default.
+  await page.getByLabel("Find").fill("cat")
+  await page.getByLabel("Replace with").fill("dog")
+  await page.getByLabel("Source text").fill("Cat catalog cat")
+  await expect(page.getByRole("heading", { name: "3 matches" })).toBeVisible()
+  await expect(page.getByLabel("Replacement result")).toHaveValue("dog dogalog dog")
+
+  // Whole word narrows the third match out.
+  await page.getByLabel("Whole word").check()
+  await expect(page.getByRole("heading", { name: "2 matches" })).toBeVisible()
+
+  // Applying the replacement edits the source in place.
+  await page.getByRole("button", { name: "Apply changes" }).click()
+  await expect(page.getByLabel("Source text")).toHaveValue("dog catalog dog")
+})
+
+test("invisible character detector finds and removes hidden characters", async ({ page }) => {
+  await page.goto("/#/tool/invisible-character-detector")
+  await expect(page.getByRole("heading", { name: "Invisible Character Detector" })).toBeVisible()
+
+  await page.getByLabel("Text to scan").fill("a​b c d")
+  await expect(page.getByRole("heading", { name: "2 invisible characters" })).toBeVisible()
+  await expect(page.getByText(/Zero-Width Space/)).toBeVisible()
+  await expect(page.getByText(/Narrow No-Break Space/)).toBeVisible()
+
+  await page.getByRole("button", { name: "Remove all" }).click()
+  await expect(page.getByLabel("Text to scan")).toHaveValue("ab cd")
+  await expect(page.getByText("No invisible characters were detected in this text.")).toBeVisible()
+})
+
+test("hash diff compares digests of equal and different texts", async ({ page }) => {
+  await page.goto("/#/tool/hash-diff")
+  await expect(page.getByRole("heading", { name: "Hash Diff" })).toBeVisible()
+
+  const compare = page.getByRole("button", { name: "Compare Hashes" })
+  await expect(compare).toBeDisabled()
+
+  await page.getByLabel("First text").fill("abc")
+  await page.getByLabel("Second text").fill("abc")
+  await expect(compare).toBeEnabled()
+  await compare.click()
+  await expect(page.getByRole("heading", { name: "Result — identical" })).toBeVisible()
+  // SHA-1 of "abc", the published NIST vector.
+  await expect(page.getByText("a9993e364706816aba3e25717850c26c9cd0d89d").first()).toBeVisible()
+
+  await page.getByLabel("Second text").fill("abd")
+  await page.getByRole("button", { name: "Compare Hashes" }).click()
+  await expect(page.getByRole("heading", { name: "Result — different" })).toBeVisible()
+})
+
+test("cron builder validates fields and describes presets", async ({ page }) => {
+  await page.goto("/#/tool/cron-builder")
+  await expect(page.getByRole("heading", { name: "Cron Expression Builder" })).toBeVisible()
+
+  await expect(page.getByText("at 09:00, on Monday through Friday")).toBeVisible()
+
+  // Regression: upstream accepted out-of-range fields without complaint.
+  await page.getByLabel("Cron expression").fill("99 99 99 99 99")
+  await expect(page.getByText(/Minute "99" is outside range 0-59\./).first()).toBeVisible()
+  await expect(page.getByText("at 09:00, on Monday through Friday")).toBeHidden()
+
+  await page.getByRole("button", { name: "Every 15 minutes" }).click()
+  await expect(page.getByLabel("Cron expression")).toHaveValue("*/15 * * * *")
+  await expect(page.getByText("every 15 minutes", { exact: true })).toBeVisible()
+})
+
+test("lorem ipsum generator produces the requested unit counts", async ({ page }) => {
+  await page.goto("/#/tool/lorem-ipsum-generator")
+  await expect(page.getByRole("heading", { name: "Lorem Ipsum Generator" })).toBeVisible()
+
+  await page.getByRole("button", { name: "Generate" }).click()
+  const paragraphs = await page.locator("#lorem-output").inputValue()
+  expect(paragraphs.split("\n\n")).toHaveLength(3)
+
+  await page.getByLabel("Count").fill("4")
+  await page.getByRole("radio", { name: "Sentences" }).check()
+  await page.getByRole("button", { name: "Generate" }).click()
+  const sentences = await page.locator("#lorem-output").inputValue()
+  expect(sentences.split(".")).toHaveLength(5)
+})

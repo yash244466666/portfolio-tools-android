@@ -1,10 +1,10 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 22:35 Europe/Berlin
+> Last updated: 2026-09-07 23:59 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **all 87 audited catalog tools; 53 implemented, 34 remaining**
+> Approved public version 1 scope: **all 87 audited catalog tools; 58 implemented, 29 remaining**
 > Public release readiness: **NO — foundation only**
 
 This is the living operational record for what is implemented, what is verified, what remains, and what is blocked. Update it in every implementation session. A checked item requires evidence; generated or coded does not automatically mean tested.
@@ -885,3 +885,16 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Squash-merged PR #157 into `main` as `3f81960`, closing issues #58, #69, #70, #71, and #72; all five Project items are Done and the issues carry `status:device-qa` with evidence comments. `main` == `origin/main` with a clean worktree, both hosted PR CI jobs green before merge (android-debug 4m3s, web-quality 5m2s). No open pull requests remain.
 - Registry now has 53 enabled entries; 34 of the approved 87 remain.
 - Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
+
+### 2026-09-07 — Dev batch 4 tool migration (Find & Replace, Invisible Character Detector, Hash Diff, Cron Expression Builder, Lorem Ipsum Generator)
+
+- Implemented the next five tier-1 tools (issues #103, #108, #100, #102, and #54) as one batch on `feat/dev-batch-4`, all offline, non-persistent, lazy-loaded, and built only on the platform service contracts and shared UI primitives.
+- Find & Replace (`src/tools/find-replace/`) splits search into two honest modes: literal mode is plain string scanning (bounded work, derived during render with no effect-state churn) and regex mode reuses the Regex Tester's terminable Worker runner with a 250 ms debounce and in-flight cancellation, so hostile patterns cannot freeze the interface; the upstream whole-word lookbehind semantics are kept, matches/replacements are bounded at 1,000 with end-splice index preservation, and applying a replacement edits the source in place with a disclosed replacement count.
+- Invisible Character Detector (`src/tools/invisible-character-detector/`) keeps the upstream detected code-point set (zero-width, joiners, BOM, unusual spaces, bidi marks/embeddings, annotation/object/replacement characters) and makes the removal set exactly the detected set, so Remove all only ever strips reported characters; every code point is expressed as a numeric escape so no source file contains raw invisible characters.
+- Hash Diff (`src/tools/hash-diff/`) keeps only the Web Crypto `crypto.subtle` digest path (the upstream js-sha fallbacks are intentionally not copied, matching the HMAC precedent), labels SHA-1 as legacy in both the row label and the disclosure, computes over UTF-8, and is oracle-tested against the published NIST "abc" digests.
+- Cron Expression Builder (`src/tools/cron-builder/`) copies the upstream field names, ranges, day/month names, and eight presets verbatim but fixes the upstream validation gap that accepted any five fields (for example "99 99 99 99 99") and descriptions printing "undefined" for step/range tokens: real per-field range/list/range/step validation now names the offending field, and `describeCron` falls back to raw-field phrasing instead of non-finite names.
+- Lorem Ipsum Generator (`src/tools/lorem-ipsum-generator/`) keeps the 123-word vocabulary and sentence/paragraph shapes verbatim, injects the random source for deterministic tests, clamps counts into documented per-unit bounds (paragraphs 1-10, sentences 1-50, words 1-500), and generates on-device with no persistence.
+- Registry now has 58 enabled entries; 29 of the approved 87 remain. Tests: 5 pure + 5 component suites (61 new cases; the suite is now 121 files / 853 tests) and 5 new E2E scenarios (60 scenarios × 2 viewports = 120 checks).
+- The emulator checklist driver was extended to the 58-tool catalog count with five new per-tool checks. Two intermediate runs exposed three driver expectation errors of mine (replacement-case and space-count arithmetic in the find-replace and invisible-character assertions) plus the known transient theme-persistence FAIL after a cold relaunch; after fixing the driver, a green run against the rebuilt installed artifact verified all 58 enabled tools — 72 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug.
+- Passed formatting (unpiped `pnpm format:check`), strict typecheck (after fixing a Worker-result narrowing error, unused imports, and a possibly-undefined destructure), zero-warning lint (after replacing a setState-in-effect pattern with render-derived literal results, removing raw irregular-whitespace literals from a test, and dropping an unused assignment), 853 web tests (121 files), 120 E2E checks, production build with lazy tool chunks (largest new chunk CronBuilder 7.14 kB / 2.65 kB gzip), Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes).
+- Next executable item: commit, open the PR closing issues #103, #108, #100, #102, and #54, review hosted CI, merge, and reconcile; then continue the tier-1 batch queue with the next risk-ordered batch. Android artifact validation of all enabled tools remains queue item 4.
