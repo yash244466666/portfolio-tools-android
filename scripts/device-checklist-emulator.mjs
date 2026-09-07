@@ -4,7 +4,7 @@ import { writeFileSync } from "node:fs"
 const PACKAGE = "dev.yash.tools.debug"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 53
+const enabledToolCount = 58
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -969,6 +969,78 @@ async function phaseTools(page) {
           "(document.querySelector('#uuid-output') ?? {value:''}).value.length === 110",
         )
         return "three UUIDs rendered into the output panel"
+      },
+    ],
+    [
+      "find-replace",
+      "Find & Replace",
+      async (p) => {
+        await p.setValue("#find-replace-find", "cat")
+        await p.setValue("#find-replace-replace", "dog")
+        await p.setValue("#find-replace-source", "Cat catalog cat")
+        await p.waitFor(
+          "(document.querySelector('#find-replace-output') ?? {value:''}).value === 'dog dogalog dog'",
+        )
+        await p.clickCheckbox("Whole word")
+        await p.waitFor("document.body.innerText.includes('2 matches')")
+        await p.clickButton("Apply changes")
+        await p.waitFor(
+          "(document.querySelector('#find-replace-source') ?? {value:''}).value === 'dog catalog dog'",
+        )
+        return "literal replacement applied with whole-word narrowing"
+      },
+    ],
+    [
+      "invisible-character-detector",
+      "Invisible Character Detector",
+      async (p) => {
+        await p.setValue("#invisible-character-input", "a\u200Bb c\u202Fd")
+        await p.waitFor("document.body.innerText.includes('2 invisible characters')")
+        await p.clickButton("Remove all")
+        await p.waitFor(
+          "(document.querySelector('#invisible-character-input') ?? {value:''}).value === 'ab cd'",
+        )
+        return "zero-width and narrow space found and removed"
+      },
+    ],
+    [
+      "hash-diff",
+      "Hash Diff",
+      async (p) => {
+        await p.setValue("#hash-diff-first", "abc")
+        await p.setValue("#hash-diff-second", "abd")
+        await p.clickButton("Compare Hashes")
+        await p.waitFor("document.body.innerText.includes('Result — different')")
+        return "NIST abc vectors compared with a different verdict"
+      },
+    ],
+    [
+      "cron-builder",
+      "Cron Expression Builder",
+      async (p) => {
+        await p.waitFor("document.body.innerText.includes('at 09:00, on Monday through Friday')")
+        await p.setValue("#cron-expression", "99 99 99 99 99")
+        await p.waitFor("document.body.innerText.includes('Minute \"99\" is outside range 0-59.')")
+        await p.clickButton("Every 15 minutes")
+        await p.waitFor("document.body.innerText.includes('every 15 minutes')")
+        return "out-of-range rejection and preset description rendered"
+      },
+    ],
+    [
+      "lorem-ipsum-generator",
+      "Lorem Ipsum Generator",
+      async (p) => {
+        await p.clickButton("Generate")
+        await p.waitFor(
+          "(document.querySelector('#lorem-output') ?? {value:''}).value.split('\\n\\n').length === 3",
+        )
+        await p.clickRadioValue("sentences")
+        await p.setValue("#lorem-count", "4")
+        await p.clickButton("Generate")
+        await p.waitFor(
+          "(document.querySelector('#lorem-output') ?? {value:''}).value.split('.').length === 5",
+        )
+        return "three paragraphs then four sentences generated"
       },
     ],
   ]
