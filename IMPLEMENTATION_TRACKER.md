@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 18:54 Europe/Berlin
+> Last updated: 2026-09-07 19:09 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -757,7 +757,7 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 ### 2026-09-07 — Text batch 3 merge reconciliation
 
 - Merged PR #149 into `main` as `435d435`, closing issues #105, #106, #107, and #97; all four Project items are Done and the issues carry `status:device-qa` with evidence comments. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge (web-quality 2m56s, android-debug 3m39s), and no open pull requests remain.
-- Twenty-five of the 87 approved tools are implemented; the 12-tool milestone, both tier-3 network tools, and three tier-1 text/dev batches are complete (62 remain).
+- Twenty-nine of the 87 approved tools are implemented; the 12-tool milestone, both tier-3 network tools, three tier-1 text/dev batches, and math batch 1 are complete (58 remain).
 - Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
 
 ### 2026-09-07 — Android instrumentation foundation batch (issue #17)
@@ -782,3 +782,13 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Final hardening: the lint/type-cleanup pass had silently inverted the CDP `Runtime.evaluate` response shape (`result.result.value` was flattened to `result.value`), which made every `waitFor` poll observe `undefined` and the first cold-launch `h1` wait fail deterministically; the response typedef now matches the protocol, every CDP command is bounded by a 15-second response timeout so a wedged renderer fails fast instead of hanging the run, cold launches are verified against a rendered `h1` and retried up to three times, and the 200% font-scale step reconnects after the Activity-recreating configuration change instead of talking into a dead page connection.
 - Result on the installed debug artifact (SHA-256 `4405784…`, WebView 124.0.6367.219): two consecutive green runs of the final driver, 39 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL. Recorded in `docs/PHYSICAL_DEVICE_CHECKLIST.md` as "Automated emulator pre-verification"; every physical-device checkbox remains unchecked and issue #18 stays open for physical-device evidence.
 - Next executable item: continue the tier-1 batch queue with the next risk-ordered batch of remaining catalog tools; issue #18 remains open pending an approved physical device.
+
+### 2026-09-07 — Math batch 1 tool migration (Percentage, Tip, GCD/LCM, Roman Numeral)
+
+- Implemented the four smallest remaining tier-1 math tools (issues #119, #121, #122, #123) as one batch on `feat/119-math-batch-1`. Percentage Calculator (`src/tools/percentage-calculator/percentage.ts`) replaces the upstream `parseFloat` partial parses with strict whole-input decimal validation, distinguishes a mathematically undefined result (zero total in percent/what-percent and percent-change modes) from invalid input instead of the silent `--` placeholder, and fixes the `\.?0+$` formatting collapse that rendered 0 as an empty string.
+- Tip Calculator (`src/tools/tip-calculator/tip.ts`) validates the 0–100% tip and 1–100 split bounds, rounds to cents explicitly, and presents currency-neutral labeled amounts instead of the hardcoded `$` symbol; preset tips are pressed-state buttons and the quick slider covers 0–50% while any 0–100% value validates.
+- GCD/LCM Calculator (`src/tools/gcd-lcm-calculator/gcd-lcm.ts`) replaces the upstream Number arithmetic with exact BigInt: the silent drop of unparsable entries ("48, abc, 18" became 48 and 18) is now a per-entry validation error, the `a * b` overflow past 2^53 is eliminated (pinned by regression vectors), inputs are bounded to 12 values of 15 digits, and the LCM-zero state is disclosed.
+- Roman Numeral Converter (`src/tools/roman-numeral-converter/roman.ts`) replaces the upstream `parseInt` partial parses with strict integer validation, keeps the round-trip canonical-form check that rejects "IIII" and "IC", and replaces the per-keystroke history auto-append with an explicit Save-to-history button; history is session-only and never persisted.
+- Registry now has 29 enabled entries; the four tools are offline, non-persistent, low-risk, and lazy-loaded. Tests: 4 pure + 4 component suites (50 new cases) and 5 new E2E scenarios across both viewports.
+- The emulator checklist driver was extended to the 29-tool catalog count and 29 per-tool checks (the offline-recovery lookup also now retries until connectivity returns), and a green run against the rebuilt installed artifact verified all 29 enabled tools on the artifact — 43 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, artifact SHA-256 `4405784…`.
+- Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
