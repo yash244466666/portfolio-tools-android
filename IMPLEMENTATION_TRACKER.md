@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 00:30 Europe/Berlin
+> Last updated: 2026-09-07 01:05 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -559,6 +559,12 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Passed formatting, strict typecheck, zero-warning lint, 176 web tests (23 files), 20 E2E scenarios, production build (NotesScratchpad lazy chunk 4.64 kB/2.07 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
 - Next executable item: the Pomodoro Timer tool migration (issue #101) with best-effort notifications and process reconstruction.
 
+### 2026-09-07 — Notes/Scratchpad merge reconciliation
+
+- Merged PR #140 into `main` as `863563f`, closing issue #109; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
+- Eight of the 87 approved tools are implemented. The vertical slice still needs Pomodoro Timer, Image Compressor, File Hash Checker, and Currency Converter.
+- Next executable item: the Pomodoro Timer tool migration (issue #101) with best-effort notifications, permission-on-demand, and process reconstruction.
+
 ### 2026-09-06 — JSON Editor merge reconciliation
 
 - Merged PR #139 into `main` as `d900561`, closing issue #49; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
@@ -572,3 +578,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Added 7 pure cases (round-trip, newer-schema refusal, corrupt-payload corpus, byte bounds, import decode with invalid UTF-8 replacement, word counting) and 10 component cases (load, empty, autosave, unchanged-skip, two-step clear, over-limit preservation, newer-schema blocking, two-step import, cancelled import, share payload). E2E grew to 20 scenarios and proves the note survives a full reload and clears only through the two-step confirmation on both device profiles.
 - Passed formatting, strict typecheck, zero-warning lint, 176 web tests (23 files), 20 E2E scenarios, production build (NotesScratchpad lazy chunk 4.64 kB/2.07 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
 - Next executable item: the Pomodoro Timer tool migration (issue #101) with best-effort notifications and process reconstruction.
+
+### 2026-09-07 — Notes/Scratchpad merge reconciliation
+
+- Merged PR #140 into `main` as `863563f`, closing issue #109; the Project item is Done and the issue carries `status:device-qa`. `main` == `origin/main` with a clean worktree, both hosted CI jobs green before merge, and no open pull requests remain.
+- Eight of the 87 approved tools are implemented. The vertical slice still needs Pomodoro Timer, Image Compressor, File Hash Checker, and Currency Converter.
+- Next executable item: the Pomodoro Timer tool migration (issue #101) with best-effort notifications, permission-on-demand, and process reconstruction.
