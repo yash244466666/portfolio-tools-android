@@ -238,3 +238,37 @@ test("file hash checker computes real digests for a picked file", async ({ page 
   ).toBeVisible()
   await expect(page.getByText(/Legacy — not collision-secure/)).toBeVisible()
 })
+
+test("currency converter fetches mocked Frankfurter rates and converts", async ({ page }) => {
+  // The provider response is mocked so the E2E run is deterministic; the request shape
+  // (exact origin, base parameter) is asserted below as the packaged-origin contract.
+  const requests: string[] = []
+  await page.route("**/api.frankfurter.dev/v2/rates**", (route) => {
+    void requests.push(route.request().url())
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([
+        { date: "2026-09-07", base: "USD", quote: "EUR", rate: 0.86044 },
+        { date: "2026-09-07", base: "USD", quote: "BDT", rate: 122.8 },
+      ]),
+    })
+  })
+
+  await page.goto("/#/tool/currency-converter")
+  await expect(page.getByRole("heading", { name: "Currency Converter" })).toBeVisible()
+
+  await expect(page.locator("#currency-result")).toHaveText("0.8604 EUR", { timeout: 10_000 })
+  await expect(
+    page.getByText(/1 USD = 0.8604 EUR · provider data date 2026-09-07/),
+  ).toBeVisible()
+  await expect(page.getByText(/Fresh rates fetched/)).toBeVisible()
+  await expect(page.getByText(/Rates come from Frankfurter/)).toBeVisible()
+  await expect(page.getByText(/only the selected base currency code/)).toBeVisible()
+
+  expect(requests.length).toBe(1)
+  expect(requests[0]).toBe("https://api.frankfurter.dev/v2/rates?base=USD")
+
+  await page.getByLabel("Amount").fill("2")
+  await expect(page.locator("#currency-result")).toHaveText("1.7209 EUR")
+})

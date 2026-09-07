@@ -1,10 +1,10 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 05:45 Europe/Berlin
+> Last updated: 2026-09-07 11:20 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **all 87 audited catalog tools; 11 implemented, 76 remaining**
+> Approved public version 1 scope: **all 87 audited catalog tools; 12 implemented, 75 remaining**
 > Public release readiness: **NO — foundation only**
 
 This is the living operational record for what is implemented, what is verified, what remains, and what is blocked. Update it in every implementation session. A checked item requires evidence; generated or coded does not automatically mean tested.
@@ -189,9 +189,9 @@ The first public Google Play release is approved to contain all 87 tools from th
 |     7 | JSON Editor         | DONE    | Bounded parsing, plain-text editor, view-only tree, tab/panel layout | Android artifact interaction/device check |
 |     8 | Notes/Scratchpad    | DONE    | Versioned durable store, migration gate, export/import, honest copy  | Android artifact interaction/device check |
 |     9 | Pomodoro Timer      | DONE    | Wall-clock anchor, durable reconstruction, best-effort alerts        | Android artifact interaction/device check |
-|    10 | Image Compressor    | PLANNED | Picker, decoded limits, generated output                             | SAF picker, EXIF/metadata policy          |
-|    11 | File Hash Checker   | PLANNED | Large files, cancellation, streaming                                 | Native stream plugin or strict JS cap     |
-|    12 | Currency Converter  | PLANNED | Network, cache, offline/stale                                        | Packaged-origin CORS and provider review  |
+|    10 | Image Compressor    | DONE    | Picker, decoded-pixel cap, EXIF-normalized re-encode, bridge share/Save As | Android artifact interaction/device check |
+|    11 | File Hash Checker   | DONE    | Native streaming digests, cancellation, legacy SHA-1 labeling         | Android artifact interaction/device check |
+|    12 | Currency Converter  | DONE    | Frankfurter v2, strict response schema, typed failures, cached/stale  | Android artifact interaction/device check |
 
 Vertical-slice completion requires all twelve to pass their Definition of Done in `AGENT.md`, not merely render. Public-release completion additionally requires the remaining 75 tools to pass the same gate; the 12-tool milestone is not an approved production subset.
 
@@ -216,6 +216,7 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 
 | Date/time                                                                                                                                                                                                                                                                                                                                                                                                    | Commit/worktree           | Command                                                                                    | Result  | Evidence/notes                                                                                |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- | ------------------------------------------------------------------------------------------ | ------- | --------------------------------------------------------------------------------------------- |
+| 2026-09-07 11:15 | feat/43-currency-converter | `pnpm typecheck` `pnpm lint` `pnpm test` `pnpm build` `pnpm test:e2e` | PASS | 30 test files, 267 web tests, 28 E2E scenarios (14 tests x 2 device profiles); CurrencyConverter lazy chunk 17.29 kB/6.46 kB gzip (static 165-currency catalog); Frankfurter v2 probed live: 301 from stale `api.frankfurter.app`, `access-control-allow-origin: *`, bounded ~10 KiB response, per-row dates, 422/429 errors documented |
 | 2026-09-05 14:39                                                                                                                                                                                                                                                                                                                                                                                             | Uncommitted foundation    | `pnpm format:check`                                                                        | PASS    | All tracked source/document formats accepted                                                  |
 | 2026-09-05 14:39                                                                                                                                                                                                                                                                                                                                                                                             | Uncommitted foundation    | `pnpm check`                                                                               | PASS    | Strict typecheck; ESLint zero warnings; 6 files/16 tests; production build                    |
 | 2026-09-05 14:39                                                                                                                                                                                                                                                                                                                                                                                             | Uncommitted foundation    | `pnpm build`                                                                               | PASS    | Main JS 240.43 kB / 76.32 kB gzip; enabled tools remain lazy chunks                           |
@@ -336,8 +337,7 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 1. Configure the recommended saved Project views in GitHub's UI; upgrade the account plan before completing protected-main issue #129.
 2. Add process-recreation, permission, picker, Save As, share, notification, and renderer-recovery instrumentation/UI Automator coverage.
 3. Connect/authorize a physical Android device (or approved emulator), install the debug APK, and execute the physical checklist.
-4. Prove packaged-origin CORS and port Currency Converter (issue #43) as the first network tool.
-5. Complete and Android-validate all 12 tools in the architecture milestone.
+4. Complete and Android-validate all 12 tools in the architecture milestone.
 6. Migrate the remaining 75 audited tools in controlled, risk-ordered batches until all 87 pass their Definition of Done.
 7. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval.
 8. Approve or revise the provisional app name, application ID, bundled origin, and privacy posture before release work; public v1 tool count is resolved at 87 by ADR 0004.
@@ -349,7 +349,7 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 
 - Status: **FOUNDATION PASS COMPLETE; FULL GATE IN PROGRESS**.
 - Passed: stack, bundled/minified builds, typed registry, adapter boundary, three representative tools, browser QA, manifest budget, baseline security config.
-- Missing: complete 12-tool internal slice, file-content streaming, and physical/Play-installed artifact evidence.
+- Missing: Android artifact validation of the 12-tool slice, and physical/Play-installed artifact evidence.
 
 ### Closed-beta gate
 
@@ -611,6 +611,14 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - Added 8 component cases (initial state, all three digests with the exact known fixture vectors, SHA-1 legacy labeling, contract algorithm ordering, cancelled pick, aborted hashing with distinct cancelled state, digest failure recovery, reset) — the same synthetic fixture and its independently computed digests drive the E2E oracle. E2E grew to 26 scenarios and asserts the exact SHA-256/SHA-1/SHA-512 of the fixture through the real web adapter on both device profiles.
 - Passed formatting, strict typecheck, zero-warning lint, 225 web tests (28 files), 26 E2E scenarios, production build (FileHashChecker lazy chunk 3.36 kB/1.44 kB gzip), Capacitor sync, 38 native tests, Android Lint, debug/internal APK and minified release AAB builds with the tool chunk present, three manifest budgets, APK v2 signatures, work-item/action audits, and `git diff --check`.
 - Next executable item: proving packaged-origin CORS behavior and porting Currency Converter (issue #43) as the first network tool — its provider, terms, and cache/stale UX must pass review before enabling.
+
+### 2026-09-07 — Currency Converter (first network tool)
+
+- Implemented the `currency-converter` tool (issue #43) from the audited upstream component onto the Frankfurter v2 endpoint, recorded in ADR 0017: HTTPS-only exact-origin requests with a 15 s timeout and contract-level cancellation, strict per-row response-schema validation before any value reaches React, typed failure states (offline/timeout/rate-limited/provider-failure/malformed/no-record/cancelled), a versioned PreferenceStore cache (at most 8 bases, 24 h TTL aligned with the provider `max-age`), stale-labeled offline fallback with reconnect guidance, a deliberately refreshed static 165-currency catalog, and per-conversion data-date freshness. The stale `api.frankfurter.app` CSP hostname moved to `api.frankfurter.dev`; the settings privacy summary now distinguishes offline tools from Currency Converter instead of claiming all enabled tools are local, and the Clear-data copy names cached exchange rates.
+- Provider review: Frankfurter is free/open-source with no API key; the old `api.frankfurter.app` origin now 301-redirects (plan/CSP were stale); v1 is superseded by the provider and excludes 53 quoted currencies including BDT; v2 confirmed CORS-permissive from the packaged production origin with a bounded ~10 KiB response.
+- Added 28 pure tests (catalog invariants, URL building, hostile/malformed response corpus, amount bounds, cross-rate arithmetic with oldest-date freshness, cache migration/eviction/freshness) and 14 component cases (fresh fetch, cross-rate refetch per base, cache reuse without a second call, durable persistence, offline stale/no-cache states, 429/500/malformed/network-error/timeout mappings, swap/reset). E2E grew to 28 scenarios and intercepts the exact request URL `https://api.frankfurter.dev/v2/rates?base=USD` on both device profiles.
+- Passed formatting, strict typecheck, zero-warning lint, 267 web tests (30 files), 28 E2E scenarios, production build (CurrencyConverter lazy chunk 17.29 kB/6.46 kB gzip), Capacitor sync, native tests, Android Lint, and manifest budgets.
+- Next executable item: Android artifact validation of the complete 12-tool architecture milestone (queue item 4), then the remaining 75 tools in controlled, risk-ordered batches.
 
 ### 2026-09-07 — File Hash Checker merge reconciliation
 

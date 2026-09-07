@@ -52,7 +52,7 @@ export function App() {
 
   async function clearPreferences() {
     const confirmed = window.confirm(
-      "Clear favorites, recents, theme, and your saved scratchpad note from this installation?",
+      "Clear favorites, recents, theme, your saved scratchpad note, and cached exchange rates from this installation?",
     )
     if (!confirmed) return
     await platform.preferences.clear()
