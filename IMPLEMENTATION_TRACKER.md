@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-07 21:20 Europe/Berlin
+> Last updated: 2026-09-07 21:15 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -843,3 +843,8 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - The emulator checklist driver was extended to the 43-tool catalog count with five new per-tool checks. One intermediate run against the rebuilt installed artifact showed two transient theme-persistence FAILs immediately after a cold relaunch; the immediate re-run was fully green — 57 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug.
 - Passed formatting (unpiped `pnpm format:check`), strict typecheck, zero-warning lint, 691 web tests (92 files), 90 E2E checks, production build with lazy tool chunks (largest new chunk UnicodeLookup 18.28 kB / 3.93 kB gzip), Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes).
 - Next executable item: commit, open the PR closing issues #79, #80, #83, #85, and #86, review hosted CI, merge, and reconcile; then continue the tier-1 batch queue with the next risk-ordered batch. Android artifact validation of all enabled tools remains queue item 4.
+
+### 2026-09-07 — Reference batch merge reconciliation
+
+- Squash-merged PR #155 into `main` as `2fcea34`, closing issues #79, #80, #83, and #86 (issue #85 was closed by the same merge); all five Project items are Done and the issues carry `status:device-qa` with evidence comments. `main` == `origin/main` with a clean worktree, both hosted PR CI jobs green before merge (android-debug 3m40s, web-quality 4m30s), and the post-merge `main` CI run is green. No open pull requests remain.
+- Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
