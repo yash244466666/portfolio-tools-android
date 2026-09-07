@@ -879,3 +879,9 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 - The emulator checklist driver was extended to the 53-tool catalog count with five new per-tool checks. One intermediate run exposed a driver arithmetic mistake in the UUID output-length assertion (3×36+2 separators is 110, not 71) plus the known transient theme-persistence FAIL after a cold relaunch; after fixing the driver, a green run against the rebuilt installed artifact verified all 53 enabled tools — 67 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug.
 - Passed formatting (unpiped `pnpm format:check`), strict typecheck, zero-warning lint, 792 web tests (112 files), 110 E2E checks, production build with lazy tool chunks (largest new chunk MorseCodeTranslator 4.01 kB / 1.69 kB gzip), Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes).
 - Next executable item: commit, open the PR closing issues #58, #69, #70, #71, and #72, review hosted CI, merge, and reconcile; then continue the tier-1 batch queue with the next risk-ordered batch. Android artifact validation of all enabled tools remains queue item 4.
+
+### 2026-09-07 — Dev batch 3 merge reconciliation
+
+- Squash-merged PR #157 into `main` as `3f81960`, closing issues #58, #69, #70, #71, and #72; all five Project items are Done and the issues carry `status:device-qa` with evidence comments. `main` == `origin/main` with a clean worktree, both hosted PR CI jobs green before merge (android-debug 4m3s, web-quality 5m2s). No open pull requests remain.
+- Registry now has 53 enabled entries; 34 of the approved 87 remain.
+- Next executable item: continue the tier-1 batch queue with the next risk-ordered batch; Android artifact validation of all enabled tools remains queue item 4.
