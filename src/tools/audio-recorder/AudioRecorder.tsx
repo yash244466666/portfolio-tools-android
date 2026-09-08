@@ -271,8 +271,8 @@ export default function AudioRecorder() {
           {levels.map((level, index) => (
             <div
               key={index}
-              className="w-1.5 rounded-full bg-[var(--accent)] transition-all duration-150"
-              style={{ height: `${Math.round(6 + level * 90)}%` }}
+              className="h-full w-1.5 origin-bottom rounded-full bg-[var(--primary)] transition-transform duration-150"
+              style={{ transform: `scaleY(${Math.min(1, Math.max(0, 0.06 + level * 0.9))})` }}
             />
           ))}
         </div>

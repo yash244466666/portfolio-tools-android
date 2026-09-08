@@ -302,7 +302,7 @@ export default function BookmarkManager() {
                 </div>
                 <button
                   aria-label={`Open ${bookmark.title} in the browser`}
-                  className="mt-1 block truncate text-left text-xs text-[var(--accent)] underline"
+                  className="mt-1 block w-full truncate py-3 text-left text-xs leading-6 text-[var(--primary)] underline"
                   onClick={() => void handleOpen(bookmark)}
                   type="button"
                 >

@@ -28,7 +28,7 @@ export default function DiceRoller() {
 
   return (
     <div className="grid gap-4">
-      <ToolPanel title="Dice notation">
+      <ToolPanel>
         <div className="grid gap-4">
           <Field
             error={parsed.status === "error" ? parsed.message : undefined}
