@@ -1,0 +1,1178 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:f8188b3f-8002-4768-80cf-9536dfdde46a",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-09-08T17:12:40.315Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "scripts/build-sbom.mjs"
+        }
+      ]
+    },
+    "component": {
+      "type": "application",
+      "name": "portfolio-tools-android",
+      "version": "0.1.0",
+      "description": "Yash Tools: offline-first Android utility app (Capacitor/React)."
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "@capacitor/android",
+      "version": "8.5.1",
+      "purl": "pkg:npm/@capacitor/android@8.5.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/app",
+      "version": "8.1.1",
+      "purl": "pkg:npm/@capacitor/app@8.1.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/browser",
+      "version": "8.0.4",
+      "purl": "pkg:npm/@capacitor/browser@8.0.4",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/clipboard",
+      "version": "8.0.1",
+      "purl": "pkg:npm/@capacitor/clipboard@8.0.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/core",
+      "version": "8.5.1",
+      "purl": "pkg:npm/@capacitor/core@8.5.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/device",
+      "version": "8.0.3",
+      "purl": "pkg:npm/@capacitor/device@8.0.3",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/filesystem",
+      "version": "8.1.3",
+      "purl": "pkg:npm/@capacitor/filesystem@8.1.3",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/haptics",
+      "version": "8.0.2",
+      "purl": "pkg:npm/@capacitor/haptics@8.0.2",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/keyboard",
+      "version": "8.0.5",
+      "purl": "pkg:npm/@capacitor/keyboard@8.0.5",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/local-notifications",
+      "version": "8.3.1",
+      "purl": "pkg:npm/@capacitor/local-notifications@8.3.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/network",
+      "version": "8.0.1",
+      "purl": "pkg:npm/@capacitor/network@8.0.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/preferences",
+      "version": "8.0.1",
+      "purl": "pkg:npm/@capacitor/preferences@8.0.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/share",
+      "version": "8.0.1",
+      "purl": "pkg:npm/@capacitor/share@8.0.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/splash-screen",
+      "version": "8.0.2",
+      "purl": "pkg:npm/@capacitor/splash-screen@8.0.2",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/status-bar",
+      "version": "8.0.3",
+      "purl": "pkg:npm/@capacitor/status-bar@8.0.3",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "@capacitor/synapse",
+      "version": "1.0.4",
+      "purl": "pkg:npm/@capacitor/synapse@1.0.4",
+      "licenses": [
+        {
+          "license": {
+            "expression": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas-android-arm64",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas-android-arm64@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas-darwin-arm64",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas-darwin-arm64@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas-darwin-x64",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas-darwin-x64@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas-linux-arm-gnueabihf",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas-linux-arm-gnueabihf@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas-linux-arm64-gnu",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas-linux-arm64-gnu@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas-linux-arm64-musl",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas-linux-arm64-musl@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas-linux-riscv64-gnu",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas-linux-riscv64-gnu@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas-linux-x64-gnu",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas-linux-x64-gnu@1.0.8",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas-linux-x64-musl",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas-linux-x64-musl@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas-win32-arm64-msvc",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas-win32-arm64-msvc@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas-win32-x64-msvc",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas-win32-x64-msvc@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "@napi-rs/canvas",
+      "version": "1.0.8",
+      "purl": "pkg:npm/@napi-rs/canvas@1.0.8",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@pdf-lib/standard-fonts",
+      "version": "1.0.0",
+      "purl": "pkg:npm/@pdf-lib/standard-fonts@1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@pdf-lib/upng",
+      "version": "1.0.1",
+      "purl": "pkg:npm/@pdf-lib/upng@1.0.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "@types/trusted-types",
+      "version": "2.0.7",
+      "purl": "pkg:npm/@types/trusted-types@2.0.7",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ansi-styles",
+      "version": "4.3.0",
+      "purl": "pkg:npm/ansi-styles@4.3.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "argparse",
+      "version": "2.0.1",
+      "purl": "pkg:npm/argparse@2.0.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "Python-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "camelcase",
+      "version": "5.3.1",
+      "purl": "pkg:npm/camelcase@5.3.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "cliui",
+      "version": "6.0.0",
+      "purl": "pkg:npm/cliui@6.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "color-convert",
+      "version": "2.0.1",
+      "purl": "pkg:npm/color-convert@2.0.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "color-name",
+      "version": "1.1.4",
+      "purl": "pkg:npm/color-name@1.1.4",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "commander",
+      "version": "2.20.3",
+      "purl": "pkg:npm/commander@2.20.3",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "core-util-is",
+      "version": "1.0.3",
+      "purl": "pkg:npm/core-util-is@1.0.3",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "decamelize",
+      "version": "1.2.0",
+      "purl": "pkg:npm/decamelize@1.2.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "diff",
+      "version": "9.0.0",
+      "purl": "pkg:npm/diff@9.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "BSD-3-Clause"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "dijkstrajs",
+      "version": "1.0.3",
+      "purl": "pkg:npm/dijkstrajs@1.0.3",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "discontinuous-range",
+      "version": "1.0.0",
+      "purl": "pkg:npm/discontinuous-range@1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "dompurify",
+      "version": "3.4.14",
+      "purl": "pkg:npm/dompurify@3.4.14",
+      "licenses": [
+        {
+          "license": {
+            "expression": "(MPL-2.0 OR Apache-2.0)"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "emoji-regex",
+      "version": "8.0.0",
+      "purl": "pkg:npm/emoji-regex@8.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "find-up",
+      "version": "4.1.0",
+      "purl": "pkg:npm/find-up@4.1.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "get-caller-file",
+      "version": "2.0.5",
+      "purl": "pkg:npm/get-caller-file@2.0.5",
+      "licenses": [
+        {
+          "license": {
+            "expression": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "immediate",
+      "version": "3.0.6",
+      "purl": "pkg:npm/immediate@3.0.6",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "inherits",
+      "version": "2.0.4",
+      "purl": "pkg:npm/inherits@2.0.4",
+      "licenses": [
+        {
+          "license": {
+            "expression": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "is-fullwidth-code-point",
+      "version": "3.0.0",
+      "purl": "pkg:npm/is-fullwidth-code-point@3.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "isarray",
+      "version": "1.0.0",
+      "purl": "pkg:npm/isarray@1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "js-yaml",
+      "version": "4.3.1",
+      "purl": "pkg:npm/js-yaml@4.3.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "jszip",
+      "version": "3.10.1",
+      "purl": "pkg:npm/jszip@3.10.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "(MIT OR GPL-3.0-or-later)"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "lie",
+      "version": "3.3.0",
+      "purl": "pkg:npm/lie@3.3.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "locate-path",
+      "version": "5.0.0",
+      "purl": "pkg:npm/locate-path@5.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "lucide-react",
+      "version": "1.41.0",
+      "purl": "pkg:npm/lucide-react@1.41.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "ISC"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "marked",
+      "version": "18.0.11",
+      "purl": "pkg:npm/marked@18.0.11",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "moo",
+      "version": "0.5.3",
+      "purl": "pkg:npm/moo@0.5.3",
+      "licenses": [
+        {
+          "license": {
+            "expression": "BSD-3-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "nearley",
+      "version": "2.20.1",
+      "purl": "pkg:npm/nearley@2.20.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "p-limit",
+      "version": "2.3.0",
+      "purl": "pkg:npm/p-limit@2.3.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "p-locate",
+      "version": "4.1.0",
+      "purl": "pkg:npm/p-locate@4.1.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "p-try",
+      "version": "2.2.0",
+      "purl": "pkg:npm/p-try@2.2.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pako",
+      "version": "1.0.11",
+      "purl": "pkg:npm/pako@1.0.11",
+      "licenses": [
+        {
+          "license": {
+            "expression": "(MIT AND Zlib)"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "path-exists",
+      "version": "4.0.0",
+      "purl": "pkg:npm/path-exists@4.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pdf-lib",
+      "version": "1.17.1",
+      "purl": "pkg:npm/pdf-lib@1.17.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "pdfjs-dist",
+      "version": "6.3.289",
+      "purl": "pkg:npm/pdfjs-dist@6.3.289",
+      "licenses": [
+        {
+          "license": {
+            "expression": "Apache-2.0"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "pngjs",
+      "version": "5.0.0",
+      "purl": "pkg:npm/pngjs@5.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "process-nextick-args",
+      "version": "2.0.1",
+      "purl": "pkg:npm/process-nextick-args@2.0.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "qrcode",
+      "version": "1.5.4",
+      "purl": "pkg:npm/qrcode@1.5.4",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "railroad-diagrams",
+      "version": "1.0.0",
+      "purl": "pkg:npm/railroad-diagrams@1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "CC0-1.0"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "randexp",
+      "version": "0.4.6",
+      "purl": "pkg:npm/randexp@0.4.6",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "react-dom",
+      "version": "19.2.8",
+      "purl": "pkg:npm/react-dom@19.2.8",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "react",
+      "version": "19.2.8",
+      "purl": "pkg:npm/react@19.2.8",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "readable-stream",
+      "version": "2.3.8",
+      "purl": "pkg:npm/readable-stream@2.3.8",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "require-directory",
+      "version": "2.1.1",
+      "purl": "pkg:npm/require-directory@2.1.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "require-main-filename",
+      "version": "2.0.0",
+      "purl": "pkg:npm/require-main-filename@2.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ret",
+      "version": "0.1.15",
+      "purl": "pkg:npm/ret@0.1.15",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "safe-buffer",
+      "version": "5.1.2",
+      "purl": "pkg:npm/safe-buffer@5.1.2",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scheduler",
+      "version": "0.27.0",
+      "purl": "pkg:npm/scheduler@0.27.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "set-blocking",
+      "version": "2.0.0",
+      "purl": "pkg:npm/set-blocking@2.0.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "setimmediate",
+      "version": "1.0.5",
+      "purl": "pkg:npm/setimmediate@1.0.5",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sql-formatter",
+      "version": "15.7.3",
+      "purl": "pkg:npm/sql-formatter@15.7.3",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ],
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "name": "string_decoder",
+      "version": "1.1.1",
+      "purl": "pkg:npm/string_decoder@1.1.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "string-width",
+      "version": "4.2.3",
+      "purl": "pkg:npm/string-width@4.2.3",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "strip-ansi",
+      "version": "6.0.1",
+      "purl": "pkg:npm/strip-ansi@6.0.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "tslib",
+      "version": "1.14.1",
+      "purl": "pkg:npm/tslib@1.14.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "0BSD"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "util-deprecate",
+      "version": "1.0.2",
+      "purl": "pkg:npm/util-deprecate@1.0.2",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "which-module",
+      "version": "2.0.1",
+      "purl": "pkg:npm/which-module@2.0.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wrap-ansi",
+      "version": "6.2.0",
+      "purl": "pkg:npm/wrap-ansi@6.2.0",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "y18n",
+      "version": "4.0.3",
+      "purl": "pkg:npm/y18n@4.0.3",
+      "licenses": [
+        {
+          "license": {
+            "expression": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "yargs-parser",
+      "version": "18.1.3",
+      "purl": "pkg:npm/yargs-parser@18.1.3",
+      "licenses": [
+        {
+          "license": {
+            "expression": "ISC"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "yargs",
+      "version": "15.4.1",
+      "purl": "pkg:npm/yargs@15.4.1",
+      "licenses": [
+        {
+          "license": {
+            "expression": "MIT"
+          }
+        }
+      ]
+    }
+  ]
+}

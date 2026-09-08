@@ -7,6 +7,15 @@
 > Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 100 implemented — version-1 scope complete**
 > Public release readiness: **NO — foundation only**
 
+### 2026-09-08 — Security/privacy/SBOM audit dossier and js-yaml security bump (issue #24 automatable portion)
+
+- **js-yaml 4.1.1 → 4.3.1 (PR #195, merged `79ef271`)**: js-yaml is a runtime dependency of the YAML to JSON tool, so its two HIGH quadratic-CPU advisories (GHSA-52cp-r559-cp3m, GHSA-5p4m-2wfm-xmqj) applied to user-controlled YAML parsed in the WebView. Dedicated dependency change; lockfile diff contained only js-yaml; full unpiped gate suite passed; rebuilt artifacts `a3a84d4b…`/`8d7bb5bc…`/`fbdb09f2…`. `pnpm audit` now reports only the dev-only transitive `uuid` moderate via `@capacitor/cli` (never ships; accepted, revisit on Capacitor CLI update).
+- **Audit dossier `docs/certification/security-privacy-audit.md`**: reconciled threat model/boundaries, the re-verified 8-permission/1-exported-component budget ×3 variants, the device-local data inventory, the two-provider network review with freshly re-validated Frankfurter/Cloudflare DoH terms (matching the CSP `connect-src` allowlist exactly), license inventory (83 production packages, 10 permissive kinds, no GPL exercised), provenance status, a generated CycloneDX SBOM, and a documented secret scan (no matches).
+- **SBOM tooling**: `scripts/build-sbom.mjs` generates `docs/certification/sbom/cyclonedx.json` (CycloneDX 1.5, 92 production components) from the pnpm tree — npm-based SBOM tools do not understand pnpm's layout.
+- Provider terms for #33 were re-verified by direct fetch (Frankfurter: free/commercial-OK/no-key/no-quotas; Cloudflare: 25-hour query-name logs, no client-IP storage, no-sale commitments).
+- Gates: `pnpm format:check`, `github:actions:check`, `github:work-items:check`, `typecheck`, `lint` PASS; manifest checks ×3 re-run PASS. The app bundle changed only in PR #195 (verified there); this branch is scripts/docs.
+- Next executable item: #33 provider review dossier (CORS proof from the packaged origin) — then #22/#23/#26 automatable portions.
+
 ### 2026-09-08 — Automated regression matrix (issue #21 automatable portion)
 
 - Added `scripts/build-regression-matrix.mjs` and the generated
