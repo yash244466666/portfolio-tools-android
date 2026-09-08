@@ -1167,3 +1167,63 @@ test("fake data generator generates and clears values", async ({ page }) => {
   await page.getByRole("button", { name: "Clear" }).click()
   await expect(page.getByRole("listitem")).toHaveCount(0)
 })
+
+test("stopwatch counts, laps, and resets on wall-clock anchors", async ({ page }) => {
+  await page.goto("/#/tool/stopwatch")
+  await expect(page.getByRole("heading", { name: "Stopwatch" })).toBeVisible()
+
+  await expect(page.getByRole("timer")).toHaveText("00:00.00")
+  await page.getByRole("button", { name: "Start" }).click()
+  await expect(page.getByRole("timer")).not.toHaveText("00:00.00")
+  await page.getByRole("button", { name: "Lap", exact: true }).click()
+  await page.getByRole("button", { name: "Lap", exact: true }).click()
+  await expect(page.getByRole("table")).toContainText("(best lap)")
+  await expect(page.getByRole("table")).toContainText("(worst lap)")
+  await page.getByRole("button", { name: "Stop" }).click()
+  await page.getByRole("button", { name: "Reset" }).click()
+  await expect(page.getByRole("timer")).toHaveText("00:00.00")
+  await expect(page.getByRole("table")).toHaveCount(0)
+})
+
+test("countdown timer runs from presets and rejects zero durations", async ({ page }) => {
+  await page.goto("/#/tool/countdown-timer")
+  await expect(page.getByRole("heading", { name: "Countdown Timer" })).toBeVisible()
+
+  await expect(page.getByRole("timer", { name: "Remaining time" })).toHaveText("00:00:00")
+  await page.getByRole("button", { name: "1 min" }).click()
+  await page.getByRole("button", { name: "Start" }).click()
+  await expect(page.getByRole("timer", { name: "Remaining time" })).toHaveText("00:01:00")
+  await page.getByRole("button", { name: "Pause" }).click()
+  await expect(page.getByText("Paused", { exact: true })).toBeVisible()
+  await page.getByRole("button", { name: "Reset" }).click()
+  await expect(page.getByRole("timer", { name: "Remaining time" })).toHaveText("00:00:00")
+
+  await page.getByLabel("Minutes").fill("0")
+  await expect(page.getByRole("alert")).toContainText("at least one second")
+  await expect(page.getByRole("button", { name: "Start" })).toBeDisabled()
+})
+
+test("iCalendar and vCard generators escape text and validate links", async ({ page }) => {
+  await page.goto("/#/tool/ical-generator")
+  await expect(page.getByRole("heading", { name: "iCalendar Generator" })).toBeVisible()
+
+  await page.getByLabel("Event title").fill("Sync, part 2")
+  await page.getByLabel("Start date").fill("2026-09-10")
+  await page.getByLabel("End date").fill("2026-09-10")
+  await page.getByRole("button", { name: "Generate .ics" }).click()
+  await expect(page.locator("pre")).toContainText("SUMMARY:Sync\\, part 2")
+
+  await page.goto("/#/tool/vcard-generator")
+  await expect(page.getByRole("heading", { name: "vCard Generator" })).toBeVisible()
+
+  await page.getByLabel("First name").fill("Grace")
+  await page.getByLabel("Last name").fill("Hopper; Admiral")
+  await page.getByLabel("Website (optional)").fill("http://example.com")
+  await page.getByRole("button", { name: "Generate vCard" }).click()
+  await expect(page.getByRole("alert")).toContainText("Enter an https website URL.")
+
+  await page.getByLabel("Website (optional)").fill("https://example.com")
+  await page.getByRole("button", { name: "Generate vCard" }).click()
+  await expect(page.locator("pre")).toContainText("N:Hopper\\; Admiral;Grace;;;")
+  await expect(page.locator("pre")).toContainText("URL:https://example.com")
+})
