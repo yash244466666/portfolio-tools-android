@@ -69,6 +69,14 @@
 - Section 2 of `AGENT.md`/`CLAUDE.md` (kept byte-identical) updated to the 86-tool registry; "not yet implemented" now records no remaining in-scope catalog tools.
 - Device-matrix rows from dossier section 5 remain binding for #112 closure (not claimable from this batch): decode across the codec matrix with a distinct unsupported state, rotation-metadata correctness on portrait phone videos, memory ceiling and renderer responsiveness on a maximum take (30 s / 100 frames / 640 px) on a mid-range device, low-storage Save As failure recovery, and interruption (call/backgrounding) mid-conversion with no retained buffers.
 
+### 2026-09-08 — Dev batch 16 merge reconciliation — the 100-tool scope is fully implemented
+
+- Squash-merged PR #192 as `9404e80`, closing #183, #177, #185, and #188 (Loan EMI Calculator with amortization, Color Contrast Checker, Dice Roller, Fuel & Trip Cost Calculator — all original work, none in the upstream catalog). Hosted CI green (android-debug 4m22s, web-quality 9m9s).
+- Max-effort code-review pass (11 verified findings, all applied before merge): the dice emulator probe was deterministic-FAIL (waited on a string the UI never renders); WCAG pass/fail now judges the exact ratio (a 4.497 pair no longer passes AA on its rounded 4.5 display) and the luminance/ratio implementation was consolidated with color-picker's shared module; integrality validates before clamping (both "0.5" and "2.5" reject); clamp disclosures added to both new calculators; duplicate converters and a dead wrapper deleted; tracker H1 restored and AGENT/CLAUDE self-contradiction removed.
+- Gates after the fixes (unpiped): strict typecheck, zero-warning lint, 1655 web tests (215 files), production build, 182 E2E checks, Capacitor sync, Gradle `testDebugUnitTest lintDebug assembleDebug assembleInternal bundleRelease`, merged-manifest checks ×3, `git diff --check`, `format:check`, AGENT/CLAUDE byte-identity.
+- **The registry is at 100 enabled entries — the version-1 scope defined by ADRs 0004/0021/0022 is fully implemented.** Remaining pre-release work: the emulator checklist driver run at 100 tools (emulator-side evidence), the device-evidence rows (#18/#20/#25/#111/#112), certification gates (#21–#26), and the product-owner release gates (#27–#41).
+- Next executable item: the 100-tool emulator checklist run; then the automated portions of #21/#26. The board's other open items need a physical device or product-owner decisions.
+
 ### 2026-09-08 — Dev batch 15 merge reconciliation
 
 - Squash-merged PR #191 as `5864cbe`, closing #178, #179, #180, #182, and #181 (Word Frequency Analyzer, Text-Binary Converter, Reading Time Estimator, Date Difference Calculator, Time Zone Converter — all original work; embedded data sets are the curated English stopword list and a ~50-zone IANA subset, both public domain, recorded in provenance). Hosted CI green (android-debug 4m1s, web-quality 6m39s).
