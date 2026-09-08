@@ -5,7 +5,7 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 91
+const enabledToolCount = 96
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -1530,10 +1530,66 @@ async function phaseTools(page) {
         await p.selectOption("#unit-price-unit-2", "ml")
         await p.setValue("#unit-price-price-2", "2.00")
         await p.setValue("#unit-price-quantity-2", "500")
-        await p.waitFor(
-          "document.body.innerText.includes('Bottle is the cheapest at 0.0030 per ml')",
-        )
+        await p.waitFor("document.body.innerText.includes('Bottle at 0.0030 per ml')")
         return "mixed-unit normalization ranks cheapest per base unit"
+      },
+    ],
+    [
+      "word-frequency-analyzer",
+      "Word Frequency Analyzer",
+      async (p) => {
+        await p.setValue("#word-frequency-input", "apple banana apple apple the the")
+        await p.waitFor("document.body.innerText.includes('4 words (2 unique)')")
+        await p.waitFor("document.body.innerText.includes('75%')")
+        await p.waitFor("document.body.innerText.includes('after skipping 2 common English words')")
+        return "unicode tokenization with stopword removal and share percentages"
+      },
+    ],
+    [
+      "text-binary-converter",
+      "Text-Binary Converter",
+      async (p) => {
+        await p.setValue("#text-binary-text", "\u00e9")
+        await p.waitFor(
+          "document.querySelector('#text-binary-encoded').value.includes('11000011 10101001')",
+        )
+        await p.setValue("#text-binary-decode-input", "255")
+        await p.waitFor("document.body.innerText.includes('not a valid binary value')")
+        return "utf-8 byte encoding with strict decode failures"
+      },
+    ],
+    [
+      "reading-time-estimator",
+      "Reading Time Estimator",
+      async (p) => {
+        await p.setValue("#reading-time-text", Array.from({ length: 300 }, () => "word").join(" "))
+        await p.waitFor("document.body.innerText.includes('1 min 30 s at 200 wpm')")
+        await p.waitFor("document.body.innerText.includes('Fits')")
+        return "wpm estimate with per-budget fit table"
+      },
+    ],
+    [
+      "date-difference-calculator",
+      "Date Difference Calculator",
+      async (p) => {
+        await p.setValue("#date-diff-start", "2026-09-07")
+        await p.setValue("#date-diff-end", "2026-09-11")
+        await p.waitFor("document.body.innerText.includes('with 4 business days (Monday-Friday)')")
+        await p.waitFor("document.body.innerText.includes('Business days (Mon-Fri)')")
+        return "exclusive span with calendar-accurate months and business days"
+      },
+    ],
+    [
+      "time-zone-converter",
+      "Time Zone Converter",
+      async (p) => {
+        await p.setValue("#time-zone-date", "2026-01-15")
+        await p.setValue("#time-zone-time", "12:00")
+        await p.waitFor("document.body.innerText.includes('is 2026-01-15 23:00 in Asia/Dhaka')")
+        await p.setValue("#time-zone-date", "2026-03-08")
+        await p.setValue("#time-zone-time", "02:30")
+        await p.waitFor("document.body.innerText.includes('does not exist')")
+        return "explicit-zone conversion with an honest spring-forward gap state"
       },
     ],
   ]

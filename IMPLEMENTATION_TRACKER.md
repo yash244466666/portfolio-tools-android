@@ -1,11 +1,23 @@
-# Android Tools Implementation Tracker
+> Last updated: 2026-09-08 15:10 Europe/Berlin# Android Tools Implementation Tracker
 
 > Last updated: 2026-09-08 14:20 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 91 implemented; 9 of 100 remain (batches 15-16)**
+> Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 96 implemented; 4 of 100 remain (batch 16: #183, #177, #185, #188)**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Dev batch 15: five more ADR 0022 additions (issues #178, #179, #180, #182, #181)
+
+- Implemented and enabled five offline, permission-free, dependency-free tools as one batch, all original work (verified none exists upstream; one shared provenance row added):
+  - **#178 Word Frequency Analyzer** (`src/tools/word-frequency-analyzer/`, text): 100,000-character bounded textarea, Unicode word-boundary tokenization, optional case-folding, an embedded curated English stopword set (public-domain provenance noted), and a selectable top-N (5/10/25/50) table with counts and share percentages, deterministic alphabetical tie-breaking.
+  - **#179 Text-Binary Converter** (`src/tools/text-binary-converter/`, text): text ⇄ binary/octal/decimal through UTF-8 bytes (TextEncoder/TextDecoder), space/newline/none delimiters (zero-padded fixed-width streams for "none"), strict per-base digit validation, out-of-range and invalid-UTF-8 byte sequences failing closed with typed messages; known multi-byte vectors (é, €, 東京, emoji) round-trip tested.
+  - **#180 Reading Time Estimator** (`src/tools/reading-time-estimator/`, text): same 100k cap, words-per-minute clamped 100-500 (default 200), three editable character-budget caps (SEO/summary/post defaults), minutes+seconds output, and a per-budget fit/over-by table.
+  - **#182 Date Difference Calculator** (`src/tools/date-difference-calculator/`, core): strict-regex component date parsing (ical-generator pattern, never `new Date(string)`), calendar-accurate months+days with short-month anchor clamping, total days, weeks+days, inclusive/exclusive mode, and a documented closed-form Monday-Friday business-day algorithm with known vectors.
+  - **#181 Time Zone Converter** (`src/tools/time-zone-converter/`, core): a curated ~50-zone fixed IANA subset embedded as data (public-domain provenance noted), conversion via `Intl.DateTimeFormat` with an explicit `timeZone` over fixed ISO components (never locale parsing), two-pass offset resolution, and honest distinct statuses for spring-forward gaps (skipped) and fall-back overlaps (ambiguous, earlier interpretation used).
+- Registry: five enabled entries (risk low, network false, persistent false, lazy components; lucide icons ListFilter/Binary/Timer/CalendarDays/Globe). Tests: five pure suites plus five component suites covering labels, empty/invalid/done/reset states, `role="status"` feedback, and DST edge states; one Playwright scenario exercises the Time Zone Converter (known-offset conversion, spring-forward alert, reset).
+- Emulator checklist driver: `enabledToolCount` 91 -> 96 with five per-tool CDP checks appended in the existing style (using the batch-14 `selectOption` helper where selects appear).
+- Batches complete through 15: only batch 16 (loan-emi-calculator #183, color-contrast-checker #177, dice-roller #185, fuel-trip-cost-calculator #188) remains for the 100-tool scope.
 
 ### 2026-09-08 — Dev batch 14: five ADR 0022 additions (issues #175, #176, #184, #186, #187)
 

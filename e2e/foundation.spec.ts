@@ -1398,3 +1398,25 @@ test("discount and tax calculator shows every exact-cent step and rejects junk m
   await page.getByRole("button", { name: "Reset" }).click()
   await expect(page.getByRole("status")).toContainText("Enter the price")
 })
+
+test("time zone converter crosses zones and surfaces daylight-saving edges honestly", async ({
+  page,
+}) => {
+  await page.goto("/#/tool/time-zone-converter")
+  await expect(page.getByRole("heading", { name: "Time Zone Converter" })).toBeVisible()
+  await expect(page.getByRole("status")).toContainText("Enter a date and time")
+
+  await page.getByLabel("Date").fill("2026-01-15")
+  await page.getByLabel("Time").fill("12:00")
+  await expect(page.getByRole("status")).toContainText(
+    "2026-01-15 12:00 in America/New_York is 2026-01-15 23:00 in Asia/Dhaka",
+  )
+
+  // A spring-forward gap is surfaced as its own state, never silently folded.
+  await page.getByLabel("Date").fill("2026-03-08")
+  await page.getByLabel("Time").fill("02:30")
+  await expect(page.getByRole("alert")).toContainText("does not exist")
+
+  await page.getByRole("button", { name: "Clear" }).click()
+  await expect(page.getByRole("status")).toContainText("Enter a date and time")
+})
