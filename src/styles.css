@@ -7,6 +7,9 @@
 
 :root,
 :root[data-theme="light"] {
+  --motion-quick: 150ms;
+  --motion-base: 200ms;
+  --motion-slow: 300ms;
   --background: #f6f7fb;
   --surface: #ffffff;
   --surface-raised: #ffffff;
@@ -250,9 +253,9 @@ button {
   font-size: 0.875rem;
   font-weight: 700;
   transition:
-    background-color 180ms ease,
-    color 180ms ease,
-    border-color 180ms ease;
+    background-color var(--motion-base) ease,
+    color var(--motion-base) ease,
+    border-color var(--motion-base) ease;
 }
 
 .filter-chip {
