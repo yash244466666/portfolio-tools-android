@@ -55,6 +55,10 @@ class FakeMediaRecorder {
     this.#failOnStop = true
   }
 
+  errorMidTake() {
+    this.onerror?.()
+  }
+
   stop() {
     if (this.#failOnStop) {
       this.onerror?.()
@@ -159,7 +163,7 @@ describe("microphone recorder service", () => {
     const levels: number[] = []
     await service.start(
       { maximumDurationMs: 60_000, maximumBytes: maximumRecordingBytes },
-      (level) => levels.push(level),
+      { onLevel: (level: number) => levels.push(level) },
     )
     await new Promise((resolve) => setTimeout(resolve, 150))
     expect(levels.length).toBeGreaterThan(0)
@@ -233,5 +237,60 @@ describe("microphone recorder service", () => {
     if (!recorder) throw new Error("expected a recorder instance")
     recorder.failOnStop()
     await expect(service.stop()).rejects.toMatchObject({ code: "RECORDING_FAILED" })
+  })
+
+  it("delivers a limit-finalized take through onFinalized immediately", async () => {
+    const { service } = newService()
+    const finalized: { reason: string; bytes: number }[] = []
+    await service.start(
+      { maximumDurationMs: 60_000, maximumBytes: 1 },
+      {
+        onFinalized: (result) => {
+          finalized.push({ reason: result.finalReason, bytes: result.data.byteLength })
+        },
+      },
+    )
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(finalized).toEqual([{ reason: "size-limit", bytes: 3072 }])
+    // stop() still resolves with the same take for late callers.
+    const result = await service.stop()
+    expect(result.finalReason).toBe("size-limit")
+  })
+
+  it("labels an encoder failure as a failed take, not a user stop", async () => {
+    const { service } = newService()
+    await service.start({ maximumDurationMs: 60_000, maximumBytes: maximumRecordingBytes })
+    const recorder = FakeMediaRecorder.instances[0]
+    if (!recorder) throw new Error("expected a recorder instance")
+    recorder.errorMidTake()
+    const result = await service.stop()
+    expect(result.finalReason).toBe("failed")
+  })
+
+  it("does not brick the service when start throws synchronously after assignment", async () => {
+    const { service } = newService()
+    navigator.mediaDevices.getUserMedia = vi.fn().mockResolvedValue(fakeStream())
+    // A recorder constructor failure after stream acquisition must leave no state.
+    const brokenPrototype = MediaRecorder as unknown as { isTypeSupported?: unknown }
+    brokenPrototype.isTypeSupported = () => true
+    const RealFake = FakeMediaRecorder
+    vi.stubGlobal(
+      "MediaRecorder",
+      class {
+        constructor() {
+          throw new Error("constructor exploded")
+        }
+      },
+    )
+    void RealFake
+    await expect(
+      service.start({ maximumDurationMs: 60_000, maximumBytes: maximumRecordingBytes }),
+    ).rejects.toBeInstanceOf(Error)
+    vi.stubGlobal("MediaRecorder", RealFake)
+    // Recovery: a subsequent start must work.
+    await expect(
+      service.start({ maximumDurationMs: 60_000, maximumBytes: maximumRecordingBytes }),
+    ).resolves.toBeUndefined()
   })
 })

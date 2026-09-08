@@ -6,8 +6,6 @@
  * is verified against the file-format standard rather than against itself.
  */
 
-export const wavSampleRate = 44100
-
 function writeAscii(bytes: Uint8Array, offset: number, text: string): void {
   for (let i = 0; i < text.length; i += 1) {
     bytes[offset + i] = text.charCodeAt(i)

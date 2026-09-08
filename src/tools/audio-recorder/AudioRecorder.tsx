@@ -3,20 +3,21 @@ import { Mic, Square, Download, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { ToolPanel } from "@/components/ui/ToolPanel"
 import type { RecordingResult } from "@/platform/contracts"
-import { toSafeErrorMessage } from "@/platform/errors"
+import { isCancellationError, PlatformError, toSafeErrorMessage } from "@/platform/errors"
 import { usePlatform } from "@/platform/platform-context"
-import { bytesToBase64 } from "@/platform/shared/files"
+import { maximumBridgeGeneratedFileBytes, bytesToBase64 } from "@/platform/shared/files"
+import {
+  maximumRecordingBytes,
+  maximumRecordingDurationMs,
+} from "@/platform/shared/microphone-recorder"
 import {
   canExportTake,
-  canExportWav,
   exportFileName,
   finalReasonLabel,
   formatDuration,
-  maximumTakeBytes,
-  maximumTakeDurationMs,
   takeFormatLabel,
 } from "./recording"
-import { downmixToMono, encodeWav, wavSampleRate } from "./wav-encoder"
+import { downmixToMono, encodeWav } from "./wav-encoder"
 
 type Phase = "initial" | "starting" | "recording" | "finalizing" | "done"
 
@@ -104,6 +105,14 @@ export default function AudioRecorder() {
     stopRef.current = handleStop
   })
 
+  // Cancel expensive work when navigating away: an in-app unmount must
+  // release the microphone immediately (section 21/26 cleanup rules).
+  useEffect(() => {
+    return () => {
+      void microphone.cancel()
+    }
+  }, [microphone])
+
   // Foreground-only: the service finalizes the take when the app leaves the
   // foreground; the tool retrieves it so the user finds it instead of losing it.
   useEffect(() => {
@@ -130,12 +139,21 @@ export default function AudioRecorder() {
     setErrorState(null)
     setExportNote(null)
     setBusy(true)
+    setPhase("starting")
     setLevels(Array.from({ length: levelBars }, () => 0.04))
     try {
       await microphone.start(
-        { maximumDurationMs: maximumTakeDurationMs, maximumBytes: maximumTakeBytes },
-        (level) => {
-          setLevels((previous) => [...previous.slice(1), Math.max(0.04, Math.min(1, level))])
+        {
+          maximumDurationMs: maximumRecordingDurationMs,
+          maximumBytes: maximumRecordingBytes,
+        },
+        {
+          onLevel: (level) => {
+            setLevels((previous) => [...previous.slice(1), Math.max(0.04, Math.min(1, level))])
+          },
+          onFinalized: (result) => {
+            finishTake(result, Date.now())
+          },
         },
       )
       startAnchorRef.current = Date.now()
@@ -143,13 +161,14 @@ export default function AudioRecorder() {
       setPhase("recording")
     } catch (error) {
       const message = toSafeErrorMessage(error)
-      const kind = message.includes("settings")
-        ? "denied"
-        : message.includes("No microphone") || message.includes("other apps")
-          ? "unavailable"
-          : message.includes("cannot encode") || message.includes("does not support")
-            ? "unsupported"
-            : "failed"
+      const kind =
+        error instanceof PlatformError
+          ? ({
+              MICROPHONE_PERMISSION_DENIED: "denied",
+              MICROPHONE_UNAVAILABLE: "unavailable",
+              MICROPHONE_UNSUPPORTED: "unsupported",
+            }[error.code as string] ?? "failed")
+          : "failed"
       setErrorState({ kind, message })
       setPhase("initial")
     } finally {
@@ -191,7 +210,7 @@ export default function AudioRecorder() {
       await files.saveAs({
         name: exportFileName("webm", take.takenAtMs),
         mimeType: take.result.mimeType,
-        data: bytesToBase64(new Uint8Array(take.result.data.slice(0))),
+        data: bytesToBase64(new Uint8Array(take.result.data)),
         encoding: "base64",
       })
       setExportNote("Recording exported.")
@@ -208,28 +227,35 @@ export default function AudioRecorder() {
     setExportNote(null)
     try {
       const context = new AudioContext()
+      let wav: Uint8Array
       try {
+        // decodeAudioData may detach its input, so decode a copy and keep the
+        // take intact for a later WebM export; the context resamples to its
+        // own sample rate, so the header must record that rate, not a constant.
         const decoded = await context.decodeAudioData(take.result.data.slice(0))
-        const mono = downmixToMono(decoded)
-        const wav = encodeWav(mono, wavSampleRate)
-        if (wav.byteLength > 5 * 1024 * 1024) {
-          setExportNote(maximumExportBytesNote)
-          return
-        }
-        await files.saveAs({
-          name: exportFileName("wav", take.takenAtMs),
-          mimeType: "audio/wav",
-          data: bytesToBase64(wav),
-          encoding: "base64",
-        })
-        setExportNote("WAV export saved.")
+        wav = encodeWav(downmixToMono(decoded), context.sampleRate)
       } finally {
         void context.close().catch(() => undefined)
       }
-    } catch {
-      setExportNote(
-        "This recording could not be converted to WAV on this device. Export the original WebM instead.",
-      )
+      if (wav.byteLength > maximumBridgeGeneratedFileBytes) {
+        setExportNote(maximumExportBytesNote)
+        return
+      }
+      await files.saveAs({
+        name: exportFileName("wav", take.takenAtMs),
+        mimeType: "audio/wav",
+        data: bytesToBase64(wav),
+        encoding: "base64",
+      })
+      setExportNote("WAV export saved.")
+    } catch (error) {
+      if (isCancellationError(error)) {
+        setExportNote("Save cancelled.")
+      } else {
+        setExportNote(
+          "This recording could not be converted to WAV on this device. Export the original WebM instead.",
+        )
+      }
     } finally {
       setBusy(false)
     }
@@ -237,10 +263,6 @@ export default function AudioRecorder() {
 
   const recording = phase === "recording" || phase === "starting" || phase === "finalizing"
   const takeExportable = take !== null && canExportTake(take.bytes)
-  const wavExportable =
-    take !== null &&
-    take.result.durationMs <= maximumTakeDurationMs &&
-    canExportWav(take.result.durationMs)
 
   return (
     <div className="grid gap-4">
@@ -351,16 +373,7 @@ export default function AudioRecorder() {
               >
                 <Download aria-hidden="true" className="size-4" /> Save WebM
               </Button>
-              <Button
-                onClick={() => void exportWav()}
-                variant="secondary"
-                disabled={busy || !wavExportable}
-                title={
-                  wavExportable
-                    ? undefined
-                    : "WAV export is only available for takes that fit the 5 MB export cap."
-                }
-              >
+              <Button onClick={() => void exportWav()} variant="secondary" disabled={busy}>
                 <Download aria-hidden="true" className="size-4" /> Save WAV
               </Button>
             </div>

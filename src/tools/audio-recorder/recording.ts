@@ -9,9 +9,14 @@
  */
 
 import { maximumBridgeGeneratedFileBytes } from "@/platform/shared/files"
+import {
+  maximumRecordingBytes,
+  maximumRecordingDurationMs,
+} from "@/platform/shared/microphone-recorder"
 
-export const maximumTakeDurationMs = 10 * 60 * 1000
-export const maximumTakeBytes = 32 * 1024 * 1024
+// Tool-level aliases of the contract caps, so the policy has one source.
+export const maximumTakeDurationMs = maximumRecordingDurationMs
+export const maximumTakeBytes = maximumRecordingBytes
 
 export type ExportFormat = "webm" | "wav"
 
@@ -82,6 +87,8 @@ export function finalReasonLabel(reason: string): string {
       return "Recording stopped automatically at the 32 MB size limit."
     case "interrupted":
       return "Recording stopped because the app left the foreground."
+    case "failed":
+      return "Recording stopped early because of a recording error. The take may be incomplete."
     default:
       return "Recording saved."
   }

@@ -1,6 +1,7 @@
 import type {
   LifecycleService,
   MicrophoneRecorderService,
+  RecordingCallbacks,
   RecordingFinalReason,
   RecordingResult,
   RecordingStartOptions,
@@ -130,9 +131,8 @@ interface RecorderState {
   startedAtWallClock: number
   durationTimer: number | null
   levelTimer: number | null
-  lifecycleUnsubscribe: (() => void) | null
   options: RecordingStartOptions
-  onLevel: ((level: number) => void) | undefined
+  callbacks: RecordingCallbacks | undefined
   finalized: boolean
   result: Promise<RecordingResult> | null
 }
@@ -150,10 +150,8 @@ export function createMicrophoneRecorderService(
   let lastResult: Promise<RecordingResult> | null = null
 
   function teardown(state: RecorderState): void {
-    if (state.durationTimer !== null) window.clearInterval(state.durationTimer)
+    if (state.durationTimer !== null) window.clearTimeout(state.durationTimer)
     if (state.levelTimer !== null) window.clearInterval(state.levelTimer)
-    state.lifecycleUnsubscribe?.()
-    state.lifecycleUnsubscribe = null
     try {
       state.source.disconnect()
       state.analyser.disconnect()
@@ -222,124 +220,140 @@ export function createMicrophoneRecorderService(
       }
     })
     lastResult = state.result
+    // Deliver the take when the finalization was not user-initiated, so the
+    // tool updates immediately instead of showing a stale recording state.
+    if (reason !== "user") {
+      void state.result
+        .then((result) => state?.callbacks?.onFinalized?.(result))
+        .catch(() => undefined)
+    }
   }
 
+  let starting = false
+
+  async function startCapture(options: RecordingStartOptions, callbacks?: RecordingCallbacks) {
+    const policy = validateRecordingOptions(options)
+
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+      throw new PlatformError(
+        "MICROPHONE_UNSUPPORTED",
+        "This device or browser does not support microphone capture.",
+      )
+    }
+
+    const recorderPrototype = MediaRecorder as unknown as {
+      isTypeSupported?: (mimeType: string) => boolean
+    }
+    const mimeType =
+      typeof recorderPrototype.isTypeSupported === "function"
+        ? pickRecorderMimeType(recorderPrototype.isTypeSupported.bind(recorderPrototype))
+        : null
+    if (!mimeType) {
+      throw new PlatformError(
+        "MICROPHONE_UNSUPPORTED",
+        "This device cannot encode audio recordings in a supported format.",
+      )
+    }
+
+    let stream: MediaStream
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    } catch (error) {
+      throw mapCaptureError(error)
+    }
+
+    let next: RecorderState | null = null
+    try {
+      const recorder = new MediaRecorder(stream, { mimeType })
+      const audioContext = new AudioContext()
+      const source = audioContext.createMediaStreamSource(stream)
+      const analyser = audioContext.createAnalyser()
+      analyser.fftSize = 1024
+      source.connect(analyser)
+
+      next = {
+        stream,
+        recorder,
+        audioContext,
+        analyser,
+        source,
+        chunks: [],
+        bytes: 0,
+        startedAtWallClock: Date.now(),
+        durationTimer: null,
+        levelTimer: null,
+        options: policy,
+        callbacks,
+        finalized: false,
+        result: null,
+      }
+      state = next
+      const current = next
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size <= 0) return
+        current.chunks.push(event.data)
+        current.bytes += event.data.size
+        if (current.bytes >= current.options.maximumBytes) {
+          finalize(current, "size-limit")
+        }
+      }
+      recorder.onerror = () => finalize(current, "failed")
+
+      // The duration limit finalizes (never errors) with one wake-up instead
+      // of polling for the whole take.
+      current.durationTimer = window.setTimeout(
+        () => {
+          finalize(current, "duration-limit")
+        },
+        Math.max(0, policy.maximumDurationMs),
+      )
+
+      if (callbacks?.onLevel) {
+        const levelCallback = callbacks.onLevel
+        const buffer = new Float32Array(analyser.fftSize)
+        current.levelTimer = window.setInterval(() => {
+          analyser.getFloatTimeDomainData(buffer)
+          levelCallback(computeRmsLevel(buffer))
+        }, 100)
+      }
+
+      recorder.start(250)
+    } catch (error) {
+      // A synchronous throw after assignment must not leave a bricked state.
+      if (next && state === next) state = null
+      stream.getTracks().forEach((track) => track.stop())
+      if (error instanceof PlatformError) throw error
+      throw mapCaptureError(error)
+    }
+  }
+
+  // Foreground-only: the service owns the lifecycle subscription so its
+  // finalize-with-`interrupted` always runs before any tool-registered
+  // listener that would stop() with a user reason.
+  void deps.lifecycle
+    .subscribe((lifecycleState) => {
+      const current = state
+      if (!lifecycleState.active && current && !current.finalized) {
+        finalize(current, "interrupted")
+      }
+    })
+    .catch(() => {
+      // Without a lifecycle source the take still ends on Stop or the limits.
+    })
+
   return {
-    async start(options, onLevel) {
-      if (state && !state.finalized) {
+    async start(options, callbacks) {
+      if (starting || (state && !state.finalized)) {
         throw new PlatformError("RECORDING_ALREADY_ACTIVE", "A recording is already in progress.")
       }
-      state = null
-      lastResult = null
-      const policy = validateRecordingOptions(options)
-
-      if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
-        throw new PlatformError(
-          "MICROPHONE_UNSUPPORTED",
-          "This device or browser does not support microphone capture.",
-        )
-      }
-
-      const recorderPrototype = MediaRecorder as unknown as {
-        isTypeSupported?: (mimeType: string) => boolean
-      }
-      const mimeType =
-        typeof recorderPrototype.isTypeSupported === "function"
-          ? pickRecorderMimeType(recorderPrototype.isTypeSupported.bind(recorderPrototype))
-          : null
-      if (!mimeType) {
-        throw new PlatformError(
-          "MICROPHONE_UNSUPPORTED",
-          "This device cannot encode audio recordings in a supported format.",
-        )
-      }
-
-      let stream: MediaStream
+      starting = true
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      } catch (error) {
-        throw mapCaptureError(error)
-      }
-
-      try {
-        const recorder = new MediaRecorder(stream, { mimeType })
-        const audioContext = new AudioContext()
-        const source = audioContext.createMediaStreamSource(stream)
-        const analyser = audioContext.createAnalyser()
-        analyser.fftSize = 1024
-        source.connect(analyser)
-
-        const next: RecorderState = {
-          stream,
-          recorder,
-          audioContext,
-          analyser,
-          source,
-          chunks: [],
-          bytes: 0,
-          startedAtWallClock: Date.now(),
-          durationTimer: null,
-          levelTimer: null,
-          lifecycleUnsubscribe: null,
-          options: policy,
-          onLevel,
-          finalized: false,
-          result: null,
-        }
-        state = next
-
-        recorder.ondataavailable = (event) => {
-          if (event.data.size <= 0) return
-          next.chunks.push(event.data)
-          next.bytes += event.data.size
-          if (next.bytes >= next.options.maximumBytes) {
-            finalize(next, "size-limit")
-          }
-        }
-        recorder.onerror = () => finalize(next, "user")
-
-        // Duration and size limits finalize (never error) per the recorded design.
-        const remaining = Math.max(0, policy.maximumDurationMs)
-        next.durationTimer = window.setInterval(() => {
-          if (Date.now() - next.startedAtWallClock >= remaining) {
-            finalize(next, "duration-limit")
-          }
-        }, 200)
-
-        if (onLevel) {
-          const buffer = new Float32Array(analyser.fftSize)
-          next.levelTimer = window.setInterval(() => {
-            analyser.getFloatTimeDomainData(buffer)
-            onLevel(computeRmsLevel(buffer))
-          }, 100)
-        }
-
-        // Foreground-only: finalize (never drop) when the app leaves the foreground.
-        deps.lifecycle
-          .subscribe((lifecycleState) => {
-            if (!lifecycleState.active && state === next && !next.finalized) {
-              finalize(next, "interrupted")
-            }
-          })
-          .then((unsubscribe) => {
-            if (next.finalized) {
-              void unsubscribe()
-            } else {
-              next.lifecycleUnsubscribe = () => void unsubscribe()
-            }
-          })
-          .catch(() => {
-            // Without a lifecycle source the take still ends on Stop or the limits.
-          })
-
-        recorder.start(250)
-      } catch (error) {
-        stream.getTracks().forEach((track) => track.stop())
-        if (error instanceof PlatformError) throw error
-        throw mapCaptureError(error)
+        await startCapture(options, callbacks)
+      } finally {
+        starting = false
       }
     },
-
     async stop() {
       const current = state
       if (current && current.result) {
