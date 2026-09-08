@@ -1,11 +1,19 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 11:05 Europe/Berlin
+> Last updated: 2026-09-08 12:10 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **86 of the 87 audited catalog tools (ADR 0021 excludes youtube-downloader); 85 implemented, 1 remaining**
+> Approved public version 1 scope: **86 of the 87 audited catalog tools (ADR 0021 excludes youtube-downloader); 85 implemented, 1 remaining (Video to GIF #112)**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Dev batch 12 merge reconciliation
+
+- Squash-merged PR #172 as `12edf64` (tier-4 decisions recorded; version-1 scope amended to 86 tools via ADR 0021; #34/#35/#36 closed completed, #93 closed not-planned with `status:excluded`) and PR #173 as `7b5740d` (Audio Recorder #111). Both hosted CI runs were green before merge (android-debug ~4m, web-quality ~7m45s).
+- The Audio Recorder PR carried a full code-review pass (max effort, 15 verified findings) whose fixes were applied before merge: unmount cancel so in-app navigation can never leave the microphone hot; WAV export at the AudioContext's real sample rate instead of a hardcoded header rate; a service-owned lifecycle subscription that makes the `interrupted` reason reachable ahead of the tool's stop(); an `onFinalized` callback so limit/interrupted/failed takes reach the UI immediately; re-entrancy and state-reset guarantees in `start()`; save-cancel versus conversion-failure separation; typed-code error classification; a one-shot duration timeout; and the section-2 foundation-status update in `AGENT.md`/`CLAUDE.md` (byte-identical) to the 85-tool registry.
+- Gates ran unpiped after the fixes: strict typecheck, zero-warning lint, 1293 web tests (180 files), production build, 174 E2E checks, Capacitor sync, Gradle `testDebugUnitTest lintDebug assembleDebug assembleInternal bundleRelease` (BUILD SUCCESSFUL), merged-manifest policy checks for debug/internal/release (8 reviewed permissions including the approved `RECORD_AUDIO`/`MODIFY_AUDIO_SETTINGS`; only MainActivity exported), `git diff --check`, and `format:check`.
+- Registry now has 85 enabled entries; **1 of the 86 in-scope tools remains (Video to GIF, #112)**. Device rows for #111 remain open (permission revocation recovery, call/interruption behavior, mic-indicator release, low-storage export, WebView variance) and are recorded on the issue.
+- Next executable item: Video to GIF (#112) per the approved #35 dossier (16 MiB input reconciliation, Worker-based bounded pipeline, ported GIF89a/LZW encoder with an independent decoder oracle); then the emulator checklist driver run for the 85-tool catalog and the physical-device rows for #18/#20/#25/#111.
 
 ### 2026-09-08 — Dev batch 12: Audio Recorder (issue #111)
 
