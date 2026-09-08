@@ -1,11 +1,19 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 05:35 Europe/Berlin
+> Last updated: 2026-09-08 07:22 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **all 87 audited catalog tools; 84 implemented, 3 remaining**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — PDF Converter WebView 124 runtime fix (issue #166)
+
+- Device verification of the newly migrated PDF Converter found all four modes broken on the installed Android artifact while the desktop web harness passed. CDP-driven probes of pdf.js's exact worker handshake isolated three APIs missing on WebView 124.0.6367.219 (V8 12.4): `Promise.try` (Chromium 128+) threw before the handshake so every tool hung; `Uint8Array.prototype.toHex` (ES2025) failed fingerprint computation during `loadDocument` (surfaced as the wrapped `UnknownErrorException: n.toHex is not a function`); and `Map.prototype.getOrInsertComputed`/`getOrInsert` (Map upsert proposal, 17 uses in each of `pdf.mjs` and `pdf.worker.mjs`) broke page rendering with a `TypeError`. pdf.js also uses `toBase64`/`fromBase64` defensively (font data URIs), which were polyfilled too; no other modern-API gaps exist in the pdf.js scan.
+- Fix: three guarded polyfill modules (`promise-try-polyfill`, `typed-array-methods-polyfill`, `map-upsert-polyfill`, each with unit tests using independent oracles and guarded `typeof` installs) load on the main thread via app-entry imports, and a Vite build plugin prepends the same guarded blocks to the emitted `pdf.worker*.mjs` asset so the dedicated worker thread is covered. `scripts/check-pdf-worker-polyfill.mjs` fails the build if any required marker is missing from the first 8 KiB of a built worker asset; it runs in `pnpm check` and CI. `mapLibraryError` now surfaces only the error class name, never the underlying message, which can echo parsed input.
+- Device evidence on the bundled debug artifact (emulator, not a physical device): driven through the real UI with SAF picks and Save As dialogs — PDF to Text "Extracted text from 1 page." / "Alpha page"; PDF to Images "Rendered 1 page as PNG."; Merge PDFs "Saved merged.pdf with 2 pages."; Images to PDF "Saved probe-image.pdf with 1 page." (synthetic fixtures only).
+- DocumentsUI finding: multi-select in the system picker is long-press (in-place swipe ~700 ms) → selection mode → tap toggles → tap the "Select" toolbar button; this is system UX, not an app bug. Background activity starts are blocked on newer Android, so the app must be foregrounded before a picker can open.
+- Gates ran unpiped after the diagnostic removal: strict typecheck, zero-warning lint, 1264 web tests (176 files), 172 E2E checks, production build, Capacitor sync, and debug assembly all pass. PR #167 (`fix/166-pdf-webview-polyfills`) closes issue #166.
 
 ### 2026-09-08 — Dev batch 11 merge reconciliation
 

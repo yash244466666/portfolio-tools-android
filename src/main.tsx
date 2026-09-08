@@ -1,3 +1,6 @@
+import "@/platform/shared/promise-try-polyfill"
+import "@/platform/shared/typed-array-methods-polyfill"
+import "@/platform/shared/map-upsert-polyfill"
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import { App } from "@/app/App"

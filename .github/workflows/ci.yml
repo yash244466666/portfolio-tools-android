@@ -28,6 +28,7 @@ jobs:
       - run: pnpm github:work-items:check
       - run: pnpm test
       - run: pnpm build
+      - run: node scripts/check-pdf-worker-polyfill.mjs
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
 

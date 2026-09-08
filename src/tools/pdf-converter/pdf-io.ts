@@ -47,7 +47,13 @@ function mapLibraryError(error: unknown, fallback: string): PdfToolError {
       "This PDF is password-protected or encrypted. Encrypted files are not supported.",
     )
   }
-  return new PdfToolError("corrupt", fallback)
+  // Only the error class name is surfaced — never the underlying message,
+  // which can echo parsed input back to the user.
+  const errorName = error instanceof Error ? error.name : ""
+  return new PdfToolError(
+    "corrupt",
+    errorName ? `${fallback} (${errorName})` : fallback,
+  )
 }
 
 async function canvasToPngBytes(canvas: HTMLCanvasElement): Promise<Uint8Array> {
