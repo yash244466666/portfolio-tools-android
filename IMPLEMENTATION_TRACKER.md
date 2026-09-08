@@ -1,11 +1,20 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 19:15 Europe/Berlin
+> Last updated: 2026-09-08 20:10 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 100 implemented — version-1 scope complete**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Automated regression matrix (issue #21 automatable portion)
+
+- Added `scripts/build-regression-matrix.mjs` and the generated
+  `docs/certification/regression-matrix.md`: every enabled version-1 tool is mapped to its pure oracle (per-tool `*.test.ts`, or the documented shared module for Character Counter and File Hash Checker), component tests, E2E coverage, and installed-artifact interaction (emulator driver per-tool check or E2E flow). The script exits non-zero when any enabled tool lacks a pure oracle or artifact-interaction coverage, so it doubles as a coverage gate.
+- **Closed a real coverage gap the matrix surfaced: 13 enabled tools had no E2E coverage** (including the original timestamp-converter and hash-generator). Added 13 interaction tests mirroring the emulator driver's probes; E2E route coverage is now 100/100 (208 checks = 104 scenarios × phone/tablet).
+- Full gate suite re-run at this commit (unpiped): format/actions/work-items/typecheck/lint PASS; **1,655 web tests (215 files), 0 skipped**; production build PASS; **208 E2E checks** PASS; cap:sync PASS; native unit/policy tests PASS; `lintDebug` PASS; debug/internal APK + unsigned release AAB rebuilt **byte-identical** to the batch-16 inventory (`4ec71a06…`/`bab29fb8…`/`d0ef058f…`); merged-manifest budget ×3 PASS; matrix gate PASS.
+- Evidence recorded in `docs/certification/regression-matrix.md` (gate-run evidence section). #21 stays open pending the remaining physical-device-dependent rows; next cycle item: #24 security/privacy/SBOM audit (js-yaml HIGH advisories affect the runtime YAML tool — dedicated bump planned).
+- Next executable item: #24 (js-yaml 4.1.1 → 4.3.1 dedicated dependency change, then the audit dossier); #22/#23/#26 automatable portions follow.
 
 ### 2026-09-08 — 100-tool emulator checklist run and documentation reconciliation (issues #18/#20/#111/#112 emulator-side evidence)
 
