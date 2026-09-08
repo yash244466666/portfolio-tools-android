@@ -7,6 +7,13 @@
 > Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 100 implemented — version-1 scope complete**
 > Public release readiness: **NO — foundation only**
 
+### 2026-09-08 — Production network-provider review dossier (issue #33 evidence)
+
+- Added `docs/certification/network-provider-review.md`: the two reviewed providers with exact origins and sent fields, the CSP `connect-src` allowlist match, the packaged-origin CORS proof (100-tool checklist driver executed both tools live on the bundled `https://app.yash.tools` origin with attribution; E2E additionally drives live calls), the 15 s `AbortController` timeouts, the Currency Converter's 24 h versioned cache aligned with the provider's `max-age=86400`, typed offline/timeout/rate-limit/malformed states, stale presentation, and the fallback/removal/review triggers.
+- Terms/privacy/country availability re-verified by direct provider fetch on 2026-09-08 (recorded in the dossier and the #24 audit doc). The remaining item on #33 is the explicit product-owner approval of this provider set, which this dossier now supports.
+- Gates: `pnpm format:check`, `typecheck`, `lint` PASS; docs-only change.
+- Next executable item: #22/#23/#26 automatable portions, then the blocked-issue documentation pass.
+
 ### 2026-09-08 — Security/privacy/SBOM audit dossier and js-yaml security bump (issue #24 automatable portion)
 
 - **js-yaml 4.1.1 → 4.3.1 (PR #195, merged `79ef271`)**: js-yaml is a runtime dependency of the YAML to JSON tool, so its two HIGH quadratic-CPU advisories (GHSA-52cp-r559-cp3m, GHSA-5p4m-2wfm-xmqj) applied to user-controlled YAML parsed in the WebView. Dedicated dependency change; lockfile diff contained only js-yaml; full unpiped gate suite passed; rebuilt artifacts `a3a84d4b…`/`8d7bb5bc…`/`fbdb09f2…`. `pnpm audit` now reports only the dev-only transitive `uuid` moderate via `@capacitor/cli` (never ships; accepted, revisit on Capacitor CLI update).
