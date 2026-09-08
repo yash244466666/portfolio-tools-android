@@ -1341,3 +1341,20 @@ test("pdf converter saves a real PDF built from picked images", async ({ page })
   expect(saved.subarray(0, 5).toString()).toBe("%PDF-")
   await expect(page.getByText("Saved yash-tools-e2e-pdf-image.pdf with 1 page.")).toBeVisible()
 })
+
+test("audio recorder discloses offline-only capture and the unsupported fallback honestly", async ({
+  page,
+}) => {
+  await page.goto("/#/tool/audio-recorder")
+  await expect(page.getByRole("heading", { name: "Audio Recorder" })).toBeVisible()
+
+  await expect(page.getByRole("status")).toContainText("offline-only")
+  await expect(page.getByText("10 minutes or 32 MB")).toBeVisible()
+  await expect(page.getByText(/never written to storage unless you export/i)).toBeVisible()
+
+  // The browser harness has no microphone grant, so starting capture must
+  // surface a distinct, recoverable state instead of a generic failure.
+  await page.getByRole("button", { name: "Start recording" }).click()
+  await expect(page.getByRole("alert")).toBeVisible()
+  await expect(page.getByRole("button", { name: "Start recording" })).toBeEnabled()
+})

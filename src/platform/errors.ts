@@ -23,6 +23,14 @@ export type PlatformErrorCode =
   | "EXTERNAL_URL_REJECTED"
   | "EXTERNAL_URL_OPEN_FAILED"
   | "RANDOM_UNAVAILABLE"
+  | "MICROPHONE_PERMISSION_DENIED"
+  | "MICROPHONE_UNAVAILABLE"
+  | "MICROPHONE_UNSUPPORTED"
+  | "RECORDING_INVALID_ARGUMENT"
+  | "RECORDING_ALREADY_ACTIVE"
+  | "RECORDING_NOT_ACTIVE"
+  | "RECORDING_FAILED"
+  | "RECORDING_CANCELLED"
 
 export class PlatformError extends Error {
   readonly code: PlatformErrorCode
@@ -50,6 +58,7 @@ export function isCancellationError(error: unknown): boolean {
         ((error as { code?: unknown }).code === "FILE_PICK_CANCELLED" ||
           (error as { code?: unknown }).code === "FILE_SHARE_CANCELLED" ||
           (error as { code?: unknown }).code === "FILE_SAVE_CANCELLED" ||
-          (error as { code?: unknown }).code === "FILE_READ_CANCELLED")))
+          (error as { code?: unknown }).code === "FILE_READ_CANCELLED" ||
+          (error as { code?: unknown }).code === "RECORDING_CANCELLED")))
   )
 }

@@ -7,6 +7,7 @@ import type {
   PlatformServices,
 } from "@/platform/contracts"
 import { isCancellationError, PlatformError } from "@/platform/errors"
+import { createMicrophoneRecorderService } from "@/platform/shared/microphone-recorder"
 import {
   bytesToBase64,
   generatedFileBytes,
@@ -107,6 +108,17 @@ function checkWebDigestAbort(signal?: AbortSignal): void {
   if (signal?.aborted) {
     throw new PlatformError("FILE_READ_CANCELLED", "The operation was cancelled.")
   }
+}
+
+const webLifecycle = {
+  current() {
+    return { active: document.visibilityState === "visible" }
+  },
+  async subscribe(listener: (state: { active: boolean }) => void) {
+    const handle = () => listener({ active: document.visibilityState === "visible" })
+    document.addEventListener("visibilitychange", handle)
+    return () => document.removeEventListener("visibilitychange", handle)
+  },
 }
 
 export const webPlatformServices: PlatformServices = {
@@ -301,19 +313,11 @@ export const webPlatformServices: PlatformServices = {
     },
   },
   random: secureRandomService,
-  lifecycle: {
-    current() {
-      return { active: document.visibilityState === "visible" }
-    },
-    async subscribe(listener) {
-      const handle = () => listener({ active: document.visibilityState === "visible" })
-      document.addEventListener("visibilitychange", handle)
-      return () => document.removeEventListener("visibilitychange", handle)
-    },
-  },
+  lifecycle: webLifecycle,
   haptics: {
     async confirm() {
       navigator.vibrate?.(12)
     },
   },
+  microphone: createMicrophoneRecorderService({ lifecycle: webLifecycle }),
 }

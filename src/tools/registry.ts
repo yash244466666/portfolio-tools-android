@@ -3,6 +3,7 @@ import {
   ArrowDownUp,
   ArrowLeftRight,
   AudioLines,
+  Mic,
   Baseline,
   Binary,
   Bookmark,
@@ -1238,6 +1239,20 @@ export const tools: readonly ToolDefinition[] = [
     network: false,
     persistent: false,
     component: lazy(() => import("@/tools/pdf-converter/PdfConverter")),
+  },
+  {
+    id: "audio-recorder",
+    label: "Audio Recorder",
+    description:
+      "Record microphone takes offline with foreground-only capture, hard duration and size limits, and on-device-only export.",
+    category: "media",
+    tags: ["audio", "recorder", "microphone", "voice", "memo", "offline"],
+    icon: Mic,
+    status: "enabled",
+    risk: "medium",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/audio-recorder/AudioRecorder")),
   },
 ] as const
 

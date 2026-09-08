@@ -11,7 +11,9 @@ const manifest = readFileSync(manifestPath, "utf8")
 const allowedPermissions = new Set([
   "android.permission.ACCESS_NETWORK_STATE",
   "android.permission.INTERNET",
+  "android.permission.MODIFY_AUDIO_SETTINGS",
   "android.permission.POST_NOTIFICATIONS",
+  "android.permission.RECORD_AUDIO",
   "android.permission.VIBRATE",
   "android.permission.WAKE_LOCK",
 ])
@@ -26,7 +28,6 @@ const deniedPermissions = [
   "android.permission.READ_EXTERNAL_STORAGE",
   "android.permission.READ_MEDIA_IMAGES",
   "android.permission.READ_MEDIA_VIDEO",
-  "android.permission.RECORD_AUDIO",
   "android.permission.RECEIVE_BOOT_COMPLETED",
   "android.permission.SCHEDULE_EXACT_ALARM",
   "android.permission.SEND_SMS",

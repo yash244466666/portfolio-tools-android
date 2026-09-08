@@ -387,7 +387,7 @@ Permission budget for the planned product:
 
 - `INTERNET` for the two clearly labeled network tools.
 - `POST_NOTIFICATIONS` only when the user enables timer alerts.
-- `RECORD_AUDIO` only if Audio Recorder later passes its separate release gate.
+- `RECORD_AUDIO` (runtime) and `MODIFY_AUDIO_SETTINGS` (normal) for Audio Recorder, approved by the accepted ADR 0020 release review; requested only while the tool is in use, foreground-only.
 
 CI must reject unexpected dangerous/special permissions and exported components. Always inspect the merged manifest because plugins can add entries.
 
