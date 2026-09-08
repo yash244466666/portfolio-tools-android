@@ -76,6 +76,8 @@ interface WorkManifest {
   tier3: string[]
   tier4: string[]
   toolDependencies: Record<string, string[]>
+  /** Optional per-tool workflow priority overrides; the 100-tool ADR 0022 additions are P1. */
+  toolPriorities?: Record<string, string>
   tools: [string, string, CategoryId][]
 }
 
@@ -164,12 +166,12 @@ const ghBinary = process.env.GH_BIN ?? "gh"
 const apiVersion = "2026-03-10"
 
 const expectedCategoryCounts: Record<CategoryId, number> = {
-  core: 7,
-  dev: 45,
-  text: 17,
+  core: 9,
+  dev: 48,
+  text: 20,
   media: 3,
   security: 5,
-  math: 10,
+  math: 16,
 }
 
 const categoryNames: Record<CategoryId, string> = {
@@ -236,7 +238,10 @@ function validateManifest(): {
     manifest.repository === "yash244466666/portfolio-tools-android",
     "Unexpected repository",
   )
-  invariant(manifest.tools.length === 87, `Expected 87 tools, found ${manifest.tools.length}`)
+  invariant(
+    manifest.tools.length === 101,
+    `Expected 101 managed tools (87 catalog + 14 ADR 0022 additions), found ${manifest.tools.length}`,
+  )
 
   const toolIds = unique(
     manifest.tools.map(([id]) => id),
@@ -292,8 +297,8 @@ function validateManifest(): {
     (tier) => manifest.tools.filter(([id]) => tierFor(id) === tier).length,
   )
   invariant(
-    tierCounts.join(",") === "67,15,2,3",
-    `Expected tier counts 67,15,2,3, found ${tierCounts.join(",")}`,
+    tierCounts.join(",") === "81,15,2,3",
+    `Expected tier counts 81,15,2,3, found ${tierCounts.join(",")}`,
   )
 
   for (const listName of ["tier2", "tier3", "tier4"] as const) {
@@ -527,7 +532,9 @@ function issueDefinitions(): WorkItemDefinition[] {
       type: "Tool" as const,
       category: categoryNames[category],
       phase,
-      priority: verticalSlice ? "P0 Critical" : tier >= 3 ? "P1 High" : "P2 Normal",
+      priority:
+        manifest.toolPriorities?.[id] ??
+        (verticalSlice ? "P0 Critical" : tier >= 3 ? "P1 High" : "P2 Normal"),
       risk,
       estimate,
       workflow: implemented ? "Device QA" : "Backlog",

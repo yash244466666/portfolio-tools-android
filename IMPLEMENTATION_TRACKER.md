@@ -1,11 +1,23 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 12:45 Europe/Berlin
+> Last updated: 2026-09-08 13:40 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **86 of the 87 audited catalog tools (ADR 0021 excludes youtube-downloader); 86 implemented, 0 remaining in version-1 scope**
+> Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 86 implemented, 14 tracked (issues #175-#188) pending the batch 14-16 implementations**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Scope expansion: version 1 grows to 100 tools (ADR 0022)
+
+- The product owner expanded the version-1 scope to **100 tools** via the accepted `docs/decisions/0022-version-one-scope-expansion-to-100.md`: the 86 in-scope catalog tools (ADR 0021's youtube-downloader exclusion stays in force) plus 14 new original, offline, permission-free, dependency-free, network-free tools: `aspect-ratio-calculator`, `word-frequency-analyzer`, `text-binary-converter` (binary/octal/decimal), `time-zone-converter` (offline via platform `Intl` data), `date-difference-calculator`, `loan-emi-calculator`, `discount-tax-calculator`, `dice-roller` (RandomService-backed, never Math.random), `bmi-calculator`, `color-contrast-checker`, `unit-price-comparer`, `fuel-trip-cost-calculator`, `reading-time-estimator`, and `css-unit-converter`. TOTP Generator and JSON-to-TypeScript Generator were proposed and not selected; they remain version-1.1 candidates.
+- Work-items manifest (`config/github-work-items.json`) extended to 101 managed tools (87 catalog + 14 new): 14 tool entries with correct categories (dev: aspect-ratio-calculator, color-contrast-checker, css-unit-converter; text: word-frequency-analyzer, text-binary-converter, reading-time-estimator; core: time-zone-converter, date-difference-calculator; math: loan-emi-calculator, discount-tax-calculator, dice-roller, bmi-calculator, unit-price-comparer, fuel-trip-cost-calculator), 14 empty dependency-map entries (all dependency-free), and a new `toolPriorities` manifest map giving each addition P1 High (the derived tier-1 default is P2, so the schema gained an optional per-tool priority override consumed by the provisioning script). Script invariants updated: 101 managed tools, category counts 9 core / 48 dev / 20 text / 3 media / 5 security / 16 math, tier counts 81/15/2/3, and the project README line now reads "87 catalog + 14 new = 101 managed, 100 in version-1 scope per ADR 0022".
+- Provisioning run (`pnpm github:work-items:apply`) created issues **#175 [Tool] Aspect Ratio Calculator, #176 [Tool] CSS Unit Converter, #177 [Tool] Color Contrast Checker, #178 [Tool] Word Frequency Analyzer, #179 [Tool] Text-Binary Converter, #180 [Tool] Reading Time Estimator, #181 [Tool] Time Zone Converter, #182 [Tool] Date Difference Calculator, #183 [Tool] Loan EMI Calculator, #184 [Tool] Discount and Tax Calculator, #185 [Tool] Dice Roller, #186 [Tool] BMI Calculator, #187 [Tool] Unit Price Comparer, #188 [Tool] Fuel and Trip Cost Calculator** under their category epics (Tier 1 Migration phase, Medium risk, estimate 3, Workflow Backlog, no blockers); each was set to **Status Todo** in Project #8 (verified via GraphQL).
+- `AGENT.md`/`CLAUDE.md` (byte-identical, cmp-verified) updated: section 1 ships 100 tools, section 2 keeps the enabled count accurate at eighty-six and records the 14 approved-and-tracked additions, and section 27 gains the batch step below.
+- **Batch plan (all P1, risk-ordered, assigned after this merges):**
+  - Batch 14: aspect-ratio-calculator, css-unit-converter, discount-tax-calculator, unit-price-comparer, bmi-calculator.
+  - Batch 15: word-frequency-analyzer, text-binary-converter, reading-time-estimator, date-difference-calculator, time-zone-converter.
+  - Batch 16: loan-emi-calculator, color-contrast-checker, dice-roller, fuel-trip-cost-calculator.
+- No implementation has started; each batch must pass the full Definition of Done and device evidence before its tools are marked enabled.
 
 ### 2026-09-08 — Dev batch 13: Video to GIF (issue #112)
 
