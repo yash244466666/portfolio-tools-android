@@ -1123,3 +1123,47 @@ test("neumorphism generator switches to the pressed variant", async ({ page }) =
   await page.getByLabel("Base color", { exact: true }).fill("zzz")
   await expect(page.getByText(/Fix the base color to a six-digit hex value/)).toBeVisible()
 })
+
+test("svg optimizer minifies between tags and rejects broken markup", async ({ page }) => {
+  await page.goto("/#/tool/svg-optimizer")
+  await expect(page.getByRole("heading", { name: "SVG Optimizer" })).toBeVisible()
+
+  const sample = '<svg xmlns="http://www.w3.org/2000/svg">\n  <text>a = b</text>\n</svg>'
+  await page.getByLabel("SVG input").fill(sample)
+  await page.getByRole("button", { name: "Minify" }).click()
+  await expect(page.locator("pre")).toHaveText(
+    '<svg xmlns="http://www.w3.org/2000/svg"><text>a = b</text></svg>',
+  )
+
+  await page.getByLabel("SVG input").fill("<svg><text>unclosed</svg>")
+  await page.getByRole("button", { name: "Minify" }).click()
+  await expect(page.getByRole("alert")).toContainText("not well-formed XML")
+})
+
+test("open graph preview extracts tags offline and reports misses", async ({ page }) => {
+  await page.goto("/#/tool/open-graph-preview")
+  await expect(page.getByRole("heading", { name: "Open Graph Preview" })).toBeVisible()
+
+  await page.getByLabel("HTML input").fill(
+    '<meta property="og:title" content="Launch day" /><meta name="twitter:card" content="summary_large_image" />',
+  )
+  await expect(page.getByText("Launch day", { exact: true })).toBeVisible()
+  await expect(page.getByText("summary_large_image", { exact: true })).toBeVisible()
+  await expect(page.getByText(/never downloaded/)).toBeVisible()
+
+  await page.getByLabel("HTML input").fill("<head><title>Plain</title></head>")
+  await expect(page.getByRole("alert")).toContainText("No Open Graph or Twitter Card")
+})
+
+test("fake data generator generates and clears values", async ({ page }) => {
+  await page.goto("/#/tool/fake-data-generator")
+  await expect(page.getByRole("heading", { name: "Fake Data Generator" })).toBeVisible()
+
+  await page.getByRole("radio", { name: "Country" }).check()
+  await page.getByLabel("How many").fill("3")
+  await page.getByRole("button", { name: "Generate" }).click()
+  await expect(page.getByRole("listitem")).toHaveCount(3)
+
+  await page.getByRole("button", { name: "Clear" }).click()
+  await expect(page.getByRole("listitem")).toHaveCount(0)
+})
