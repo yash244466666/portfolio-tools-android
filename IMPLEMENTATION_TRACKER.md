@@ -1,11 +1,19 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 07:22 Europe/Berlin
+> Last updated: 2026-09-08 11:05 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **all 87 audited catalog tools; 84 implemented, 3 remaining**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Dossier PR merge cycle and YouTube Downloader review dossier (issue #36)
+
+- Merged all three session PRs by squash (tracker conflicts reconciled on the `docs/35` branch before its merge): #168 as `dec174f` (Audio Recorder dossier + ADR 0020), #170 as `0df584f` (Video to GIF dossier), and #169 as `1fed84f` (Prettier drift restoration; merged last and verified — `pnpm format:check` is green on merged `main`). Issues #34 and #35 stay open pending the product-owner decisions on the decision points recorded in their dossier comments — no decision exists yet; the Project #8 reconciliation for #44/#45/#47 from the earlier session entry is live.
+- Drafted `docs/release-reviews/youtube-downloader-review.md` for the five-dimension tier-4 gate (Play-policy, legal, provider-terms, reliability, product-value) behind #36 (tool issue #93). Decisive upstream finding: the component performs no downloading at all — it validates/parses YouTube URLs (with an unanchored-regex truncation quirk), hot-links thumbnails from `img.youtube.com` (an unreviewed third-party network provider under section 14), deep-links to `cobalt.tools` via `window.open` plus a second inline navigation surface and a clipboard touchpoint, so the review question is whether a Play-published app may route users to a third-party YouTube downloader.
+- The dossier's live policy checks (YouTube ToS download prohibition, Play's Device and Network Abuse terms-of-service clause, cobalt.tools status) and its risk assessment are recorded in the dossier itself, which is the single source for those perishable, dated claims — the tracker deliberately does not duplicate them.
+- The dossier presents four options to the product owner — ship as titled (explicitly not recommended, and a departure from the plan's own recorded exclusion), compliant re-scope to a "Video Link Inspector" (which under section 10 requires a new tool ID and a superseding ADR — ADR 0004 must never be edited in place), exclude from version 1 through that same superseding-ADR process with the exclusion reconciled across tracker/manifest/Project, or defer pending external change — and states plainly that no document can pre-clear Play reviewer discretion. The issue stays open until the decision is recorded; #93 implementation must not start before then.
+- Next executable item: product-owner decisions on #34, #35, and now #36 (all three tier-4 dossiers are drafted and merged). With the tool pipeline drained, the remaining open work falls into three blocker categories: the tier-4 decisions, physical-device evidence (#18/#20/#25), and independently actionable prerequisites — #129 (protected main/immutable CI, blocked by the GitHub plan) and the release-preparation gates (#27–#33) such as the production network-provider review (#33), which wait on neither of the other two.
 
 ### 2026-09-08 — Session audit, Project reconciliation, and Audio Recorder review dossier (issue #34)
 

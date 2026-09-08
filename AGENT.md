@@ -133,7 +133,8 @@ Do not copy either lockfile from the portfolio repository. This repository uses 
 │   ├── ARCHITECTURE.md              Runtime boundaries and dependency direction
 │   ├── DESIGN_SYSTEM.md             Mobile visual/interaction rules
 │   ├── PHYSICAL_DEVICE_CHECKLIST.md Device validation record
-│   └── SOURCE_PROVENANCE.md         Upstream source commit and copied-code map
+│   ├── SOURCE_PROVENANCE.md         Upstream source commit and copied-code map
+│   └── release-reviews/             Tier-4 tool release-review dossiers and template
 ├── e2e/                             Playwright browser-harness tests
 ├── src/
 │   ├── app/                         Shell, navigation, routes, catalog, settings
