@@ -5,7 +5,7 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 84
+const enabledToolCount = 85
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 

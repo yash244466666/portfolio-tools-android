@@ -132,6 +132,46 @@ export interface HapticsService {
   confirm(): Promise<void>
 }
 
+export type RecordingFinalReason =
+  "user" | "duration-limit" | "size-limit" | "interrupted" | "failed"
+
+export interface RecordingStartOptions {
+  /** Hard stop and finalize at this duration; the service clamps to its own caps. */
+  maximumDurationMs: number
+  /** Hard stop and finalize at this accumulated encoded size. */
+  maximumBytes: number
+}
+
+export interface RecordingCallbacks {
+  /** Periodic capture level (0..1) while recording. */
+  onLevel?: (level: number) => void
+  /**
+   * Invoked exactly once when the take is finalized without a user Stop
+   * (limit reached, lifecycle inactive, or encoder failure).
+   */
+  onFinalized?: (result: RecordingResult) => void
+}
+
+export interface RecordingResult {
+  data: ArrayBuffer
+  mimeType: string
+  /** Wall-clock-derived duration of the finalized take. */
+  durationMs: number
+  finalReason: RecordingFinalReason
+}
+
+export interface MicrophoneRecorderService {
+  /** Resolves once capture starts. Rejects with typed microphone errors. */
+  start(options: RecordingStartOptions, callbacks?: RecordingCallbacks): Promise<void>
+  /**
+   * Finalizes and resolves with the take. Also resolves with the take when a
+   * limit or the lifecycle already finalized it; rejects when nothing exists.
+   */
+  stop(): Promise<RecordingResult>
+  /** Discards the active take and releases the microphone; safe when idle. */
+  cancel(): Promise<void>
+}
+
 export interface PlatformServices {
   kind: PlatformKind
   clipboard: ClipboardService
@@ -143,4 +183,5 @@ export interface PlatformServices {
   random: RandomService
   lifecycle: LifecycleService
   haptics: HapticsService
+  microphone: MicrophoneRecorderService
 }

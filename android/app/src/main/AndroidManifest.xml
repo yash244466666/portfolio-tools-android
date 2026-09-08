@@ -17,6 +17,17 @@
         tools:node="remove" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!--
+      Audio Recorder (ADR 0020, accepted 2026-09-08): the WebView forwards
+      audio-only getUserMedia requests as RECORD_AUDIO (runtime, requested
+      only while the Audio Recorder tool is in use) and MODIFY_AUDIO_SETTINGS
+      (normal, install-time). No CAMERA permission is added; video capture
+      requests are never made. Recording is foreground-only and stops when
+      the app leaves the foreground.
+    -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
     <application
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"

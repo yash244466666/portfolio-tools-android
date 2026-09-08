@@ -4,8 +4,17 @@
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **86 of the 87 audited catalog tools (ADR 0021 excludes youtube-downloader); 84 implemented, 2 remaining**
+> Approved public version 1 scope: **86 of the 87 audited catalog tools (ADR 0021 excludes youtube-downloader); 85 implemented, 1 remaining**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Dev batch 12: Audio Recorder (issue #111)
+
+- Implemented the first approved tier-4 tool on the reviewed ADR 0020 design. A narrow `MicrophoneRecorderService` joins `src/platform/contracts.ts` (start/stop/cancel with typed errors and a level callback), backed by a shared WebView implementation in `src/platform/shared/microphone-recorder.ts` used verbatim by both the web and Capacitor adapters: capture runs entirely through `getUserMedia` + `MediaRecorder` inside the WebView, with the Capacitor `BridgeWebChromeClient` mapping the `AUDIO_CAPTURE` request to runtime `RECORD_AUDIO` + `MODIFY_AUDIO_SETTINGS` (no `CAMERA`; verified against the dependency source in the dossier).
+- Foreground-only by construction: the recorder subscribes to the platform LifecycleService and finalizes the take (reason `interrupted`) when the app leaves the foreground, releasing tracks, the AudioContext, analyser, timers, and listeners on every path. Duration derives from wall-clock anchors (ADR 0014 pattern); the 10-minute and 32 MB limits finalize rather than error, with the reason surfaced to the user. Permission-denied, unavailable, unsupported, empty-take, and failed states are distinct typed codes; `RECORDING_CANCELLED` joins the cancellation-error set.
+- The tool (`src/tools/audio-recorder/`) shows a real AnalyserNode-driven level visualization (decorative, aria-hidden) with a text `role="status"` line, WebM/Opus playback through a managed object URL (revoked on replace/reset/unmount), Save As export through the platform bridge with the honest 5 MB generated-file cap disclosed (typical Opus takes fit well within it), and an optional tested pure WAV (16-bit mono PCM) export with an independent RIFF-header oracle. Registry count is now 85 enabled; 1 of 86 in-scope tools remains (Video to GIF #112).
+- Manifest: `RECORD_AUDIO` and `MODIFY_AUDIO_SETTINGS` added with an ADR 0020 comment; `scripts/check-android-manifest.mjs` moves `RECORD_AUDIO` from the denied list to the allowlist and adds `MODIFY_AUDIO_SETTINGS`; the §15 permission-budget wording in `AGENT.md`/`CLAUDE.md` (byte-identical) records the approval. Provenance row added; the emulator checklist driver gained the 85-tool count.
+- Tests: pure policy/encoder/oracle suites plus 12 shared-recorder cases (limits, size-limit finalization, lifecycle interruption, cancel/restart, unsupported, denied, empty-take rejection) and component states; a new E2E scenario verifies the offline disclosure and the distinct unsupported/denied fallback in the browser harness.
+- Device rows still open for #111's closure: permission denial/revocation recovery, incoming-call/interruption behavior, mic-indicator release on backgrounding, low-storage export failure, and WebView-version variance on a physical device.
 
 ### 2026-09-08 — Tier-4 decisions recorded; version-1 scope amended to 86 tools (ADR 0021)
 

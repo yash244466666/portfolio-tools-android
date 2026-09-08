@@ -27,6 +27,7 @@ import type {
 } from "@/platform/contracts"
 import { PlatformError, type PlatformErrorCode } from "@/platform/errors"
 import { sanitizeGeneratedFileName, validatedGeneratedFileBytes } from "@/platform/shared/files"
+import { createMicrophoneRecorderService } from "@/platform/shared/microphone-recorder"
 import { secureRandomService } from "@/platform/shared/random"
 import { validatedExternalUrl } from "@/platform/shared/urls"
 
@@ -232,6 +233,18 @@ function stableNotificationId(value: string): number {
 function normalizeConnectionType(type: string): NetworkState["connectionType"] {
   if (type === "wifi" || type === "cellular" || type === "none") return type
   return "unknown"
+}
+
+const capacitorLifecycle = {
+  current() {
+    return { active: document.visibilityState === "visible" }
+  },
+  async subscribe(listener: (state: { active: boolean }) => void) {
+    const handle = await App.addListener("appStateChange", ({ isActive }) =>
+      listener({ active: isActive }),
+    )
+    return () => handle.remove()
+  },
 }
 
 export const capacitorPlatformServices: PlatformServices = {
@@ -522,20 +535,11 @@ export const capacitorPlatformServices: PlatformServices = {
     },
   },
   random: secureRandomService,
-  lifecycle: {
-    current() {
-      return { active: document.visibilityState === "visible" }
-    },
-    async subscribe(listener) {
-      const handle = await App.addListener("appStateChange", ({ isActive }) =>
-        listener({ active: isActive }),
-      )
-      return () => handle.remove()
-    },
-  },
+  lifecycle: capacitorLifecycle,
   haptics: {
     async confirm() {
       await Haptics.impact({ style: ImpactStyle.Light }).catch(() => undefined)
     },
   },
+  microphone: createMicrophoneRecorderService({ lifecycle: capacitorLifecycle }),
 }
