@@ -5,7 +5,7 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 80
+const enabledToolCount = 83
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -1385,6 +1385,43 @@ async function phaseTools(page) {
         await p.clickButton("Clear")
         await p.waitFor("document.querySelectorAll('li').length === 0")
         return "3 country rows generated from the secure byte source and cleared"
+      },
+    ],
+    [
+      "color-palette-from-image",
+      "Color Palette from Image",
+      async (p) => {
+        await p.waitFor("document.body.innerText.includes('Colors are extracted on this device')")
+        await p.waitFor("document.body.innerText.includes('Choose image')")
+        return "empty state and on-device extraction disclosure rendered"
+      },
+    ],
+    [
+      "chart-generator",
+      "Chart Generator",
+      async (p) => {
+        await p.waitFor("document.body.innerText.includes('Chart data as a text table')")
+        await p.waitFor("document.body.innerText.includes('80')")
+        await p.clickButton("Add point")
+        await p.waitFor("!!document.querySelector('#point-label-5')")
+        await p.evaluate(
+          "[...document.querySelectorAll('button')].find(b => (b.getAttribute('aria-label') ?? '').endsWith('point 6')).click()",
+        )
+        await p.waitFor("!document.querySelector('#point-label-5')")
+        return "text-equivalent summary table with point add and remove"
+      },
+    ],
+    [
+      "bookmark-manager",
+      "Bookmark Manager",
+      async (p) => {
+        await p.setValue("#bookmark-title", "Emulator docs")
+        await p.setValue("#bookmark-url", "example.com/docs")
+        await p.clickButton("Add bookmark")
+        await p.waitFor("document.body.innerText.includes('https://example.com/docs')")
+        await p.setValue("#bookmark-search", "nomatch")
+        await p.waitFor("document.body.innerText.includes('No bookmarks match the search.')")
+        return "https normalization saved and search miss explained"
       },
     ],
   ]
