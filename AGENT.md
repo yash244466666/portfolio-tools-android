@@ -18,7 +18,7 @@ The intended product is a fast, privacy-conscious collection of developer and ev
 - Uses Android system facilities for files, sharing, notifications, lifecycle, and external links.
 - Remains usable on phones, tablets, landscape, split-screen, foldable layouts, keyboards, and assistive technology.
 - Publishes only tools that meet the repository's Definition of Done.
-- Ships all 87 tools from the audited upstream catalog in the first public Google Play release; the 12-tool vertical slice is an internal milestone, not the public scope.
+- Ships 86 of the 87 audited upstream catalog tools in the first public Google Play release; YouTube Downloader is excluded by the accepted ADR 0021 legal/policy review, and the 12-tool vertical slice is an internal milestone, not the public scope.
 
 The source portfolio is an upstream reference, not a runtime dependency.
 
@@ -28,7 +28,7 @@ Implemented now:
 
 - React/Vite/TypeScript/Tailwind application.
 - Capacitor Android project.
-- Typed tool registry containing the completed 12-tool architecture milestone plus reviewed post-slice batches within the approved 87-tool public-release scope.
+- Typed tool registry containing the completed 12-tool architecture milestone plus reviewed post-slice batches within the approved 86-tool public-release scope (ADR 0021).
 - Eighty-four enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, Text to Slug, Sort Lines, Add Line Numbers, Trim Whitespace, Remove Duplicates, Percentage Calculator, Tip Calculator, GCD/LCM Calculator, Roman Numeral Converter, Password Strength Checker, Data Sanitizer, CSP Generator, CORS Header Builder, Robots.txt Generator, Age Calculator, Bitwise Calculator, Color Blindness Simulator, Scientific Calculator, HTTP Status Codes, MIME Type Lookup, Meta Tag Generator, Unicode Lookup, ASCII Table, Box Shadow Generator, Border Radius Generator, Text Shadow Generator, HTML Entity Encoder, ROT13 Cipher, Morse Code Translator, HMAC Generator, UUID Generator, Find & Replace, Invisible Character Detector, Hash Diff, Cron Expression Builder, Lorem Ipsum Generator, Password Generator, JWT Decoder, CSV to JSON, YAML to JSON, Text Diff, Color Picker, CSS Gradient Generator, XML Formatter, SQL Formatter, Emoji Picker, Flexbox Playground, Grid Generator, CSS Animation Generator, Glassmorphism Generator, Neumorphism Generator, SVG Optimizer, Open Graph Preview, Fake Data Generator, Stopwatch, Countdown Timer, iCalendar Generator, vCard Generator, Color Palette from Image, Chart Generator, Bookmark Manager, and PDF Converter.
 - Catalog search and category filters.
 - Favorites and recent-tool persistence.
@@ -44,7 +44,7 @@ Implemented now:
 
 Not yet implemented:
 
-- Remaining 3 catalog tools; 3 of the approved 87 are not yet implemented overall.
+- Remaining 2 in-scope catalog tools; 2 of the approved 86 are not yet implemented overall (Audio Recorder, Video to GIF). YouTube Downloader is excluded per ADR 0021.
 - Installed-artifact device verification of the sensitive clipboard bridge, generated-file cache cleanup, and renderer recovery/safe mode.
 - Final icons, splash assets, app name, application ID approval, App Links, and Play signing.
 - Physical-device verification and Play-distributed artifact testing.
@@ -626,8 +626,8 @@ Unless the tracker or user changes priority:
 2. Execute the physical-device foundation checklist through issue #18 on an approved device or emulator.
 3. Validate the complete 12-tool architecture milestone and every enabled post-slice tool on bundled Android artifacts.
 4. Migrate the remaining 19 audited catalog tools in controlled, risk-ordered batches selected from Ready Project work.
-5. Complete quality, accessibility, privacy, policy, release, and closed-testing gates without weakening the all-87 scope.
-6. Submit no production candidate until all 87 tools pass the Definition of Done and the release manifest, store claims, and signed artifact agree.
+5. Complete quality, accessibility, privacy, policy, release, and closed-testing gates without weakening the approved 86-tool scope (ADR 0021).
+6. Submit no production candidate until every in-scope tool passes the Definition of Done and the release manifest, store claims, and signed artifact agree.
 
 ## 28. Handoff checklist
 

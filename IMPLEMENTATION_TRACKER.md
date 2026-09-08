@@ -4,8 +4,16 @@
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **all 87 audited catalog tools; 84 implemented, 3 remaining**
+> Approved public version 1 scope: **86 of the 87 audited catalog tools (ADR 0021 excludes youtube-downloader); 84 implemented, 2 remaining**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Tier-4 decisions recorded; version-1 scope amended to 86 tools (ADR 0021)
+
+- Product-owner decisions recorded for all three tier-4 gates: **Audio Recorder approved for implementation** (ADR 0020 moved from Proposed to Accepted — `RECORD_AUDIO` + `MODIFY_AUDIO_SETTINGS` permission budget, foreground-only capture, WebM/Opus recording with optional tested WAV export, 10-minute/32 MiB limits); **Video to GIF approved with the 16 MiB input reconciliation** (Worker-based bounded pipeline, PDF Converter precedent, no new permissions); **YouTube Downloader excluded from version 1** (dossier option 3).
+- ADR 0021 (Accepted) supersedes ADR 0004's all-87 clause for `youtube-downloader` through the superseding-ADR process ADR 0004 itself mandates — ADR 0004 is not edited in place. The approved public version-1 scope is now **86 of the 87 audited catalog tools**; the section-1/section-27 scope statements in `AGENT.md`/`CLAUDE.md` (kept byte-identical) are updated to match.
+- Exclusion mechanics made provisioning-safe: GitHub has no EXCLUDED close reason and the work-items provisioning maps closed issues to Done, so issue #93 is closed as not-planned carrying a distinct `status:excluded` label, the tool has no registry entry (and must never gain one in version 1), and this tracker, ADR 0021, and the future release manifest are the authoritative exclusion records. Review issues #34, #35, and #36 close as completed with decision evidence comments; their device-level acceptance rows transfer to #111/#112.
+- Dossier status headers updated from DRAFT to their recorded decisions; the dossiers' section-5 device-evidence lists are the binding exit criteria for the two implementation issues.
+- Next executable item: implement Audio Recorder (#111) — the `MicrophoneRecorderService` contract, web/Capacitor adapters, the manifest permission change with the `scripts/check-android-manifest.mjs` allowlist update, and the section-15 permission-budget wording in `AGENT.md`/`CLAUDE.md` in the same reviewed change — then Video to GIF (#112). Device rows for both remain outstanding.
 
 ### 2026-09-08 — Dossier PR merge cycle and YouTube Downloader review dossier (issue #36)
 

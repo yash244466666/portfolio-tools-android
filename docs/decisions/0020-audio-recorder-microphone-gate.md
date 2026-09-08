@@ -1,6 +1,6 @@
 # ADR 0020: Audio Recorder Microphone Permission Gate
 
-- Status: Proposed (pending product-owner decision recorded in `docs/release-reviews/audio-recorder-review.md`)
+- Status: Accepted (product-owner decision recorded 2026-09-08; see the dossier status header and issue #34 evidence comment)
 - Date: 2026-09-08
 - Owner: Yash Sikdar
 - Revisit when: the Audio Recorder decision is made, a foreground-service recording mode is proposed, or the WebView capture floor changes.
