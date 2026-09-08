@@ -1,11 +1,19 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 20:10 Europe/Berlin
+> Last updated: 2026-09-08 21:30 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 100 implemented — version-1 scope complete**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Merge-cycle close-out: certification-evidence dossiers and blocked-issue reconciliation
+
+- Merged cycle (squash): #193 100-tool emulator checklist + doc reconciliation; #194 regression matrix (13 E2E gaps closed; `scripts/build-regression-matrix.mjs` gate); #195 js-yaml 4.3.1 runtime security bump; #196 security/privacy/SBOM audit dossier + `scripts/build-sbom.mjs`; #197 network-provider review dossier; #199 performance-evidence dossier; #200 interoperability-evidence dossier; #201 accessibility-evidence dossier. All hosted CI green before each merge.
+- The automatable portions of #21, #22, #23, #24, #26, and #33 are complete with reproducible dossiers under `docs/certification/`; each issue stays open for its explicitly pending device/owner rows (recorded in the dossiers and issue comments).
+- Blocked-issue pass: #25/#27–#32/#37–#41/#129 carry 2026-09-08 cycle-update comments and Project #8 workflow status **Blocked**; #21/#24/#33 are **Device QA**; #22/#23/#26 were **In Review** during their PR cycles. Epics #2–#11 stay open until their children close.
+- Remaining open issues after this cycle are, exhaustively: device-evidence rows (#18/#20/#25 plus the device-qa rows on #111/#112), product-owner release decisions (#27–#32, #37–#41), #129 (GitHub plan), and the epics whose children include those.
+- Next executable item: physical-device validation (issue #18) on an approved device; then the owner-decision gates. Nothing else remains automatable in the coding-agent scope.
 
 ### 2026-09-08 — Accessibility certification evidence dossier (issue #22 automated portions)
 
@@ -634,11 +642,11 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 
 1. Configure the recommended saved Project views in GitHub's UI; upgrade the account plan before completing protected-main issue #129.
 2. Connect/authorize a physical Android device, install the verified debug APK, and execute issue #18's physical checklist.
-3. Complete physical Android validation of all 100 enabled tools and the outstanding device-evidence rows (#18/#20/#25/#111/#112).
-4. Execute the automatable portions of the certification gates (#21–#26); the remaining rows depend on the device evidence above.
-5. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval.
-6. Approve or revise the provisional app name, application ID, bundled origin, and privacy posture before release work; the version-1 scope is 100 tools per ADR 0004 as amended by ADR 0021/0022.
-7. Freeze release-signing/key-custody strategy without committing secrets.
+3. Complete physical Android validation of all 100 enabled tools and the outstanding device-evidence rows (#18/#20/#25/#111/#112) and the physical rows recorded in the certification dossiers (#22/#23/#25/#26).
+4. Certification-gate note: the automatable portions of #21/#22/#23/#24/#26/#33 are complete with dossiers under `docs/certification/`; the remaining rows on those issues depend on the device evidence above.
+5. Replace generated launcher/splash assets, including adaptive and monochrome icons, after final visual identity approval (owner).
+6. Approve or revise the provisional app name, application ID, bundled origin, and privacy posture before release work (owner); the version-1 scope is 100 tools per ADR 0004 as amended by ADR 0021/0022.
+7. Freeze release-signing/key-custody strategy without committing secrets (owner).
 
 ## 10. Release-gate snapshot
 
