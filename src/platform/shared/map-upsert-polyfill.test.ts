@@ -17,7 +17,12 @@ describe("Map upsert polyfills", () => {
   it("getOrInsertComputed returns the existing value without invoking the callback", () => {
     let calls = 0
     const map = new Map<string, number[]>([["a", [1]]])
-    expect(map.getOrInsertComputed("a", () => { calls += 1; return [] })).toStrictEqual([1])
+    expect(
+      map.getOrInsertComputed("a", () => {
+        calls += 1
+        return []
+      }),
+    ).toStrictEqual([1])
     expect(calls).toBe(0)
   })
 

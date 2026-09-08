@@ -55,7 +55,16 @@ export default function OpenGraphPreview() {
         </ToolPanel>
       ) : hasTags ? (
         <>
-          <ToolPanel title="Preview" action={<CopyButton label="Copy tags" onStatus={setStatus} value={serializeOpenGraphTags(tags)} />}>
+          <ToolPanel
+            title="Preview"
+            action={
+              <CopyButton
+                label="Copy tags"
+                onStatus={setStatus}
+                value={serializeOpenGraphTags(tags)}
+              />
+            }
+          >
             <dl className="grid gap-3">
               {summaryRows.map((row) => (
                 <div key={row.key} className="grid gap-1">
@@ -67,8 +76,8 @@ export default function OpenGraphPreview() {
               ))}
             </dl>
             <p className="mt-3 text-xs leading-5 text-[var(--text-secondary)]">
-              {tags.length} tag{tags.length === 1 ? "" : "s"} found. The image is shown as a URL
-              and never downloaded.
+              {tags.length} tag{tags.length === 1 ? "" : "s"} found. The image is shown as a URL and
+              never downloaded.
             </p>
           </ToolPanel>
           <ToolPanel title="Extracted tags">
@@ -90,8 +99,8 @@ export default function OpenGraphPreview() {
       </p>
       <p className="text-xs leading-5 text-[var(--text-secondary)]">
         This tool works entirely offline: it reads only the markup you paste and never fetches the
-        page, its images, or any other resource. Open Graph values win over Twitter Card values
-        when both are present.
+        page, its images, or any other resource. Open Graph values win over Twitter Card values when
+        both are present.
       </p>
     </div>
   )

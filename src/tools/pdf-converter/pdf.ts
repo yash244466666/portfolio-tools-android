@@ -147,13 +147,17 @@ export function assembleDocumentText(pages: ReadonlyArray<string>): string {
  * separators, whitespace, and control characters are stripped; the extension is
  * appended. A character loop keeps the control-character policy explicit.
  */
-export function safeOutputName(sourceName: string, fallbackBase: string, extension: string): string {
+export function safeOutputName(
+  sourceName: string,
+  fallbackBase: string,
+  extension: string,
+): string {
   const stripped = sourceName.replace(/\.[^.]+$/, "")
   let base = ""
   for (const character of stripped) {
     const code = character.codePointAt(0) ?? 0
     if (code < 32 || code === 127) continue
-    if ("\\/:*?\"<>| ".includes(character)) continue
+    if ('\\/:*?"<>| '.includes(character)) continue
     base += character
   }
   base = base.trim()

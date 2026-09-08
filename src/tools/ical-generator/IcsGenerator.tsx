@@ -72,7 +72,11 @@ export default function IcsGenerator() {
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field hint={allDay ? "Used as the all-day start date." : undefined} htmlFor="ics-start-date" label="Start date">
+            <Field
+              hint={allDay ? "Used as the all-day start date." : undefined}
+              htmlFor="ics-start-date"
+              label="Start date"
+            >
               <input
                 className="app-input"
                 id="ics-start-date"
@@ -81,7 +85,11 @@ export default function IcsGenerator() {
                 value={startDate}
               />
             </Field>
-            <Field hint={allDay ? "Used as the all-day end date." : undefined} htmlFor="ics-end-date" label="End date">
+            <Field
+              hint={allDay ? "Used as the all-day end date." : undefined}
+              htmlFor="ics-end-date"
+              label="End date"
+            >
               <input
                 className="app-input"
                 id="ics-end-date"
@@ -130,7 +138,11 @@ export default function IcsGenerator() {
               value={description}
             />
           </Field>
-          <Field hint="Only https links are included." htmlFor="ics-url" label="Event URL (optional)">
+          <Field
+            hint="Only https links are included."
+            htmlFor="ics-url"
+            label="Event URL (optional)"
+          >
             <input
               className="app-input"
               id="ics-url"
@@ -173,10 +185,10 @@ export default function IcsGenerator() {
         {status}
       </p>
       <p className="text-xs leading-5 text-[var(--text-secondary)]">
-        Times are floating local times: the calendar stores no timezone offset, so the event
-        shows at the same local clock time everywhere. Every generated event gets a fresh UID
-        from the platform's secure random source. Nothing is saved or uploaded; this tool has no
-        network access.
+        Times are floating local times: the calendar stores no timezone offset, so the event shows
+        at the same local clock time everywhere. Every generated event gets a fresh UID from the
+        platform's secure random source. Nothing is saved or uploaded; this tool has no network
+        access.
       </p>
     </div>
   )

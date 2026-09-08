@@ -50,10 +50,7 @@ function mapLibraryError(error: unknown, fallback: string): PdfToolError {
   // Only the error class name is surfaced — never the underlying message,
   // which can echo parsed input back to the user.
   const errorName = error instanceof Error ? error.name : ""
-  return new PdfToolError(
-    "corrupt",
-    errorName ? `${fallback} (${errorName})` : fallback,
-  )
+  return new PdfToolError("corrupt", errorName ? `${fallback} (${errorName})` : fallback)
 }
 
 async function canvasToPngBytes(canvas: HTMLCanvasElement): Promise<Uint8Array> {
@@ -91,9 +88,7 @@ export async function imagesToPdfBytes(
 }
 
 /** Copies every page of each input, in order, into one merged PDF. */
-export async function mergePdfs(
-  inputs: ReadonlyArray<Uint8Array>,
-): Promise<PdfConversionOutput> {
+export async function mergePdfs(inputs: ReadonlyArray<Uint8Array>): Promise<PdfConversionOutput> {
   try {
     const merged = await PDFDocument.create()
     let pageCount = 0

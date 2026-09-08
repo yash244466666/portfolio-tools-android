@@ -47,8 +47,12 @@ if (typeof Uint8Array.prototype.toBase64 !== "function") {
       let out = ""
       let index = 0
       for (; index + 2 < this.length; index += 3) {
-        const value = ((this[index]! << 16) | (this[index + 1]! << 8) | this[index + 2]!)
-        out += BASE64_ALPHABET[value >> 18]! + BASE64_ALPHABET[(value >> 12) & 63]! + BASE64_ALPHABET[(value >> 6) & 63]! + BASE64_ALPHABET[value & 63]!
+        const value = (this[index]! << 16) | (this[index + 1]! << 8) | this[index + 2]!
+        out +=
+          BASE64_ALPHABET[value >> 18]! +
+          BASE64_ALPHABET[(value >> 12) & 63]! +
+          BASE64_ALPHABET[(value >> 6) & 63]! +
+          BASE64_ALPHABET[value & 63]!
       }
       const remaining = this.length - index
       if (remaining === 1) {
@@ -56,7 +60,11 @@ if (typeof Uint8Array.prototype.toBase64 !== "function") {
         out += BASE64_ALPHABET[value >> 18]! + BASE64_ALPHABET[(value >> 12) & 63]! + "=="
       } else if (remaining === 2) {
         const value = (this[index]! << 16) | (this[index + 1]! << 8)
-        out += BASE64_ALPHABET[value >> 18]! + BASE64_ALPHABET[(value >> 12) & 63]! + BASE64_ALPHABET[(value >> 6) & 63]! + "="
+        out +=
+          BASE64_ALPHABET[value >> 18]! +
+          BASE64_ALPHABET[(value >> 12) & 63]! +
+          BASE64_ALPHABET[(value >> 6) & 63]! +
+          "="
       }
       return out
     },

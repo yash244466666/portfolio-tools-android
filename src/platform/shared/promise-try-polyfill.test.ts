@@ -32,9 +32,9 @@ describe("Promise.try polyfill", () => {
       expect(typeof Promise.try).toBe("function")
       if (typeof Promise.try === "function") {
         await expect(Promise.try(() => "installed")).resolves.toBe("installed")
-        await expect(
-          Promise.try((value: string) => value.toUpperCase(), "works"),
-        ).resolves.toBe("WORKS")
+        await expect(Promise.try((value: string) => value.toUpperCase(), "works")).resolves.toBe(
+          "WORKS",
+        )
       }
     } finally {
       Object.defineProperty(Promise, "try", { value: original, configurable: true, writable: true })

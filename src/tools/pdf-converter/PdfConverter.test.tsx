@@ -29,9 +29,7 @@ const mergePdfsMock = vi.hoisted(() =>
 )
 const loadPdfDocumentMock = vi.hoisted(() => vi.fn())
 const renderPageToPngMock = vi.hoisted(() =>
-  vi.fn(() =>
-    Promise.resolve({ bytes: new Uint8Array([7, 7]), width: 640, height: 880 }),
-  ),
+  vi.fn(() => Promise.resolve({ bytes: new Uint8Array([7, 7]), width: 640, height: 880 })),
 )
 const extractPageTextMock = vi.hoisted(() => vi.fn(() => Promise.resolve("Extracted words")))
 const zipPagesMock = vi.hoisted(() => vi.fn(() => Promise.resolve(new Uint8Array([4, 5]))))
@@ -88,9 +86,7 @@ describe("PdfConverter", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Choose images" }))
     await waitFor(() => expect(screen.getByText("Selected 2 images.")).toBeTruthy())
     fireEvent.click(screen.getByRole("button", { name: "Convert to PDF" }))
-    await waitFor(() =>
-      expect(screen.getByText("Saved shot.pdf with 2 pages.")).toBeTruthy(),
-    )
+    await waitFor(() => expect(screen.getByText("Saved shot.pdf with 2 pages.")).toBeTruthy())
     expect(imagesToPdfBytesMock).toHaveBeenCalledTimes(1)
     expect(saveAsMock.mock.calls[0]?.[0]?.name).toBe("shot.pdf")
     expect(saveAsMock.mock.calls[0]?.[0]?.mimeType).toBe("application/pdf")
@@ -145,7 +141,9 @@ describe("PdfConverter", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Choose PDF" }))
     await waitFor(() => expect(screen.getByText("Selected 1.2 kB PDF.")).toBeTruthy())
     fireEvent.click(screen.getByRole("button", { name: "Convert to images" }))
-    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("Encrypted PDFs are not supported."))
+    await waitFor(() =>
+      expect(screen.getByRole("alert").textContent).toBe("Encrypted PDFs are not supported."),
+    )
     expect(destroyMock).not.toHaveBeenCalled()
   })
 
@@ -162,9 +160,7 @@ describe("PdfConverter", () => {
     await waitFor(() => expect(screen.getByText("Selected 1.2 kB PDF.")).toBeTruthy())
     fireEvent.click(screen.getByRole("button", { name: "Convert to images" }))
     await waitFor(() =>
-      expect(
-        screen.getByText("This PDF has 201 pages, above the 200-page limit."),
-      ).toBeTruthy(),
+      expect(screen.getByText("This PDF has 201 pages, above the 200-page limit.")).toBeTruthy(),
     )
     expect(renderPageToPngMock).not.toHaveBeenCalled()
     expect(destroyMock).toHaveBeenCalled()
@@ -207,13 +203,13 @@ describe("PdfConverter", () => {
     await waitFor(() => expect(screen.getByText("Selected 1.2 kB PDF.")).toBeTruthy())
     fireEvent.click(screen.getByRole("button", { name: "Extract text" }))
     await waitFor(() =>
-      expect(screen.getByText("This PDF contains no extractable text; it may be image-only.")).toBeTruthy(),
+      expect(
+        screen.getByText("This PDF contains no extractable text; it may be image-only."),
+      ).toBeTruthy(),
     )
     extractPageTextMock.mockResolvedValue("Words from page")
     fireEvent.click(screen.getByRole("button", { name: "Extract text" }))
-    await waitFor(() =>
-      expect(screen.getByText("Extracted text from 2 pages.")).toBeTruthy(),
-    )
+    await waitFor(() => expect(screen.getByText("Extracted text from 2 pages.")).toBeTruthy())
     const editor = screen.getByLabelText("Extracted text")
     expect((editor as HTMLTextAreaElement).value).toContain("Words from page")
     expect((editor as HTMLTextAreaElement).readOnly).toBe(true)

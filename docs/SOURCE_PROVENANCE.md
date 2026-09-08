@@ -100,20 +100,20 @@ The Android repository is a separate codebase. The upstream path is recorded for
 
 ## Dependency provenance
 
-| Dependency                     | Version | License                 | Treatment                                                                                                                                         |
-| ------------------------------ | ------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `marked`                       | 18.0.11 | MIT                     | GFM Markdown parser, bundled offline; standard vectors test its documented behavior                                                               |
-| `dompurify`                    | 3.4.14  | (MPL-2.0 OR Apache-2.0) | HTML sanitizer with an explicit narrow allowlist (ADR 0008); hostile-input corpus tests the policy                                                |
-| `qrcode`                       | 1.5.4   | MIT                     | QR-spec encoder used only through the pure `create()` data model (ADR 0011); spec-structure vectors test finder/timing patterns and capacities    |
-| `js-yaml`                      | 4.1.1   | MIT                     | Safe-schema YAML loader/dumper for the YAML-JSON converter, bundled offline; round-trip and alias-expansion guard tests                           |
-| `diff`                         | 9.0.0   | MIT                     | jsdiff line diffing for the Text Diff tool, bundled offline; count and marker behavior is tested against the library's documented change list     |
-| `@types/js-yaml`               | 4.0.9   | MIT                     | Type definitions only; dev-time                                                                                                                   |
-| `sql-formatter`                | 15.7.3  | MIT                     | SQL formatting/minification for the SQL Formatter tool, bundled offline; dialect, literal-preservation, and failure-state tests cover the wrapper |
-| `pdf-lib`                      | 1.17.1  | MIT                     | PDF creation/merge for the PDF Converter tool, bundled offline; image-to-PDF and merge paths are exercised end to end against generated fixtures |
-| `jszip`                        | 3.10.1  | MIT (of MIT OR GPL-3.0-or-later) | ZIP packaging of rendered PDF pages, bundled offline; the MIT option is selected by the package's dual-license terms |
-| `pdfjs-dist`                   | 6.3.289 | Apache-2.0              | PDF text extraction and page rendering, bundled offline with the worker packaged through Vite; never loaded from a CDN |
-| AndroidX Test Espresso Intents | 3.7.0   | Apache-2.0              | Test-APK-only inspection/stubbing of picker, Save As, and share intents; absent from production runtime                                           |
-| AndroidX Test UI Automator     | 2.3.0   | Apache-2.0              | Stable test-APK-only system Back and Android permission-dialog automation; absent from production runtime                                         |
+| Dependency                     | Version | License                          | Treatment                                                                                                                                         |
+| ------------------------------ | ------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `marked`                       | 18.0.11 | MIT                              | GFM Markdown parser, bundled offline; standard vectors test its documented behavior                                                               |
+| `dompurify`                    | 3.4.14  | (MPL-2.0 OR Apache-2.0)          | HTML sanitizer with an explicit narrow allowlist (ADR 0008); hostile-input corpus tests the policy                                                |
+| `qrcode`                       | 1.5.4   | MIT                              | QR-spec encoder used only through the pure `create()` data model (ADR 0011); spec-structure vectors test finder/timing patterns and capacities    |
+| `js-yaml`                      | 4.1.1   | MIT                              | Safe-schema YAML loader/dumper for the YAML-JSON converter, bundled offline; round-trip and alias-expansion guard tests                           |
+| `diff`                         | 9.0.0   | MIT                              | jsdiff line diffing for the Text Diff tool, bundled offline; count and marker behavior is tested against the library's documented change list     |
+| `@types/js-yaml`               | 4.0.9   | MIT                              | Type definitions only; dev-time                                                                                                                   |
+| `sql-formatter`                | 15.7.3  | MIT                              | SQL formatting/minification for the SQL Formatter tool, bundled offline; dialect, literal-preservation, and failure-state tests cover the wrapper |
+| `pdf-lib`                      | 1.17.1  | MIT                              | PDF creation/merge for the PDF Converter tool, bundled offline; image-to-PDF and merge paths are exercised end to end against generated fixtures  |
+| `jszip`                        | 3.10.1  | MIT (of MIT OR GPL-3.0-or-later) | ZIP packaging of rendered PDF pages, bundled offline; the MIT option is selected by the package's dual-license terms                              |
+| `pdfjs-dist`                   | 6.3.289 | Apache-2.0                       | PDF text extraction and page rendering, bundled offline with the worker packaged through Vite; never loaded from a CDN                            |
+| AndroidX Test Espresso Intents | 3.7.0   | Apache-2.0                       | Test-APK-only inspection/stubbing of picker, Save As, and share intents; absent from production runtime                                           |
+| AndroidX Test UI Automator     | 2.3.0   | Apache-2.0                       | Stable test-APK-only system Back and Android permission-dialog automation; absent from production runtime                                         |
 
 ## Platform implementation references
 

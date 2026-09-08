@@ -146,7 +146,12 @@ function pdfWorkerPolyfill(): Plugin {
       for (const value of Object.values(bundle)) {
         if (value.type !== "asset") continue
         if (typeof value.fileName !== "string" || !value.fileName.includes("pdf.worker")) continue
-        if (Buffer.from(value.source.slice(0, 40) ?? "").toString("utf8").includes("getOrInsert")) continue
+        if (
+          Buffer.from(value.source.slice(0, 40) ?? "")
+            .toString("utf8")
+            .includes("getOrInsert")
+        )
+          continue
         if (typeof value.source === "string") {
           value.source = workerPolyfillSource + value.source
         } else {

@@ -80,7 +80,11 @@ function installAddUpsert(prototype: AddPrototype): void {
   }
   if (typeof prototype.getOrInsertComputed !== "function") {
     Object.defineProperty(prototype, "getOrInsertComputed", {
-      value: function getOrInsertComputed<T extends object>(this: WeakSet<T>, value: T, callbackfn: (value: T) => T): void {
+      value: function getOrInsertComputed<T extends object>(
+        this: WeakSet<T>,
+        value: T,
+        callbackfn: (value: T) => T,
+      ): void {
         if (!this.has(value)) this.add(callbackfn(value))
       },
       writable: true,

@@ -82,13 +82,7 @@ export default function FakeDataGenerator() {
       {rows.length > 0 ? (
         <ToolPanel
           title="Results"
-          action={
-            <CopyButton
-              label="Copy values"
-              onStatus={setStatus}
-              value={rows.join("\n")}
-            />
-          }
+          action={<CopyButton label="Copy values" onStatus={setStatus} value={rows.join("\n")} />}
         >
           <ul className="grid gap-2">
             {rows.map((row, index) => (
@@ -107,9 +101,9 @@ export default function FakeDataGenerator() {
         {status}
       </p>
       <p className="text-xs leading-5 text-[var(--text-secondary)]">
-        Values are invented locally from realistic datasets for test fixtures, UI mockups, and
-        forms demos. They are random but not secure, and they do not describe real people,
-        addresses, or companies. Nothing is saved or uploaded; this tool has no network access.
+        Values are invented locally from realistic datasets for test fixtures, UI mockups, and forms
+        demos. They are random but not secure, and they do not describe real people, addresses, or
+        companies. Nothing is saved or uploaded; this tool has no network access.
       </p>
     </div>
   )
