@@ -74,42 +74,38 @@ export function daysInMonth(year: number, month: number): number {
 }
 
 /**
- * Calendar-accurate month/day split: whole months from the start date, then
- * the leftover days measured against the end date's own calendar (borrowing
- * from the month before the end date when the end day-of-month is smaller).
+ * Calendar-accurate month/day split, computed closed-form (no loops, so
+ * spans of thousands of years are exact): whole months from the start date,
+ * then the leftover days measured from the start date advanced by those
+ * months (its day clamped only to the advanced month's length — the
+ * addMonths convention, so Jan 30 + 2 months lands on Mar 30).
  */
 export function monthsAndDaysBetween(
   start: CalendarDate,
   end: CalendarDate,
 ): { months: number; days: number } {
+  if (toUtcAnchors(end) < toUtcAnchors(start)) return { months: 0, days: 0 }
+
   let months = (end.year - start.year) * 12 + (end.month - start.month)
+  // Step back one month when the anniversary overshoots the end date
+  // (the start day-of-month is past the end month's length).
+  const endMonthAnchor: CalendarDate = {
+    year: end.year,
+    month: end.month,
+    day: Math.min(start.day, daysInMonth(end.year, end.month)),
+  }
+  if (toUtcAnchors(endMonthAnchor) > toUtcAnchors(end)) months -= 1
   if (months < 0) return { months: 0, days: 0 }
 
-  let anchorYear = start.year
-  let anchorMonth = start.month
-  // Guard the day-of-month against shorter months while advancing.
-  const anchorDay = Math.min(start.day, daysInMonth(anchorYear, anchorMonth))
-  months = 0
-  while (months < 12_000) {
-    const nextMonth = anchorMonth === 12 ? 1 : anchorMonth + 1
-    const nextYear = anchorMonth === 12 ? anchorYear + 1 : anchorYear
-    const candidateDay = Math.min(anchorDay, daysInMonth(nextYear, nextMonth))
-    const candidate: CalendarDate = { year: nextYear, month: nextMonth, day: candidateDay }
-    if (toUtcAnchors(candidate) > toUtcAnchors(end)) break
-    anchorYear = nextYear
-    anchorMonth = nextMonth
-    months += 1
-    if (months >= 12_000) break
-  }
-
-  // Leftover days: from the last monthly anchor to the end date.
+  const advancedMonthIndex = start.month - 1 + months
+  const advancedYear = start.year + Math.floor(advancedMonthIndex / 12)
+  const advancedMonth = (advancedMonthIndex % 12) + 1
   const anchor: CalendarDate = {
-    year: anchorYear,
-    month: anchorMonth,
-    day: Math.min(start.day, daysInMonth(anchorYear, anchorMonth)),
+    year: advancedYear,
+    month: advancedMonth,
+    day: Math.min(start.day, daysInMonth(advancedYear, advancedMonth)),
   }
-  let days = diffInDays(anchor, end)
-  if (days < 0) days = 0
+  const days = Math.max(0, diffInDays(anchor, end))
   return { months, days }
 }
 

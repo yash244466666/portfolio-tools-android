@@ -3,7 +3,6 @@
  * always through UTF-8 bytes (TextEncoder/TextDecoder semantics). Original
  * work for this repository; no upstream code is copied.
  */
-import { parseBoundedDecimal } from "@/tools/_shared/bounded-parse"
 
 export type NumberBase = "binary" | "octal" | "decimal"
 export type ByteDelimiter = "space" | "newline" | "none"
@@ -56,10 +55,10 @@ export type DecodeFailure =
 
 /**
  * Decodes per-byte numbers in the chosen base back into UTF-8 text. Parsing
- * is strict: the shared decimal grammar applies to every token after the
- * base-specific prefix split, malformed or out-of-range tokens fail with a
- * typed message, and byte sequences that are not valid UTF-8 fail closed
- * instead of producing replacement characters silently.
+ * is strict: every token must be an integer in the base's own digit set
+ * (fractions, exponents, and out-of-range values fail with a typed message),
+ * and byte sequences that are not valid UTF-8 fail closed instead of
+ * producing replacement characters silently.
  */
 export function decodeText(
   input: string,
@@ -70,30 +69,47 @@ export function decodeText(
   if (trimmed === "") return { status: "error", message: "Enter the encoded values to decode." }
 
   const radix = baseFor(base)
-  const separator =
-    delimiter === "none"
-      ? new RegExp(`[\\s\\S]{${Math.ceil(8 / Math.log2(radix))}}`, "g")
-      : delimiterTokens[delimiter]
-  const tokens =
-    delimiter === "none"
-      ? (trimmed.match(separator) ?? [])
-      : trimmed.split(delimiterTokens[delimiter]).filter((token) => token !== "")
+  const width = Math.ceil(8 / Math.log2(radix))
+  // Whitespace normalization: pasted CRLF/CR/tabs become the active
+  // delimiter (or are stripped for the fixed-width "none" stream), and
+  // non-breaking spaces count as whitespace before splitting.
+  const normalized = trimmed
+    .replace(/\u00A0/g, " ")
+    .replace(/\r\n?/g, delimiter === "newline" ? "\n" : " ")
+    .replace(/\t/g, delimiter === "newline" ? "\n" : " ")
+
+  let tokens: string[]
+  if (delimiter === "none") {
+    const stripped = normalized.replace(/\s+/g, "")
+    if (stripped.length % width !== 0) {
+      return {
+        status: "error",
+        message: `The fixed-width stream must be a multiple of ${width} characters for ${base}; some trailing characters do not form a complete value.`,
+      }
+    }
+    tokens = stripped.match(new RegExp(`[\\s\\S]{${width}}`, "g")) ?? []
+  } else if (delimiter === "newline") {
+    tokens = normalized.split("\n")
+  } else {
+    tokens = normalized.split(/\s+/)
+  }
+  tokens = tokens.filter((token) => token !== "")
 
   const bytes: number[] = []
-  const width = Math.ceil(8 / Math.log2(radix))
-  const digitPattern = base === "binary" ? /^[01]+$/ : base === "octal" ? /^[0-7]+$/ : /^\d+$/
+  const digitPattern =
+    base === "binary"
+      ? /^[01]+$/
+      : base === "octal"
+        ? /^[0-7]+$/
+        : // Decimal bytes are integers only: the shared decimal grammar also
+          // accepts fractions, which would silently truncate into a byte.
+          /^\d+$/
   for (const token of tokens) {
-    if (base === "decimal") {
-      const parsed = parseBoundedDecimal(token, {
-        minimum: 0,
-        maximum: 255,
-        outOfRange: "reject",
-      })
-      if (!parsed) {
-        return { status: "error", message: `"${token.slice(0, 32)}" is not a valid ${base} value.` }
+    if (delimiter === "none" && token.length !== width) {
+      return {
+        status: "error",
+        message: `"${token.slice(0, 32)}" is not exactly ${width} characters for ${base} with no delimiter.`,
       }
-      bytes.push(parsed.value)
-      continue
     }
     if (!digitPattern.test(token) || token.length > width) {
       return { status: "error", message: `"${token.slice(0, 32)}" is not a valid ${base} value.` }

@@ -56,6 +56,18 @@ describe("analyzeWordFrequency", () => {
     expect(kept.tokenCount).toBe(5)
   })
 
+  it("removes capitalized stopwords even when the display fold is off", () => {
+    const result = analyzeWordFrequency("The cat and the dog", {
+      topN: 5,
+      caseFold: false,
+      removeStopwords: true,
+    })
+    // "The", "and", and "the" are still stopwords with the fold off; the
+    // capitalized "The" would survive as a distinct display key without this.
+    expect(result.stopwordsRemoved).toBe(3)
+    expect(result.tokenCount).toBe(2)
+  })
+
   it("tokenizes on Unicode word boundaries across scripts and digits", () => {
     const result = analyzeWordFrequency("café naïve 東京 42 42 don't", {
       topN: 10,
@@ -71,13 +83,59 @@ describe("analyzeWordFrequency", () => {
     expect(fortyTwo?.count).toBe(2)
   })
 
-  it("breaks ties alphabetically for a deterministic table", () => {
+  it("treats the typographic apostrophe as a word character and strips possessives", () => {
+    const result = analyzeWordFrequency("don’t stop dogs' bones", {
+      topN: 10,
+      caseFold: true,
+      removeStopwords: true,
+    })
+    const words = result.entries.map((entry) => entry.word)
+    expect(words).toContain("don’t")
+    expect(words).toContain("dogs")
+    expect(words).not.toContain("dogs'")
+    // "stop" is a content word, not a stopword.
+    expect(words).toContain("stop")
+    expect(words).not.toContain("and")
+  })
+
+  it("case-folds with the invariant algorithm (Turkish-locale safe)", () => {
+    // toLocaleLowerCase under a Turkish host locale maps "I" to "ı"; the
+    // invariant fold must keep "I" and "i" together.
+    const result = analyzeWordFrequency("I i", {
+      topN: 5,
+      caseFold: true,
+      removeStopwords: false,
+    })
+    expect(result.uniqueWordCount).toBe(1)
+    expect(result.entries[0]?.count).toBe(2)
+  })
+
+  it("keeps the all-filtered state distinct from the empty state", () => {
+    const allFiltered = analyzeWordFrequency("the and", {
+      topN: 5,
+      caseFold: true,
+      removeStopwords: true,
+    })
+    expect(allFiltered.rawTokenCount).toBe(2)
+    expect(allFiltered.tokenCount).toBe(0)
+    expect(allFiltered.entries).toEqual([])
+  })
+
+  it("breaks ties by codepoint order, immune to the host locale", () => {
     const result = analyzeWordFrequency("cherry banana apple", {
       topN: 5,
       caseFold: true,
       removeStopwords: false,
     })
     expect(result.entries.map((entry) => entry.word)).toEqual(["apple", "banana", "cherry"])
+    // "ä" (U+00E4) sorts AFTER "z" (U+007A) by codepoint; an sv locale would
+    // flip it, so this vector pins the deterministic comparator.
+    const flip = analyzeWordFrequency("ä z", {
+      topN: 5,
+      caseFold: true,
+      removeStopwords: false,
+    })
+    expect(flip.entries.map((entry) => entry.word)).toEqual(["z", "ä"])
   })
 
   it("handles the empty and punctuation-only inputs", () => {

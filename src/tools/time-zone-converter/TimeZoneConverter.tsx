@@ -145,22 +145,19 @@ export default function TimeZoneConverter() {
               : "Enter a date and time to convert."}
         </p>
         {result && result.status !== "error" ? (
-          <dl className="mt-3 grid gap-1 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-[var(--text-secondary)]">Converted</dt>
-              <dd className="font-mono">{result.formatted}</dd>
-            </div>
-            {result.status === "skipped" ? (
+          <>
+            <dl className="mt-3 grid gap-1 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-[var(--text-secondary)]">Converted</dt>
+                <dd className="font-mono">{result.formatted}</dd>
+              </div>
+            </dl>
+            {result.status === "skipped" || result.status === "ambiguous" ? (
               <p className="text-sm" role="alert">
                 {result.note}
               </p>
             ) : null}
-            {result.status === "ambiguous" ? (
-              <p className="text-sm" role="alert">
-                {result.note}
-              </p>
-            ) : null}
-          </dl>
+          </>
         ) : null}
       </ToolPanel>
 

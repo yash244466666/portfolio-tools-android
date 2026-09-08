@@ -1,6 +1,6 @@
-> Last updated: 2026-09-08 15:10 Europe/Berlin# Android Tools Implementation Tracker
+# Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 14:20 Europe/Berlin
+> Last updated: 2026-09-08 16:00 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -17,6 +17,7 @@
   - **#181 Time Zone Converter** (`src/tools/time-zone-converter/`, core): a curated ~50-zone fixed IANA subset embedded as data (public-domain provenance noted), conversion via `Intl.DateTimeFormat` with an explicit `timeZone` over fixed ISO components (never locale parsing), two-pass offset resolution, and honest distinct statuses for spring-forward gaps (skipped) and fall-back overlaps (ambiguous, earlier interpretation used).
 - Registry: five enabled entries (risk low, network false, persistent false, lazy components; lucide icons ListFilter/Binary/Timer/CalendarDays/Globe). Tests: five pure suites plus five component suites covering labels, empty/invalid/done/reset states, `role="status"` feedback, and DST edge states; one Playwright scenario exercises the Time Zone Converter (known-offset conversion, spring-forward alert, reset).
 - Emulator checklist driver: `enabledToolCount` 91 -> 96 with five per-tool CDP checks appended in the existing style (using the batch-14 `selectOption` helper where selects appear).
+- Code-review pass applied on the same branch (15 findings, all fixed): fall-back overlaps now detect both candidate instants via a ±12 h offset bracket (the two-pass previously missed the earlier candidate in positive-UTC-offset zones, so Berlin-style overlaps never surfaced) and the note states the resolved interpretation truthfully; spring-forward gaps resolve forward to the next valid time (standard-library convention — NY 02:30 → 03:30) with the note naming the resolved wall time; the fixed-width binary/octal decode fails closed on trailing remainders; decimal decode is integer-only per base (no silent fraction truncation); date-difference months compute closed-form (the 12,000-month loop cap gave wrong breakdowns on multi-century spans — verified against a month-by-month brute force over a 2,000-year vector); the word tokenizer is one shared module (`src/tools/_shared/word-tokenizer.ts`) treating both apostrophe forms as word characters, stripping possessives, folding with invariant `toLowerCase()` (Turkish-safe), and ranking ties by codepoint comparator (sv-locale flip pinned by test); stopword removal always compares the folded form so capitalized stopwords are removed with the fold off; the word-frequency over-cap flag derives from state so Clear clears it; text-binary decode normalizes pasted CRLF/CR/tabs/NBSP before splitting; all-filtered and punctuation-only inputs get distinct honest statuses; DST notes moved out of the invalid `<dl>` child position; a fused tracker H1/timestamp was repaired.
 - Batches complete through 15: only batch 16 (loan-emi-calculator #183, color-contrast-checker #177, dice-roller #185, fuel-trip-cost-calculator #188) remains for the 100-tool scope.
 
 ### 2026-09-08 — Dev batch 14: five ADR 0022 additions (issues #175, #176, #184, #186, #187)

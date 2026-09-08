@@ -46,14 +46,34 @@ describe("WordFrequencyAnalyzer", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(/capped at the first 100,000 characters/i)
   })
 
-  it("clears back to the empty state", () => {
+  it("clears back to the empty state, including the over-cap disclosure", () => {
     renderTool()
     fireEvent.change(screen.getByLabelText("Text to analyze"), {
-      target: { value: "apple banana" },
+      target: { value: "a".repeat(100_001) },
     })
+    expect(screen.getByRole("alert")).toBeVisible()
     fireEvent.click(screen.getByRole("button", { name: /clear text/i }))
     expect(screen.getByLabelText("Text to analyze")).toHaveValue("")
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
     expect(screen.getByRole("status")).toHaveTextContent(/enter text/i)
     expect(screen.queryByRole("table")).not.toBeInTheDocument()
+  })
+
+  it("reports an all-filtered input distinctly from the empty state", () => {
+    renderTool()
+    fireEvent.change(screen.getByLabelText("Text to analyze"), {
+      target: { value: "the and" },
+    })
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /all 2 words were skipped as common english words/i,
+    )
+  })
+
+  it("reports punctuation-only input as no words found", () => {
+    renderTool()
+    fireEvent.change(screen.getByLabelText("Text to analyze"), {
+      target: { value: "!!! … ???" },
+    })
+    expect(screen.getByRole("status")).toHaveTextContent(/no words were found/i)
   })
 })

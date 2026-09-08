@@ -8,6 +8,10 @@ import {
   weekdayOf,
 } from "./date-difference"
 
+function toUtc(date: { year: number; month: number; day: number }): number {
+  return Date.UTC(date.year, date.month - 1, date.day)
+}
+
 describe("weekdayOf", () => {
   it("matches known weekdays on the UTC anchor", () => {
     // 2026-09-08 is a Tuesday.
@@ -84,6 +88,33 @@ describe("monthsAndDaysBetween", () => {
       { year: 2026, month: 3, day: 30 },
     )
     expect(result).toEqual({ months: 2, days: 0 })
+  })
+
+  it("matches a month-by-month brute force over multi-century spans", () => {
+    const start = { year: 1000, month: 1, day: 15 }
+    const end = { year: 3000, month: 6, day: 20 }
+    const result = monthsAndDaysBetween(start, end)
+
+    // Brute force: advance one month at a time from the start.
+    let months = 0
+    let anchorYear = start.year
+    let anchorMonth = start.month
+    for (;;) {
+      const nextMonth = anchorMonth === 12 ? 1 : anchorMonth + 1
+      const nextYear = anchorMonth === 12 ? anchorYear + 1 : anchorYear
+      const day = Math.min(start.day, daysInMonth(nextYear, nextMonth))
+      if (toUtc({ year: nextYear, month: nextMonth, day }) > toUtc(end)) break
+      anchorYear = nextYear
+      anchorMonth = nextMonth
+      months += 1
+    }
+    const anchorDay = Math.min(start.day, daysInMonth(anchorYear, anchorMonth))
+    const expectedDays = Math.round(
+      (toUtc(end) - toUtc({ year: anchorYear, month: anchorMonth, day: anchorDay })) / 86_400_000,
+    )
+    expect(result.months).toBe(months)
+    expect(result.months).toBeGreaterThan(24_000)
+    expect(result.days).toBe(expectedDays)
   })
 
   it("returns zeros for inverted ranges", () => {

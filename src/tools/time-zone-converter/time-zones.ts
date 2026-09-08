@@ -177,13 +177,15 @@ function formatWall(wall: ZoneWallTime): string {
 
 /**
  * Converts wall-clock components in `fromZone` into the wall time shown in
- * `toZone`. DST edges are surfaced honestly:
+ * `toZone`. DST edges are surfaced honestly and resolved deterministically:
  *
- * - a wall time that does not exist in the from-zone (spring-forward gap)
- *   resolves to a "skipped" status carrying the wall time the input actually
- *   maps back to;
  * - a wall time that happens twice (fall-back overlap) resolves to the
- *   earlier interpretation and an "ambiguous" status;
+ *   earlier interpretation and an "ambiguous" status — this is independent
+ *   of the zone's UTC offset sign (both negative-offset America/New_York and
+ *   positive-offset Europe/Berlin resolve identically);
+ * - a wall time that does not exist in the from-zone (spring-forward gap)
+ *   resolves forward to the next valid time (standard-library convention)
+ *   with a "skipped" status that names the resolved wall time;
  * - an unknown zone id resolves to an "error".
  */
 export function convertTimeZone(
@@ -209,46 +211,57 @@ export function convertTimeZone(
     return { status: "error", message: "Enter a valid date and time." }
   }
 
-  // Two-pass resolution: the zone offset at the naive instant may differ
-  // from the offset at the resolved instant (DST edges), so iterate once.
+  // Bracket the offsets 12 hours on either side of the naive instant. The
+  // probes are far enough out that any transition inside a DST edge (never
+  // more than two hours wide) lands between them, so the pair yields the
+  // pre- and post-transition offsets regardless of the zone's offset sign.
   const naive = wallToUtc(input)
-  let instant: number
-  try {
-    const firstOffset = offsetMinutes(naive, fromZone)
-    if (firstOffset === null) {
-      return { status: "error", message: `Unknown time zone "${fromZone}".` }
-    }
-    const firstGuess = naive - firstOffset * 60_000
-    const secondOffset = offsetMinutes(firstGuess, fromZone) ?? firstOffset
-    instant = naive - secondOffset * 60_000
-  } catch {
+  const offsetBefore = offsetMinutes(naive - 43_200_000, fromZone)
+  const offsetAfter = offsetMinutes(naive + 43_200_000, fromZone)
+  if (offsetBefore === null || offsetAfter === null) {
     return { status: "error", message: `Unknown time zone "${fromZone}".` }
   }
 
+  // The two candidate instants for the requested wall time: read with the
+  // pre-transition offset and with the post-transition offset. At least one
+  // round-trips for every valid wall time.
+  const candidateEarly = naive - offsetBefore * 60_000
+  const candidateLate = naive - offsetAfter * 60_000
+  const candidates = [...new Set([candidateEarly, candidateLate])].sort(
+    (left, right) => left - right,
+  )
+  const valid = candidates.filter((candidate) => {
+    const wall = wallTimeInZone(candidate, fromZone)
+    return wall !== null && sameWall(wall, input)
+  })
+
+  // Resolution: the earlier candidate when it is valid (the deterministic
+  // convention for overlaps), otherwise the forward-resolved gap instant.
+  const instant = valid.length > 0 ? (valid[0] as number) : candidateEarly
   const converted = wallTimeInZone(instant, toZone)
   if (!converted) {
     return { status: "error", message: `Unknown time zone "${toZone}".` }
   }
   const formatted = formatWall(converted)
 
-  // Round-trip the resolved instant back into the from-zone to detect a
-  // spring-forward gap.
-  const actualFrom = wallTimeInZone(instant, fromZone)
-  if (!actualFrom || !sameWall(actualFrom, input)) {
+  if (valid.length === 0) {
+    // Spring-forward gap: candidateEarly maps the skipped wall time to the
+    // next valid instant (the conventional forward resolution), so the
+    // from-zone round-trip names the resolved wall time honestly.
+    const actualFrom = wallTimeInZone(instant, fromZone)
     return {
       status: "skipped",
       instantMs: instant,
       converted,
       formatted,
       actualFromWall: actualFrom ? formatWall(actualFrom) : "",
-      note: `That local time does not exist in ${fromZone} (daylight-saving spring-forward). It was interpreted as ${actualFrom ? formatWall(actualFrom) : "the next valid time"}.`,
+      note: `That local time does not exist in ${fromZone} (daylight-saving spring-forward). It was interpreted as the next valid time, ${actualFrom ? formatWall(actualFrom) : ""}.`,
     }
   }
 
-  // Fall-back overlap: the same wall time occurs one hour earlier or later.
-  const earlier = wallTimeInZone(instant - 3_600_000, fromZone)
-  const later = wallTimeInZone(instant + 3_600_000, fromZone)
-  if ((earlier && sameWall(earlier, input)) || (later && sameWall(later, input))) {
+  if (valid.length > 1) {
+    // Fall-back overlap: both offsets produced a valid instant; the earlier
+    // candidate is the deterministic resolution.
     return {
       status: "ambiguous",
       instantMs: instant,

@@ -11,14 +11,15 @@ import {
 } from "./word-frequency"
 
 export default function WordFrequencyAnalyzer() {
-  const [text, setText] = useState("")
+  const [rawText, setRawText] = useState("")
   const [topN, setTopN] = useState<TopNCount>(10)
   const [caseFold, setCaseFold] = useState(true)
   const [removeStopwords, setRemoveStopwords] = useState(true)
 
-  // The over-cap flag compares the raw pasted length before the clamped
-  // state lands, so the disclosure survives the trim.
-  const [overCap, setOverCap] = useState(false)
+  // The over-cap flag derives from the raw input, so Clear text always
+  // clears it too.
+  const overCap = rawText.length > maximumInputCharacters
+  const text = clampInput(rawText)
 
   const result = useMemo(
     () => analyzeWordFrequency(text, { topN, caseFold, removeStopwords }),
@@ -41,11 +42,7 @@ export default function WordFrequencyAnalyzer() {
           <textarea
             className="app-input min-h-40"
             id="word-frequency-input"
-            onChange={(event) => {
-              const raw = event.target.value
-              setOverCap(raw.length > maximumInputCharacters)
-              setText(clampInput(raw))
-            }}
+            onChange={(event) => setRawText(event.target.value)}
             placeholder="Paste the text to analyze…"
             value={text}
           />
@@ -95,7 +92,7 @@ export default function WordFrequencyAnalyzer() {
           </label>
         </div>
         <div className="mt-4">
-          <Button onClick={() => setText("")} variant="quiet">
+          <Button onClick={() => setRawText("")} variant="quiet">
             Clear text
           </Button>
         </div>
@@ -105,7 +102,11 @@ export default function WordFrequencyAnalyzer() {
         <p aria-live="polite" className="text-sm" role="status">
           {result.tokenCount > 0
             ? `${result.tokenCount.toLocaleString("en-US")} words (${result.uniqueWordCount.toLocaleString("en-US")} unique)${removeStopwords && result.stopwordsRemoved > 0 ? ` after skipping ${result.stopwordsRemoved.toLocaleString("en-US")} common English words` : ""}. Showing the top ${Math.min(topN, result.uniqueWordCount)}.`
-            : "Enter text to see the most frequent words."}
+            : result.rawTokenCount > 0
+              ? `All ${result.rawTokenCount.toLocaleString("en-US")} word${result.rawTokenCount === 1 ? "" : "s"} were skipped as common English words. Turn off the skip list to count them.`
+              : rawText.trim() !== "" || text.trim() !== ""
+                ? "No words were found in the text (punctuation and symbols are not counted)."
+                : "Enter text to see the most frequent words."}
         </p>
         {result.entries.length > 0 ? (
           <table className="mt-3 w-full text-sm">

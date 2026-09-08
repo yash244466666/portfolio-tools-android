@@ -61,6 +61,15 @@ describe("ReadingTimeEstimator", () => {
     expect(alerts.some((alert) => alert.textContent?.match(/at least 1 character/i))).toBe(true)
   })
 
+  it("reports punctuation-only input as no words found", () => {
+    renderTool()
+    fireEvent.change(screen.getByLabelText("Text to estimate"), {
+      target: { value: "!!! … ???" },
+    })
+    expect(screen.getByRole("status")).toHaveTextContent(/no words were found/i)
+    expect(screen.queryByRole("table")).not.toBeInTheDocument()
+  })
+
   it("resets text, speed, and caps", () => {
     renderTool()
     fireEvent.change(screen.getByLabelText("Text to estimate"), {

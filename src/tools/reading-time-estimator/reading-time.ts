@@ -3,6 +3,7 @@
  * for this repository; no upstream code is copied.
  */
 import { parseBoundedDecimal, type BoundedParseResult } from "@/tools/_shared/bounded-parse"
+import { countWords as countWordsInText } from "@/tools/_shared/word-tokenizer"
 
 export const maximumInputCharacters = 100_000
 export const minimumWordsPerMinute = 100
@@ -22,11 +23,9 @@ export const budgetSlots: readonly BudgetSlot[] = [
   { key: "post", label: "Post", defaultCap: 3000 },
 ]
 
-const wordPattern = /\p{L}[\p{L}\p{N}']*|\p{N}+/gu
-
-/** Counts words on Unicode word boundaries (same tokenizer family as the Word Frequency Analyzer). */
+/** Counts words through the shared Unicode tokenizer (with invariant folding). */
 export function countWords(text: string): number {
-  return text.match(wordPattern)?.length ?? 0
+  return countWordsInText(text)
 }
 
 /** Parses a words-per-minute value clamped into 100-500; null when invalid. */

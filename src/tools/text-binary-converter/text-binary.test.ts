@@ -81,6 +81,43 @@ describe("decode failure modes", () => {
     expect(decodeText("2", "binary", "space").status).toBe("error")
   })
 
+  it("fails closed on a fixed-width remainder with the none delimiter", () => {
+    // 7 binary characters cannot form a complete byte.
+    const failure = decodeText("1100001", "binary", "none")
+    expect(failure.status).toBe("error")
+    if (failure.status === "error") {
+      expect(failure.message).toMatch(/multiple of 8 characters/i)
+    }
+  })
+
+  it("rejects decimal fractions instead of truncating them into bytes", () => {
+    const failure = decodeText("12.5 105", "decimal", "space")
+    expect(failure.status).toBe("error")
+    if (failure.status === "error") {
+      expect(failure.message).toMatch(/not a valid decimal/)
+    }
+  })
+
+  it("normalizes pasted CRLF, tabs, and NBSP before splitting", () => {
+    // CRLF pasted into the space-delimited panel still decodes.
+    expect(decodeText("72\r\n105", "decimal", "space")).toEqual({
+      status: "ok",
+      text: "Hi",
+      byteCount: 2,
+    })
+    // Tabs act as the newline delimiter, and NBSP acts as whitespace.
+    expect(decodeText("72\t105", "decimal", "newline")).toEqual({
+      status: "ok",
+      text: "Hi",
+      byteCount: 2,
+    })
+    expect(decodeText("72\u00A0105", "decimal", "space")).toEqual({
+      status: "ok",
+      text: "Hi",
+      byteCount: 2,
+    })
+  })
+
   it("fails closed on invalid UTF-8 byte sequences", () => {
     // A lone 0xFF byte is never valid UTF-8.
     const failure = decodeText("255", "decimal", "space")

@@ -146,7 +146,9 @@ export default function ReadingTimeEstimator() {
             ? "Fix the highlighted reading speed to estimate."
             : words > 0
               ? `${words.toLocaleString("en-US")} words take about ${formatReadingTime(time)} at ${wpm ?? defaultWordsPerMinute} words per minute.`
-              : "Enter text to estimate the reading time."}
+              : clampedText.trim() !== ""
+                ? "No words were found in the text (punctuation and symbols are not counted)."
+                : "Enter text to estimate the reading time."}
         </p>
         {words > 0 && !wpmInvalid ? (
           <table className="mt-3 w-full text-sm">

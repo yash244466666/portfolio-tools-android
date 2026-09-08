@@ -100,6 +100,53 @@ describe("convertTimeZone", () => {
     expect(result.status).toBe("ambiguous")
     if (result.status === "ambiguous") {
       expect(result.note).toMatch(/happens twice/)
+      expect(result.note).toMatch(/earlier interpretation was used/)
+    }
+  })
+
+  it("resolves a spring-forward gap forward to the next valid time", () => {
+    // NY 2026-03-08 02:30 does not exist; the conventional forward mapping
+    // is 03:30 EDT = 07:30 UTC.
+    const result = convertTimeZone(
+      { year: 2026, month: 3, day: 8, hour: 2, minute: 30 },
+      "America/New_York",
+      "UTC",
+    )
+    expect(result.status).toBe("skipped")
+    if (result.status === "skipped") {
+      expect(result.formatted).toBe("2026-03-08 07:30")
+      expect(result.actualFromWall).toBe("2026-03-08 03:30")
+      expect(result.note).toMatch(/next valid time, 2026-03-08 03:30/)
+    }
+  })
+
+  it("detects a fall-back overlap in a positive-UTC-offset zone too", () => {
+    // Berlin 2025-10-26 02:30 happens twice (CEST 00:30Z and CET 01:30Z);
+    // the earlier interpretation (00:30Z) is the deterministic resolution.
+    const result = convertTimeZone(
+      { year: 2025, month: 10, day: 26, hour: 2, minute: 30 },
+      "Europe/Berlin",
+      "UTC",
+    )
+    expect(result.status).toBe("ambiguous")
+    if (result.status === "ambiguous") {
+      expect(result.formatted).toBe("2025-10-26 00:30")
+      expect(result.note).toMatch(/earlier interpretation was used/)
+    }
+  })
+
+  it("detects a spring-forward gap in a positive-UTC-offset zone", () => {
+    // Berlin 2026-03-29 02:30 does not exist (02:00 CET -> 03:00 CEST); the
+    // forward resolution is 03:30 CEST = 01:30 UTC.
+    const result = convertTimeZone(
+      { year: 2026, month: 3, day: 29, hour: 2, minute: 30 },
+      "Europe/Berlin",
+      "UTC",
+    )
+    expect(result.status).toBe("skipped")
+    if (result.status === "skipped") {
+      expect(result.formatted).toBe("2026-03-29 01:30")
+      expect(result.note).toMatch(/next valid time, 2026-03-29 03:30/)
     }
   })
 

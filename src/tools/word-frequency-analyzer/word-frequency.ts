@@ -11,6 +11,8 @@
  * enabled.
  */
 
+import { compareCodepoints, tokenizeWords } from "@/tools/_shared/word-tokenizer"
+
 /** The standard bounded-input cap shared with the other text tools. */
 export const maximumInputCharacters = 100_000
 
@@ -74,8 +76,6 @@ export const englishStopwords: readonly string[] = [
   "your",
 ]
 
-const wordPattern = /\p{L}[\p{L}\p{N}']*|\p{N}+/gu
-
 export interface WordFrequencyEntry {
   word: string
   count: number
@@ -86,15 +86,21 @@ export interface WordFrequencyEntry {
 export interface WordFrequencyResult {
   /** Total tokens after stopword removal (if enabled). */
   tokenCount: number
+  /** Tokens before stopword removal, so an all-filtered state can be distinct. */
+  rawTokenCount: number
   uniqueWordCount: number
   entries: WordFrequencyEntry[]
   stopwordsRemoved: number
 }
 
 /**
- * Tokenizes, applies the optional case-folded stopword removal, and returns
- * the top `topN` words with counts and percentages. Ties break
- * alphabetically so the same input always yields the same table.
+ * Tokenizes, applies stopword removal, and returns the top `topN` words
+ * with counts and percentages. Ties break by codepoint order so the same
+ * input always yields the same table on every host locale.
+ *
+ * Stopword removal always compares against the invariant case-folded form,
+ * independent of the display case-fold toggle: capitalized stopwords ("The")
+ * are removed even when the fold is off, and the removed count discloses it.
  */
 export function analyzeWordFrequency(
   text: string,
@@ -103,21 +109,21 @@ export function analyzeWordFrequency(
   const source = text.length > maximumInputCharacters ? text.slice(0, maximumInputCharacters) : text
   const counts = new Map<string, number>()
   let stopwordsRemoved = 0
+  let rawTokenCount = 0
 
-  for (const match of source.matchAll(wordPattern)) {
-    const token = match[0] ?? ""
-    const key = options.caseFold ? token.toLocaleLowerCase() : token
-    if (options.removeStopwords && englishStopwords.includes(key)) {
+  for (const token of tokenizeWords(source, options.caseFold)) {
+    rawTokenCount += 1
+    if (options.removeStopwords && englishStopwords.includes(token.toLowerCase())) {
       stopwordsRemoved += 1
       continue
     }
-    counts.set(key, (counts.get(key) ?? 0) + 1)
+    counts.set(token, (counts.get(token) ?? 0) + 1)
   }
 
   const tokenCount = [...counts.values()].reduce((sum, count) => sum + count, 0)
   const sorted = [...counts.entries()].sort((left, right) => {
     if (right[1] !== left[1]) return right[1] - left[1]
-    return left[0].localeCompare(right[0])
+    return compareCodepoints(left[0], right[0])
   })
 
   const entries = sorted.slice(0, options.topN).map(([word, count]) => ({
@@ -131,6 +137,7 @@ export function analyzeWordFrequency(
     uniqueWordCount: counts.size,
     entries,
     stopwordsRemoved,
+    rawTokenCount,
   }
 }
 
