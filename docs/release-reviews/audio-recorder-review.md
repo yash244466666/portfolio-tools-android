@@ -1,7 +1,7 @@
 # Release Review: Audio Recorder
 
 - Review issue: #34 (tool issue: #111)
-- Status: **DRAFT — the approval decision belongs to the product owner and is not made by this document**
+- Status: **APPROVED 2026-09-08** — the product owner approved implementation (permission budget, foreground-only confirmation, WebM/Opus + optional WAV format, proceed). See ADR 0020 (Accepted) and the #34 evidence comment; device evidence in section 5 gates #111's closure.
 - Date: 2026-09-08
 - Upstream reference: `portfolio-v2` commit `61e54c64edbeffc9487239b6dae399e255c6a71d`, `components/tools/media/audio-recorder.tsx` (198 lines)
 - Scope of this document: technical evidence and a proposed design so the tier-4 gate in `ANDROID_APP_IMPLEMENTATION_PLAN.md` ("Audio Recorder and Video to GIF experiments" and the `RECORD_AUDIO` permission decision) can be decided deliberately. Implementation work on #111 must not start before the decision is recorded.

@@ -1,7 +1,7 @@
 # Release Review: YouTube Downloader
 
 - Review issue: #36 (tool issue: #93)
-- Status: **DRAFT — the legal/policy/product decision belongs to the product owner and is not made by this document**
+- Status: **DECIDED 2026-09-08 — EXCLUDED from version 1** (dossier option 3). See ADR 0021 (Accepted), which supersedes ADR 0004's all-87 clause for this tool, and the #36 evidence comment.
 - Date: 2026-09-08
 - Upstream reference: `portfolio-v2` commit `61e54c64edbeffc9487239b6dae399e255c6a71d`, `components/tools/dev/youtube-downloader.tsx` (150 lines)
 - Plan anchors: `ANDROID_APP_IMPLEMENTATION_PLAN.md` line 470 ("Exclude YouTube Downloader from the first Play release" until validated) and section 29.4, which lists "YouTube downloading or other third-party media-download workflows" among workflows excluded "unless separately approved"
