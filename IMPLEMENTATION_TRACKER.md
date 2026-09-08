@@ -57,6 +57,14 @@
 - Section 2 of `AGENT.md`/`CLAUDE.md` (kept byte-identical) updated to the 86-tool registry; "not yet implemented" now records no remaining in-scope catalog tools.
 - Device-matrix rows from dossier section 5 remain binding for #112 closure (not claimable from this batch): decode across the codec matrix with a distinct unsupported state, rotation-metadata correctness on portrait phone videos, memory ceiling and renderer responsiveness on a maximum take (30 s / 100 frames / 640 px) on a mid-range device, low-storage Save As failure recovery, and interruption (call/backgrounding) mid-conversion with no retained buffers.
 
+### 2026-09-08 — Dev batch 15 merge reconciliation
+
+- Squash-merged PR #191 as `5864cbe`, closing #178, #179, #180, #182, and #181 (Word Frequency Analyzer, Text-Binary Converter, Reading Time Estimator, Date Difference Calculator, Time Zone Converter — all original work; embedded data sets are the curated English stopword list and a ~50-zone IANA subset, both public domain, recorded in provenance). Hosted CI green (android-debug 4m1s, web-quality 6m39s).
+- Max-effort code-review pass (15 verified findings, all applied before merge): sign-independent DST resolution (a ±12 h candidate bracket replaces the sign-dependent two-pass; gaps resolve forward to the next valid wall time; both NY and Berlin vectors), fail-closed fixed-width and per-base-integer decodes, calendar-correct closed-form month math over multi-millennium spans, locale-invariant folding and codepoint tie-breaking (Turkish-I and sv-collation vectors), a shared apostrophe-aware tokenizer, honest all-filtered states, CRLF/NBSP normalization, a repaired tracker H1, and the AGENT/CLAUDE remaining-work sentence corrected to name only the batch-16 tools.
+- Gates after the fixes (unpiped): strict typecheck, zero-warning lint, 1592 web tests (207 files), production build, 180 E2E checks, Capacitor sync, Gradle `testDebugUnitTest lintDebug assembleDebug assembleInternal bundleRelease`, merged-manifest checks ×3, `git diff --check`, `format:check`, AGENT/CLAUDE byte-identity.
+- Registry now at **96 enabled entries; 4 of the 100-tool scope remain** (batch 16: #183 Loan/EMI, #177 Color Contrast, #185 Dice Roller, #188 Fuel & Trip Cost).
+- Next executable item: batch 16 under the same review-fix-merge cycle; emulator driver run at 100 tools; device-evidence and release-decision gates unchanged.
+
 ### 2026-09-08 — Dev batch 14 merge reconciliation
 
 - Squash-merged PR #190 as `8443d5c`, closing #175, #176, #184, #186, and #187 (Aspect Ratio Calculator, CSS Unit Converter, Discount & Tax Calculator, BMI Calculator, Unit Price Comparer — all original work, none present in the upstream catalog). Hosted CI green (android-debug 4m4s, web-quality 7m57s).
