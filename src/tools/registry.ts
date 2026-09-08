@@ -1,5 +1,9 @@
 import { lazy } from "react"
 import {
+  CalendarDays,
+  Hourglass,
+  IdCard,
+  Timer,
   ArrowDownUp,
   ArrowLeftRight,
   AudioLines,
@@ -1121,6 +1125,62 @@ export const tools: readonly ToolDefinition[] = [
     network: false,
     persistent: false,
     component: lazy(() => import("@/tools/fake-data-generator/FakeDataGenerator")),
+  },
+  {
+    id: "stopwatch",
+    label: "Stopwatch",
+    description:
+      "Count elapsed time from wall-clock anchors with laps, best/worst marking, and a reset control.",
+    category: "core",
+    tags: ["stopwatch", "timer", "laps", "elapsed", "offline"],
+    icon: Timer,
+    status: "enabled",
+    risk: "low",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/stopwatch/Stopwatch")),
+  },
+  {
+    id: "countdown-timer",
+    label: "Countdown Timer",
+    description:
+      "Count down from a chosen duration against a wall-clock deadline with quick presets.",
+    category: "core",
+    tags: ["countdown", "timer", "alarm", "presets", "offline"],
+    icon: Hourglass,
+    status: "enabled",
+    risk: "low",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/countdown-timer/CountdownTimer")),
+  },
+  {
+    id: "ical-generator",
+    label: "iCalendar Generator",
+    description:
+      "Build an RFC 5545 .ics event file with escaped text and a fresh UID, ready to import.",
+    category: "dev",
+    tags: ["icalendar", "ics", "calendar", "event", "rfc 5545", "offline"],
+    icon: CalendarDays,
+    status: "enabled",
+    risk: "low",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/ical-generator/IcsGenerator")),
+  },
+  {
+    id: "vcard-generator",
+    label: "vCard Generator",
+    description:
+      "Build an RFC 6350 vCard 3.0 contact with escaped text fields, ready to import.",
+    category: "dev",
+    tags: ["vcard", "contact", "vcf", "rfc 6350", "offline"],
+    icon: IdCard,
+    status: "enabled",
+    risk: "low",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/vcard-generator/VcardGenerator")),
   },
 ] as const
 

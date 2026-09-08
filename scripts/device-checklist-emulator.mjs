@@ -5,7 +5,7 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 76
+const enabledToolCount = 80
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -1308,6 +1308,70 @@ async function phaseTools(page) {
         await p.setValue("#open-graph-preview-input", "<head><title>Plain</title></head>")
         await p.waitFor("document.body.innerText.includes('No Open Graph or Twitter Card')")
         return "tags previewed as text and miss explained without any fetch"
+      },
+    ],
+    [
+      "stopwatch",
+      "Stopwatch",
+      async (p) => {
+        await p.waitFor("document.querySelector('[role=timer]')?.textContent === '00:00.00'")
+        await p.clickButton("Start")
+        await p.waitFor("!document.querySelector('[role=timer]')?.textContent.startsWith('00:00.')")
+        await p.clickButton("Lap")
+        await p.clickButton("Lap")
+        await p.waitFor("document.body.innerText.includes('best lap')")
+        await p.clickButton("Stop")
+        await p.clickButton("Reset")
+        await p.waitFor("document.querySelector('[role=timer]')?.textContent === '00:00.00'")
+        return "wall-clock counting with two laps and best/worst marking; reset to idle"
+      },
+    ],
+    [
+      "countdown-timer",
+      "Countdown Timer",
+      async (p) => {
+        await p.waitFor("document.querySelector('[role=timer]')?.textContent === '00:00:00'")
+        await p.clickButton("1 min")
+        await p.clickButton("Start")
+        await p.waitFor(
+          "document.querySelector('[role=timer]')?.textContent.startsWith('00:00:5') || document.querySelector('[role=timer]')?.textContent === '00:01:00'",
+        )
+        await p.clickButton("Pause")
+        await p.waitFor("document.body.innerText.includes('Paused')")
+        await p.clickButton("Reset")
+        await p.waitFor("document.querySelector('[role=timer]')?.textContent === '00:00:00'")
+        return "preset start, pause, and wall-clock reset rendered"
+      },
+    ],
+    [
+      "ical-generator",
+      "iCalendar Generator",
+      async (p) => {
+        await p.setValue("#ics-title", "Team sync, weekly")
+        await p.setValue("#ics-start-date", "2026-09-10")
+        await p.setValue("#ics-end-date", "2026-09-10")
+        await p.clickButton("Generate .ics")
+        await p.waitFor(
+          "document.querySelector('pre')?.textContent.includes('SUMMARY:Team sync\\\\, weekly')",
+        )
+        await p.clickCheckbox("All-day event")
+        return "CRLF calendar generated with RFC 5545 escaped commas"
+      },
+    ],
+    [
+      "vcard-generator",
+      "vCard Generator",
+      async (p) => {
+        await p.setValue("#vcard-first-name", "Grace")
+        await p.setValue("#vcard-last-name", "Hopper; Admiral")
+        await p.clickButton("Generate vCard")
+        await p.waitFor(
+          "document.querySelector('pre')?.textContent.includes('N:Hopper\\\\; Admiral;Grace;;;')",
+        )
+        await p.setValue("#vcard-url", "http://example.com")
+        await p.clickButton("Generate vCard")
+        await p.waitFor("document.body.innerText.includes('Enter an https website URL.')")
+        return "RFC 6350 escaping rendered and non-https URL rejected"
       },
     ],
     [

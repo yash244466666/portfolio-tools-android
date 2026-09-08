@@ -1,11 +1,25 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 03:12 Europe/Berlin
+> Last updated: 2026-09-08 02:57 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **all 87 audited catalog tools; 76 implemented, 11 remaining**
+> Approved public version 1 scope: **all 87 audited catalog tools; 80 implemented, 7 remaining**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Dev batch 9 tool migration (Stopwatch, Countdown Timer, iCalendar Generator, vCard Generator)
+
+- Implemented the first tier-2 batch (issues #127, #128, #67, and #68) as one offline batch. All four are offline, non-persistent, lazy-loaded, and built only on the platform service contracts and shared UI primitives.
+- Stopwatch (`src/tools/stopwatch/`) fixes the upstream tick-counting design: upstream accumulated elapsed time by counting interval ticks, so a throttled background timer made the stopwatch run slow. Elapsed time reconstructs from a wall-clock anchor (start timestamp plus elapsed-at-start) per the ADR 0014 timer pattern; the 50 ms interval only drives re-render. Laps are stored newest-first with best/worst markers computed in a pure tested module (markers appear only with two or more laps), and haptics go through the platform service.
+- Countdown Timer (`src/tools/countdown-timer/`) fixes the same class of bug upstream: a decrementing per-tick counter lost time in the background. Remaining time derives from a wall-clock deadline; pausing freezes the remaining seconds and resuming recomputes the deadline from them. Completion is best-effort by design — no exact-alarm promise — and duration fields are parsed as clamped integers (0–99 hours, 0–59 minutes/seconds) with a zero-duration error state. The decorative SVG ring is aria-hidden; the `role="timer"` text display is the source of truth.
+- iCalendar Generator (`src/tools/ical-generator/`) fixes two upstream correctness bugs: upstream formatted dates through `new Date(string)`, which parses `YYYY-MM-DD` as UTC midnight and shifts the calendar day in timezones west of UTC, so dates are now parsed by component with a strict regex; and upstream escaped only commas in text values, so a semicolon or newline corrupted the property — escaping now covers backslash, semicolon, comma, and newlines per RFC 5545. DTSTAMP is UTC, all-day events emit `VALUE=DATE` and hide the time fields, the UID comes from the platform RandomService, and event URLs are validated https-only.
+- vCard Generator (`src/tools/vcard-generator/`) fixes the upstream unescaped property interpolation (a name like `Smith; Jr` corrupted the N property) with RFC 6350 text escaping across all fields. Website URLs are validated https-only, the suggested `.vcf` filename is sanitized, and the upstream download anchor is replaced by the platform copy bridge.
+- Registry now has 80 enabled entries; 7 of the approved 87 remain. Tests: 8 suites (4 pure + 4 component, 43 new cases; the suite is now 165 files / 1169 tests) and 4 new E2E scenarios (81 scenarios × 2 viewports = 162 checks).
+- The emulator checklist driver gained the 80-tool catalog count and four per-tool checks (wall-clock laps with best/worst markers, preset start/pause/reset, CRLF calendar with RFC 5545 comma escaping, and RFC 6350 semicolon escaping with http rejection).
+- Validation gates ran unpiped: strict typecheck, zero-warning lint, 1169 web tests (165 files), 162 E2E checks, production build with the four new lazy chunks, Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes).
+- One artifact staleness incident is worth recording: the driver failed one check (`tool.ical-generator` checkbox attribute missing) while dist and the synced assets were correct. Diagnosis: the debug APK had been assembled before the final `cap:sync`, so it still bundled the previous build's chunks — uninstall + fresh install did not help because the stale bundle was baked into the APK, not the WebView cache. Re-running `assembleDebug` after sync fixed it. Lesson: after any asset edit, assemble the APK after the final sync, and verify the bundle hash inside the APK (`unzip -p app-debug.apk assets/public/index.html`) when an attribute probe fails against a correct dist.
+- A green run against the installed rebuilt artifact verified all 80 enabled tools — 94 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug, artifact SHA-256 3cb506cf59346194fb707174fd960a3b3b54dab12679c75110021c959da54824.
+- Next executable item: commit, open the PR closing issues #127, #128, #67, and #68, review hosted CI, merge, and reconcile; then continue with the tier-2 queue (Color Palette from Image #62, Chart Generator #92, Bookmark Manager #110, PDF Converter #42). Android artifact validation of all enabled tools remains queue item 4.
 
 ### 2026-09-08 — Dev batch 8 merge reconciliation
 
