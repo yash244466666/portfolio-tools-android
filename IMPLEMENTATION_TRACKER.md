@@ -1,11 +1,24 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 13:40 Europe/Berlin
+> Last updated: 2026-09-08 14:20 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 86 implemented, 14 tracked (issues #175-#188) pending the batch 14-16 implementations**
+> Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 91 implemented; 9 of 100 remain (batches 15-16)**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Dev batch 14: five ADR 0022 additions (issues #175, #176, #184, #186, #187)
+
+- Implemented and enabled five offline, permission-free, dependency-free tools as one batch, all original work (verified none exists upstream; no upstream code copied — one shared provenance row added):
+  - **#175 Aspect Ratio Calculator** (`src/tools/aspect-ratio-calculator/`, dev): GCD-reduced simplified ratios, eight common presets, target-width/height scaling with rounded whole-pixel dimensions, and a text-equivalent table.
+  - **#176 CSS Unit Converter** (`src/tools/css-unit-converter/`, dev): px/rem/em/% against a root font size clamped to 1-72 px, bidirectional conversion table, bounded finite-number parsing.
+  - **#184 Discount and Tax Calculator** (`src/tools/discount-tax-calculator/`, math): price clamped to 0-10,000,000, percent or flat discount, tax applied after the discount; all money carried as integer cents with exactly one half-up rounding per derived amount (`roundToCents`), so displays are exact 2-decimal strings and never float noise.
+  - **#186 BMI Calculator** (`src/tools/bmi-calculator/`, math): metric and imperial inputs, one-decimal BMI, WHO band labels rendered as text (never color alone), and a visible estimate-only/not-medical-advice disclaimer.
+  - **#187 Unit Price Comparer** (`src/tools/unit-price-comparer/`, math): up to four items with price (>= 0) + quantity (> 0) + unit (ml/l/g/kg/m/pc), base-unit normalization (ml/g/m/pc), deterministic input-order tie-breaking, and a ranked per-unit table.
+- Registry: five enabled entries (risk low, network false, persistent false, lazy components, lucide icons Ratio/Scaling/BadgePercent/HeartPulse/Scale). Tests: five pure suites (46 cases) with boundary/invalid vectors and five component suites (25 cases) covering accessible labels, distinct initial/empty/invalid/done/reset states, `role="status"` feedback, 48 dp buttons, and text-only category cues. One Playwright scenario exercises the Discount and Tax Calculator end to end (steps text, table, junk-money alert, reset).
+- Emulator checklist driver: `enabledToolCount` 85 -> 90 with five per-tool CDP checks appended in the existing style. `docs/SOURCE_PROVENANCE.md` gained one shared batch row.
+- Gates run unpiped, all green: format:check, typecheck (0 errors), lint (0 warnings), test (194 files, 1413 passed — was 1342 + 71 new), build, test:e2e (178 passed), cap:sync, `./android/gradlew -p android testDebugUnitTest lintDebug assembleDebug assembleInternal bundleRelease` (BUILD SUCCESSFUL), `android:manifest:check debug|internal/release` (reviewed 8 permissions, only MainActivity exported), `git diff --check` clean. Gradle daemon stopped after the run.
+- Batches 15-16 (word-frequency-analyzer, text-binary-converter, reading-time-estimator, date-difference-calculator, time-zone-converter; loan-emi-calculator, color-contrast-checker, dice-roller, fuel-trip-cost-calculator) remain assigned to Ready Project work.
 
 ### 2026-09-08 — Scope expansion: version 1 grows to 100 tools (ADR 0022)
 
