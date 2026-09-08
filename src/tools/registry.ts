@@ -37,6 +37,7 @@ import {
   FileSpreadsheet,
   FileStack,
   FileText,
+  Film,
   FileType,
   Gauge,
   GitCompareArrows,
@@ -1253,6 +1254,20 @@ export const tools: readonly ToolDefinition[] = [
     network: false,
     persistent: false,
     component: lazy(() => import("@/tools/audio-recorder/AudioRecorder")),
+  },
+  {
+    id: "video-to-gif",
+    label: "Video to GIF",
+    description:
+      "Convert a short video into a looping GIF on this device with bounded size, duration, and frame limits.",
+    category: "media",
+    tags: ["video", "gif", "convert", "animation", "offline"],
+    icon: Film,
+    status: "enabled",
+    risk: "medium",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/video-to-gif/VideoToGif")),
   },
 ] as const
 

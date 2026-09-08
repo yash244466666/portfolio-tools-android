@@ -1358,3 +1358,19 @@ test("audio recorder discloses offline-only capture and the unsupported fallback
   await expect(page.getByRole("alert")).toBeVisible()
   await expect(page.getByRole("button", { name: "Start recording" })).toBeEnabled()
 })
+
+test("video to gif discloses the input budget and codec baseline honestly", async ({ page }) => {
+  await page.goto("/#/tool/video-to-gif")
+  await expect(page.getByRole("heading", { name: "Video to GIF" })).toBeVisible()
+
+  // The effective version-1 input budget is the 16 MiB read bridge (PDF
+  // Converter precedent); the picker area must state it, not a bigger number.
+  await expect(page.getByText(/at most 16.0 MB/i)).toBeVisible()
+  await expect(page.getByText(/MP4\/H\.264 is the supported baseline/i)).toBeVisible()
+  await expect(page.getByRole("status")).toContainText("Nothing is stored or sent anywhere")
+
+  // No real video decode runs in the harness; the conversion must stay gated
+  // behind a pick and the export panel must not exist before a take.
+  await expect(page.getByRole("button", { name: "Convert to GIF" })).toBeDisabled()
+  await expect(page.getByRole("button", { name: "Save GIF" })).toHaveCount(0)
+})
