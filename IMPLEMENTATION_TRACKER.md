@@ -1,11 +1,17 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 02:55 Europe/Berlin
+> Last updated: 2026-09-08 03:12 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **all 87 audited catalog tools; 76 implemented, 11 remaining**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Dev batch 8 merge reconciliation
+
+- Squash-merged PR #162 into `main` as `c8ade44`, closing issues #60, #82, and #87; all three Project items are Done and the issues carry `status:device-qa` with evidence comments (stale `status:triage` labels removed). Both hosted PR CI jobs were green before merge (android-debug 4m17s, web-quality 6m8s). No open pull requests remain.
+- Registry now has 76 enabled entries; 11 of the approved 87 remain. **All tier-1 tools are now migrated** — the remaining 11 are the tier-2 queue plus the separately gated tier-4 audio/video items and YouTube downloader.
+- Next executable item: continue with the tier-2 queue in risk-ordered batches from Ready Project work (Color Palette from Image #62, iCalendar Generator #67, vCard Generator #68, Chart Generator #92, Bookmark Manager #110, Stopwatch #127, Countdown Timer #128, PDF Converter #42); Android artifact validation of all enabled tools remains queue item 4.
 
 ### 2026-09-08 — Dev batch 8 tool migration (SVG Optimizer, Open Graph Preview, Fake Data Generator)
 
