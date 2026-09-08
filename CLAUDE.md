@@ -29,7 +29,7 @@ Implemented now:
 - React/Vite/TypeScript/Tailwind application.
 - Capacitor Android project.
 - Typed tool registry containing the completed 12-tool architecture milestone plus reviewed post-slice batches within the approved 87-tool public-release scope.
-- Eighty-three enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, Text to Slug, Sort Lines, Add Line Numbers, Trim Whitespace, Remove Duplicates, Percentage Calculator, Tip Calculator, GCD/LCM Calculator, Roman Numeral Converter, Password Strength Checker, Data Sanitizer, CSP Generator, CORS Header Builder, Robots.txt Generator, Age Calculator, Bitwise Calculator, Color Blindness Simulator, Scientific Calculator, HTTP Status Codes, MIME Type Lookup, Meta Tag Generator, Unicode Lookup, ASCII Table, Box Shadow Generator, Border Radius Generator, Text Shadow Generator, HTML Entity Encoder, ROT13 Cipher, Morse Code Translator, HMAC Generator, UUID Generator, Find & Replace, Invisible Character Detector, Hash Diff, Cron Expression Builder, Lorem Ipsum Generator, Password Generator, JWT Decoder, CSV to JSON, YAML to JSON, Text Diff, Color Picker, CSS Gradient Generator, XML Formatter, SQL Formatter, Emoji Picker, Flexbox Playground, Grid Generator, CSS Animation Generator, Glassmorphism Generator, Neumorphism Generator, SVG Optimizer, Open Graph Preview, Fake Data Generator, Stopwatch, Countdown Timer, iCalendar Generator, vCard Generator, Color Palette from Image, Chart Generator, and Bookmark Manager.
+- Eighty-four enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, Text to Slug, Sort Lines, Add Line Numbers, Trim Whitespace, Remove Duplicates, Percentage Calculator, Tip Calculator, GCD/LCM Calculator, Roman Numeral Converter, Password Strength Checker, Data Sanitizer, CSP Generator, CORS Header Builder, Robots.txt Generator, Age Calculator, Bitwise Calculator, Color Blindness Simulator, Scientific Calculator, HTTP Status Codes, MIME Type Lookup, Meta Tag Generator, Unicode Lookup, ASCII Table, Box Shadow Generator, Border Radius Generator, Text Shadow Generator, HTML Entity Encoder, ROT13 Cipher, Morse Code Translator, HMAC Generator, UUID Generator, Find & Replace, Invisible Character Detector, Hash Diff, Cron Expression Builder, Lorem Ipsum Generator, Password Generator, JWT Decoder, CSV to JSON, YAML to JSON, Text Diff, Color Picker, CSS Gradient Generator, XML Formatter, SQL Formatter, Emoji Picker, Flexbox Playground, Grid Generator, CSS Animation Generator, Glassmorphism Generator, Neumorphism Generator, SVG Optimizer, Open Graph Preview, Fake Data Generator, Stopwatch, Countdown Timer, iCalendar Generator, vCard Generator, Color Palette from Image, Chart Generator, Bookmark Manager, and PDF Converter.
 - Catalog search and category filters.
 - Favorites and recent-tool persistence.
 - System/light/dark theme preferences.
@@ -44,7 +44,7 @@ Implemented now:
 
 Not yet implemented:
 
-- Remaining 4 catalog tools; 4 of the approved 87 are not yet implemented overall.
+- Remaining 3 catalog tools; 3 of the approved 87 are not yet implemented overall.
 - Installed-artifact device verification of the sensitive clipboard bridge, generated-file cache cleanup, and renderer recovery/safe mode.
 - Final icons, splash assets, app name, application ID approval, App Links, and Play signing.
 - Physical-device verification and Play-distributed artifact testing.
@@ -108,6 +108,7 @@ The foundation currently pins:
 - TypeScript 6.0.3. Do not upgrade to TypeScript 7 until the ESLint TypeScript parser officially supports it.
 - Tailwind CSS 4.3.3 using the Vite plugin.
 - Capacitor core/android/CLI 8.5.1 and individually pinned official plugins.
+- PDF Converter libraries: pdf-lib 1.17.1 (MIT), jszip 3.10.1 (MIT option of a dual MIT/GPL package), and pdfjs-dist 6.3.289 (Apache-2.0) with its worker bundled through Vite.
 - JDK 21 for Android builds.
 - Minimum SDK 24, compile SDK 36, target SDK 36.
 

@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs"
+import { readFileSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { expect, test } from "@playwright/test"
@@ -1276,4 +1276,68 @@ test("bookmark manager saves https bookmarks, filters, and rejects cleartext", a
 
   await page.getByLabel("Search").fill("nomatch")
   await expect(page.getByText("No bookmarks match the search.")).toBeVisible()
+})
+
+test("pdf converter extracts real text from a generated two-page PDF", async ({ page }) => {
+  // Independent oracle: the PDF fixture is built by pdf-lib itself, so the
+  // extracted strings exercise the real bundled pdf.js worker end to end.
+  const { PDFDocument, StandardFonts } = await import("pdf-lib")
+  await page.goto("/#/tool/pdf-converter")
+  await expect(page.getByRole("heading", { name: "PDF Converter" })).toBeVisible()
+
+  const pdfPath = join(tmpdir(), "yash-tools-e2e-text.pdf")
+  const fixture = await PDFDocument.create()
+  const font = await fixture.embedFont(StandardFonts.Helvetica)
+  for (const line of ["Alpha page", "Beta page"]) {
+    const fixturePage = fixture.addPage([400, 300])
+    fixturePage.drawText(line, { x: 40, y: 150, size: 24, font })
+  }
+  writeFileSync(pdfPath, await fixture.save())
+
+  await page.getByRole("button", { name: "PDF to Text" }).click()
+  const [chooser] = await Promise.all([
+    page.waitForEvent("filechooser"),
+    page.getByRole("button", { name: "Choose PDF" }).click(),
+  ])
+  await chooser.setFiles(pdfPath)
+  await expect(page.getByText(/Selected .* PDF\./)).toBeVisible()
+  await page.getByRole("button", { name: "Extract text" }).click()
+
+  const editor = page.getByLabel("Extracted text")
+  await expect(editor).toHaveValue(/Alpha page/, { timeout: 15_000 })
+  await expect(editor).toHaveValue(/Beta page/)
+  await expect(page.getByText("Extracted text from 2 pages.")).toBeVisible()
+})
+
+test("pdf converter saves a real PDF built from picked images", async ({ page }) => {
+  await page.goto("/#/tool/pdf-converter")
+  await expect(page.getByRole("heading", { name: "PDF Converter" })).toBeVisible()
+
+  const pngPath = join(tmpdir(), "yash-tools-e2e-pdf-image.png")
+  writeFileSync(
+    pngPath,
+    Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+      "base64",
+    ),
+  )
+
+  const [chooser] = await Promise.all([
+    page.waitForEvent("filechooser"),
+    page.getByRole("button", { name: "Choose images" }).click(),
+  ])
+  await chooser.setFiles(pngPath)
+  await expect(page.getByText("Selected 1 image.")).toBeVisible()
+
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Convert to PDF" }).click(),
+  ])
+  expect(download.suggestedFilename()).toBe("yash-tools-e2e-pdf-image.pdf")
+  const savedPath = join(tmpdir(), "yash-tools-e2e-output.pdf")
+  await download.saveAs(savedPath)
+  const saved = readFileSync(savedPath)
+  // The real pdf-lib output begins with the PDF magic and closes with EOF.
+  expect(saved.subarray(0, 5).toString()).toBe("%PDF-")
+  await expect(page.getByText("Saved yash-tools-e2e-pdf-image.pdf with 1 page.")).toBeVisible()
 })

@@ -34,6 +34,7 @@ import {
   FileImage,
   FileKey,
   FileSpreadsheet,
+  FileStack,
   FileText,
   FileType,
   Gauge,
@@ -1223,6 +1224,20 @@ export const tools: readonly ToolDefinition[] = [
     network: false,
     persistent: true,
     component: lazy(() => import("@/tools/bookmark-manager/BookmarkManager")),
+  },
+  {
+    id: "pdf-converter",
+    label: "PDF Converter",
+    description:
+      "Convert between images and PDF, merge PDFs, and extract text or page images on this device.",
+    category: "core",
+    tags: ["pdf", "convert", "merge", "extract", "images", "offline"],
+    icon: FileStack,
+    status: "enabled",
+    risk: "medium",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/pdf-converter/PdfConverter")),
   },
 ] as const
 

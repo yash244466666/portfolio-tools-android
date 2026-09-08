@@ -5,7 +5,7 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 83
+const enabledToolCount = 84
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -1422,6 +1422,23 @@ async function phaseTools(page) {
         await p.setValue("#bookmark-search", "nomatch")
         await p.waitFor("document.body.innerText.includes('No bookmarks match the search.')")
         return "https normalization saved and search miss explained"
+      },
+    ],
+    [
+      "pdf-converter",
+      "PDF Converter",
+      async (p) => {
+        await p.waitFor("document.body.innerText.includes('Images to PDF')")
+        // Every mode tab mounts its own panel; file picking is covered by the
+        // instrumentation suite, so the driver verifies the mode round-trip.
+        await p.clickButton("PDF to Text")
+        await p.waitFor(
+          "document.body.innerText.includes('Scanned image-only PDFs contain no extractable text')",
+        )
+        await p.clickButton("Merge PDFs")
+        await p.waitFor("document.body.innerText.includes('Combine 2 to 20 PDFs')")
+        await p.clickButton("Images to PDF")
+        return "mode tabs mount bounded panels; SAF pick covered by the instrumentation suite"
       },
     ],
   ]
