@@ -1,6 +1,6 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 02:57 Europe/Berlin
+> Last updated: 2026-09-08 03:20 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -37,6 +37,12 @@
 - The emulator checklist driver gained the 76-tool catalog count and three per-tool checks. The long-flaky `process.durableThemeSurvivesForceStop` check was also fixed: the saved theme loads asynchronously over the Preferences bridge after the shell renders with the system-resolved value, so the driver polls for `dark` up to 15 s instead of reading once at mount time — two consecutive runs failed on the single-shot read before this fix, and the manual probe confirmed the preference itself persisted correctly.
 - Validation gates ran unpiped: strict typecheck, zero-warning lint, 1126 web tests (157 files), 156 E2E checks, production build with the three new lazy chunks (3.3/3.7/6.4 kB, ≤3.2 kB gzip), Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes). A green run against the installed rebuilt artifact verified all 76 enabled tools — 90 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug, artifact SHA-256 fec75339bef89c0f7b81014fa47a7eb127280840dcc47b96d980223441a26221.
 - Next executable item: commit, open the PR closing issues #60, #82, and #87, review hosted CI, merge, and reconcile; then continue with the tier-2 queue (Color Palette from Image #62, iCalendar Generator #67, vCard Generator #68, Chart Generator #92, Bookmark Manager #110, Stopwatch #127, Countdown Timer #128, PDF Converter #42). Android artifact validation of all enabled tools remains queue item 4.
+
+### 2026-09-08 — Dev batch 9 merge reconciliation
+
+- Squash-merged PR #163 into `main` as `bf69e3e`, closing issues #127, #128, #67, and #68; all four Project items are Done and the issues carry `status:device-qa` with evidence comments (stale `status:triage` labels removed). Both hosted PR CI jobs were green before merge (android-debug 3m54s, web-quality 6m45s). No open pull requests remain.
+- Registry now has 80 enabled entries; 7 of the approved 87 remain.
+- Next executable item: continue with the tier-2 queue in risk-ordered batches from Ready Project work (Color Palette from Image #62, Chart Generator #92, Bookmark Manager #110, PDF Converter #42); Android artifact validation of all enabled tools remains queue item 4.
 
 This is the living operational record for what is implemented, what is verified, what remains, and what is blocked. Update it in every implementation session. A checked item requires evidence; generated or coded does not automatically mean tested.
 
