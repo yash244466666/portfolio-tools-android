@@ -118,12 +118,12 @@ button {
 }
 
 .screen-title {
-  max-width: 18ch;
+  max-width: 22ch;
   margin-top: 0.35rem;
-  font-size: clamp(2rem, 8vw, 3.75rem);
+  font-size: clamp(1.75rem, 3vw + 1rem, 3rem);
   font-weight: 850;
-  letter-spacing: -0.045em;
-  line-height: 1.04;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
   color: var(--text);
 }
 
@@ -137,27 +137,28 @@ button {
 
 .hero-panel {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.25rem;
   align-items: end;
-  padding: clamp(1.25rem, 4vw, 2.5rem);
+  padding: clamp(1.25rem, 3vw, 2rem);
   border: 1px solid var(--border);
-  border-radius: 2rem;
+  border-radius: 1.5rem;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   box-shadow: var(--shadow);
 }
 
 .foundation-stat {
-  display: grid;
-  width: min(100%, 13rem);
-  gap: 0.15rem;
-  padding: 1rem;
+  display: flex;
+  width: fit-content;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
   border: 1px solid var(--border-strong);
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   background: var(--surface-muted);
 }
 
 .foundation-stat strong {
-  font-size: 2rem;
+  font-size: 1.75rem;
   line-height: 1;
   color: var(--primary);
 }
@@ -230,7 +231,7 @@ button {
 
 .filter-chip,
 .segment {
-  min-height: 2.75rem;
+  min-height: 3rem;
   border: 1px solid var(--border-strong);
   background: var(--surface-raised);
   color: var(--text-secondary);
@@ -269,19 +270,18 @@ button {
 
 .tool-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
-  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 1rem;
 }
 
 .tool-card {
   position: relative;
   display: flex;
-  min-height: 16.5rem;
   flex-direction: column;
-  gap: 1.2rem;
-  padding: 1.1rem;
+  gap: 1rem;
+  padding: 1rem;
   border: 1px solid var(--border);
-  border-radius: 1.5rem;
+  border-radius: 1.25rem;
   background: var(--surface);
   box-shadow: 0 8px 24px rgb(15 23 42 / 0.04);
 }
@@ -355,7 +355,7 @@ button {
 .empty-state,
 .loading-panel {
   display: grid;
-  min-height: 18rem;
+  min-height: 16rem;
   place-items: center;
   align-content: center;
   gap: 0.75rem;
@@ -399,9 +399,15 @@ button.text-link {
 
 .tool-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 0.75rem 1rem;
   margin-block: 0.75rem 1.5rem;
+}
+
+.tool-heading-text {
+  flex: 1 1 16rem;
+  min-width: 0;
 }
 
 .app-input {
@@ -512,6 +518,19 @@ button.text-link {
 @media (min-width: 48rem) {
   .hero-panel {
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .foundation-stat {
+    display: grid;
+    width: min(100%, 13rem);
+    align-items: stretch;
+    gap: 0.15rem;
+    padding: 1rem;
+    border-radius: 1.25rem;
+  }
+
+  .foundation-stat strong {
+    font-size: 2rem;
   }
 
   .screen-content {

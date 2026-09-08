@@ -84,8 +84,10 @@ export function SettingsScreen({
             <div>
               <p className="text-sm leading-6 text-[var(--text-secondary)]">
                 Clear local data from this installation. This removes favorites, recents, theme,
-                your saved scratchpad note, and cached exchange rates. Notes are stored unencrypted
-                and are not recoverable after clearing.
+                your saved scratchpad note, your saved bookmarks, your saved Pomodoro timer state,
+                and cached exchange rates. The confirmation states exactly how many of each will be
+                removed. Notes and bookmarks are stored unencrypted and are not recoverable after
+                clearing.
               </p>
               <Button className="mt-4" onClick={() => void onClearPreferences()} variant="danger">
                 Clear local preferences

@@ -68,13 +68,13 @@ export function ToolScreen({
         <div className="tool-icon large">
           <Icon aria-hidden="true" size={26} />
         </div>
-        <div>
+        <div className="tool-heading-text">
           <div className="flex flex-wrap items-center gap-2">
             <p className="eyebrow">{tool.network ? "Network tool" : "Works offline"}</p>
             <span className="risk-badge">{tool.risk} risk</span>
           </div>
           <h1
-            className="mt-1 text-3xl font-extrabold tracking-tight text-[var(--text)]"
+            className="mt-1 text-2xl font-extrabold tracking-tight text-[var(--text)] sm:text-3xl"
             ref={titleRef}
             tabIndex={-1}
           >
