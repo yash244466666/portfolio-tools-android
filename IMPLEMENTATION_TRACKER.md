@@ -1,11 +1,24 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 04:05 Europe/Berlin
+> Last updated: 2026-09-08 05:35 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **all 87 audited catalog tools; 83 implemented, 4 remaining**
+> Approved public version 1 scope: **all 87 audited catalog tools; 84 implemented, 3 remaining**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Dev batch 11 tool migration (PDF Converter)
+
+- Implemented issue #42 on `feat/dev-batch-11` as a single lazy-loaded offline tool covering the upstream's four modes (Images to PDF, PDF to Images, Merge PDFs, PDF to Text), built only on the platform service contracts.
+- This batch includes a dedicated dependency change reviewed under the section 5 policy: pdf-lib 1.17.1 (MIT), jszip 3.10.1 (MIT option of the dual MIT/GPL package), and pdfjs-dist 6.3.289 (Apache-2.0). Peer dependencies are clean, the lockfile diff is limited to the three additions, and provenance rows were added for each.
+- The upstream implementation violated section 19 in four ways, all fixed: the pdf.js worker was loaded from unpkg at runtime (a forbidden remote executable-code download) and is now a Vite-bundled module asset permitted by the existing `worker-src 'self'` CSP; outputs used hidden download anchors, now replaced by the platform Save As bridge; every rendered page was held as a base64 data URL simultaneously, now bounded to 20 simultaneous PNG blob pages with a 25-megapixel per-page render budget that clamps the 2× requested scale; and there was no encryption, size, or page handling — encrypted PDFs now surface a distinct recovery message (`PasswordException` mapping), the page count is capped at 200, and pdf-lib failures map onto stable tool error codes.
+- Limit reconciliation with the plan: the plan's 50 MiB PDF / 20 MiB image selection budgets cannot be honored by a bridge-based JavaScript tool because both the web and Capacitor FileService adapters cap content reads at 16 MiB and the contract forbids unbounded Base64 bridge transfers. The effective per-file input budget is therefore 16 MiB in version 1, validated at pick time and read time, with the reasoning recorded in the tool module and the tracker. Streaming/native PDF processing remains a version-1.1 improvement option.
+- Text extraction and assembly (item joining, blank-line page separation, empty/image-only detection, 2 MiB text bound) live in a pure tested module; rendered previews are object URLs revoked on replacement, reset, and unmount; page canvases are released after each render; and the pdf.js document is destroyed on every path.
+- Registry now has 84 enabled entries; 3 of the approved 87 remain. Tests: 2 suites (1 pure + 1 component, 34 new cases; the suite is now 173 files / 1248 tests) and 2 new E2E scenarios (86 scenarios × 2 viewports = 172 checks) — one extracts real text from a pdf-lib-generated two-page fixture through the actual bundled pdf.js worker, and one converts a picked PNG and verifies the Save As download starts with `%PDF-`.
+- The emulator checklist driver gained the 84-tool catalog count and a pdf-converter mode round-trip check; SAF picking itself stays covered by the instrumentation suite.
+- Validation gates ran unpiped: strict typecheck, zero-warning lint, 1248 web tests (173 files), 172 E2E checks, production build, Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes). A green run against the installed rebuilt artifact verified all 84 enabled tools — 98 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug, artifact SHA-256 66ab9590613db22f5aea6540ee824893f022060f28246a0aec241aed89207e0a.
+- Bundle budget note: the PdfConverter lazy chunk is 336.29 kB gzip because pdf-lib and pdf.js share it; the plan documents a PDF.js exception to the 250 KiB normal-tool budget, and the 1.27 MB worker is a separate bundled asset. Both stay lazy and outside the shell bundle (main JS 290.68 kB / 90.55 kB gzip).
+- Next executable item: commit, open the PR closing issue #42, review hosted CI, merge, and reconcile; then only the separately gated tier-4 audio/video tools (#111/#112) and YouTube Downloader (#93) remain, each blocked behind its own release review. Android artifact validation of all enabled tools remains queue item 4, and issue #18 stays open pending physical-device evidence.
 
 ### 2026-09-08 — Dev batch 10 merge reconciliation
 
