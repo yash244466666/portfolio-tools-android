@@ -6,8 +6,21 @@ import { SettingsScreen } from "@/app/SettingsScreen"
 import { ToolScreen } from "@/app/ToolScreen"
 import { useNetworkState, useStoredStringArray, useThemePreference } from "@/app/useAppState"
 import { usePlatform } from "@/platform/platform-context"
+import { bookmarksStorageKey } from "@/tools/bookmark-manager/bookmarks"
+import { currencyStorageKey } from "@/tools/currency-converter/currency"
+import { notesStorageKey } from "@/tools/notes-scratchpad/notes"
+import { pomodoroStorageKey } from "@/tools/pomodoro-timer/pomodoro"
 
 const maximumRecentTools = 12
+
+function pluralize(count: number, singular: string, plural: string) {
+  return `${count} ${count === 1 ? singular : plural}`
+}
+
+function joinHumanly(items: string[]) {
+  if (items.length <= 1) return items.join("")
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`
+}
 
 export function App() {
   const platform = usePlatform()
@@ -51,8 +64,29 @@ export function App() {
   }, [setRecents])
 
   async function clearPreferences() {
+    const [note, timerState, cachedRates, storedBookmarks] = await Promise.all([
+      platform.preferences.get(notesStorageKey),
+      platform.preferences.get(pomodoroStorageKey),
+      platform.preferences.get(currencyStorageKey),
+      platform.preferences.get<{ bookmarks?: unknown }>(bookmarksStorageKey),
+    ])
+    const removedClasses = [
+      pluralize(favorites.length, "favorite", "favorites"),
+      pluralize(recents.length, "recent tool", "recent tools"),
+      "your theme preference",
+    ]
+    if (note) removedClasses.push("your saved scratchpad note")
+    if (storedBookmarks) {
+      const bookmarkCount = Array.isArray(storedBookmarks.bookmarks)
+        ? storedBookmarks.bookmarks.length
+        : 0
+      removedClasses.push(pluralize(bookmarkCount, "saved bookmark", "saved bookmarks"))
+    }
+    if (timerState) removedClasses.push("your saved Pomodoro timer state")
+    if (cachedRates) removedClasses.push("cached exchange rates")
+
     const confirmed = window.confirm(
-      "Clear favorites, recents, theme, your saved scratchpad note, and cached exchange rates from this installation?",
+      `Clear local data from this installation? This removes ${joinHumanly(removedClasses)}. This cannot be undone.`,
     )
     if (!confirmed) return
     await platform.preferences.clear()

@@ -1,4 +1,4 @@
-import { CircleCheck, CloudOff, Heart, Search, Trash2, Wifi } from "lucide-react"
+import { CircleCheck, CloudOff, Heart, History, Search, Trash2, Wifi } from "lucide-react"
 import { useMemo, useState } from "react"
 import { routeHref } from "@/app/routing"
 import { Button } from "@/components/ui/Button"
@@ -233,17 +233,32 @@ export function CatalogScreen({
             />
           ))}
         </div>
+      ) : mode === "favorites" && favorites.length === 0 ? (
+        <section className="empty-state">
+          <Heart aria-hidden="true" size={28} />
+          <h2 className="text-lg font-bold">No favorites yet</h2>
+          <p>
+            Tap the heart on any tool card to keep it here. Favorites are stored only on this
+            device.
+          </p>
+          <a className="text-link" href={routeHref({ screen: "catalog" })}>
+            Browse all tools
+          </a>
+        </section>
+      ) : mode === "recent" && recentCount === 0 ? (
+        <section className="empty-state">
+          <History aria-hidden="true" size={28} />
+          <h2 className="text-lg font-bold">No recent tools yet</h2>
+          <p>Open any tool and it will appear here. Recent history stays on this device.</p>
+          <a className="text-link" href={routeHref({ screen: "catalog" })}>
+            Browse all tools
+          </a>
+        </section>
       ) : (
         <section className="empty-state">
           <Search aria-hidden="true" size={28} />
           <h2 className="text-lg font-bold">No matching tools</h2>
-          <p>
-            {mode === "favorites" && favorites.length === 0
-              ? "Add a favorite from the Tools screen."
-              : mode === "recent" && recentCount === 0
-                ? "Open a ready tool and it will appear here."
-                : "Try another search or category."}
-          </p>
+          <p>Try another search or category.</p>
           <a className="text-link" href={routeHref({ screen: "catalog" })}>
             Browse all tools
           </a>

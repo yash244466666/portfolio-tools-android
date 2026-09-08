@@ -29,6 +29,38 @@ test("catalog does not overflow across foundation breakpoints", async ({ page })
   }
 })
 
+test("shell interactive controls meet the 48 dp touch floor", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 })
+  await page.goto("/#/")
+
+  const assertFloor = async (selector: string) => {
+    const boxes = await page.locator(selector).evaluateAll((elements) =>
+      elements.map((element) => {
+        const rect = element.getBoundingClientRect()
+        return { width: rect.width, height: rect.height }
+      }),
+    )
+    expect(boxes.length, `${selector} should exist`).toBeGreaterThan(0)
+    for (const box of boxes) {
+      expect(
+        Math.min(box.width, box.height),
+        `${selector} target ${JSON.stringify(box)} smaller than 48 px`,
+      ).toBeGreaterThanOrEqual(48)
+    }
+  }
+
+  await assertFloor(".filter-chip")
+  await assertFloor(".bottom-link")
+  await assertFloor(".search-field")
+  await assertFloor(".tool-card .icon-button")
+
+  await page.goto("/#/settings")
+  await assertFloor(".segmented-control .segment")
+
+  await page.goto("/#/tool/unit-converter")
+  await assertFloor(".back-link")
+})
+
 test("an enabled tool opens and performs a conversion", async ({ page }) => {
   await page.goto("/#/tool/unit-converter")
   await expect(page.getByRole("heading", { name: "Unit Converter" })).toBeVisible()

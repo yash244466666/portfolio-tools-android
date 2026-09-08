@@ -27,3 +27,4 @@ android/captures/
 # Signing and Play credentials must never be committed
 signing/
 play-service-account*.json
+.ui-audit/
