@@ -1,11 +1,22 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 02:06 Europe/Berlin
+> Last updated: 2026-09-08 02:55 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
-> Approved public version 1 scope: **all 87 audited catalog tools; 73 implemented, 14 remaining**
+> Approved public version 1 scope: **all 87 audited catalog tools; 76 implemented, 11 remaining**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-08 — Dev batch 8 tool migration (SVG Optimizer, Open Graph Preview, Fake Data Generator)
+
+- Implemented the last three tier-1 tools (issues #60, #82, and #87) as one offline batch on `feat/dev-batch-8`, completing all tier-1 tool migration. All are offline, non-persistent, lazy-loaded, and built only on the platform service contracts and shared UI primitives.
+- SVG Optimizer (`src/tools/svg-optimizer/`) fixes two upstream correctness bugs: input is validated with the standard XML parser before any change (upstream minified arbitrary text into garbage), and minification only removes comments and inter-tag whitespace because upstream collapsed every whitespace run and stripped spaces around `=` and `;`, silently rewriting text-node content such as `<text>a = b</text>`. Pretty-printing reuses the XML Formatter's indentation module, and byte sizes come from `TextEncoder` for determinism. The upstream hidden Blob-download anchor is replaced by the platform copy bridge.
+- Open Graph Preview (`src/tools/open-graph-preview/`) is offline-first by construction: upstream loaded the pasted page's image URL directly into an `<img>` (a remote fetch), while this implementation renders the image URL as text and never fetches anything. Parsing accepts both meta attribute orders, deduplicates identical property/content pairs (multiple `og:image` values legitimately coexist), normalizes casing, and falls back from `og:` to `twitter:` in a pure tested module; extracted tags re-serialize to canonical meta elements for copying.
+- Fake Data Generator (`src/tools/fake-data-generator/`) copies the upstream name/email/phone/address/company/country datasets verbatim but injects randomness from the platform RandomService instead of calling `crypto.getRandomValues` directly; the modulo pick is documented as acceptable only because values are explicitly fake and must never be treated as secrets. The count input is parsed as a clamped integer bounded 1–50.
+- Registry now has 76 enabled entries; 11 of the approved 87 remain. Tests: 6 suites (3 pure + 3 component, 38 new cases; the suite is now 157 files / 1126 tests) and 3 new E2E scenarios (78 scenarios × 2 viewports = 156 checks).
+- The emulator checklist driver gained the 76-tool catalog count and three per-tool checks. The long-flaky `process.durableThemeSurvivesForceStop` check was also fixed: the saved theme loads asynchronously over the Preferences bridge after the shell renders with the system-resolved value, so the driver polls for `dark` up to 15 s instead of reading once at mount time — two consecutive runs failed on the single-shot read before this fix, and the manual probe confirmed the preference itself persisted correctly.
+- Validation gates ran unpiped: strict typecheck, zero-warning lint, 1126 web tests (157 files), 156 E2E checks, production build with the three new lazy chunks (3.3/3.7/6.4 kB, ≤3.2 kB gzip), Capacitor sync, Android Lint, debug assembly (BUILD SUCCESSFUL), and the debug merged-manifest policy check (no permission or exported-component changes). A green run against the installed rebuilt artifact verified all 76 enabled tools — 90 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL on Android 15 (SDK 35), WebView 124.0.6367.219, versionName 1.0-debug, artifact SHA-256 fec75339bef89c0f7b81014fa47a7eb127280840dcc47b96d980223441a26221.
+- Next executable item: commit, open the PR closing issues #60, #82, and #87, review hosted CI, merge, and reconcile; then continue with the tier-2 queue (Color Palette from Image #62, iCalendar Generator #67, vCard Generator #68, Chart Generator #92, Bookmark Manager #110, Stopwatch #127, Countdown Timer #128, PDF Converter #42). Android artifact validation of all enabled tools remains queue item 4.
 
 This is the living operational record for what is implemented, what is verified, what remains, and what is blocked. Update it in every implementation session. A checked item requires evidence; generated or coded does not automatically mean tested.
 

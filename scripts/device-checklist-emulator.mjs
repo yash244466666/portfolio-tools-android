@@ -5,7 +5,7 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 73
+const enabledToolCount = 76
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -1277,6 +1277,52 @@ async function phaseTools(page) {
         return "convex gradient, pressed inset shadows, and recolored base rendered"
       },
     ],
+    [
+      "svg-optimizer",
+      "SVG Optimizer",
+      async (p) => {
+        await p.setValue(
+          "#svg-optimizer-input",
+          '<svg xmlns="http://www.w3.org/2000/svg">\n  <text>a = b</text>\n</svg>',
+        )
+        await p.clickButton("Minify")
+        await p.waitFor(
+          "!(document.querySelector('pre')?.textContent ?? '').includes('\\n') && document.querySelector('pre')?.textContent.includes('<text>a = b</text>')",
+        )
+        await p.setValue("#svg-optimizer-input", "<svg><text>unclosed</svg>")
+        await p.clickButton("Minify")
+        await p.waitFor("document.body.innerText.includes('not well-formed XML')")
+        return "text-node whitespace preserved; broken markup fails closed"
+      },
+    ],
+    [
+      "open-graph-preview",
+      "Open Graph Preview",
+      async (p) => {
+        await p.setValue(
+          "#open-graph-preview-input",
+          '<meta property="og:title" content="Launch day" /><meta name="twitter:card" content="summary_large_image" />',
+        )
+        await p.waitFor("document.body.innerText.includes('Launch day')")
+        await p.waitFor("document.body.innerText.includes('summary_large_image')")
+        await p.setValue("#open-graph-preview-input", "<head><title>Plain</title></head>")
+        await p.waitFor("document.body.innerText.includes('No Open Graph or Twitter Card')")
+        return "tags previewed as text and miss explained without any fetch"
+      },
+    ],
+    [
+      "fake-data-generator",
+      "Fake Data Generator",
+      async (p) => {
+        await p.clickRadioValue("country")
+        await p.setValue("#fake-data-count", "3")
+        await p.clickButton("Generate")
+        await p.waitFor("document.querySelectorAll('li').length === 3")
+        await p.clickButton("Clear")
+        await p.waitFor("document.querySelectorAll('li').length === 0")
+        return "3 country rows generated from the secure byte source and cleared"
+      },
+    ],
   ]
 
   for (const [toolId, label, check] of checks) {
@@ -1343,14 +1389,26 @@ async function phaseOffline(page) {
 async function phaseProcessDeath() {
   const page = await relaunch()
   await page.waitFor("document.querySelector('h1') !== null", 45_000)
-  const state = /** @type {{ theme?: string }} */ (
-    await page.evaluate("(() => ({ theme: document.documentElement.dataset.theme }))()")
-  )
-  record(
-    "process.durableThemeSurvivesForceStop",
-    state.theme === "dark" ? "PASS" : "FAIL",
-    `theme=${state.theme}`,
-  )
+  // The saved theme loads asynchronously over the Preferences bridge after
+  // the shell renders with the system-resolved value, so poll instead of
+  // reading once at mount time.
+  try {
+    await page.waitFor("document.documentElement.dataset.theme === 'dark'", 15_000)
+    record(
+      "process.durableThemeSurvivesForceStop",
+      "PASS",
+      "theme=dark after force stop and relaunch",
+    )
+  } catch {
+    const state = /** @type {{ theme?: string }} */ (
+      await page.evaluate("(() => ({ theme: document.documentElement.dataset.theme }))()")
+    )
+    record(
+      "process.durableThemeSurvivesForceStop",
+      "FAIL",
+      `theme=${state.theme} persisted value did not apply within 15s`,
+    )
+  }
   await page.navigate("#/tool/hash-generator")
   await page.waitFor("document.querySelector('#hash-input') !== null")
   const inputValue = /** @type {string} */ (

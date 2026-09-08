@@ -1080,6 +1080,48 @@ export const tools: readonly ToolDefinition[] = [
     persistent: false,
     component: lazy(() => import("@/tools/emoji-picker/EmojiPicker")),
   },
+  {
+    id: "svg-optimizer",
+    label: "SVG Optimizer",
+    description:
+      "Validate, minify, and pretty-print SVG markup locally without touching text content.",
+    category: "dev",
+    tags: ["svg", "minify", "optimize", "format", "xml", "offline"],
+    icon: FileImage,
+    status: "enabled",
+    risk: "low",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/svg-optimizer/SvgOptimizer")),
+  },
+  {
+    id: "open-graph-preview",
+    label: "Open Graph Preview",
+    description:
+      "Inspect Open Graph and Twitter Card meta tags from pasted page head markup, fully offline.",
+    category: "dev",
+    tags: ["open graph", "meta tags", "twitter card", "seo", "preview", "offline"],
+    icon: Globe,
+    status: "enabled",
+    risk: "low",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/open-graph-preview/OpenGraphPreview")),
+  },
+  {
+    id: "fake-data-generator",
+    label: "Fake Data Generator",
+    description:
+      "Generate random fake names, emails, phone numbers, addresses, companies, and countries for test fixtures.",
+    category: "dev",
+    tags: ["fake data", "mock", "test data", "random", "placeholder", "offline"],
+    icon: Bot,
+    status: "enabled",
+    risk: "low",
+    network: false,
+    persistent: false,
+    component: lazy(() => import("@/tools/fake-data-generator/FakeDataGenerator")),
+  },
 ] as const
 
 const toolsById = new Map(tools.map((tool) => [tool.id, tool]))
