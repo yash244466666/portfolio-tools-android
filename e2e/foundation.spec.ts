@@ -1438,3 +1438,136 @@ test("loan EMI calculator computes the known vector and discloses its indicative
   await page.getByRole("button", { name: "Reset" }).click()
   await expect(page.getByRole("status")).toContainText("Enter the principal")
 })
+
+test("timestamp converter renders epoch 0 as 1970", async ({ page }) => {
+  await page.goto("/#/tool/timestamp-converter")
+  await expect(page.getByRole("heading", { name: "Timestamp Converter" })).toBeVisible()
+  await page.locator("#timestamp").fill("0")
+  await page.getByRole("button", { name: "Convert timestamp" }).click()
+  await expect(page.getByText(/1970/).first()).toBeVisible()
+})
+
+test("hash generator produces the SHA-256 standard vector for abc", async ({ page }) => {
+  await page.goto("/#/tool/hash-generator")
+  await expect(page.getByRole("heading", { name: "Hash Generator" })).toBeVisible()
+  await page.locator("#hash-input").fill("abc")
+  await page.getByRole("button", { name: "Generate hashes" }).click()
+  await expect(
+    page
+      .getByText("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", {
+        exact: false,
+      })
+      .first(),
+  ).toBeVisible()
+})
+
+test("aspect ratio calculator reduces the ratio and scales a target", async ({ page }) => {
+  await page.goto("/#/tool/aspect-ratio-calculator")
+  await expect(page.getByRole("heading", { name: "Aspect Ratio Calculator" })).toBeVisible()
+  await page.locator("#aspect-width").fill("1920")
+  await page.locator("#aspect-height").fill("1080")
+  await expect(page.getByText("Simplified ratio 16:9")).toBeVisible()
+  await page.locator("#aspect-target").fill("1280")
+  await expect(page.getByText("1280 × 720 px")).toBeVisible()
+})
+
+test("CSS unit converter converts px against the root", async ({ page }) => {
+  await page.goto("/#/tool/css-unit-converter")
+  await expect(page.getByRole("heading", { name: "CSS Unit Converter" })).toBeVisible()
+  await page.locator("#css-unit-root").fill("16")
+  await page.locator("#css-unit-value").fill("24")
+  await expect(page.getByText("1.5rem").first()).toBeVisible()
+  await expect(page.getByText("150%").first()).toBeVisible()
+})
+
+test("BMI calculator shows the WHO band and the estimate-only disclaimer", async ({ page }) => {
+  await page.goto("/#/tool/bmi-calculator")
+  await expect(page.getByRole("heading", { name: "BMI Calculator" })).toBeVisible()
+  await page.locator("#bmi-weight").fill("70")
+  await page.locator("#bmi-height-cm").fill("175")
+  await expect(page.getByText("BMI 22.9")).toBeVisible()
+  await expect(page.getByText(/normal band/)).toBeVisible()
+  await expect(page.getByText(/not medical advice/)).toBeVisible()
+})
+
+test("unit price comparer ranks mixed units by base-unit cost", async ({ page }) => {
+  await page.goto("/#/tool/unit-price-comparer")
+  await expect(page.getByRole("heading", { name: "Unit Price Comparer" })).toBeVisible()
+  await page.locator("#unit-price-label-1").fill("Bottle")
+  await page.locator("#unit-price-unit-1").selectOption("l")
+  await page.locator("#unit-price-price-1").fill("4.50")
+  await page.locator("#unit-price-quantity-1").fill("1.5")
+  await page.locator("#unit-price-unit-2").selectOption("ml")
+  await page.locator("#unit-price-price-2").fill("2.00")
+  await page.locator("#unit-price-quantity-2").fill("500")
+  await expect(page.getByText("Bottle at 0.0030 per ml")).toBeVisible()
+})
+
+test("word frequency analyzer tokenizes and skips stopwords", async ({ page }) => {
+  await page.goto("/#/tool/word-frequency-analyzer")
+  await expect(page.getByRole("heading", { name: "Word Frequency Analyzer" })).toBeVisible()
+  await page.locator("#word-frequency-input").fill("apple banana apple apple the the")
+  await expect(page.getByText("4 words (2 unique)")).toBeVisible()
+  await expect(page.getByText("75%")).toBeVisible()
+  await expect(page.getByText(/after skipping 2 common English words/)).toBeVisible()
+})
+
+test("text-binary converter encodes UTF-8 bytes and rejects invalid decodes", async ({ page }) => {
+  await page.goto("/#/tool/text-binary-converter")
+  await expect(page.getByRole("heading", { name: "Text-Binary Converter" })).toBeVisible()
+  await page.locator("#text-binary-text").fill("é")
+  await expect(page.locator("#text-binary-encoded")).toHaveValue(/11000011 10101001/)
+  await page.locator("#text-binary-decode-input").fill("255")
+  await expect(page.getByText(/not a valid binary value/)).toBeVisible()
+})
+
+test("reading time estimator reports wpm output and fit budgets", async ({ page }) => {
+  await page.goto("/#/tool/reading-time-estimator")
+  await expect(page.getByRole("heading", { name: "Reading Time Estimator" })).toBeVisible()
+  await page.locator("#reading-time-text").fill(Array.from({ length: 300 }, () => "word").join(" "))
+  await expect(page.getByText("1 min 30 s at 200 wpm")).toBeVisible()
+  await expect(page.getByText("Fits").first()).toBeVisible()
+})
+
+test("date difference calculator reports exclusive spans and business days", async ({ page }) => {
+  await page.goto("/#/tool/date-difference-calculator")
+  await expect(page.getByRole("heading", { name: "Date Difference Calculator" })).toBeVisible()
+  await page.locator("#date-diff-start").fill("2026-09-07")
+  await page.locator("#date-diff-end").fill("2026-09-11")
+  await expect(page.getByText(/with 4 business days/)).toBeVisible()
+  await expect(page.getByText("Business days (Mon-Fri)")).toBeVisible()
+})
+
+test("color contrast checker computes the WCAG ratio and swaps colors", async ({ page }) => {
+  await page.goto("/#/tool/color-contrast-checker")
+  await expect(page.getByRole("heading", { name: "Color Contrast Checker" })).toBeVisible()
+  await page.locator("#contrast-first").fill("#ffffff")
+  await page.locator("#contrast-second").fill("#777777")
+  await expect(page.getByText("The contrast ratio is 4.48:1.")).toBeVisible()
+  await expect(page.getByText("Fail").first()).toBeVisible()
+  await page.getByRole("button", { name: "Swap colors" }).click()
+})
+
+test("dice roller rolls from secure bytes and repeats the last roll", async ({ page }) => {
+  await page.goto("/#/tool/dice-roller")
+  await expect(page.getByRole("heading", { name: "Dice Roller" })).toBeVisible()
+  await page.locator("#dice-notation").fill("1d6 + 0")
+  await page.getByRole("button", { name: "Roll" }).click()
+  const result = page.getByRole("status")
+  await expect(result).toContainText(/^Total [1-6] from 1d6 \+ 0\.$/)
+  await expect(page.getByRole("table")).toBeVisible()
+  await page.getByRole("button", { name: "Repeat last roll" }).click()
+  await expect(result).toContainText(/^Total [1-6] from 1d6 \+ 0\.$/)
+})
+
+test("fuel and trip cost calculator handles round trip and passenger split", async ({ page }) => {
+  await page.goto("/#/tool/fuel-trip-cost-calculator")
+  await expect(page.getByRole("heading", { name: "Fuel and Trip Cost Calculator" })).toBeVisible()
+  await page.locator("#fuel-distance").fill("150")
+  await page.locator("#fuel-efficiency").fill("6.5")
+  await page.locator("#fuel-price").fill("1.85")
+  await page.locator("#fuel-passengers").fill("3")
+  await expect(page.getByText("23.077 l of fuel, costing 42.69 total")).toBeVisible()
+  await page.getByLabel("Round trip (double the distance)").check()
+  await expect(page.getByText("46.154 l of fuel, costing 85.38 total")).toBeVisible()
+})
