@@ -1,7 +1,6 @@
 # Physical Android Device Checklist
 
-> Status: not yet executed on a physical device; automated emulator pre-verification executed 2026-09-07  
-> Do not check an item without recording device/API/WebView/build evidence.
+> Status: not yet executed on a physical device; automated emulator pre-verification executed 2026-09-07 and re-executed 2026-09-08 against the 100-tool artifact. Do not check an item without recording device/API/WebView/build evidence.
 
 ## Test record
 
@@ -77,6 +76,53 @@ Recorded as PENDING_PHYSICAL (not automatable on this emulator image):
 This emulator record supplements but does not replace the physical-device
 checklist below; every checkbox remains unchecked until physical-device
 evidence exists.
+
+## Automated emulator pre-verification (2026-09-08 — 100-tool artifact)
+
+Re-executed `scripts/device-checklist-emulator.mjs` against the rebuilt debug
+artifact containing all 100 enabled version-1 tools (ADR 0004/0021/0022).
+Two consecutive green runs of the fixed driver completed. The first 100-tool
+attempt reported 2 FAIL, both driver-side probe defects rather than tool
+defects: the dice-roller probe anchored `^…$` against whole-page
+`innerText` without the multiline flag, and `clickCheckbox` only accepted an
+`aria-label` while the Fuel and Trip Cost Calculator exposes its round-trip
+toggle through a wrapping `<label>`. Both probes were fixed and the two
+consecutive green runs below used the fixed driver.
+
+| Field                          | Value                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------- |
+| Date/time                      | 2026-09-08 (two consecutive green runs of the fixed driver)                                  |
+| Tester                         | Automated driver script, orchestrated by the coding agent                                    |
+| Git commit                     | Artifact built at `14a0f80` (batch 16); driver probe fixes in the evidence commit            |
+| APK hash                       | SHA-256 `4ec71a06fa088cddbabb4e6c6185fafecd2251b76412191d28452adbe40bc08c` (`app-debug.apk`) |
+| Install source                 | Local Gradle debug build via `adb install -r`                                                |
+| Device model                   | `sdk_gphone64_x86_64` (Android Studio AVD `yash_tools_api35_test`)                           |
+| Android/API                    | Android 15 (SDK 35)                                                                          |
+| Android System WebView version | 124.0.6367.219                                                                               |
+| Security patch                 | 2024-09-05                                                                                   |
+| Result                         | 112 PASS, 6 INFO, 4 PENDING_PHYSICAL, 0 FAIL (122 records)                                   |
+
+Automated coverage that passed:
+
+- Cold launch on the bundled production origin, catalog rendering all 100
+  enabled tool cards, catalog search filtering, labeled primary navigation
+  with `aria-current`, system Back, and theme restoration across process
+  reconnect.
+- Per-tool interaction for all 100 enabled tools on the installed artifact,
+  including the batch 14–16 additions: aspect-ratio, CSS unit,
+  discount/tax, BMI, unit-price comparison, word frequency, text-binary,
+  reading time, date difference with business days, time-zone gap handling,
+  loan EMI with amortization, WCAG 2.2 color contrast, dice roller with
+  repeat-last roll, and fuel/trip cost with round trip and passenger split.
+- Offline behavior under airplane mode, process death and relaunch,
+  landscape rotation, 200% text scale, and "Don't keep activities"
+  recovery — the same environment rows as the 2026-09-07 run.
+
+Recorded as INFO and PENDING_PHYSICAL items are unchanged from the
+2026-09-07 record: soft-IME on the hardware-keyboard AVD profile (INFO), and
+TalkBack, Doze/OEM battery, OEM split-screen, and the WebView update matrix
+(PENDING_PHYSICAL). This record supplements but does not replace the
+physical-device checklist below.
 
 ## Installation and startup
 
@@ -166,7 +212,7 @@ evidence exists.
 ## Result
 
 - Overall: **PARTIAL — emulator pre-verification passed; physical device pending**
-- Emulator evidence: 2026-09-07 automated run (39 PASS / 0 FAIL / 4 PENDING_PHYSICAL) on Android 15 SDK 35, WebView 124.0.6367.219, debug artifact `4405784…`; see "Automated emulator pre-verification" above.
+- Emulator evidence: 2026-09-07 automated run (39 PASS / 0 FAIL / 4 PENDING_PHYSICAL) and the 2026-09-08 re-run at 100 enabled tools (112 PASS / 0 FAIL / 4 PENDING_PHYSICAL), both on Android 15 SDK 35, WebView 124.0.6367.219; see "Automated emulator pre-verification" above.
 - Blocking issues:
   - Physical device has not been selected or tested.
   - The instrumentation suite and the emulator checklist driver supplement but do not replace the pending physical-device, OEM-picker/share-target, Doze, TalkBack, and WebView-update evidence.

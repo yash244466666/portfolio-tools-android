@@ -226,11 +226,14 @@ class CdpPage {
    */
   async clickCheckbox(label) {
     const needle = JSON.stringify(label)
-    await this.waitFor(
-      `[...document.querySelectorAll('input[type=checkbox]')].some(i => i.getAttribute('aria-label') === ${needle})`,
-    )
+    // Checkboxes carry their accessible name either through aria-label or
+    // through a wrapping <label>; both must be accepted.
+    const matcher =
+      `i => i.getAttribute('aria-label') === ${needle} || ` +
+      `(i.closest('label') !== null && i.closest('label').textContent.trim() === ${needle})`
+    await this.waitFor(`[...document.querySelectorAll('input[type=checkbox]')].some(${matcher})`)
     await this.evaluate(
-      `[...document.querySelectorAll('input[type=checkbox]')].find(i => i.getAttribute('aria-label') === ${needle}).click()`,
+      `[...document.querySelectorAll('input[type=checkbox]')].find(${matcher}).click()`,
     )
   }
 
@@ -1624,10 +1627,10 @@ async function phaseTools(page) {
       async (p) => {
         await p.setValue("#dice-notation", "1d6 + 0")
         await p.clickButton("Roll")
-        await p.waitFor("/^Total [1-6] from 1d6 \\+ 0\\.$/.test(document.body.innerText)")
+        await p.waitFor("/^Total [1-6] from 1d6 \\+ 0\\.$/m.test(document.body.innerText)")
         await p.waitFor("!!document.querySelector('table')")
         await p.clickButton("Repeat last roll")
-        await p.waitFor("/^Total [1-6] from 1d6 \\+ 0\\.$/.test(document.body.innerText)")
+        await p.waitFor("/^Total [1-6] from 1d6 \\+ 0\\.$/m.test(document.body.innerText)")
         return "parsed groups with unbiased bytes and a repeat-last roll"
       },
     ],

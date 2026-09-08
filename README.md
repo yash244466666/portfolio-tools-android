@@ -20,7 +20,7 @@ This repository is currently a foundation build, not a Play-ready release.
 - Unit, component, registry, and browser-harness tests
 - Native policy tests plus bundled-artifact Android instrumentation/UI Automator coverage
 
-The first public Google Play release is approved to include all 87 tools from the audited upstream catalog. The completed 12-tool vertical slice is the first architecture milestone, not a reduced release scope. Forty-eight tools are implemented today, and every public tool must pass the repository Definition of Done before it is enabled. The complete roadmap is in [ANDROID_APP_IMPLEMENTATION_PLAN.md](ANDROID_APP_IMPLEMENTATION_PLAN.md), live status and evidence are in [IMPLEMENTATION_TRACKER.md](IMPLEMENTATION_TRACKER.md), and the executable issue/Project workflow is defined in [docs/WORK_MANAGEMENT.md](docs/WORK_MANAGEMENT.md).
+The first public Google Play release is approved to include all 100 tools per ADRs 0004/0021/0022 (86 of the 87 audited upstream catalog tools — YouTube Downloader stays excluded — plus 14 new original tools). All 100 are implemented and enabled; the 12-tool vertical slice was the first architecture milestone, not the release scope, and every public tool must still pass the remaining device-evidence, certification, and release gates in [IMPLEMENTATION_TRACKER.md](IMPLEMENTATION_TRACKER.md) before publication. The complete roadmap is in [ANDROID_APP_IMPLEMENTATION_PLAN.md](ANDROID_APP_IMPLEMENTATION_PLAN.md), live status and evidence are in [IMPLEMENTATION_TRACKER.md](IMPLEMENTATION_TRACKER.md), and the executable issue/Project workflow is defined in [docs/WORK_MANAGEMENT.md](docs/WORK_MANAGEMENT.md).
 
 ## Requirements
 
