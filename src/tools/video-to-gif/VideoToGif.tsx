@@ -653,8 +653,8 @@ export default function VideoToGif() {
             className="h-2 overflow-hidden rounded-full bg-[var(--surface-muted)]"
           >
             <div
-              className="h-full rounded-full bg-[var(--accent)] transition-all duration-200"
-              style={{ width: `${progressPercent}%` }}
+              className="h-full w-full origin-left rounded-full bg-[var(--primary)] transition-transform duration-200"
+              style={{ transform: `scaleX(${Math.min(100, Math.max(0, progressPercent)) / 100})` }}
             />
           </div>
           {progress && progress.frameCount > 0 ? (

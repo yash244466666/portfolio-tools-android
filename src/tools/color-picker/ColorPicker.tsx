@@ -96,7 +96,7 @@ function SwatchButton({
       style={{ background: color }}
       type="button"
     >
-      <span className="rounded-full bg-[var(--surface-raised)] px-1.5 font-mono text-[10px] leading-4 text-[var(--text)]">
+      <span className="rounded-full bg-[var(--surface-raised)] px-1.5 font-mono text-xs leading-5 text-[var(--text)]">
         {color}
       </span>
     </button>

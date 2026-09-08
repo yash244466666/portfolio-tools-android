@@ -49,9 +49,9 @@ export default function PasswordStrengthChecker() {
             className="h-2 overflow-hidden rounded-full bg-[var(--surface-muted)]"
           >
             <div
-              className="h-full rounded-full transition-all duration-200"
+              className="h-full w-full origin-left rounded-full transition-transform duration-200"
               style={{
-                width: `${active ? analysis.score * 100 : 0}%`,
+                transform: `scaleX(${active ? Math.min(1, Math.max(0, analysis.score)) : 0})`,
                 backgroundColor: active ? bandColor : "var(--border)",
               }}
             />

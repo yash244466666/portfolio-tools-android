@@ -181,7 +181,7 @@ export default function CountdownTimer() {
                 strokeWidth="6"
               />
               <circle
-                className={finished ? "text-[var(--danger)]" : "text-[var(--accent)]"}
+                className={finished ? "text-[var(--danger)]" : "text-[var(--primary)]"}
                 cx="100"
                 cy="100"
                 fill="none"

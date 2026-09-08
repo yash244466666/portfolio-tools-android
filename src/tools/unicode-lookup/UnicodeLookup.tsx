@@ -96,10 +96,7 @@ export default function UnicodeLookup() {
                 <span aria-hidden="true" className="text-2xl leading-7">
                   {entry.char}
                 </span>
-                <span
-                  aria-hidden="true"
-                  className="font-mono text-[10px] text-[var(--text-secondary)]"
-                >
+                <span aria-hidden="true" className="font-mono text-xs text-[var(--text-secondary)]">
                   {copiedCodePoint === entry.codePoint ? "Copied" : entry.codePoint}
                 </span>
                 {copiedCodePoint === entry.codePoint ? (

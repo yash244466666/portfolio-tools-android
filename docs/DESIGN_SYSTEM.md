@@ -36,6 +36,7 @@ Do not use theme-specific raw hex values in tool components. Add a semantic toke
 ## Interaction
 
 - Android touch target: minimum 48 × 48 dp. Every shared interactive control meets this floor: buttons, inputs, filter chips, segmented-control segments, icon buttons, navigation links (bottom bar and rail), and links (back/text). Intentional exceptions are non-interactive elements only: status/risk chips and count badges are read-only and may sit below 48 dp. Any future interactive control smaller than the floor must be documented here with its hit-area expansion.
+- Checkbox/radio options use a full-width row as the tap target: the visible control may stay compact (20 px) inside a `min-h-12` label row that wraps both the input and its visible text label. The row, not the small control, must meet the 48 dp floor; rows keep `gap-3` spacing between the control and text.
 - Adjacent easily confused controls: aim for at least 8 dp separation.
 - Press feedback: visible within 100 ms.
 - Typical transition: 150–300 ms.

@@ -46,7 +46,7 @@ export default function CspGenerator() {
         <div className="grid gap-2">
           {directives.map((directive) => (
             <div className="rounded-2xl border border-[var(--border)] p-3" key={directive.id}>
-              <label className="flex min-h-8 items-center gap-3">
+              <label className="flex min-h-12 items-center gap-3">
                 <input
                   checked={directive.enabled}
                   className="h-5 w-5 accent-[var(--primary)]"

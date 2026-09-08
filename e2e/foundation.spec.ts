@@ -59,6 +59,11 @@ test("shell interactive controls meet the 48 dp touch floor", async ({ page }) =
 
   await page.goto("/#/tool/unit-converter")
   await assertFloor(".back-link")
+
+  await page.goto("/#/tool/csp-generator")
+  const optionRows = 'label:has(input[type="checkbox"])'
+  await page.locator(optionRows).first().waitFor()
+  await assertFloor(optionRows)
 })
 
 test("an enabled tool opens and performs a conversion", async ({ page }) => {
