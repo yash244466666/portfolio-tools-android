@@ -40,6 +40,9 @@ export class GifPolicyError extends Error {
   }
 }
 
+/** The over-size rejection message, shared with the picker's error mapping. */
+export const overSizeMessage = `This video is larger than the ${formatMegabytes(maximumInputBytes)} input limit.`
+
 /**
  * Validates a picked video before it is read. Returns the first problem so a
  * rejected pick never discards an already-selected source.
@@ -55,10 +58,7 @@ export function validatePickedVideo(file: {
     return new GifPolicyError("invalid-mime", "Only video files are supported.")
   }
   if (file.size > maximumInputBytes) {
-    return new GifPolicyError(
-      "over-size",
-      `This video is larger than the ${formatMegabytes(maximumInputBytes)} input limit.`,
-    )
+    return new GifPolicyError("over-size", overSizeMessage)
   }
   return null
 }
@@ -96,6 +96,10 @@ export interface FramePlan {
   frameIntervalSeconds: number
   /** Milliseconds between frame starts; the GIF delay input. */
   frameIntervalMs: number
+  /** True when the take was truncated at the 100-frame limit. */
+  truncated: boolean
+  /** Seconds of the source the plan actually includes. */
+  includedSeconds: number
 }
 
 /**
@@ -112,13 +116,31 @@ export function computeFramePlan(durationSeconds: number, fps: number): FramePla
   const frameIntervalSeconds = 1 / fps
   const frameCount = Math.min(maximumFrames, Math.floor(durationSeconds * fps))
   if (frameCount < 1) {
-    return "This video is too short for one frame at the chosen rate. Lower the frame rate and try again."
+    return "This video is too short for one frame at the chosen rate. Raise the frame rate and try again; very short clips may not contain a full frame even at 15 fps."
   }
+  const includedSeconds = frameCount * frameIntervalSeconds
   return {
     frameCount,
     frameIntervalSeconds,
     frameIntervalMs: frameIntervalSeconds * 1000,
+    truncated: frameCount < Math.floor(durationSeconds * fps),
+    includedSeconds,
   }
+}
+
+/**
+ * Validates a requested output width against the tool range. Returns the
+ * problem message, or null when the width is usable.
+ */
+export function validateOutputWidth(requestedWidth: number): string | null {
+  if (
+    !Number.isFinite(requestedWidth) ||
+    requestedWidth < 2 ||
+    requestedWidth > maximumOutputWidth
+  ) {
+    return `Output width must be a number between 2 and ${maximumOutputWidth} pixels.`
+  }
+  return null
 }
 
 /**

@@ -8,11 +8,13 @@ import {
   maximumInputBytes,
   maximumOutputBytes,
   maximumOutputWidth,
+  overSizeMessage,
   resolveOutputDimensions,
   suggestedGifName,
   validateDuration,
   validateFps,
   validateOutputSize,
+  validateOutputWidth,
   validatePickedVideo,
 } from "./gif-policy"
 
@@ -33,6 +35,18 @@ describe("validatePickedVideo", () => {
     const problem = validatePickedVideo({ mimeType: "video/mp4", size: maximumInputBytes + 1 })
     expect(problem?.code).toBe("over-size")
     expect(problem?.message).toMatch(/16 MB/)
+    expect(overSizeMessage).toBe(problem?.message)
+  })
+})
+
+describe("validateOutputWidth", () => {
+  it("accepts the 2-640 range and rejects outside values", () => {
+    expect(validateOutputWidth(2)).toBeNull()
+    expect(validateOutputWidth(640)).toBeNull()
+    expect(validateOutputWidth(320)).toBeNull()
+    expect(validateOutputWidth(0)).toMatch(/between 2 and 640/)
+    expect(validateOutputWidth(641)).toMatch(/between 2 and 640/)
+    expect(validateOutputWidth(Number.NaN)).toMatch(/between 2 and 640/)
   })
 })
 
@@ -71,18 +85,32 @@ describe("computeFramePlan", () => {
     }
   })
 
-  it("caps the frame count at the 100-frame limit", () => {
+  it("caps the frame count at the 100-frame limit and reports the truncation", () => {
     const plan = computeFramePlan(30, 15)
     expect(typeof plan).toBe("object")
     if (typeof plan !== "string") {
       expect(plan.frameCount).toBe(maximumFrames)
+      expect(plan.truncated).toBe(true)
+      expect(plan.includedSeconds).toBeCloseTo(maximumFrames / 15)
     }
   })
 
-  it("rejects a plan that would produce zero frames", () => {
+  it("marks a plan that fits the frame budget as not truncated", () => {
+    const plan = computeFramePlan(10, 5)
+    expect(typeof plan).toBe("object")
+    if (typeof plan !== "string") {
+      expect(plan.truncated).toBe(false)
+      expect(plan.includedSeconds).toBeCloseTo(10)
+    }
+  })
+
+  it("rejects a plan that would produce zero frames with raised-fps advice", () => {
     const plan = computeFramePlan(0.05, 15)
     expect(typeof plan).toBe("string")
-    if (typeof plan === "string") expect(plan).toMatch(/too short/i)
+    if (typeof plan === "string") {
+      expect(plan).toMatch(/too short/i)
+      expect(plan).toMatch(/raise the frame rate/i)
+    }
   })
 
   it("propagates duration and fps validation", () => {

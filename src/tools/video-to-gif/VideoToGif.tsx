@@ -3,11 +3,13 @@ import { Film, RotateCcw, X } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { ToolPanel } from "@/components/ui/ToolPanel"
 import type { PickedFile } from "@/platform/contracts"
-import { isCancellationError, toSafeErrorMessage } from "@/platform/errors"
+import { isCancellationError, PlatformError, toSafeErrorMessage } from "@/platform/errors"
 import { usePlatform } from "@/platform/platform-context"
 import { bytesToBase64 } from "@/platform/shared/files"
 import { createGifConversion, type GifConversion } from "./gif-client"
 import {
+  canExportOutput,
+  computeFramePlan,
   defaultFps,
   defaultOutputWidth,
   exportCapNote,
@@ -19,13 +21,13 @@ import {
   maximumOutputWidth,
   metadataTimeoutMs,
   minimumFps,
-  canExportOutput,
-  computeFramePlan,
+  overSizeMessage,
   resolveOutputDimensions,
   seekTimeoutMs,
   suggestedGifName,
   validateDuration,
   validateOutputSize,
+  validateOutputWidth,
   validatePickedVideo,
 } from "./gif-policy"
 
@@ -44,7 +46,8 @@ type Phase =
 
 interface DoneGif {
   url: string
-  bytes: Uint8Array<ArrayBuffer>
+  /** The finished GIF bytes, held only as the preview Blob (F15 retention). */
+  blob: Blob
   byteLength: number
   width: number
   height: number
@@ -136,16 +139,27 @@ export default function VideoToGif() {
   const [phase, setPhase] = useState<Phase>("initial")
   const [selected, setSelected] = useState<PickedFile | null>(null)
   const [fps, setFps] = useState(defaultFps)
-  const [outputWidth, setOutputWidth] = useState(defaultOutputWidth)
+  const [widthText, setWidthText] = useState(String(defaultOutputWidth))
   const [error, setError] = useState("")
   const [progress, setProgress] = useState<{ framesDone: number; frameCount: number } | null>(null)
   const [gif, setGif] = useState<DoneGif | null>(null)
   const [exportNote, setExportNote] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState("")
+  // Progress announced through the live region, throttled to ~10% steps so
+  // every frame does not re-announce; the percentage lives inside the region.
+  const [announcedPercent, setAnnouncedPercent] = useState(0)
+  // Explicit truncation notice when the take exceeded the 100-frame budget
+  // (the PdfConverter "first N of M pages" precedent).
+  const [truncationNote, setTruncationNote] = useState("")
 
   const conversionRef = useRef<GifConversion | null>(null)
   const cancelledRef = useRef(false)
+  // Generation token for the running convert() loop: cancel/reset and a new
+  // run both bump it, so a parked stale loop can never touch the new run.
+  const runIdRef = useRef(0)
+  const readControllerRef = useRef<AbortController | null>(null)
+  const announcedPercentRef = useRef(0)
   const sourceUrlRef = useRef<string | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
@@ -162,7 +176,9 @@ export default function VideoToGif() {
   useEffect(() => {
     return () => {
       cancelledRef.current = true
+      runIdRef.current += 1
       conversionRef.current?.dispose()
+      readControllerRef.current?.abort()
       if (sourceUrlRef.current) URL.revokeObjectURL(sourceUrlRef.current)
       sourceUrlRef.current = null
       if (videoRef.current) {
@@ -226,13 +242,26 @@ export default function VideoToGif() {
       setPhase("initial")
       setError("")
     } catch (pickError) {
+      if (isCancellationError(pickError)) {
+        setPhase("initial")
+        return
+      }
+      if (pickError instanceof PlatformError && pickError.code === "FILE_TOO_LARGE") {
+        // The picker's own cap fires before our validation can see the file;
+        // surface it on the distinct over-size panel instead of a generic one.
+        setError(overSizeMessage)
+        setPhase("over-size")
+        return
+      }
       setPhase("initial")
-      if (!isCancellationError(pickError)) setError(toSafeErrorMessage(pickError))
+      setError(toSafeErrorMessage(pickError))
     }
   }, [files])
 
   const convert = useCallback(async () => {
     if (!selected) return
+    const runId = ++runIdRef.current
+    const isCurrent = () => runIdRef.current === runId && !cancelledRef.current
     cancelledRef.current = false
     setError("")
     setExportNote(null)
@@ -242,14 +271,28 @@ export default function VideoToGif() {
       return null
     })
     setProgress(null)
+    announcedPercentRef.current = 0
+    setAnnouncedPercent(0)
+    setTruncationNote("")
     setPhase("extracting")
 
-    let bytes: Uint8Array<ArrayBuffer>
+    const readController = new AbortController()
+    readControllerRef.current = readController
+    let sourceUrl: string
     try {
-      const content = await files.readContent(selected, { maximumBytes: maximumInputBytes })
-      bytes = base64ToBytes(content.data)
+      const content = await files.readContent(
+        selected,
+        { maximumBytes: maximumInputBytes },
+        readController.signal,
+      )
+      // The decoded byte copy lives only in this block: the Blob behind the
+      // object URL carries the data from here on (retention rule).
+      const decoded = base64ToBytes(content.data)
+      sourceUrl = URL.createObjectURL(
+        new Blob([decoded.buffer], { type: selected.mimeType || "video/mp4" }),
+      )
     } catch (readError) {
-      if (cancelledRef.current) return
+      if (cancelledRef.current || runIdRef.current !== runId) return
       setError(
         isCancellationError(readError)
           ? "The video could not be read from the picker."
@@ -258,15 +301,20 @@ export default function VideoToGif() {
       setPhase("decode-failure")
       return
     }
+    // Cancellation re-check after the bounded read: never build the video
+    // element, object URL, or Worker for a run that is already over.
+    if (!isCurrent()) {
+      URL.revokeObjectURL(sourceUrl)
+      readControllerRef.current = null
+      return
+    }
+    readControllerRef.current = null
 
     const video = document.createElement("video")
     video.muted = true
     video.playsInline = true
     video.preload = "auto"
     videoRef.current = video
-    const sourceUrl = URL.createObjectURL(
-      new Blob([bytes.buffer], { type: selected.mimeType || "video/mp4" }),
-    )
     sourceUrlRef.current = sourceUrl
     video.src = sourceUrl
 
@@ -274,7 +322,7 @@ export default function VideoToGif() {
       await loadMetadata(video, metadataTimeoutMs)
     } catch (loadError) {
       releaseSource()
-      if (cancelledRef.current) return
+      if (!isCurrent()) return
       if ((loadError as Error).message === "unsupported") {
         setPhase("unsupported-codec")
         setError(
@@ -309,8 +357,17 @@ export default function VideoToGif() {
       setPhase("initial")
       return
     }
+    setTruncationNote(
+      plan.truncated
+        ? `This video is longer than the ${maximumFrames}-frame budget; only the first ${plan.includedSeconds.toFixed(1)} seconds are included in the GIF.`
+        : "",
+    )
 
-    const dimensions = resolveOutputDimensions(video.videoWidth, video.videoHeight, outputWidth)
+    const dimensions = resolveOutputDimensions(
+      video.videoWidth,
+      video.videoHeight,
+      Number(widthText),
+    )
     if (typeof dimensions === "string") {
       releaseSource()
       setPhase("decode-failure")
@@ -329,13 +386,25 @@ export default function VideoToGif() {
       },
       {
         onProgress: (framesDone, frameCount) => {
+          if (runIdRef.current !== runId) return
           setProgress({ framesDone, frameCount })
+          // Announce at most every ~10% (or at completion); the percentage
+          // itself lives inside the live region.
+          const percent =
+            frameCount > 0 ? Math.min(100, Math.round((framesDone / frameCount) * 100)) : 0
+          if (percent >= 100 || percent - announcedPercentRef.current >= 10) {
+            announcedPercentRef.current = percent
+            setAnnouncedPercent(percent)
+          }
         },
         onEncoding: () => {
+          if (runIdRef.current !== runId) return
           setPhase((current) => (current === "extracting" ? "encoding" : current))
         },
         onComplete: (result) => {
+          if (runIdRef.current !== runId) return
           releaseSource()
+          // The Worker enforces the cap authoritatively; the client verifies.
           const outputProblem = validateOutputSize(result.bytes.byteLength)
           if (outputProblem) {
             setError(outputProblem)
@@ -343,10 +412,11 @@ export default function VideoToGif() {
             return
           }
           const durationSeconds = (result.frameCount * plan.frameIntervalMs) / 1000
-          const url = URL.createObjectURL(new Blob([result.bytes.buffer], { type: "image/gif" }))
+          const blob = new Blob([result.bytes.buffer], { type: "image/gif" })
+          const url = URL.createObjectURL(blob)
           setGif({
             url,
-            bytes: result.bytes,
+            blob,
             byteLength: result.bytes.byteLength,
             width: result.width,
             height: result.height,
@@ -358,6 +428,7 @@ export default function VideoToGif() {
           setError("")
         },
         onFailure: (code, message) => {
+          if (runIdRef.current !== runId) return
           // Stop the seek loop; the Worker has already given up on the take.
           cancelledRef.current = true
           releaseSource()
@@ -383,16 +454,21 @@ export default function VideoToGif() {
 
     try {
       for (let index = 0; index < plan.frameCount; index += 1) {
-        if (cancelledRef.current) return
+        if (!isCurrent()) return
         await seekTo(video, index * plan.frameIntervalSeconds, seekTimeoutMs)
-        if (cancelledRef.current) return
-        const bitmap = await createImageBitmap(video)
+        if (!isCurrent()) return
+        // Decode down to the output dimensions at bitmap creation; the
+        // pipeline never holds intrinsic-resolution bitmaps.
+        const bitmap = await createImageBitmap(video, {
+          resizeWidth: dimensions.width,
+          resizeHeight: dimensions.height,
+        })
         conversion.addFrame(bitmap)
       }
-      if (cancelledRef.current) return
+      if (!isCurrent()) return
       conversion.finish()
     } catch {
-      if (cancelledRef.current) return
+      if (!isCurrent()) return
       cancelledRef.current = true
       conversion.cancel()
       releaseSource()
@@ -401,11 +477,14 @@ export default function VideoToGif() {
         "Frames could not be extracted from this video before the deadline. Please try another file.",
       )
     }
-  }, [selected, fps, outputWidth, files, ensureConversion, releaseSource])
+  }, [selected, fps, widthText, files, ensureConversion, releaseSource])
 
   const cancel = useCallback(() => {
     cancelledRef.current = true
+    runIdRef.current += 1
     conversionRef.current?.cancel()
+    readControllerRef.current?.abort()
+    readControllerRef.current = null
     releaseSource()
     setPhase("cancelled")
     setError("")
@@ -413,7 +492,10 @@ export default function VideoToGif() {
 
   const reset = useCallback(() => {
     cancelledRef.current = true
+    runIdRef.current += 1
     conversionRef.current?.cancel()
+    readControllerRef.current?.abort()
+    readControllerRef.current = null
     releaseSource()
     setGif((current) => {
       if (current) URL.revokeObjectURL(current.url)
@@ -421,6 +503,7 @@ export default function VideoToGif() {
     })
     setSelected(null)
     setProgress(null)
+    setTruncationNote("")
     setExportNote(null)
     setError("")
     setNotice("Tool reset. Nothing is retained.")
@@ -433,14 +516,13 @@ export default function VideoToGif() {
     setBusy(true)
     setExportNote(null)
     try {
-      if (!canExportOutput(gif.byteLength)) {
-        setExportNote(exportCapNote)
-        return
-      }
+      // Read the bytes back from the retained preview Blob; nothing else
+      // keeps the GIF in memory.
+      const buffer = await gif.blob.arrayBuffer()
       await files.saveAs({
         name: suggestedGifName(gif.sourceName),
         mimeType: "image/gif",
-        data: bytesToBase64(gif.bytes),
+        data: bytesToBase64(new Uint8Array(buffer)),
         encoding: "base64",
       })
       setExportNote("GIF saved.")
@@ -454,7 +536,10 @@ export default function VideoToGif() {
   }, [files, gif])
 
   const converting = phase === "extracting" || phase === "encoding"
-  const showSettings = !converting && phase !== "done" && phase !== "over-limit-output"
+  // Settings stay visible in the over-limit phase so the recovery advice
+  // (lower frame rate / width) can actually be followed.
+  const showSettings = !converting && phase !== "done"
+  const widthProblem = validateOutputWidth(Number(widthText))
   const gifExportable = gif !== null && canExportOutput(gif.byteLength)
   const progressPercent =
     progress && progress.frameCount > 0
@@ -466,7 +551,7 @@ export default function VideoToGif() {
       ? "Opening the picker…"
       : phase === "extracting"
         ? progress
-          ? `Extracting and encoding frame ${Math.min(progress.framesDone + 1, progress.frameCount)} of ${progress.frameCount}…`
+          ? `Converting… ${announcedPercent}%`
           : "Preparing the conversion…"
         : phase === "encoding"
           ? "Finishing the GIF encoding…"
@@ -539,16 +624,22 @@ export default function VideoToGif() {
                 id="video-to-gif-width"
                 max={maximumOutputWidth}
                 min={2}
-                onChange={(event) => setOutputWidth(Number(event.target.value))}
+                onChange={(event) => setWidthText(event.target.value)}
                 type="number"
-                value={outputWidth}
+                value={widthText}
               />
-              <p className="text-xs text-[var(--text-secondary)]">
-                At most {maximumOutputWidth} px wide; the aspect ratio is preserved and dimensions
-                are evened.
-              </p>
+              {widthProblem ? (
+                <p className="text-sm" role="note">
+                  {widthProblem}
+                </p>
+              ) : (
+                <p className="text-xs text-[var(--text-secondary)]">
+                  At most {maximumOutputWidth} px wide; the aspect ratio is preserved and dimensions
+                  are evened.
+                </p>
+              )}
             </div>
-            <Button disabled={!selected} onClick={() => void convert()}>
+            <Button disabled={!selected || widthProblem !== null} onClick={() => void convert()}>
               Convert to GIF
             </Button>
           </div>
@@ -566,7 +657,17 @@ export default function VideoToGif() {
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">{progressPercent}%</p>
+          {progress && progress.frameCount > 0 ? (
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">
+              Frame {Math.min(progress.framesDone + 1, progress.frameCount)} of{" "}
+              {progress.frameCount} ({progressPercent}%).
+            </p>
+          ) : null}
+          {truncationNote ? (
+            <p className="mt-2 text-sm" role="note">
+              {truncationNote}
+            </p>
+          ) : null}
           <div className="mt-3">
             <Button onClick={cancel} variant="quiet">
               <X aria-hidden="true" className="size-4" /> Cancel
@@ -611,14 +712,15 @@ export default function VideoToGif() {
                 when you reset, navigate away, or close the app.
               </p>
               <div className="mt-3">
-                <Button
-                  disabled={busy || !gifExportable}
-                  onClick={() => void exportGif()}
-                  title={gifExportable ? undefined : exportCapNote}
-                >
+                <Button disabled={busy || !gifExportable} onClick={() => void exportGif()}>
                   Save GIF
                 </Button>
               </div>
+              {!gifExportable && (
+                <p className="mt-2 text-sm" role="note">
+                  {exportCapNote}
+                </p>
+              )}
               {exportNote && (
                 <p className="mt-2 text-sm" role="status">
                   {exportNote}

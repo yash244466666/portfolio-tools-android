@@ -7,8 +7,14 @@
  * under the hard output-byte cap. Nothing here touches the DOM, nothing is
  * logged, and every buffer is released as soon as its frame is encoded.
  *
- * The Worker is terminated by the client on cancel, reset, unmount, and
- * over-limit, so a wedged or oversized conversion can never outlive the tool.
+ * Flow control: every encoded frame produces one `progress` response, which
+ * doubles as the producer/consumer acknowledgement — the client keeps a
+ * bounded in-flight window against those acks so its queue of transferred
+ * bitmaps cannot grow unbounded.
+ *
+ * The Worker is terminated by the client on cancel, reset, unmount, terminal
+ * responses, and over-limit, so a wedged or oversized conversion can never
+ * outlive the tool.
  */
 import { GifEncoder } from "./gif-encoder"
 import type { GifWorkerRequest, GifWorkerResponse } from "./gif-conversion"

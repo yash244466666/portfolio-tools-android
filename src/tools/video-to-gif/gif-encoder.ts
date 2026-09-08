@@ -256,9 +256,15 @@ export class GifEncoder {
   }
 
   /**
-   * Ported LZW encoder (minimum code size 8). Emits the clear code, builds the
+   * LZW encoder (minimum code size 8). Emits the clear code, builds the
    * dictionary up to the 4096 code limit, resets it when full, and writes the
    * compressed bytes as GIF data sub-blocks of at most 255 bytes.
+   *
+   * The dictionary is the classic integer-keyed scheme (omggif-style): the
+   * key is `(prefixCode << 8) | pixelIndex` in a fixed `Int32Array` with open
+   * addressing, replacing upstream's string-concatenation keys for a large
+   * speedup. The emitted bitstream is identical to the ported reference
+   * algorithm, which the parser/decoder oracle tests pin.
    */
   private lzwEncode(indices: Uint8Array): void {
     const minCodeSize = 8
@@ -267,9 +273,21 @@ export class GifEncoder {
     let codeSize = minCodeSize + 1
     let nextCode = eoiCode + 1
 
-    const dictionary = new Map<string, number>()
-    for (let code = 0; code < clearCode; code += 1) {
-      dictionary.set(String.fromCharCode(code), code)
+    // Open-addressing table sized so the 4096-entry dictionary stays under
+    // 25% load; -1 marks an empty slot.
+    const tableCapacity = 1 << 14
+    const tableMask = tableCapacity - 1
+    const tableKeys = new Int32Array(tableCapacity).fill(-1)
+    const tableValues = new Int32Array(tableCapacity)
+    const clearTable = () => {
+      tableKeys.fill(-1)
+    }
+    const findSlot = (key: number): number => {
+      let slot = Math.imul(key, 0x9e3779b1) >>> (32 - 14)
+      while (tableKeys[slot] !== -1 && tableKeys[slot] !== key) {
+        slot = (slot + 1) & tableMask
+      }
+      return slot
     }
 
     // One frame's compressed bytes; released as soon as the sub-blocks land.
@@ -277,16 +295,20 @@ export class GifEncoder {
     const writer = new BitWriter(compressed)
     writer.writeBits(clearCode, codeSize)
 
-    let current = String.fromCharCode(indices[0] ?? 0)
+    // The pending string is tracked as the code it was assigned; root
+    // pixels are their own codes (0..255).
+    let current = indices[0] ?? 0
     for (let index = 1; index < indices.length; index += 1) {
-      const character = String.fromCharCode(indices[index] ?? 0)
-      const combined = current + character
-      if (dictionary.has(combined)) {
-        current = combined
+      const character = indices[index] ?? 0
+      const key = (current << 8) | character
+      const slot = findSlot(key)
+      if (tableKeys[slot] === key) {
+        current = tableValues[slot] ?? 0
       } else {
-        writer.writeBits(dictionary.get(current) ?? 0, codeSize)
+        writer.writeBits(current, codeSize)
         if (nextCode < codeLimit) {
-          dictionary.set(combined, nextCode)
+          tableKeys[slot] = key
+          tableValues[slot] = nextCode
           nextCode += 1
           if (nextCode > 1 << codeSize && codeSize < 12) {
             codeSize += 1
@@ -294,10 +316,7 @@ export class GifEncoder {
         } else {
           // Dictionary full: emit a clear code and start over.
           writer.writeBits(clearCode, codeSize)
-          dictionary.clear()
-          for (let code = 0; code < clearCode; code += 1) {
-            dictionary.set(String.fromCharCode(code), code)
-          }
+          clearTable()
           nextCode = eoiCode + 1
           codeSize = minCodeSize + 1
         }
@@ -305,7 +324,7 @@ export class GifEncoder {
       }
     }
 
-    writer.writeBits(dictionary.get(current) ?? 0, codeSize)
+    writer.writeBits(current, codeSize)
     writer.writeBits(eoiCode, codeSize)
     writer.flushPartialByte()
 
