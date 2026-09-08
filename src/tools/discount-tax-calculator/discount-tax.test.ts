@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest"
+import { percentOfCentsHalfUp, roundToCents } from "@/tools/_shared/money"
 import {
   computeDiscountTax,
   formatCents,
   maximumPrice,
   parsePercent,
   parsePriceToCents,
-  roundToCents,
 } from "./discount-tax"
 
 describe("parsePriceToCents", () => {
@@ -25,10 +25,13 @@ describe("parsePriceToCents", () => {
   })
 })
 
-describe("roundToCents and formatCents", () => {
+describe("percent rounding and formatCents", () => {
   it("rounds half-up exactly once and never shows float noise", () => {
-    expect(roundToCents(1999.5)).toBe(2000)
-    expect(roundToCents(1999.4999)).toBe(1999)
+    // Shared half-up rounding vectors (src/tools/_shared/money.ts).
+    expect(roundToCents(1.005)).toBe(1.01)
+    expect(roundToCents(1999.4999 / 100)).toBe(19.99)
+    expect(percentOfCentsHalfUp(25000, 0.29)).toBe(73)
+    expect(percentOfCentsHalfUp(55000, 0.29)).toBe(160)
     expect(formatCents(1500)).toBe("15.00")
     expect(formatCents(5)).toBe("0.05")
     expect(formatCents(1_000_000_05)).toBe("1000000.05")
@@ -47,10 +50,11 @@ describe("roundToCents and formatCents", () => {
 })
 
 describe("parsePercent", () => {
-  it("accepts 0-100 and clamps above 100", () => {
+  it("accepts 0-100 and rejects above 100 (percents are never clamped)", () => {
     expect(parsePercent("7.5")).toBe(7.5)
     expect(parsePercent("0")).toBe(0)
-    expect(parsePercent("150")).toBe(100)
+    expect(parsePercent("100")).toBe(100)
+    expect(parsePercent("150")).toBeNull()
   })
 
   it("rejects negatives and junk", () => {
@@ -131,6 +135,27 @@ describe("computeDiscountTax", () => {
       taxCents: 68,
       totalCents: 917,
     })
+  })
+
+  it("keeps the half cent on sub-percent rates (shared exact path)", () => {
+    // 250.00 at 0.29%: 72.5 cents saved -> 73; subtotal 249.27; 0% tax.
+    expect(
+      computeDiscountTax({
+        priceCents: 25000,
+        mode: "percent",
+        discountPercent: 0.29,
+        taxPercent: 0,
+      }),
+    ).toEqual({ savedCents: 73, subtotalCents: 24927, taxCents: 0, totalCents: 24927 })
+    // 550.00 at 0.29%: 159.5 cents -> 160.
+    expect(
+      computeDiscountTax({
+        priceCents: 55000,
+        mode: "percent",
+        discountPercent: 0.29,
+        taxPercent: 0,
+      }),
+    ).toEqual({ savedCents: 160, subtotalCents: 54840, taxCents: 0, totalCents: 54840 })
   })
 
   it("rejects invalid prices, percents, and missing inputs", () => {

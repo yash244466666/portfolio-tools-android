@@ -52,18 +52,15 @@ describe("DiscountTaxCalculator", () => {
     )
   })
 
-  it("reports invalid input with visible alerts and clamps percents into range", () => {
+  it("reports invalid input with visible alerts and rejects out-of-range percents", () => {
     renderTool()
     fireEvent.change(screen.getByLabelText("Original price"), { target: { value: "1.999" } })
     expect(screen.getByRole("alert")).toHaveTextContent(/at most 2 decimals/i)
     expect(screen.queryByRole("table")).not.toBeInTheDocument()
     fireEvent.change(screen.getByLabelText("Original price"), { target: { value: "10.00" } })
+    // Percents are promised 0-100, so out-of-range input rejects with an alert.
     fireEvent.change(screen.getByLabelText("Discount percent"), { target: { value: "150" } })
-    // Percents clamp into 0-100, so 150% off computes the floor price.
-    fireEvent.change(screen.getByLabelText("Tax percent"), { target: { value: "10" } })
-    expect(screen.getByRole("status")).toHaveTextContent(
-      /save 10.00; the subtotal after discount is 0.00/,
-    )
+    expect(screen.getByRole("alert")).toHaveTextContent(/between 0 and 100/i)
   })
 
   it("resets to the empty state", () => {

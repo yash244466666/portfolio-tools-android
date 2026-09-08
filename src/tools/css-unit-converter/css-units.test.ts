@@ -18,10 +18,13 @@ describe("parseRootFontSize", () => {
     expect(parseRootFontSize("100")).toBe(maximumRootFontSize)
   })
 
-  it("rejects non-finite and junk input", () => {
+  it("rejects non-finite and junk input with the shared strict grammar", () => {
     expect(parseRootFontSize("")).toBeNull()
     expect(parseRootFontSize("big")).toBeNull()
     expect(parseRootFontSize(Number.NaN.toString())).toBeNull()
+    expect(parseRootFontSize("0x10")).toBeNull()
+    expect(parseRootFontSize("1e2")).toBeNull()
+    expect(parseRootFontSize("+16")).toBeNull()
   })
 })
 
@@ -33,10 +36,12 @@ describe("parseUnitValue", () => {
     expect(parseUnitValue("-2000000")).toBe(-1_000_000)
   })
 
-  it("rejects non-finite input", () => {
+  it("rejects non-finite and exponent input", () => {
     expect(parseUnitValue("")).toBeNull()
     expect(parseUnitValue("12rem")).toBeNull()
     expect(parseUnitValue("Infinity")).toBeNull()
+    expect(parseUnitValue("1e3")).toBeNull()
+    expect(parseUnitValue("+2")).toBeNull()
   })
 })
 

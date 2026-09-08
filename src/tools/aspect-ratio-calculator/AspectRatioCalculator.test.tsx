@@ -36,6 +36,21 @@ describe("AspectRatioCalculator", () => {
     expect(screen.getByRole("status")).toHaveTextContent(/enter a width and height/i)
   })
 
+  it("offers reset from the success state, not only from errors", () => {
+    renderTool()
+    setDimensions("1920", "1080")
+    expect(screen.getByRole("status")).toHaveTextContent(/Simplified ratio 16:9/)
+    fireEvent.click(screen.getByRole("button", { name: /reset/i }))
+    expect(screen.getByRole("status")).toHaveTextContent(/enter a width and height/i)
+    expect(screen.queryByRole("table")).not.toBeInTheDocument()
+  })
+
+  it("discloses clamped inputs as effective values", () => {
+    renderTool()
+    setDimensions("0", "1080")
+    expect(screen.getByText(/Width clamped to 1 px/i)).toBeVisible()
+  })
+
   it("scales to a target width and shows a text-equivalent table", () => {
     renderTool()
     setDimensions("1920", "1080")

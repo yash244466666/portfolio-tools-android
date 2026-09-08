@@ -30,6 +30,8 @@ export default function CssUnitConverter() {
   const value = useMemo(() => parseUnitValue(valueText), [valueText])
   const rootInvalid = rootText.trim() !== "" && root === null
   const valueInvalid = valueText.trim() !== "" && value === null
+  // The effective root is disclosed whenever the raw input was clamped.
+  const rootClamped = root !== null && rootText.trim() !== "" && Number(rootText) !== root
 
   const conversion = useMemo(() => {
     if (root === null || value === null || rootInvalid || valueInvalid) return null
@@ -113,33 +115,45 @@ export default function CssUnitConverter() {
               ? "Fix the highlighted input to convert."
               : "Enter a value to see the conversion table."}
         </p>
+        {rootClamped ? (
+          <p className="mt-2 text-sm text-[var(--text-secondary)]" role="note">
+            Root font size clamped to {formatUnitValue(root ?? defaultRootFontSize)} px (supported
+            range {minimumRootFontSize}-{maximumRootFontSize} px).
+          </p>
+        ) : null}
         {conversion ? (
-          <table className="mt-3 w-full text-sm">
-            <caption className="sr-only">
-              Converted values for every unit against the configured root font size
-            </caption>
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-[var(--text-secondary)]">
-                <th scope="col" className="py-2">
-                  Unit
-                </th>
-                <th scope="col" className="py-2 text-right">
-                  Value
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {cssUnits.map((unit) => (
-                <tr className="border-t border-[var(--border)]" key={unit}>
-                  <td className="py-2">{unitLabels[unit]}</td>
-                  <td className="py-2 text-right font-mono">
-                    {formatUnitValue(conversion.inputs[unit === "%" ? "percent" : unit])}
-                    {unit}
-                  </td>
+          <>
+            <table className="mt-3 w-full text-sm">
+              <caption className="sr-only">
+                Converted values for every unit against the configured root font size
+              </caption>
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wide text-[var(--text-secondary)]">
+                  <th scope="col" className="py-2">
+                    Unit
+                  </th>
+                  <th scope="col" className="py-2 text-right">
+                    Value
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {cssUnits.map((unit) => (
+                  <tr className="border-t border-[var(--border)]" key={unit}>
+                    <td className="py-2">{unitLabels[unit]}</td>
+                    <td className="py-2 text-right font-mono">
+                      {formatUnitValue(conversion.inputs[unit === "%" ? "percent" : unit])}
+                      {unit}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)]">
+              Caveat: em is computed against the root font size, so the em and rem results match
+              here. Inside an element that sets its own font size, real em values differ.
+            </p>
+          </>
         ) : null}
       </ToolPanel>
 

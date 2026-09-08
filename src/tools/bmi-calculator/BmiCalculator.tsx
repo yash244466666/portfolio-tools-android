@@ -2,18 +2,24 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { formatEffectiveValue } from "@/tools/_shared/bounded-parse"
 import {
   bmiCategory,
   bmiCategoryLabel,
   computeBmiImperial,
   computeBmiMetric,
   formatBmi,
+  kgToLb,
+  lbToKg,
+  maximumImperialTotalInches,
   maximumMetricHeightCm,
   maximumMetricWeightKg,
+  minimumImperialTotalInches,
+  minimumImperialWeightLb,
   minimumMetricHeightCm,
   minimumMetricWeightKg,
-  minimumImperialWeightLb,
   parseMeasurement,
+  totalInches,
   type BmiSystem,
 } from "./bmi"
 
@@ -24,6 +30,8 @@ export default function BmiCalculator() {
   const [feetText, setFeetText] = useState("")
   const [inchesText, setInchesText] = useState("")
 
+  // Weight uses a reject policy below its floor: a zero-weight BMI is
+  // meaningless, so zero gets a real alert instead of a silent clamp.
   const weight = useMemo(() => {
     const minimum = system === "metric" ? minimumMetricWeightKg : minimumImperialWeightLb
     const maximum = system === "metric" ? maximumMetricWeightKg : 1100
@@ -45,22 +53,66 @@ export default function BmiCalculator() {
     [inchesText, system],
   )
 
-  const weightInvalid = weightText.trim() !== "" && weight === null
+  // Zero (or negative) weight parses but is meaningless for a BMI; it gets
+  // a real alert instead of a silent clamp to the floor.
+  const weightMeaningless =
+    weight !== null && /^\d+(?:\.\d+)?$/.test(weightText.trim()) && Number(weightText) <= 0
+  const weightInvalid = weightText.trim() !== "" && (weight === null || weightMeaningless)
+  const totalInchesValue =
+    system === "imperial" && feet !== null && inches !== null
+      ? totalInches(feet.value, inches.value)
+      : null
+  // The imperial height window is validated on the combined total, so
+  // 0 ft 0 in and other out-of-window pairs get one clear alert.
   const heightInvalid =
     system === "metric"
       ? heightCmText.trim() !== "" && heightCm === null
-      : (feetText.trim() !== "" && feet === null) || (inchesText.trim() !== "" && inches === null)
+      : (feetText.trim() !== "" && feet === null) ||
+        (inchesText.trim() !== "" && inches === null) ||
+        (totalInchesValue !== null &&
+          (totalInchesValue < minimumImperialTotalInches ||
+            totalInchesValue > maximumImperialTotalInches))
 
   const bmi = useMemo(() => {
     if (weight === null || heightInvalid) return null
     if (system === "metric") {
-      return heightCm === null ? null : computeBmiMetric(weight, heightCm)
+      return heightCm === null ? null : computeBmiMetric(weight.value, heightCm.value)
     }
-    if (feet === null || inches === null) return null
-    return computeBmiImperial(weight, feet, inches)
-  }, [system, weight, heightCm, feet, inches, heightInvalid])
+    if (feet === null || inches === null || totalInchesValue === null) return null
+    if (
+      totalInchesValue < minimumImperialTotalInches ||
+      totalInchesValue > maximumImperialTotalInches
+    ) {
+      return null
+    }
+    return computeBmiImperial(weight.value, feet.value, inches.value)
+  }, [system, weight, heightCm, feet, inches, totalInchesValue, heightInvalid])
 
   const category = bmi === null ? null : bmiCategory(bmi)
+
+  // Clamped inputs are disclosed so the effective value is never silent.
+  const clampedNotes: string[] = []
+  if (weight?.clamped) {
+    clampedNotes.push(
+      system === "metric"
+        ? `Weight clamped to ${formatEffectiveValue(weight.value)} kg.`
+        : `Weight clamped to ${formatEffectiveValue(weight.value)} lb.`,
+    )
+  }
+  if (heightCm?.clamped) {
+    clampedNotes.push(`Height clamped to ${formatEffectiveValue(heightCm.value)} cm.`)
+  }
+
+  function switchSystem(next: BmiSystem) {
+    if (next === system) return
+    // Convert the retained weight across units instead of reinterpreting it.
+    const parsed = parseMeasurement(weightText, 0, Number.MAX_SAFE_INTEGER)
+    if (parsed) {
+      const converted = next === "imperial" ? kgToLb(parsed.value) : lbToKg(parsed.value)
+      setWeightText(String(converted))
+    }
+    setSystem(next)
+  }
 
   function reset() {
     setWeightText("")
@@ -75,14 +127,14 @@ export default function BmiCalculator() {
         <div aria-label="Measurement system" className="flex flex-wrap gap-2" role="group">
           <Button
             aria-pressed={system === "metric"}
-            onClick={() => setSystem("metric")}
+            onClick={() => switchSystem("metric")}
             variant={system === "metric" ? "primary" : "secondary"}
           >
             Metric (kg, cm)
           </Button>
           <Button
             aria-pressed={system === "imperial"}
-            onClick={() => setSystem("imperial")}
+            onClick={() => switchSystem("imperial")}
             variant={system === "imperial" ? "primary" : "secondary"}
           >
             Imperial (lb, ft + in)
@@ -93,7 +145,13 @@ export default function BmiCalculator() {
       <ToolPanel title="Your measurements">
         <div className="grid gap-4">
           <Field
-            error={weightInvalid ? "Enter a valid weight inside the supported range." : undefined}
+            error={
+              weightInvalid
+                ? system === "metric"
+                  ? `Enter a weight of at least ${minimumMetricWeightKg} kg.`
+                  : `Enter a weight of at least ${minimumImperialWeightLb} lb.`
+                : undefined
+            }
             htmlFor="bmi-weight"
             label={system === "metric" ? "Weight (kg)" : "Weight (lb)"}
           >
@@ -108,7 +166,11 @@ export default function BmiCalculator() {
           </Field>
           {system === "metric" ? (
             <Field
-              error={heightInvalid ? "Enter a valid height inside the supported range." : undefined}
+              error={
+                heightInvalid
+                  ? `Enter a height between ${minimumMetricHeightCm} and ${maximumMetricHeightCm} cm.`
+                  : undefined
+              }
               htmlFor="bmi-height-cm"
               label="Height (cm)"
             >
@@ -153,6 +215,9 @@ export default function BmiCalculator() {
               </Field>
             </div>
           )}
+          {clampedNotes.length > 0 ? (
+            <p className="text-sm text-[var(--text-secondary)]">{clampedNotes.join(" ")}</p>
+          ) : null}
           <div>
             <Button onClick={reset} variant="quiet">
               Reset
@@ -166,7 +231,9 @@ export default function BmiCalculator() {
           {bmi !== null && category
             ? `BMI ${formatBmi(bmi)} — ${bmiCategoryLabel(category)}.`
             : heightInvalid || weightInvalid
-              ? "Fix the highlighted measurement to compute your BMI."
+              ? system === "imperial" && heightInvalid && totalInchesValue !== null
+                ? `Enter a height between ${minimumImperialTotalInches} and ${maximumImperialTotalInches} inches (1 ft 8 in to 8 ft 2 in).`
+                : "Fix the highlighted measurement to compute your BMI."
               : "Enter your weight and height to see your BMI."}
         </p>
         {bmi !== null ? (

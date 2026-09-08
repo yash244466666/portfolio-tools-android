@@ -1,10 +1,13 @@
 /**
  * Pure unit-price comparison for the Unit Price Comparer. Quantities
  * normalize onto one base unit per measure (volume -> ml, mass -> g,
- * length -> m, count -> pc) and items rank cheapest per base unit first,
- * with deterministic tie-breaking by input order. Original work for this
- * repository; no upstream code is copied.
+ * length -> m, count -> pc) and items rank cheapest per base unit within
+ * their own measure family — an ml price and a gram price are not
+ * comparable, so families never mix in a ranking. Ties break
+ * deterministically by input order. Original work for this repository; no
+ * upstream code is copied.
  */
+import { parseBoundedDecimal } from "@/tools/_shared/bounded-parse"
 
 export const maximumItems = 4
 export const minimumPrice = 0
@@ -44,26 +47,30 @@ export function factorToBase(unit: MeasureUnit): number {
   }
 }
 
-/** Parses a price string clamped into 0 - 1,000,000; null when invalid. */
+/** Parses a price with the shared bounded policy (clamped, disclosed).
+ *  Prices keep their domain rule of at most 2 decimals. */
 export function parsePrice(value: string): number | null {
-  const trimmed = value.trim()
-  if (!/^\d+(\.\d{1,2})?$/.test(trimmed)) return null
-  const parsed = Number(trimmed)
-  if (!Number.isFinite(parsed)) return null
-  return Math.min(maximumPrice, Math.max(minimumPrice, parsed))
+  if (!/^-?\d+(\.\d{1,2})?$/.test(value.trim())) return null
+  return parseBoundedDecimal(value, { minimum: minimumPrice, maximum: maximumPrice })?.value ?? null
+}
+
+/** True when the raw price was clamped into the supported range. */
+export function priceClamped(value: string): boolean {
+  const parsed = parseBoundedDecimal(value, { minimum: minimumPrice, maximum: maximumPrice })
+  return parsed?.clamped ?? false
 }
 
 /**
- * Parses a quantity string clamped into (0, 1,000,000]; zero and negatives
- * are invalid because a per-unit price would be undefined.
+ * Parses a quantity with the shared bounded policy. Zero is meaningless for
+ * a per-unit price, so sub-minimum input rejects instead of clamping.
  */
 export function parseQuantity(value: string): number | null {
-  const trimmed = value.trim()
-  if (!/^\d+(\.\d+)?$/.test(trimmed)) return null
-  const parsed = Number(trimmed)
-  if (!Number.isFinite(parsed)) return null
-  if (parsed <= 0) return null
-  return Math.min(maximumQuantity, Math.max(minimumQuantity, parsed))
+  const parsed = parseBoundedDecimal(value, {
+    minimum: minimumQuantity,
+    maximum: maximumQuantity,
+    outOfRange: "reject",
+  })
+  return parsed?.value ?? null
 }
 
 export interface CompareItem {
@@ -83,14 +90,15 @@ export interface RankedItem {
   baseQuantity: number
   /** Price per base unit (ml/g/m/pc), rounded to 4 decimals for display. */
   pricePerBaseUnit: number
-  /** 1-based cheapest rank; shared ranks reflect exact per-unit ties. */
+  /** 1-based cheapest rank within the item's own measure family. */
   rank: number
 }
 
 /**
- * Normalizes complete items and ranks them cheapest per base unit first.
- * Ties break deterministically by input order, so the same inputs always
- * produce the same table. Incomplete items are ignored.
+ * Normalizes complete items and ranks them cheapest per base unit within
+ * each measure family (ml, g, m, pc — never mixed, because families are not
+ * comparable). Ties break deterministically by input order, so the same
+ * inputs always produce the same table. Incomplete items are ignored.
  */
 export function rankUnitPrices(items: CompareItem[]): RankedItem[] {
   const complete = items.filter(
@@ -109,19 +117,46 @@ export function rankUnitPrices(items: CompareItem[]): RankedItem[] {
       price: item.price,
       quantity: item.quantity,
       unit: item.unit,
+      family: baseUnitFor(item.unit),
       baseQuantity: item.quantity * factor,
       pricePerBaseUnit: roundTo4(item.price / (item.quantity * factor)),
     }
   })
 
-  const sorted = [...withBase].sort((left, right) => left.pricePerBaseUnit - right.pricePerBaseUnit)
+  // Family first (stable groups), then cheapest per base unit; stable sort
+  // keeps input order inside a tie.
+  const families: Array<"ml" | "g" | "m" | "pc"> = ["ml", "g", "m", "pc"]
+  const sorted = [...withBase].sort((left, right) => {
+    const familyOrder = families.indexOf(left.family) - families.indexOf(right.family)
+    if (familyOrder !== 0) return familyOrder
+    return left.pricePerBaseUnit - right.pricePerBaseUnit
+  })
+
+  let previousFamily: string | null = null
   let previousRank = 0
   let previousPrice = Number.NaN
-  return sorted.map((item, index) => {
-    const rank = index > 0 && previousPrice === item.pricePerBaseUnit ? previousRank : index + 1
+  let positionInFamily = 0
+  return sorted.map((item) => {
+    if (item.family !== previousFamily) {
+      previousFamily = item.family
+      positionInFamily = 0
+      previousRank = 0
+      previousPrice = Number.NaN
+    }
+    positionInFamily += 1
+    // Exact per-unit ties share the previous rank (competition ranking).
+    const rank = previousPrice === item.pricePerBaseUnit ? previousRank : positionInFamily
     previousRank = rank
     previousPrice = item.pricePerBaseUnit
-    return { ...item, rank }
+    return {
+      label: item.label,
+      price: item.price,
+      quantity: item.quantity,
+      unit: item.unit,
+      baseQuantity: item.baseQuantity,
+      pricePerBaseUnit: item.pricePerBaseUnit,
+      rank,
+    }
   })
 }
 

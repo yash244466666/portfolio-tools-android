@@ -5,7 +5,7 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 90
+const enabledToolCount = 91
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -177,6 +177,35 @@ class CdpPage {
       }
     }
     throw new Error(`setValue could not land a value in ${selector}`)
+  }
+
+  /**
+   * Selects an <option> by value. A select element is not an input, so
+   * setValue's input-prototype write throws "Illegal invocation" in
+   * Chromium; this drives HTMLSelectElement.prototype instead.
+   * @param {string} selector
+   * @param {string} value
+   */
+  async selectOption(selector, value) {
+    const needle = JSON.stringify(selector)
+    const encoded = JSON.stringify(value)
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      await this.waitFor(`document.querySelector(${needle}) !== null`)
+      await this.evaluate(
+        `(() => { const element = document.querySelector(${needle}); ` +
+          "Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(element, " +
+          `${encoded}); ` +
+          "element.dispatchEvent(new Event('change', { bubbles: true })); return true })()",
+      )
+      if (
+        (await this.evaluate(
+          `(document.querySelector(${needle}) ?? {value: null}).value === ${encoded}`,
+        )) === true
+      ) {
+        return
+      }
+    }
+    throw new Error(`selectOption could not land a value in ${selector}`)
   }
 
   /** @param {string} label */
@@ -1495,10 +1524,10 @@ async function phaseTools(page) {
       "Unit Price Comparer",
       async (p) => {
         await p.setValue("#unit-price-label-1", "Bottle")
-        await p.setValue("#unit-price-unit-1", "l")
+        await p.selectOption("#unit-price-unit-1", "l")
         await p.setValue("#unit-price-price-1", "4.50")
         await p.setValue("#unit-price-quantity-1", "1.5")
-        await p.setValue("#unit-price-unit-2", "ml")
+        await p.selectOption("#unit-price-unit-2", "ml")
         await p.setValue("#unit-price-price-2", "2.00")
         await p.setValue("#unit-price-quantity-2", "500")
         await p.waitFor(

@@ -37,18 +37,28 @@ describe("simplifyRatio", () => {
 
 describe("parseDimension", () => {
   it("accepts positive integers and clamps to the supported range", () => {
-    expect(parseDimension("1920")).toBe(1920)
-    expect(parseDimension(" 8 ")).toBe(8)
-    expect(parseDimension(`${maximumDimension + 1}`)).toBe(maximumDimension)
+    expect(parseDimension("1920")).toEqual({ dimension: 1920, clamped: false })
+    expect(parseDimension(" 8 ")).toEqual({ dimension: 8, clamped: false })
+    expect(parseDimension(`${maximumDimension + 1}`)).toEqual({
+      dimension: maximumDimension,
+      clamped: true,
+    })
   })
 
-  it("rejects zero, negatives, decimals, and junk", () => {
-    expect(parseDimension("0")).toBeNull()
-    expect(parseDimension("-10")).toBeNull()
+  it("rejects zero, negatives, decimals, and junk (shared strict grammar)", () => {
+    // Zero clamps up to the 1 px floor and is disclosed as a clamp.
+    expect(parseDimension("0")).toEqual({ dimension: 1, clamped: true })
+    expect(parseDimension("-10")).toEqual({ dimension: 1, clamped: true })
     expect(parseDimension("10.5")).toBeNull()
     expect(parseDimension("12px")).toBeNull()
     expect(parseDimension("")).toBeNull()
-    expect(parseDimension("99999999999999999999")).toBeNull()
+    // Astronomic values clamp to the ceiling and are disclosed.
+    expect(parseDimension("99999999999999999999")).toEqual({
+      dimension: maximumDimension,
+      clamped: true,
+    })
+    expect(parseDimension("1e3")).toBeNull()
+    expect(parseDimension("+8")).toBeNull()
   })
 })
 

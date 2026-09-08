@@ -30,24 +30,49 @@ const initialRows: RowState[] = Array.from({ length: maximumItems }, () => ({
 export default function UnitPriceComparer() {
   const [rows, setRows] = useState<RowState[]>(initialRows)
 
-  const ranked = useMemo(
+  // One parsed view of the rows feeds ranking, validation, and the error
+  // props, so every render parses each row exactly once.
+  const parsedRows = useMemo(
     () =>
-      rankUnitPrices(
-        rows.map((row, index) => ({
-          label: row.label.trim() || `Item ${index + 1}`,
-          price: parsePrice(row.price) ?? Number.NaN,
-          quantity: parseQuantity(row.quantity) ?? Number.NaN,
-          unit: row.unit,
-        })),
-      ),
+      rows.map((row, index) => {
+        const price = row.price.trim() === "" ? null : parsePrice(row.price)
+        const quantity = row.quantity.trim() === "" ? null : parseQuantity(row.quantity)
+        const priceClamped =
+          row.price.trim() !== "" &&
+          price !== null &&
+          parsePrice(row.price) !== null &&
+          row.price.trim() !== "" &&
+          Number(row.price) !== price
+        return {
+          row,
+          index,
+          price,
+          quantity,
+          priceClamped,
+          quantityInvalid: row.quantity.trim() !== "" && quantity === null,
+          priceInvalid: row.price.trim() !== "" && price === null,
+          participates: price !== null && quantity !== null,
+        }
+      }),
     [rows],
   )
 
-  const anyInvalid = rows.some(
-    (row) =>
-      (row.price.trim() !== "" && parsePrice(row.price) === null) ||
-      (row.quantity.trim() !== "" && parseQuantity(row.quantity) === null),
+  const ranked = useMemo(
+    () =>
+      rankUnitPrices(
+        parsedRows
+          .filter((parsed) => parsed.participates)
+          .map((parsed) => ({
+            label: parsed.row.label.trim() || `Item ${parsed.index + 1}`,
+            price: parsed.price as number,
+            quantity: parsed.quantity as number,
+            unit: parsed.row.unit,
+          })),
+      ),
+    [parsedRows],
   )
+
+  const anyInvalid = parsedRows.some((parsed) => parsed.priceInvalid || parsed.quantityInvalid)
 
   function updateRow(index: number, patch: Partial<RowState>) {
     setRows((current) =>
@@ -63,37 +88,39 @@ export default function UnitPriceComparer() {
     <div className="grid gap-4">
       <ToolPanel title={`Items (up to ${maximumItems})`}>
         <div className="grid gap-6">
-          {rows.map((row, index) => (
-            <div className="grid gap-3" key={index}>
-              <p className="text-sm font-semibold text-[var(--text)]">Item {index + 1}</p>
+          {parsedRows.map((parsed) => (
+            <div className="grid gap-3" key={parsed.index}>
+              <p className="text-sm font-semibold text-[var(--text)]">Item {parsed.index + 1}</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field
                   hint="Optional."
-                  htmlFor={`unit-price-label-${index + 1}`}
-                  label={`Item ${index + 1} label`}
+                  htmlFor={`unit-price-label-${parsed.index + 1}`}
+                  label={`Item ${parsed.index + 1} label`}
                 >
                   <input
                     className="app-input"
-                    id={`unit-price-label-${index + 1}`}
-                    onChange={(event) => updateRow(index, { label: event.target.value })}
+                    id={`unit-price-label-${parsed.index + 1}`}
+                    onChange={(event) => updateRow(parsed.index, { label: event.target.value })}
                     placeholder="Big box"
-                    value={row.label}
+                    value={parsed.row.label}
                   />
                 </Field>
                 <div className="grid gap-2">
                   <label
                     className="text-sm font-semibold text-[var(--text)]"
-                    htmlFor={`unit-price-unit-${index + 1}`}
+                    htmlFor={`unit-price-unit-${parsed.index + 1}`}
                   >
-                    Item {index + 1} unit
+                    Item {parsed.index + 1} unit
                   </label>
                   <select
                     className="app-input"
-                    id={`unit-price-unit-${index + 1}`}
+                    id={`unit-price-unit-${parsed.index + 1}`}
                     onChange={(event) =>
-                      updateRow(index, { unit: event.target.value as MeasureUnit })
+                      updateRow(parsed.index, {
+                        unit: event.target.value as MeasureUnit,
+                      })
                     }
-                    value={row.unit}
+                    value={parsed.row.unit}
                   >
                     {measureUnits.map((unit) => (
                       <option key={unit} value={unit}>
@@ -103,39 +130,32 @@ export default function UnitPriceComparer() {
                   </select>
                 </div>
                 <Field
-                  error={
-                    row.price.trim() !== "" && parsePrice(row.price) === null
-                      ? "Enter a price of at most 2 decimals."
-                      : undefined
-                  }
-                  htmlFor={`unit-price-price-${index + 1}`}
-                  label={`Item ${index + 1} price`}
+                  error={parsed.priceInvalid ? "Enter a price of at most 2 decimals." : undefined}
+                  hint={parsed.priceClamped ? "Price clamped to the supported maximum." : undefined}
+                  htmlFor={`unit-price-price-${parsed.index + 1}`}
+                  label={`Item ${parsed.index + 1} price`}
                 >
                   <input
                     className="app-input font-mono"
-                    id={`unit-price-price-${index + 1}`}
+                    id={`unit-price-price-${parsed.index + 1}`}
                     inputMode="decimal"
-                    onChange={(event) => updateRow(index, { price: event.target.value })}
+                    onChange={(event) => updateRow(parsed.index, { price: event.target.value })}
                     placeholder="4.50"
-                    value={row.price}
+                    value={parsed.row.price}
                   />
                 </Field>
                 <Field
-                  error={
-                    row.quantity.trim() !== "" && parseQuantity(row.quantity) === null
-                      ? "Enter a quantity greater than 0."
-                      : undefined
-                  }
-                  htmlFor={`unit-price-quantity-${index + 1}`}
-                  label={`Item ${index + 1} quantity (${row.unit})`}
+                  error={parsed.quantityInvalid ? "Enter a quantity greater than 0." : undefined}
+                  htmlFor={`unit-price-quantity-${parsed.index + 1}`}
+                  label={`Item ${parsed.index + 1} quantity (${parsed.row.unit})`}
                 >
                   <input
                     className="app-input font-mono"
-                    id={`unit-price-quantity-${index + 1}`}
+                    id={`unit-price-quantity-${parsed.index + 1}`}
                     inputMode="decimal"
-                    onChange={(event) => updateRow(index, { quantity: event.target.value })}
+                    onChange={(event) => updateRow(parsed.index, { quantity: event.target.value })}
                     placeholder="1.5"
-                    value={row.quantity}
+                    value={parsed.row.quantity}
                   />
                 </Field>
               </div>
@@ -154,53 +174,65 @@ export default function UnitPriceComparer() {
           {anyInvalid
             ? "Fix the highlighted price or quantity to compare."
             : ranked.length > 0
-              ? `${ranked[0]?.label ?? ""} is the cheapest at ${formatUnitPrice(ranked[0]?.pricePerBaseUnit ?? 0)} per ${baseUnitFor(ranked[0]?.unit ?? "pc")}${ranked.length > 1 ? `; ${ranked.length - 1} more item${ranked.length > 2 ? "s" : ""} compared below.` : "."}`
+              ? `Cheapest within each measure family: ${ranked
+                  .filter((item) => item.rank === 1)
+                  .map(
+                    (item) =>
+                      `${item.label} at ${formatUnitPrice(item.pricePerBaseUnit)} per ${baseUnitFor(item.unit)}`,
+                  )
+                  .join(
+                    ", ",
+                  )}. Families (volume, mass, length, count) are not comparable with each other.`
               : "Enter a price and a quantity for at least one item to compare."}
         </p>
-        {ranked.length > 0 ? (
-          <table className="mt-3 w-full text-sm">
-            <caption className="sr-only">
-              Items ranked cheapest per normalized base unit; ties share a rank
-            </caption>
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-[var(--text-secondary)]">
-                <th scope="col" className="py-2">
-                  Item
-                </th>
-                <th scope="col" className="py-2 text-right">
-                  Price
-                </th>
-                <th scope="col" className="py-2 text-right">
-                  Per base unit
-                </th>
-                <th scope="col" className="py-2 text-right">
-                  Rank
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {ranked.map((item) => (
-                <tr className="border-t border-[var(--border)]" key={`${item.label}-${item.price}`}>
-                  <td className="py-2">
-                    {item.label}{" "}
-                    <span className="text-[var(--text-secondary)]">
-                      ({item.quantity} {item.unit})
-                    </span>
-                  </td>
-                  <td className="py-2 text-right font-mono">{item.price}</td>
-                  <td className="py-2 text-right font-mono">
-                    {formatUnitPrice(item.pricePerBaseUnit)} per {baseUnitFor(item.unit)}
-                  </td>
-                  <td className="py-2 text-right font-mono">{item.rank}</td>
+        {ranked.length > 0 && !anyInvalid ? (
+          <>
+            <table className="mt-3 w-full text-sm">
+              <caption className="sr-only">
+                Items ranked cheapest per normalized base unit within each measure family; ties
+                share a rank
+              </caption>
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wide text-[var(--text-secondary)]">
+                  <th scope="col" className="py-2">
+                    Item
+                  </th>
+                  <th scope="col" className="py-2 text-right">
+                    Price
+                  </th>
+                  <th scope="col" className="py-2 text-right">
+                    Per base unit
+                  </th>
+                  <th scope="col" className="py-2 text-right">
+                    Rank
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {ranked.map((item, index) => (
+                  <tr className="border-t border-[var(--border)]" key={`ranked-${index}`}>
+                    <td className="py-2">
+                      {item.label}{" "}
+                      <span className="text-[var(--text-secondary)]">
+                        ({item.quantity} {item.unit})
+                      </span>
+                    </td>
+                    <td className="py-2 text-right font-mono">{item.price}</td>
+                    <td className="py-2 text-right font-mono">
+                      {formatUnitPrice(item.pricePerBaseUnit)} per {baseUnitFor(item.unit)}
+                    </td>
+                    <td className="py-2 text-right font-mono">{item.rank}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)]">
+              Volumes normalize to ml, weights to g, lengths to m, and counts to pc. Items rank only
+              within their own family because milliliters, grams, meters, and pieces cannot be
+              compared with each other. Equal per-unit prices share the same rank in input order.
+            </p>
+          </>
         ) : null}
-        <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)]">
-          Volumes normalize to ml, weights to g, lengths to m, and counts to pc. Equal per-unit
-          prices share the same rank in input order.
-        </p>
       </ToolPanel>
 
       <p className="text-xs leading-5 text-[var(--text-secondary)]">

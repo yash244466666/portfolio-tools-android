@@ -1,3 +1,5 @@
+import { parseBoundedDecimal } from "@/tools/_shared/bounded-parse"
+
 /**
  * Pure helpers for the Aspect Ratio Calculator: integer validation, GCD
  * reduction to a simplified ratio, and aspect-preserving scaling. Original
@@ -55,16 +57,19 @@ export const commonRatioPresets: readonly RatioPreset[] = [
 ]
 
 /**
- * Parses a dimension string. Accepts positive integers only, clamped into
- * the supported range; anything else is invalid (null).
+ * Parses a dimension string with the shared bounded policy. Positive
+ * integers only, clamped into the supported range with the clamp reported
+ * so the UI can disclose the effective value; anything else is invalid
+ * (null).
  */
-export function parseDimension(value: string): number | null {
-  const trimmed = value.trim()
-  if (!/^\d+$/.test(trimmed)) return null
-  const parsed = Number(trimmed)
-  if (!Number.isSafeInteger(parsed)) return null
-  if (parsed < minimumDimension) return null
-  return Math.min(parsed, maximumDimension)
+export function parseDimension(value: string): { dimension: number; clamped: boolean } | null {
+  const parsed = parseBoundedDecimal(value, {
+    minimum: minimumDimension,
+    maximum: maximumDimension,
+  })
+  if (!parsed) return null
+  if (!Number.isInteger(parsed.value)) return null
+  return { dimension: parsed.value, clamped: parsed.clamped }
 }
 
 export type ScaleTargetKind = "width" | "height"

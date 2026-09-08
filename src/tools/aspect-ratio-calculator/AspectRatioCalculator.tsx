@@ -26,15 +26,28 @@ export default function AspectRatioCalculator() {
   const heightInvalid = heightText.trim() !== "" && height === null
   const targetInvalid = targetText.trim() !== "" && target === null
 
-  const simplified = width !== null && height !== null ? simplifyRatio(width, height) : null
+  const simplified =
+    width !== null && height !== null ? simplifyRatio(width.dimension, height.dimension) : null
   const scaled =
     width !== null && height !== null && target !== null
-      ? scaledDimensions(width, height, { kind: targetKind, value: target })
+      ? scaledDimensions(width.dimension, height.dimension, {
+          kind: targetKind,
+          value: target.dimension,
+        })
       : null
   const tableRows =
     width !== null && height !== null && target !== null
-      ? scaledTableRows(width, height, { kind: targetKind, value: target })
+      ? scaledTableRows(width.dimension, height.dimension, {
+          kind: targetKind,
+          value: target.dimension,
+        })
       : []
+
+  // Clamped inputs are disclosed so the effective values are never silent.
+  const clampedNotes: string[] = []
+  if (width?.clamped) clampedNotes.push(`Width clamped to ${width.dimension} px.`)
+  if (height?.clamped) clampedNotes.push(`Height clamped to ${height.dimension} px.`)
+  if (target?.clamped) clampedNotes.push(`Target clamped to ${target.dimension} px.`)
 
   function applyPreset(presetWidth: number, presetHeight: number) {
     setWidthText(String(presetWidth))
@@ -101,6 +114,9 @@ export default function AspectRatioCalculator() {
             </Button>
           ))}
         </div>
+        {clampedNotes.length > 0 ? (
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">{clampedNotes.join(" ")}</p>
+        ) : null}
         <p aria-live="polite" className="mt-3 text-sm" role="status">
           {simplified
             ? `Simplified ratio ${formatRatio(simplified)}`
@@ -108,11 +124,11 @@ export default function AspectRatioCalculator() {
               ? "Fix the highlighted dimensions to see the simplified ratio."
               : "Enter a width and height to see the simplified ratio."}
         </p>
-        {(widthInvalid || heightInvalid) && (
+        <div className="mt-3">
           <Button onClick={reset} variant="quiet">
             Reset
           </Button>
-        )}
+        </div>
       </ToolPanel>
 
       <ToolPanel title="Scaled dimensions">
@@ -154,7 +170,7 @@ export default function AspectRatioCalculator() {
           </Field>
           {scaled ? (
             <p className="text-sm">
-              At a target {targetKind} of {target} px the dimensions are {scaled.width} ×{" "}
+              At a target {targetKind} of {target?.dimension} px the dimensions are {scaled.width} ×{" "}
               {scaled.height} px.
             </p>
           ) : null}

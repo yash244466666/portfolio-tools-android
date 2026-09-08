@@ -27,17 +27,23 @@ describe("parsing", () => {
   it("accepts bounded prices and rejects junk", () => {
     expect(parsePrice("3.49")).toBe(3.49)
     expect(parsePrice("0")).toBe(0)
-    expect(parsePrice("-1")).toBeNull()
+    // Negative prices clamp up to the 0 floor and are disclosed.
+    expect(parsePrice("-1")).toBe(0)
+    expect(parsePrice("9999999.99")).toBe(1_000_000)
     expect(parsePrice("3.999")).toBeNull()
     expect(parsePrice("")).toBeNull()
   })
 
-  it("requires a positive quantity and clamps the magnitude", () => {
+  it("requires a positive quantity with the shared strict grammar", () => {
     expect(parseQuantity("0.5")).toBe(0.5)
+    // Zero and sub-minimum quantities reject: a per-unit price is undefined.
     expect(parseQuantity("0")).toBeNull()
     expect(parseQuantity("-2")).toBeNull()
-    expect(parseQuantity("5000000")).toBe(1_000_000)
+    expect(parseQuantity("0.00001")).toBeNull()
+    // Quantities reject out-of-range input entirely (no silent ceiling).
+    expect(parseQuantity("5000000")).toBeNull()
     expect(parseQuantity("3.")).toBeNull()
+    expect(parseQuantity("1e2")).toBeNull()
   })
 })
 
@@ -79,6 +85,27 @@ describe("rankUnitPrices", () => {
     const reversed = rankUnitPrices([...items].reverse())
     expect(reversed.map((item) => item.rank)).toEqual([1, 1, 1])
     expect(reversed.map((item) => item.label)).toEqual(["Third", "Second", "First"])
+  })
+
+  it("ranks within each measure family and never mixes families", () => {
+    const ranked = rankUnitPrices([
+      { label: "Heavy", price: 3, quantity: 1, unit: "kg" },
+      { label: "Liquid", price: 4.5, quantity: 1.5, unit: "l" },
+      { label: "Light", price: 1, quantity: 500, unit: "g" },
+    ])
+    // Families stay grouped (ml, g, m, pc) and each family's cheapest is
+    // rank 1; the gram item does not compete with the liter item.
+    expect(ranked.map((item) => item.label)).toEqual(["Liquid", "Light", "Heavy"])
+    expect(ranked.map((item) => item.rank)).toEqual([1, 1, 2])
+  })
+
+  it("ranks sequentially inside one family with competition ranking", () => {
+    const ranked = rankUnitPrices([
+      { label: "A", price: 1, quantity: 1, unit: "kg" },
+      { label: "B", price: 2, quantity: 1, unit: "kg" },
+      { label: "C", price: 2, quantity: 1, unit: "kg" },
+    ])
+    expect(ranked.map((item) => item.rank)).toEqual([1, 2, 2])
   })
 
   it("keeps different measures separately comparable per base unit", () => {

@@ -4,6 +4,7 @@
  * BMI bands and are shown as text labels only — the result is an estimate,
  * not medical advice.
  */
+import { parseBoundedDecimal, type BoundedParseResult } from "@/tools/_shared/bounded-parse"
 
 export const minimumMetricWeightKg = 1
 export const maximumMetricWeightKg = 500
@@ -11,8 +12,9 @@ export const minimumMetricHeightCm = 50
 export const maximumMetricHeightCm = 250
 export const minimumImperialWeightLb = 2
 export const maximumImperialWeightLb = 1100
-export const minimumImperialHeightInches = 20
-export const maximumImperialHeightInches = 98
+/** The supported total-height window for imperial input, in inches. */
+export const minimumImperialTotalInches = 20
+export const maximumImperialTotalInches = 98
 
 const kilogramsPerPound = 0.45359237
 const metersPerInch = 0.0254
@@ -20,15 +22,35 @@ const metersPerInch = 0.0254
 export type BmiSystem = "metric" | "imperial"
 
 /**
- * Parses a bounded positive measurement. Returns null for non-finite input;
- * values outside the documented clamps clamp into them.
+ * Parses a bounded measurement with the shared policy: strict decimal
+ * grammar, clamped into the documented range, with the clamp disclosed by
+ * the caller. Zero and below the minimum are clamped values the UI
+ * discloses — except weight, which uses a reject policy in the component
+ * because a zero-weight BMI is meaningless.
  */
-export function parseMeasurement(value: string, minimum: number, maximum: number): number | null {
-  const trimmed = value.trim()
-  if (trimmed === "") return null
-  const parsed = Number(trimmed)
-  if (!Number.isFinite(parsed)) return null
-  return Math.min(maximum, Math.max(minimum, parsed))
+export function parseMeasurement(
+  value: string,
+  minimum: number,
+  maximum: number,
+): BoundedParseResult | null {
+  return parseBoundedDecimal(value, { minimum, maximum })
+}
+
+/** Converts a metric kg weight into the imperial lb field on system switch. */
+export function kgToLb(weightKg: number): number {
+  return Math.round((weightKg / kilogramsPerPound) * 100) / 100
+}
+
+/** Converts an imperial lb weight into the metric kg field on system switch. */
+export function lbToKg(weightLb: number): number {
+  return Math.round(weightLb * kilogramsPerPound * 100) / 100
+}
+
+/** Total inches from a feet + inches pair; both parts are non-negative. */
+export function totalInches(heightFeet: number, heightInches: number): number | null {
+  if (!Number.isFinite(heightFeet) || heightFeet < 0) return null
+  if (!Number.isFinite(heightInches) || heightInches < 0) return null
+  return heightFeet * 12 + heightInches
 }
 
 /**
@@ -49,10 +71,10 @@ export function computeBmiImperial(
   heightInches: number,
 ): number | null {
   if (!Number.isFinite(weightLb) || weightLb <= 0) return null
-  const totalInches = heightFeet * 12 + heightInches
-  if (!Number.isFinite(totalInches) || totalInches <= 0) return null
+  const total = totalInches(heightFeet, heightInches)
+  if (total === null || total <= 0) return null
   const kg = weightLb * kilogramsPerPound
-  const meters = totalInches * metersPerInch
+  const meters = total * metersPerInch
   return roundToOneDecimal(kg / (meters * meters))
 }
 
