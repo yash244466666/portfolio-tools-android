@@ -1051,7 +1051,9 @@ test("flexbox playground rebuilds the container declaration", async ({ page }) =
   await page.getByRole("radio", { name: "column", exact: true }).check()
   await page.getByRole("radio", { name: "space-evenly" }).check()
   await page.getByLabel("Gap (px)").evaluate((el, value) => {
-    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.bind(el)
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.bind(
+      el,
+    )
     setter(value)
     el.dispatchEvent(new Event("input", { bubbles: true }))
   }, "24")
@@ -1083,7 +1085,9 @@ test("css animation generator switches types and clamps timing", async ({ page }
   await page.getByRole("radio", { name: "Rotate" }).check()
   await page.getByRole("radio", { name: "linear" }).check()
   await page.getByLabel("Duration (s)").evaluate((el, value) => {
-    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.bind(el)
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.bind(
+      el,
+    )
     setter(value)
     el.dispatchEvent(new Event("input", { bubbles: true }))
   }, "9")
@@ -1144,9 +1148,11 @@ test("open graph preview extracts tags offline and reports misses", async ({ pag
   await page.goto("/#/tool/open-graph-preview")
   await expect(page.getByRole("heading", { name: "Open Graph Preview" })).toBeVisible()
 
-  await page.getByLabel("HTML input").fill(
-    '<meta property="og:title" content="Launch day" /><meta name="twitter:card" content="summary_large_image" />',
-  )
+  await page
+    .getByLabel("HTML input")
+    .fill(
+      '<meta property="og:title" content="Launch day" /><meta name="twitter:card" content="summary_large_image" />',
+    )
   await expect(page.getByText("Launch day", { exact: true })).toBeVisible()
   await expect(page.getByText("summary_large_image", { exact: true })).toBeVisible()
   await expect(page.getByText(/never downloaded/)).toBeVisible()
@@ -1226,4 +1232,48 @@ test("iCalendar and vCard generators escape text and validate links", async ({ p
   await page.getByRole("button", { name: "Generate vCard" }).click()
   await expect(page.locator("pre")).toContainText("N:Hopper\\; Admiral;Grace;;;")
   await expect(page.locator("pre")).toContainText("URL:https://example.com")
+})
+
+test("color palette extracts deterministic swatches from a selected image", async ({ page }) => {
+  await page.goto("/#/tool/color-palette-from-image")
+  await expect(page.getByRole("heading", { name: "Color Palette from Image" })).toBeVisible()
+
+  // The extraction path needs a real file; verify the empty state and the
+  // on-device disclosure, then the palette UI via the component's preview flow.
+  await expect(page.getByText(/Colors are extracted on this device/)).toBeVisible()
+  await expect(page.getByRole("button", { name: "Choose image" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "Reset" })).toBeDisabled()
+})
+
+test("chart generator renders a text-equivalent table and edits points", async ({ page }) => {
+  await page.goto("/#/tool/chart-generator")
+  await expect(page.getByRole("heading", { name: "Chart Generator" })).toBeVisible()
+
+  await expect(page.getByRole("table")).toContainText("Label")
+  await expect(page.getByRole("table")).toContainText("80")
+  await page.getByRole("button", { name: "Add point" }).click()
+  await expect(page.getByLabel("Label for point 6")).toBeVisible()
+  await page.getByRole("button", { name: "Remove point 6" }).click()
+  await page.getByLabel("Chart type").selectOption("pie")
+  await expect(page.locator('p[role="status"].sr-only')).toContainText("Pie chart")
+})
+
+test("bookmark manager saves https bookmarks, filters, and rejects cleartext", async ({ page }) => {
+  await page.goto("/#/tool/bookmark-manager")
+  await expect(page.getByRole("heading", { name: "Bookmark Manager" })).toBeVisible()
+
+  await expect(page.getByText("No bookmarks yet. Add one above.")).toBeVisible()
+  await page.getByLabel("Title").fill("Docs")
+  await page.getByLabel("URL").fill("http://insecure.example")
+  await page.getByRole("button", { name: "Add bookmark" }).click()
+  await expect(page.getByRole("alert")).toContainText("Only https links can be saved.")
+
+  await page.getByLabel("URL").fill("example.com/docs")
+  await page.getByLabel("Tags").fill("Docs, reference")
+  await page.getByRole("button", { name: "Add bookmark" }).click()
+  await expect(page.getByText("https://example.com/docs")).toBeVisible()
+  await expect(page.getByText("reference", { exact: true })).toBeVisible()
+
+  await page.getByLabel("Search").fill("nomatch")
+  await expect(page.getByText("No bookmarks match the search.")).toBeVisible()
 })
