@@ -5,7 +5,7 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 85
+const enabledToolCount = 91
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -177,6 +177,35 @@ class CdpPage {
       }
     }
     throw new Error(`setValue could not land a value in ${selector}`)
+  }
+
+  /**
+   * Selects an <option> by value. A select element is not an input, so
+   * setValue's input-prototype write throws "Illegal invocation" in
+   * Chromium; this drives HTMLSelectElement.prototype instead.
+   * @param {string} selector
+   * @param {string} value
+   */
+  async selectOption(selector, value) {
+    const needle = JSON.stringify(selector)
+    const encoded = JSON.stringify(value)
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      await this.waitFor(`document.querySelector(${needle}) !== null`)
+      await this.evaluate(
+        `(() => { const element = document.querySelector(${needle}); ` +
+          "Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(element, " +
+          `${encoded}); ` +
+          "element.dispatchEvent(new Event('change', { bubbles: true })); return true })()",
+      )
+      if (
+        (await this.evaluate(
+          `(document.querySelector(${needle}) ?? {value: null}).value === ${encoded}`,
+        )) === true
+      ) {
+        return
+      }
+    }
+    throw new Error(`selectOption could not land a value in ${selector}`)
   }
 
   /** @param {string} label */
@@ -1439,6 +1468,72 @@ async function phaseTools(page) {
         await p.waitFor("document.body.innerText.includes('Combine 2 to 20 PDFs')")
         await p.clickButton("Images to PDF")
         return "mode tabs mount bounded panels; SAF pick covered by the instrumentation suite"
+      },
+    ],
+    [
+      "aspect-ratio-calculator",
+      "Aspect Ratio Calculator",
+      async (p) => {
+        await p.setValue("#aspect-width", "1920")
+        await p.setValue("#aspect-height", "1080")
+        await p.waitFor("document.body.innerText.includes('Simplified ratio 16:9')")
+        await p.setValue("#aspect-target", "1280")
+        await p.waitFor("document.body.innerText.includes('1280 \u00d7 720 px')")
+        await p.waitFor("document.body.innerText.includes('720')")
+        return "GCD-reduced ratio with a scaled target and text table"
+      },
+    ],
+    [
+      "css-unit-converter",
+      "CSS Unit Converter",
+      async (p) => {
+        await p.setValue("#css-unit-root", "16")
+        await p.setValue("#css-unit-value", "24")
+        await p.waitFor("document.body.innerText.includes('1.5rem')")
+        await p.waitFor("document.body.innerText.includes('150%')")
+        return "px converted to rem/em/percent against the 16 px root"
+      },
+    ],
+    [
+      "discount-tax-calculator",
+      "Discount and Tax Calculator",
+      async (p) => {
+        await p.setValue("#discount-price", "100.00")
+        await p.setValue("#discount-percent", "25")
+        await p.setValue("#discount-tax-percent", "8")
+        await p.waitFor(
+          "document.body.innerText.includes('You save 25.00; the subtotal after discount is 75.00, tax adds 6.00, and the total is 81.00.')",
+        )
+        return "percent discount then tax with every exact-cent step displayed"
+      },
+    ],
+    [
+      "bmi-calculator",
+      "BMI Calculator",
+      async (p) => {
+        await p.setValue("#bmi-weight", "70")
+        await p.setValue("#bmi-height-cm", "175")
+        await p.waitFor("document.body.innerText.includes('BMI 22.9')")
+        await p.waitFor("document.body.innerText.includes('normal band (WHO adult range)')")
+        await p.waitFor("document.body.innerText.includes('not medical advice')")
+        return "metric BMI with WHO text band and the estimate-only disclaimer"
+      },
+    ],
+    [
+      "unit-price-comparer",
+      "Unit Price Comparer",
+      async (p) => {
+        await p.setValue("#unit-price-label-1", "Bottle")
+        await p.selectOption("#unit-price-unit-1", "l")
+        await p.setValue("#unit-price-price-1", "4.50")
+        await p.setValue("#unit-price-quantity-1", "1.5")
+        await p.selectOption("#unit-price-unit-2", "ml")
+        await p.setValue("#unit-price-price-2", "2.00")
+        await p.setValue("#unit-price-quantity-2", "500")
+        await p.waitFor(
+          "document.body.innerText.includes('Bottle is the cheapest at 0.0030 per ml')",
+        )
+        return "mixed-unit normalization ranks cheapest per base unit"
       },
     ],
   ]

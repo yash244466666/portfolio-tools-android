@@ -1,3 +1,5 @@
+import { roundToCents } from "@/tools/_shared/money"
+
 export const presetTips: readonly number[] = [10, 15, 18, 20, 25]
 export const maximumTipPercent = 100
 /** The quick slider covers the common 0–50% range; any 0–100% value validates. */
@@ -21,10 +23,6 @@ export interface TipResult {
   total: number
   perPerson: number
   tipPerPerson: number
-}
-
-function roundToCents(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100
 }
 
 /**

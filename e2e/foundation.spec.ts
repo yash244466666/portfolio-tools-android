@@ -12,7 +12,7 @@ test("catalog search is usable", async ({ page }) => {
   await expect(page.locator("body")).not.toHaveCSS("overflow-x", "scroll")
 
   await page.getByRole("searchbox", { name: "Search tools" }).fill("unit")
-  await expect(page.getByRole("link", { name: "Unit Converter" })).toBeVisible()
+  await expect(page.getByRole("link", { name: "Unit Converter", exact: true })).toBeVisible()
   await expect(page.getByText("Timestamp Converter")).toHaveCount(0)
 })
 
@@ -1373,4 +1373,28 @@ test("video to gif discloses the input budget and codec baseline honestly", asyn
   // behind a pick and the export panel must not exist before a take.
   await expect(page.getByRole("button", { name: "Convert to GIF" })).toBeDisabled()
   await expect(page.getByRole("button", { name: "Save GIF" })).toHaveCount(0)
+})
+
+test("discount and tax calculator shows every exact-cent step and rejects junk money", async ({
+  page,
+}) => {
+  await page.goto("/#/tool/discount-tax-calculator")
+  await expect(page.getByRole("heading", { name: "Discount and Tax Calculator" })).toBeVisible()
+  await expect(page.getByRole("status")).toContainText("Enter the price")
+
+  await page.getByLabel("Original price").fill("100.00")
+  await page.getByLabel("Discount percent").fill("25")
+  await page.getByLabel("Tax percent").fill("8")
+  await expect(page.getByRole("status")).toContainText(
+    "You save 25.00; the subtotal after discount is 75.00, tax adds 6.00, and the total is 81.00.",
+  )
+  await expect(page.getByRole("table")).toContainText("Total to pay")
+  await expect(page.getByRole("table")).toContainText("81.00")
+
+  // Junk money fails closed with a visible recovery alert.
+  await page.getByLabel("Original price").fill("1.999")
+  await expect(page.getByRole("alert")).toContainText("at most 2 decimals")
+
+  await page.getByRole("button", { name: "Reset" }).click()
+  await expect(page.getByRole("status")).toContainText("Enter the price")
 })
