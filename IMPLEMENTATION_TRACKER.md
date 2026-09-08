@@ -7,6 +7,12 @@
 > Approved public version 1 scope: **all 87 audited catalog tools; 84 implemented, 3 remaining**
 > Public release readiness: **NO — foundation only**
 
+### 2026-09-08 — Dev batch 11 merge reconciliation
+
+- Squash-merged PR #165 into `main` as `7f2cec4`, closing issue #42; the Project item is Done (verified via GraphQL read-back) and the issue carries `status:device-qa` with an evidence comment (stale `status:triage` label removed). Both hosted PR CI jobs were green before merge (android-debug 4m10s, web-quality 7m37s). No open pull requests remain.
+- Registry now has 84 enabled entries; 3 of the approved 87 remain.
+- Next executable item: only the separately gated tier-4 audio/video tools (#111/#112) and YouTube Downloader (#93) remain — each is blocked behind its own Play-policy/legal/reliability/product release review (YouTube Downloader additionally by its §4 legal review) and must not ship without it. Android artifact validation of all enabled tools remains queue item 4, and issue #18 stays open pending physical-device evidence.
+
 ### 2026-09-08 — Dev batch 11 tool migration (PDF Converter)
 
 - Implemented issue #42 on `feat/dev-batch-11` as a single lazy-loaded offline tool covering the upstream's four modes (Images to PDF, PDF to Images, Merge PDFs, PDF to Text), built only on the platform service contracts.
