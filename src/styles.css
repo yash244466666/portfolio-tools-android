@@ -221,6 +221,18 @@ button {
   color: var(--text);
 }
 
+/* The labeled clear button replaces the engine-native one (unlabeled and not
+   focus-managed), so the native pseudo-element stays hidden. */
+.search-field input::-webkit-search-cancel-button {
+  appearance: none;
+  display: none;
+}
+
+.search-clear {
+  flex: none;
+  margin-inline-end: -0.5rem;
+}
+
 .category-scroller {
   display: flex;
   gap: 0.5rem;

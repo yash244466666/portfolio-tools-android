@@ -14,6 +14,12 @@ test("catalog search is usable", async ({ page }) => {
   await page.getByRole("searchbox", { name: "Search tools" }).fill("unit")
   await expect(page.getByRole("link", { name: "Unit Converter", exact: true })).toBeVisible()
   await expect(page.getByText("Timestamp Converter")).toHaveCount(0)
+
+  // The clear affordance empties the query and restores the full listing.
+  const clearButton = page.getByRole("button", { name: "Clear search" })
+  await expect(clearButton).toBeVisible()
+  await clearButton.click()
+  await expect(page.getByText("Timestamp Converter")).toBeVisible()
 })
 
 test("catalog does not overflow across foundation breakpoints", async ({ page }) => {

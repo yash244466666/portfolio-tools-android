@@ -414,10 +414,10 @@ async function phaseShell() {
   )
   if (cards < enabledToolCount) {
     await page.navigate("#/")
-    await page.waitFor('document.querySelector("label.search-field input") !== null', 15_000)
+    await page.waitFor('document.querySelector(".search-field input") !== null', 15_000)
   }
 
-  await page.setValue("label.search-field input", "hash")
+  await page.setValue(".search-field input", "hash")
   const filtered = /** @type {number} */ (
     await page.evaluate("document.querySelectorAll(\"a[href^='#/tool/']\").length")
   )
@@ -426,7 +426,7 @@ async function phaseShell() {
     filtered > 0 && filtered < cards ? "PASS" : "FAIL",
     `filtered to ${filtered} cards`,
   )
-  await page.setValue("label.search-field input", "")
+  await page.setValue(".search-field input", "")
 
   const nav = /** @type {{ nav: string, current: string } | null} */ (
     await page.evaluate(
@@ -1813,14 +1813,26 @@ async function phaseEnvironment(page) {
   await new Promise((resolve) => setTimeout(resolve, 2000))
   const relaunched = await relaunch()
   await relaunched.waitFor("document.querySelector('h1') !== null", 45_000)
-  const theme = /** @type {string} */ (
-    await relaunched.evaluate("document.documentElement.dataset.theme")
-  )
-  record(
-    "environment.dontKeepActivitiesRecovery",
-    theme === "dark" ? "PASS" : "FAIL",
-    `Activity destroyed on Home and relaunched; theme=${theme}`,
-  )
+  // Same async Preferences-bridge reality as the force-stop check: the shell
+  // paints the system-resolved theme first, then the saved preference applies.
+  // Poll for the dark value instead of reading a single racing snapshot.
+  try {
+    await relaunched.waitFor("document.documentElement.dataset.theme === 'dark'", 15_000)
+    record(
+      "environment.dontKeepActivitiesRecovery",
+      "PASS",
+      "Activity destroyed on Home and relaunched; theme=dark",
+    )
+  } catch {
+    const state = /** @type {{ theme?: string }} */ (
+      await relaunched.evaluate("(() => ({ theme: document.documentElement.dataset.theme }))()")
+    )
+    record(
+      "environment.dontKeepActivitiesRecovery",
+      "FAIL",
+      `Activity destroyed on Home and relaunched; theme=${state.theme} did not apply within 15s`,
+    )
+  }
   spawnSync("adb", ["shell", "settings", "put", "global", "always_finish_activities", "0"])
 }
 
@@ -1892,5 +1904,10 @@ async function main() {
 
 main().catch((error) => {
   console.error(error)
+  // The success path closes every CDP page socket; on the failure path a
+  // leftover socket would keep the event loop alive and hang the process
+  // forever, masking the failure. Close what is open, then force-exit.
+  for (const open of openPages) open.close()
+  setTimeout(() => process.exit(1), 3_000).unref()
   process.exitCode = 1
 })

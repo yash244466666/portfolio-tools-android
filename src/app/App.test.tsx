@@ -31,6 +31,40 @@ describe("application shell", () => {
     await waitFor(() => expect(document.documentElement).toHaveAttribute("data-theme"))
   })
 
+  it("clears the catalog search with focus returned to the field", async () => {
+    render(
+      <PlatformProvider>
+        <App />
+      </PlatformProvider>,
+    )
+
+    const search = screen.getByRole("searchbox", { name: "Search tools" })
+    expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument()
+
+    fireEvent.change(search, { target: { value: "hash" } })
+    const clearButton = screen.getByRole("button", { name: "Clear search" })
+    fireEvent.click(clearButton)
+
+    expect(search).toHaveValue("")
+    expect(search).toHaveFocus()
+    expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Unit Converter" })).toBeInTheDocument()
+  })
+
+  it("clears the catalog search on Escape", async () => {
+    render(
+      <PlatformProvider>
+        <App />
+      </PlatformProvider>,
+    )
+
+    const search = screen.getByRole("searchbox", { name: "Search tools" })
+    fireEvent.change(search, { target: { value: "hash" } })
+    fireEvent.keyDown(search, { key: "Escape" })
+
+    expect(search).toHaveValue("")
+  })
+
   it("renders settings from a hash route", async () => {
     window.location.hash = "#/settings"
     render(

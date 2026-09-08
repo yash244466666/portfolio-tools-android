@@ -1,5 +1,5 @@
-import { CircleCheck, CloudOff, Heart, History, Search, Trash2, Wifi } from "lucide-react"
-import { useMemo, useState } from "react"
+import { CircleCheck, CloudOff, Heart, History, Search, Trash2, Wifi, X } from "lucide-react"
+import { useMemo, useRef, useState } from "react"
 import { routeHref } from "@/app/routing"
 import { Button } from "@/components/ui/Button"
 import type { NetworkState } from "@/platform/contracts"
@@ -96,6 +96,12 @@ export function CatalogScreen({
 }: CatalogScreenProps) {
   const [query, setQuery] = useState("")
   const [category, setCategory] = useState<ToolCategoryId | "all">("all")
+  const searchRef = useRef<HTMLInputElement>(null)
+
+  function clearQuery() {
+    setQuery("")
+    searchRef.current?.focus()
+  }
 
   const visibleTools = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase()
@@ -188,17 +194,37 @@ export function CatalogScreen({
       ) : null}
 
       <div className="sticky-controls">
-        <label className="search-field">
+        <div className="search-field">
           <Search aria-hidden="true" size={20} />
-          <span className="sr-only">Search tools</span>
+          <label className="sr-only" htmlFor="tool-search">
+            Search tools
+          </label>
           <input
             autoCapitalize="none"
+            id="tool-search"
             onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && query) {
+                event.preventDefault()
+                clearQuery()
+              }
+            }}
             placeholder="Search tools"
+            ref={searchRef}
             type="search"
             value={query}
           />
-        </label>
+          {query ? (
+            <button
+              aria-label="Clear search"
+              className="icon-button search-clear"
+              onClick={clearQuery}
+              type="button"
+            >
+              <X aria-hidden="true" size={18} />
+            </button>
+          ) : null}
+        </div>
         <div className="category-scroller" aria-label="Filter by category">
           <button
             aria-pressed={category === "all"}
