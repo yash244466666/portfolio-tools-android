@@ -4,9 +4,9 @@
   "auditedUpstreamCommit": "61e54c64edbeffc9487239b6dae399e255c6a71d",
   "project": {
     "title": "Yash Tools Android — Google Play v1",
-    "description": "Delivery system for the first Google Play release containing all 87 audited tools.",
+    "description": "Delivery system for the first Google Play release containing the 100 version-1 tools (87 audited catalog + 14 new tools per ADR 0022, minus the excluded YouTube downloader).",
     "visibility": "PRIVATE",
-    "readme": "Tracks foundation, all 87 tool migrations, quality/device certification, closed testing, signing, store preparation, and the explicitly authorized first production launch. Issues and pull requests provide evidence; project fields provide planning views. Production publication still requires explicit product-owner authorization.",
+    "readme": "Tracks foundation, all 87 catalog + 14 new = 101 managed tools (100 in version-1 scope per ADR 0022), quality/device certification, closed testing, signing, store preparation, and the explicitly authorized first production launch. Issues and pull requests provide evidence; project fields provide planning views. Production publication still requires explicit product-owner authorization.",
     "fields": [
       {
         "name": "Workflow",
@@ -45,7 +45,10 @@
         "type": "SINGLE_SELECT",
         "options": ["Low", "Medium", "High", "Critical"]
       },
-      { "name": "Estimate", "type": "NUMBER" }
+      {
+        "name": "Estimate",
+        "type": "NUMBER"
+      }
     ]
   },
   "labels": [
@@ -74,13 +77,21 @@
       "color": "B60205",
       "description": "Google Play, signing, policy, listing, or launch work"
     },
-    { "name": "type:bug", "color": "D73A4A", "description": "A reproducible defect" },
+    {
+      "name": "type:bug",
+      "color": "D73A4A",
+      "description": "A reproducible defect"
+    },
     {
       "name": "status:triage",
       "color": "FBCA04",
       "description": "Needs classification or Definition of Ready"
     },
-    { "name": "status:ready", "color": "0E8A16", "description": "Refined and safe to start" },
+    {
+      "name": "status:ready",
+      "color": "0E8A16",
+      "description": "Refined and safe to start"
+    },
     {
       "name": "status:blocked",
       "color": "B60205",
@@ -91,16 +102,56 @@
       "color": "006B75",
       "description": "Implementation exists; installed-artifact evidence remains"
     },
-    { "name": "priority:p0", "color": "B60205", "description": "Critical path or release blocker" },
-    { "name": "priority:p1", "color": "D93F0B", "description": "High priority" },
-    { "name": "priority:p2", "color": "FBCA04", "description": "Normal priority" },
-    { "name": "priority:p3", "color": "C5DEF5", "description": "Low priority" },
-    { "name": "category:core", "color": "0052CC", "description": "Core catalog" },
-    { "name": "category:developer", "color": "0366D6", "description": "Developer catalog" },
-    { "name": "category:text", "color": "7057FF", "description": "Text catalog" },
-    { "name": "category:media", "color": "D876E3", "description": "Media catalog" },
-    { "name": "category:security", "color": "B60205", "description": "Security catalog" },
-    { "name": "category:math", "color": "008672", "description": "Math catalog" },
+    {
+      "name": "priority:p0",
+      "color": "B60205",
+      "description": "Critical path or release blocker"
+    },
+    {
+      "name": "priority:p1",
+      "color": "D93F0B",
+      "description": "High priority"
+    },
+    {
+      "name": "priority:p2",
+      "color": "FBCA04",
+      "description": "Normal priority"
+    },
+    {
+      "name": "priority:p3",
+      "color": "C5DEF5",
+      "description": "Low priority"
+    },
+    {
+      "name": "category:core",
+      "color": "0052CC",
+      "description": "Core catalog"
+    },
+    {
+      "name": "category:developer",
+      "color": "0366D6",
+      "description": "Developer catalog"
+    },
+    {
+      "name": "category:text",
+      "color": "7057FF",
+      "description": "Text catalog"
+    },
+    {
+      "name": "category:media",
+      "color": "D876E3",
+      "description": "Media catalog"
+    },
+    {
+      "name": "category:security",
+      "color": "B60205",
+      "description": "Security catalog"
+    },
+    {
+      "name": "category:math",
+      "color": "008672",
+      "description": "Math catalog"
+    },
     {
       "name": "category:platform",
       "color": "5319E7",
@@ -111,9 +162,21 @@
       "color": "6F42C1",
       "description": "Cross-cutting quality or release operations"
     },
-    { "name": "tier:1", "color": "C2E0C6", "description": "Directly portable tool" },
-    { "name": "tier:2", "color": "FEF2C0", "description": "Platform adaptation required" },
-    { "name": "tier:3", "color": "F9D0C4", "description": "Network-dependent tool" },
+    {
+      "name": "tier:1",
+      "color": "C2E0C6",
+      "description": "Directly portable tool"
+    },
+    {
+      "name": "tier:2",
+      "color": "FEF2C0",
+      "description": "Platform adaptation required"
+    },
+    {
+      "name": "tier:3",
+      "color": "F9D0C4",
+      "description": "Network-dependent tool"
+    },
     {
       "name": "tier:4",
       "color": "D4C5F9",
@@ -129,7 +192,11 @@
       "color": "D93F0B",
       "description": "High technical, privacy, policy, performance, or data-loss risk"
     },
-    { "name": "risk:critical", "color": "B60205", "description": "Unresolved risk blocks release" }
+    {
+      "name": "risk:critical",
+      "color": "B60205",
+      "description": "Unresolved risk blocks release"
+    }
   ],
   "milestones": [
     {
@@ -1037,7 +1104,21 @@
     "video-to-gif": ["video-gif-review", "content-uri-streaming", "share-cache-cleanup"],
     "file-hash-checker": ["content-uri-streaming"],
     "stopwatch": ["renderer-recovery"],
-    "countdown-timer": ["renderer-recovery", "android-instrumentation"]
+    "countdown-timer": ["renderer-recovery", "android-instrumentation"],
+    "aspect-ratio-calculator": [],
+    "css-unit-converter": [],
+    "color-contrast-checker": [],
+    "word-frequency-analyzer": [],
+    "text-binary-converter": [],
+    "reading-time-estimator": [],
+    "time-zone-converter": [],
+    "date-difference-calculator": [],
+    "loan-emi-calculator": [],
+    "discount-tax-calculator": [],
+    "dice-roller": [],
+    "bmi-calculator": [],
+    "unit-price-comparer": [],
+    "fuel-trip-cost-calculator": []
   },
   "tools": [
     ["pdf-converter", "PDF Converter", "core"],
@@ -1126,6 +1207,36 @@
     ["color-blindness-simulator", "Color Blindness Simulator", "math"],
     ["calculator", "Scientific Calculator", "math"],
     ["stopwatch", "Stopwatch", "math"],
-    ["countdown-timer", "Countdown Timer", "math"]
-  ]
+    ["countdown-timer", "Countdown Timer", "math"],
+    ["aspect-ratio-calculator", "Aspect Ratio Calculator", "dev"],
+    ["css-unit-converter", "CSS Unit Converter", "dev"],
+    ["color-contrast-checker", "Color Contrast Checker", "dev"],
+    ["word-frequency-analyzer", "Word Frequency Analyzer", "text"],
+    ["text-binary-converter", "Text-Binary Converter", "text"],
+    ["reading-time-estimator", "Reading Time Estimator", "text"],
+    ["time-zone-converter", "Time Zone Converter", "core"],
+    ["date-difference-calculator", "Date Difference Calculator", "core"],
+    ["loan-emi-calculator", "Loan EMI Calculator", "math"],
+    ["discount-tax-calculator", "Discount and Tax Calculator", "math"],
+    ["dice-roller", "Dice Roller", "math"],
+    ["bmi-calculator", "BMI Calculator", "math"],
+    ["unit-price-comparer", "Unit Price Comparer", "math"],
+    ["fuel-trip-cost-calculator", "Fuel and Trip Cost Calculator", "math"]
+  ],
+  "toolPriorities": {
+    "aspect-ratio-calculator": "P1 High",
+    "css-unit-converter": "P1 High",
+    "color-contrast-checker": "P1 High",
+    "word-frequency-analyzer": "P1 High",
+    "text-binary-converter": "P1 High",
+    "reading-time-estimator": "P1 High",
+    "time-zone-converter": "P1 High",
+    "date-difference-calculator": "P1 High",
+    "loan-emi-calculator": "P1 High",
+    "discount-tax-calculator": "P1 High",
+    "dice-roller": "P1 High",
+    "bmi-calculator": "P1 High",
+    "unit-price-comparer": "P1 High",
+    "fuel-trip-cost-calculator": "P1 High"
+  }
 }

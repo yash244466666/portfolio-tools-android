@@ -18,7 +18,7 @@ The intended product is a fast, privacy-conscious collection of developer and ev
 - Uses Android system facilities for files, sharing, notifications, lifecycle, and external links.
 - Remains usable on phones, tablets, landscape, split-screen, foldable layouts, keyboards, and assistive technology.
 - Publishes only tools that meet the repository's Definition of Done.
-- Ships 86 of the 87 audited upstream catalog tools in the first public Google Play release; YouTube Downloader is excluded by the accepted ADR 0021 legal/policy review, and the 12-tool vertical slice is an internal milestone, not the public scope.
+- Ships 100 tools in the first public Google Play release: the 86 in-scope audited catalog tools (YouTube Downloader stays excluded by the accepted ADR 0021 legal/policy review) plus 14 new original tools added by the accepted ADR 0022; the 12-tool vertical slice is an internal milestone, not the public scope.
 
 The source portfolio is an upstream reference, not a runtime dependency.
 
@@ -28,8 +28,8 @@ Implemented now:
 
 - React/Vite/TypeScript/Tailwind application.
 - Capacitor Android project.
-- Typed tool registry containing the completed 12-tool architecture milestone plus reviewed post-slice batches within the approved 86-tool public-release scope (ADR 0021).
-- Eighty-six enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, Text to Slug, Sort Lines, Add Line Numbers, Trim Whitespace, Remove Duplicates, Percentage Calculator, Tip Calculator, GCD/LCM Calculator, Roman Numeral Converter, Password Strength Checker, Data Sanitizer, CSP Generator, CORS Header Builder, Robots.txt Generator, Age Calculator, Bitwise Calculator, Color Blindness Simulator, Scientific Calculator, HTTP Status Codes, MIME Type Lookup, Meta Tag Generator, Unicode Lookup, ASCII Table, Box Shadow Generator, Border Radius Generator, Text Shadow Generator, HTML Entity Encoder, ROT13 Cipher, Morse Code Translator, HMAC Generator, UUID Generator, Find & Replace, Invisible Character Detector, Hash Diff, Cron Expression Builder, Lorem Ipsum Generator, Password Generator, JWT Decoder, CSV to JSON, YAML to JSON, Text Diff, Color Picker, CSS Gradient Generator, XML Formatter, SQL Formatter, Emoji Picker, Flexbox Playground, Grid Generator, CSS Animation Generator, Glassmorphism Generator, Neumorphism Generator, SVG Optimizer, Open Graph Preview, Fake Data Generator, Stopwatch, Countdown Timer, iCalendar Generator, vCard Generator, Color Palette from Image, Chart Generator, Bookmark Manager, PDF Converter, Audio Recorder, and Video to GIF.
+- Typed tool registry containing the completed 12-tool architecture milestone plus reviewed post-slice batches within the approved 100-tool public-release scope (ADR 0021 youtube-downloader exclusion; ADR 0022 scope expansion to 100 tools).
+- Eighty-six enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, Text to Slug, Sort Lines, Add Line Numbers, Trim Whitespace, Remove Duplicates, Percentage Calculator, Tip Calculator, GCD/LCM Calculator, Roman Numeral Converter, Password Strength Checker, Data Sanitizer, CSP Generator, CORS Header Builder, Robots.txt Generator, Age Calculator, Bitwise Calculator, Color Blindness Simulator, Scientific Calculator, HTTP Status Codes, MIME Type Lookup, Meta Tag Generator, Unicode Lookup, ASCII Table, Box Shadow Generator, Border Radius Generator, Text Shadow Generator, HTML Entity Encoder, ROT13 Cipher, Morse Code Translator, HMAC Generator, UUID Generator, Find & Replace, Invisible Character Detector, Hash Diff, Cron Expression Builder, Lorem Ipsum Generator, Password Generator, JWT Decoder, CSV to JSON, YAML to JSON, Text Diff, Color Picker, CSS Gradient Generator, XML Formatter, SQL Formatter, Emoji Picker, Flexbox Playground, Grid Generator, CSS Animation Generator, Glassmorphism Generator, Neumorphism Generator, SVG Optimizer, Open Graph Preview, Fake Data Generator, Stopwatch, Countdown Timer, iCalendar Generator, vCard Generator, Color Palette from Image, Chart Generator, Bookmark Manager, PDF Converter, Audio Recorder, and Video to GIF. Fourteen additional tools are approved for version 1 by ADR 0022 (aspect-ratio-calculator, word-frequency-analyzer, text-binary-converter, time-zone-converter, date-difference-calculator, loan-emi-calculator, discount-tax-calculator, dice-roller, bmi-calculator, color-contrast-checker, unit-price-comparer, fuel-trip-cost-calculator, reading-time-estimator, and css-unit-converter) and are tracked as managed work items until implemented.
 - Catalog search and category filters.
 - Favorites and recent-tool persistence.
 - System/light/dark theme preferences.
@@ -44,7 +44,7 @@ Implemented now:
 
 Not yet implemented:
 
-- No in-scope catalog tool remains; all 86 of the approved 86 are implemented. YouTube Downloader is excluded per ADR 0021.
+- All 86 in-scope catalog tools are implemented (YouTube Downloader is excluded per ADR 0021). The 14 ADR 0022 additions are approved and tracked but not yet implemented.
 - Installed-artifact device verification of the sensitive clipboard bridge, generated-file cache cleanup, and renderer recovery/safe mode.
 - Final icons, splash assets, app name, application ID approval, App Links, and Play signing.
 - Physical-device verification and Play-distributed artifact testing.
@@ -626,8 +626,9 @@ Unless the tracker or user changes priority:
 2. Execute the physical-device foundation checklist through issue #18 on an approved device or emulator.
 3. Validate the complete 12-tool architecture milestone and every enabled post-slice tool on bundled Android artifacts.
 4. Migrate the remaining 19 audited catalog tools in controlled, risk-ordered batches selected from Ready Project work.
-5. Complete quality, accessibility, privacy, policy, release, and closed-testing gates without weakening the approved 86-tool scope (ADR 0021).
-6. Submit no production candidate until every in-scope tool passes the Definition of Done and the release manifest, store claims, and signed artifact agree.
+5. Implement the 14 ADR 0022 additions in three risk-ordered batches selected from Ready Project work: batch 14 (aspect-ratio-calculator, css-unit-converter, discount-tax-calculator, unit-price-comparer, bmi-calculator), batch 15 (word-frequency-analyzer, text-binary-converter, reading-time-estimator, date-difference-calculator, time-zone-converter), and batch 16 (loan-emi-calculator, color-contrast-checker, dice-roller, fuel-trip-cost-calculator).
+6. Complete quality, accessibility, privacy, policy, release, and closed-testing gates without weakening the approved 100-tool scope (ADR 0021/0022).
+7. Submit no production candidate until every in-scope tool passes the Definition of Done and the release manifest, store claims, and signed artifact agree.
 
 ## 28. Handoff checklist
 
