@@ -7,6 +7,13 @@
 > Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 100 implemented — version-1 scope complete**
 > Public release readiness: **NO — foundation only**
 
+### 2026-09-08 — Accessibility certification evidence dossier (issue #22 automated portions)
+
+- Added `docs/certification/accessibility-evidence.md`: the already-automated accessibility layers per release candidate (semantic roles/labels/live-region assertions in component tests — 107 tool components using ARIA, 84 with live regions; route-focus to the destination heading; labeled navigation with `aria-current`; WCAG 2.2 AA token pairs; reduced-motion CSS; 48–52 px shared-control min-heights; checklist-driver 200%-text and landscape rows on the installed artifact ×2 green runs) and the explicitly pending physical rows (TalkBack, Switch Access, OEM split-screen, soft-IME, magnification/color-correction).
+- #22 stays open for those physical rows; the automated evidence is now documented and reproducible per the regression matrix.
+- Gates: `pnpm format:check`, `typecheck`, `lint` PASS; docs-only change.
+- Next executable item: #26 interoperability dossier, then the blocked-issue documentation pass.
+
 ### 2026-09-08 — Performance certification evidence dossier (issue #23 automated portions)
 
 - Added `docs/certification/performance-evidence.md`: the automated bundle/load evidence at the matrix gate (main chunk 307.40 kB / 95.87 kB gzip, stylesheet 43.62 kB / 8.78 kB gzip, per-tool lazy chunks with no tool library in the main chunk, locally bundled workers including the PDF worker's deliberate size tradeoff), the installed-artifact behavior (bounded cold launches with verified retries, cancellation coverage, process-recreation proof), and the explicitly pending physical rows (startup/long-task/60 fps/memory-return-to-baseline measurement needs the approved mid-range device — tracked with #25).
