@@ -36,3 +36,12 @@ export function percentOfCentsHalfUp(priceCents: number, percent: number): numbe
   const half = denominator / 2n
   return Number((product + half) / denominator)
 }
+
+/** Formats whole cents as an exact 2-decimal string; no floats displayed. */
+export function formatCents(cents: number): string {
+  const negative = cents < 0
+  const absolute = Math.abs(Math.round(cents))
+  const units = Math.floor(absolute / 100)
+  const remainder = absolute % 100
+  return `${negative ? "-" : ""}${units}.${String(remainder).padStart(2, "0")}`
+}

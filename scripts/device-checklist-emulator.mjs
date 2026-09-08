@@ -5,7 +5,7 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 96
+const enabledToolCount = 100
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -1590,6 +1590,59 @@ async function phaseTools(page) {
         await p.setValue("#time-zone-time", "02:30")
         await p.waitFor("document.body.innerText.includes('does not exist')")
         return "explicit-zone conversion with an honest spring-forward gap state"
+      },
+    ],
+    [
+      "loan-emi-calculator",
+      "Loan EMI Calculator",
+      async (p) => {
+        await p.setValue("#loan-emi-principal", "100000")
+        await p.setValue("#loan-emi-rate", "12")
+        await p.setValue("#loan-emi-tenure", "12")
+        await p.waitFor(
+          "document.body.innerText.includes('The EMI is 8884.88 per month for 12 months')",
+        )
+        await p.waitFor("document.body.innerText.includes('Indicative only')")
+        return "reducing-balance EMI with an indicative amortization summary"
+      },
+    ],
+    [
+      "color-contrast-checker",
+      "Color Contrast Checker",
+      async (p) => {
+        await p.setValue("#contrast-first", "#ffffff")
+        await p.setValue("#contrast-second", "#777777")
+        await p.waitFor("document.body.innerText.includes('The contrast ratio is 4.48:1.')")
+        await p.waitFor("document.body.innerText.includes('Fail')")
+        await p.clickButton("Swap colors")
+        return "WCAG 2.2 ratio with AA/AAA text results and a palette swap"
+      },
+    ],
+    [
+      "dice-roller",
+      "Dice Roller",
+      async (p) => {
+        await p.setValue("#dice-notation", "2d6 + 3")
+        await p.clickButton("Roll")
+        await p.waitFor("document.body.innerText.includes('Total 5 from 2d6 + 3.')")
+        await p.waitFor("document.body.innerText.includes('1, 1')")
+        await p.clickButton("Repeat last roll")
+        await p.waitFor("document.body.innerText.includes('Total 5 from 2d6 + 3.')")
+        return "parsed groups with unbiased bytes and a repeat-last roll"
+      },
+    ],
+    [
+      "fuel-trip-cost-calculator",
+      "Fuel and Trip Cost Calculator",
+      async (p) => {
+        await p.setValue("#fuel-distance", "150")
+        await p.setValue("#fuel-efficiency", "6.5")
+        await p.setValue("#fuel-price", "1.85")
+        await p.setValue("#fuel-passengers", "3")
+        await p.waitFor("document.body.innerText.includes('23.077 l of fuel, costing 42.69 total')")
+        await p.clickCheckbox("Round trip (double the distance)")
+        await p.waitFor("document.body.innerText.includes('46.154 l of fuel, costing 85.38 total')")
+        return "mode-aware fuel math with a round-trip toggle and passenger split"
       },
     ],
   ]

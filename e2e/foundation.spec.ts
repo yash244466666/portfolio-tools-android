@@ -1420,3 +1420,21 @@ test("time zone converter crosses zones and surfaces daylight-saving edges hones
   await page.getByRole("button", { name: "Clear" }).click()
   await expect(page.getByRole("status")).toContainText("Enter a date and time")
 })
+
+test("loan EMI calculator computes the known vector and discloses its indicative nature", async ({
+  page,
+}) => {
+  await page.goto("/#/tool/loan-emi-calculator")
+  await expect(page.getByRole("heading", { name: "Loan EMI Calculator" })).toBeVisible()
+  await expect(page.getByRole("status")).toContainText("Enter the principal")
+
+  await page.getByLabel("Principal amount").fill("100000")
+  await page.getByLabel(/annual interest rate/i).fill("12")
+  await page.getByLabel(/tenure/i).fill("12")
+  await expect(page.getByRole("status")).toContainText("The EMI is 8884.88 per month for 12 months")
+  await expect(page.getByRole("table")).toContainText("100000.00")
+  await expect(page.getByRole("note")).toContainText("Indicative only")
+
+  await page.getByRole("button", { name: "Reset" }).click()
+  await expect(page.getByRole("status")).toContainText("Enter the principal")
+})
