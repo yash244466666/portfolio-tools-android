@@ -230,9 +230,9 @@ export default function CountdownTimer() {
       </ToolPanel>
 
       <p className="text-xs leading-5 text-[var(--text-secondary)]">
-        The countdown tracks a wall-clock deadline, so background throttling or an interrupted
-        app cannot make it run slow. Completion is best-effort by design; an exact alarm is
-        never promised. Nothing is saved or uploaded; this tool has no network access.
+        The countdown tracks a wall-clock deadline, so background throttling or an interrupted app
+        cannot make it run slow. Completion is best-effort by design; an exact alarm is never
+        promised. Nothing is saved or uploaded; this tool has no network access.
       </p>
     </div>
   )

@@ -103,7 +103,11 @@ export default function VcardGenerator() {
               value={email}
             />
           </Field>
-          <Field hint="Only https links are included." htmlFor="vcard-url" label="Website (optional)">
+          <Field
+            hint="Only https links are included."
+            htmlFor="vcard-url"
+            label="Website (optional)"
+          >
             <input
               className="app-input"
               id="vcard-url"

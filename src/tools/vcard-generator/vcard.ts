@@ -15,8 +15,7 @@ export interface VcardInput {
 }
 
 export type VcardResult =
-  { status: "ok"; card: string; filename: string }
-  | { status: "error"; message: string }
+  { status: "ok"; card: string; filename: string } | { status: "error"; message: string }
 
 export function escapeVcardText(value: string): string {
   return value

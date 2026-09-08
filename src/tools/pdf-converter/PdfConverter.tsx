@@ -84,7 +84,10 @@ export default function PdfConverter() {
   }, [])
 
   const pickFiles = useCallback(
-    async (options: { accept: string[]; multiple: boolean }, apply: (picked: PickedFile[]) => void) => {
+    async (
+      options: { accept: string[]; multiple: boolean },
+      apply: (picked: PickedFile[]) => void,
+    ) => {
       setError("")
       setStatus("")
       try {
@@ -109,7 +112,10 @@ export default function PdfConverter() {
       const payloads: Array<{ bytes: Uint8Array; mimeType: string }> = []
       for (const image of images) {
         const content = await files.readContent(image, { maximumBytes: maximumPdfBytes })
-        payloads.push({ bytes: new Uint8Array(await toBytes(content.data)), mimeType: image.mimeType })
+        payloads.push({
+          bytes: new Uint8Array(await toBytes(content.data)),
+          mimeType: image.mimeType,
+        })
       }
       const output = await imagesToPdfBytes(payloads)
       const name = safeOutputName(images[0]?.name ?? "images", "images", "pdf")
@@ -309,11 +315,7 @@ export default function PdfConverter() {
   return (
     <div className="grid gap-4">
       <ToolPanel title="Conversion mode">
-        <div
-          aria-label="Conversion mode"
-          className="grid grid-cols-2 gap-2"
-          role="group"
-        >
+        <div aria-label="Conversion mode" className="grid grid-cols-2 gap-2" role="group">
           {modes.map((entry) => (
             <Button
               aria-pressed={mode === entry.id}
@@ -350,7 +352,9 @@ export default function PdfConverter() {
                         return
                       }
                       setImages(selected)
-                      setStatus(`Selected ${selected.length} image${selected.length === 1 ? "" : "s"}.`)
+                      setStatus(
+                        `Selected ${selected.length} image${selected.length === 1 ? "" : "s"}.`,
+                      )
                     })
                   }
                 >
@@ -360,7 +364,10 @@ export default function PdfConverter() {
                   Reset
                 </Button>
               </div>
-              <Button disabled={busy || images.length === 0} onClick={() => void convertImagesToPdf()}>
+              <Button
+                disabled={busy || images.length === 0}
+                onClick={() => void convertImagesToPdf()}
+              >
                 {busy ? "Working…" : "Convert to PDF"}
               </Button>
             </>
@@ -396,10 +403,7 @@ export default function PdfConverter() {
                   Reset
                 </Button>
               </div>
-              <Button
-                disabled={busy || !pdfForImages}
-                onClick={() => void convertPdfToImages()}
-              >
+              <Button disabled={busy || !pdfForImages} onClick={() => void convertPdfToImages()}>
                 {busy ? "Rendering…" : "Convert to images"}
               </Button>
               {pages.length > 0 ? (
@@ -415,7 +419,10 @@ export default function PdfConverter() {
               {pages.length > 0 ? (
                 <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="Rendered pages">
                   {pages.map((page, index) => (
-                    <li className="grid gap-2 rounded-xl border border-[var(--border)] p-2" key={page.url}>
+                    <li
+                      className="grid gap-2 rounded-xl border border-[var(--border)] p-2"
+                      key={page.url}
+                    >
                       <img
                         alt={`Page ${index + 1} preview, ${page.width} by ${page.height} pixels`}
                         className="max-h-64 w-full rounded-lg object-contain"
@@ -541,4 +548,3 @@ export default function PdfConverter() {
     </div>
   )
 }
-

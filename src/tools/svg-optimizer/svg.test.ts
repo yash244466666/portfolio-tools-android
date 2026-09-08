@@ -11,15 +11,15 @@ import {
 
 const sample = [
   "<!-- comment -->",
-  "<svg   xmlns=\"http://www.w3.org/2000/svg\"   width=\"10\"   height=\"10\">",
+  '<svg   xmlns="http://www.w3.org/2000/svg"   width="10"   height="10">',
   "  <text>hello   world</text>",
-  "  <rect   x=\"1\"   y=\"2\" />",
+  '  <rect   x="1"   y="2" />',
   "</svg>",
 ].join("\n")
 
 describe("validateSvg", () => {
   it("accepts a well-formed svg element", () => {
-    expect(validateSvg("<svg xmlns=\"http://www.w3.org/2000/svg\" />")).toEqual({
+    expect(validateSvg('<svg xmlns="http://www.w3.org/2000/svg" />')).toEqual({
       ok: true,
       message: "Valid SVG.",
     })
@@ -30,9 +30,7 @@ describe("validateSvg", () => {
   })
 
   it("rejects markup that is not well-formed XML", () => {
-    expect(validateSvg("<svg><text>unclosed</svg>").message).toBe(
-      "The SVG is not well-formed XML.",
-    )
+    expect(validateSvg("<svg><text>unclosed</svg>").message).toBe("The SVG is not well-formed XML.")
   })
 
   it("rejects well-formed XML without an svg element", () => {
@@ -52,8 +50,8 @@ describe("validateSvg", () => {
 describe("minifySvgDocument", () => {
   it("removes comments and inter-tag whitespace only", () => {
     expect(minifySvgDocument(sample)).toBe(
-      "<svg   xmlns=\"http://www.w3.org/2000/svg\"   width=\"10\"   height=\"10\">" +
-        "<text>hello   world</text><rect   x=\"1\"   y=\"2\" /></svg>",
+      '<svg   xmlns="http://www.w3.org/2000/svg"   width="10"   height="10">' +
+        '<text>hello   world</text><rect   x="1"   y="2" /></svg>',
     )
   })
 

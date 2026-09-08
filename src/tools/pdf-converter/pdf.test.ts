@@ -92,9 +92,7 @@ describe("validateSinglePdf", () => {
   })
 
   it("accepts the PDF MIME type or a .pdf name", () => {
-    expect(
-      validateSinglePdf({ mimeType: "application/pdf", name: "x.bin", size: 10 }),
-    ).toBeNull()
+    expect(validateSinglePdf({ mimeType: "application/pdf", name: "x.bin", size: 10 })).toBeNull()
     expect(validateSinglePdf({ mimeType: "", name: "report.PDF", size: 10 })).toBeNull()
   })
 
@@ -107,9 +105,9 @@ describe("validateSinglePdf", () => {
 describe("validateMergePdfs", () => {
   it("requires at least two PDFs", () => {
     expect(validateMergePdfs([])).toBe("Choose at least 2 PDF files to merge.")
-    expect(
-      validateMergePdfs([{ mimeType: "application/pdf", size: 10 }]),
-    ).toBe("Choose at least 2 PDF files to merge.")
+    expect(validateMergePdfs([{ mimeType: "application/pdf", size: 10 }])).toBe(
+      "Choose at least 2 PDF files to merge.",
+    )
   })
 
   it("rejects sets above the merge count limit", () => {

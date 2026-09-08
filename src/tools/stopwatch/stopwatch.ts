@@ -45,11 +45,7 @@ export function formatStopwatchTime(ms: number): string {
 }
 
 /** Records a lap from the current elapsed time; laps are stored newest-first. */
-export function recordLap(
-  laps: readonly LapRecord[],
-  elapsedMs: number,
-  id: string,
-): LapRecord[] {
+export function recordLap(laps: readonly LapRecord[], elapsedMs: number, id: string): LapRecord[] {
   const previousTotal = laps.length > 0 ? (laps[0]?.totalTime ?? 0) : 0
   return [
     {

@@ -8,15 +8,15 @@ import {
 
 const documentHead = [
   "<head>",
-  "<meta charset=\"utf-8\" />",
+  '<meta charset="utf-8" />',
   "<title>Upstream</title>",
-  "<meta property=\"og:title\" content=\"Launch day\" />",
-  "<meta property=\"og:description\" content=\"Everything new.\" />",
-  "<meta name=\"twitter:card\" content=\"summary_large_image\" />",
-  "<meta content=\"fallback-description\" property=\"og:description\" />",
-  "<meta property=\"og:image\" content=\"https://example.com/card.png\" />",
-  "<meta property=\"og:url\" content=\"https://example.com/launch\" />",
-  "<meta property=\"og:type\" content=\"article\" />",
+  '<meta property="og:title" content="Launch day" />',
+  '<meta property="og:description" content="Everything new." />',
+  '<meta name="twitter:card" content="summary_large_image" />',
+  '<meta content="fallback-description" property="og:description" />',
+  '<meta property="og:image" content="https://example.com/card.png" />',
+  '<meta property="og:url" content="https://example.com/launch" />',
+  '<meta property="og:type" content="article" />',
   "</head>",
 ].join("\n")
 
@@ -40,20 +40,24 @@ describe("parseOpenGraphTags", () => {
 
   it("keeps the first occurrence of an identically valued tag", () => {
     const tags = parseOpenGraphTags(
-      "<meta property=\"og:title\" content=\"first\" /><meta property=\"og:title\" content=\"first\" />",
+      '<meta property="og:title" content="first" /><meta property="og:title" content="first" />',
     )
     expect(tags).toEqual([{ property: "og:title", content: "first" }])
   })
 
   it("normalizes property casing", () => {
-    const tags = parseOpenGraphTags("<meta PROPERTY=\"OG:Title\" content=\"x\" />")
+    const tags = parseOpenGraphTags('<meta PROPERTY="OG:Title" content="x" />')
     expect(tags).toEqual([{ property: "og:title", content: "x" }])
   })
 
   it("returns nothing for empty, oversize, or tag-free input", () => {
     expect(parseOpenGraphTags("")).toEqual([])
     expect(parseOpenGraphTags("<div>no meta tags</div>")).toEqual([])
-    expect(parseOpenGraphTags(`<meta property="og:title" content="${"x".repeat(maximumOgHtmlLength)}" />`)).toEqual([])
+    expect(
+      parseOpenGraphTags(
+        `<meta property="og:title" content="${"x".repeat(maximumOgHtmlLength)}" />`,
+      ),
+    ).toEqual([])
   })
 })
 
@@ -73,7 +77,7 @@ describe("buildOpenGraphSummary", () => {
   it("falls back to Twitter Card values when Open Graph is absent", () => {
     const summary = buildOpenGraphSummary(
       parseOpenGraphTags(
-        "<meta name=\"twitter:title\" content=\"Only Twitter\" /><meta name=\"twitter:image\" content=\"https://example.com/t.png\" />",
+        '<meta name="twitter:title" content="Only Twitter" /><meta name="twitter:image" content="https://example.com/t.png" />',
       ),
     )
     expect(summary.title).toBe("Only Twitter")
@@ -91,7 +95,7 @@ describe("serializeOpenGraphTags", () => {
     const tags = parseOpenGraphTags(documentHead)
     const serialized = serializeOpenGraphTags(tags)
     expect(serialized.split("\n")).toHaveLength(tags.length)
-    expect(serialized).toContain("<meta property=\"og:title\" content=\"Launch day\" />")
+    expect(serialized).toContain('<meta property="og:title" content="Launch day" />')
     expect(parseOpenGraphTags(serialized)).toEqual(tags)
   })
 })

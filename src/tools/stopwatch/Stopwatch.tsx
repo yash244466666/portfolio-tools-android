@@ -67,16 +67,18 @@ export default function Stopwatch() {
   }
 
   function lap() {
-    const current = anchorRef.current !== null
-      ? computeElapsedMs(anchorRef.current, 0, Date.now())
-      : elapsed
+    const current =
+      anchorRef.current !== null ? computeElapsedMs(anchorRef.current, 0, Date.now()) : elapsed
     setLaps((prev) => recordLap(prev, current, `lap-${prev.length + 1}-${current}`))
     void haptics.confirm()
   }
 
   const marks = markExtremes(laps)
   const lapLines = laps
-    .map((entry, index) => `Lap ${laps.length - index}: ${formatStopwatchTime(entry.lapTime)} (total ${formatStopwatchTime(entry.totalTime)})`)
+    .map(
+      (entry, index) =>
+        `Lap ${laps.length - index}: ${formatStopwatchTime(entry.lapTime)} (total ${formatStopwatchTime(entry.totalTime)})`,
+    )
     .join("\n")
 
   return (
@@ -112,17 +114,20 @@ export default function Stopwatch() {
       </ToolPanel>
 
       {laps.length > 0 ? (
-        <ToolPanel
-          title="Laps"
-          action={<CopyButton label="Copy laps" value={lapLines} />}
-        >
+        <ToolPanel title="Laps" action={<CopyButton label="Copy laps" value={lapLines} />}>
           <table className="w-full text-sm">
             <caption className="sr-only">Recorded laps with per-lap and total times</caption>
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-[var(--text-secondary)]">
-                <th scope="col" className="py-2">Lap</th>
-                <th scope="col" className="py-2 text-right">Lap time</th>
-                <th scope="col" className="py-2 text-right">Total</th>
+                <th scope="col" className="py-2">
+                  Lap
+                </th>
+                <th scope="col" className="py-2 text-right">
+                  Lap time
+                </th>
+                <th scope="col" className="py-2 text-right">
+                  Total
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -154,9 +159,9 @@ export default function Stopwatch() {
       ) : null}
 
       <p className="text-xs leading-5 text-[var(--text-secondary)]">
-        The stopwatch counts from wall-clock timestamps, so background throttling or an
-        interrupted app cannot lose time. Timekeeping is best-effort by design; it is not an
-        exact alarm. Nothing is saved or uploaded; this tool has no network access.
+        The stopwatch counts from wall-clock timestamps, so background throttling or an interrupted
+        app cannot lose time. Timekeeping is best-effort by design; it is not an exact alarm.
+        Nothing is saved or uploaded; this tool has no network access.
       </p>
     </div>
   )

@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest"
-import {
-  computeElapsedMs,
-  formatStopwatchTime,
-  markExtremes,
-  recordLap,
-} from "./stopwatch"
+import { computeElapsedMs, formatStopwatchTime, markExtremes, recordLap } from "./stopwatch"
 
 describe("computeElapsedMs", () => {
   it("reconstructs elapsed time from the wall-clock anchor", () => {

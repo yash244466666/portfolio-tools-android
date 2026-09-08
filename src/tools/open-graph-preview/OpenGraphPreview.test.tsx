@@ -3,9 +3,9 @@ import { PlatformProvider } from "@/platform/platform-context"
 import OpenGraphPreview from "./OpenGraphPreview"
 
 const head = [
-  "<meta property=\"og:title\" content=\"Launch day\" />",
-  "<meta property=\"og:description\" content=\"Everything new.\" />",
-  "<meta name=\"twitter:card\" content=\"summary_large_image\" />",
+  '<meta property="og:title" content="Launch day" />',
+  '<meta property="og:description" content="Everything new." />',
+  '<meta name="twitter:card" content="summary_large_image" />',
 ].join("\n")
 
 function renderTool() {
@@ -30,7 +30,7 @@ describe("OpenGraphPreview interactions", () => {
     expect(screen.getByText("summary_large_image")).toBeVisible()
     expect(screen.getByText(/never downloaded/)).toBeVisible()
     expect(document.querySelector("pre")?.textContent).toContain(
-      "<meta property=\"og:title\" content=\"Launch day\" />",
+      '<meta property="og:title" content="Launch day" />',
     )
   })
 
