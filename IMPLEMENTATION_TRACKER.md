@@ -7,6 +7,13 @@
 > Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 100 implemented — version-1 scope complete**
 > Public release readiness: **NO — foundation only**
 
+### 2026-09-08 — Performance certification evidence dossier (issue #23 automated portions)
+
+- Added `docs/certification/performance-evidence.md`: the automated bundle/load evidence at the matrix gate (main chunk 307.40 kB / 95.87 kB gzip, stylesheet 43.62 kB / 8.78 kB gzip, per-tool lazy chunks with no tool library in the main chunk, locally bundled workers including the PDF worker's deliberate size tradeoff), the installed-artifact behavior (bounded cold launches with verified retries, cancellation coverage, process-recreation proof), and the explicitly pending physical rows (startup/long-task/60 fps/memory-return-to-baseline measurement needs the approved mid-range device — tracked with #25).
+- #23 stays open for those physical profiling rows; the automated evidence is documented and reproducible.
+- Gates: `pnpm format:check`, `typecheck`, `lint` PASS; docs-only change.
+- Next executable item: #26 interoperability dossier, then the blocked-issue documentation pass.
+
 ### 2026-09-08 — Production network-provider review dossier (issue #33 evidence)
 
 - Added `docs/certification/network-provider-review.md`: the two reviewed providers with exact origins and sent fields, the CSP `connect-src` allowlist match, the packaged-origin CORS proof (100-tool checklist driver executed both tools live on the bundled `https://app.yash.tools` origin with attribution; E2E additionally drives live calls), the 15 s `AbortController` timeouts, the Currency Converter's 24 h versioned cache aligned with the provider's `max-age=86400`, typed offline/timeout/rate-limit/malformed states, stale presentation, and the fallback/removal/review triggers.
