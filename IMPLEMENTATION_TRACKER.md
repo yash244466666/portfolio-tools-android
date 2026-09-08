@@ -7,6 +7,12 @@
 > Approved public version 1 scope: **all 87 audited catalog tools; 83 implemented, 4 remaining**
 > Public release readiness: **NO — foundation only**
 
+### 2026-09-08 — Dev batch 10 merge reconciliation
+
+- Squash-merged PR #164 into `main` as `a422847`, closing issues #62, #92, and #110; all three Project items are Done (verified via GraphQL read-back) and the issues carry `status:device-qa` with evidence comments (stale `status:triage` labels removed). Both hosted PR CI jobs were green before merge (android-debug 3m39s, web-quality 7m0s). No open pull requests remain.
+- Registry now has 83 enabled entries; 4 of the approved 87 remain.
+- Next executable item: PDF Converter #42 as its own batch — it requires pdf-lib/JSZip/pdfjs-dist dependency review as a dedicated change, a bundled pdf.js worker (the upstream loads its worker from unpkg, which is forbidden), and byte/page/decoded-memory limits with encryption detection. The tier-4 audio/video tools (#111/#112) and YouTube Downloader (#93) remain separately gated. Android artifact validation of all enabled tools remains queue item 4, and issue #18 stays open pending physical-device evidence.
+
 ### 2026-09-08 — Dev batch 10 tool migration (Color Palette from Image, Chart Generator, Bookmark Manager)
 
 - Implemented the next tier-2 batch (issues #62, #92, and #110) as one offline batch on `feat/dev-batch-10`. All three are offline, lazy-loaded, and built only on the platform service contracts and shared UI primitives; Bookmark Manager is the batch's only durable-data tool (persistent in the registry metadata).
