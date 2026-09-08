@@ -5,9 +5,8 @@ import { ToolPanel } from "@/components/ui/ToolPanel"
 import { formatCents } from "@/tools/_shared/money"
 import {
   computeTripCost,
+  efficiencyToOppositeMode,
   formatLitres,
-  kmPerLitreToLitresPer100Km,
-  litresPer100KmToKmPerLitre,
   parseDistanceKm,
   parseEfficiency,
   parseFuelPrice,
@@ -32,6 +31,22 @@ export default function FuelTripCostCalculator() {
   const priceInvalid = priceText.trim() !== "" && price === null
   const passengersInvalid = passengersText.trim() !== "" && passengers === null
 
+  // Clamped inputs disclose their effective values (shared bounded-parse flag).
+  const clampedNotes: string[] = []
+  if (distance?.clamped) {
+    clampedNotes.push(`Distance clamped to ${distance.value} km.`)
+  }
+  if (efficiency?.clamped) {
+    clampedNotes.push(
+      mode === "km-per-litre"
+        ? `Efficiency clamped to ${efficiency.value} km per litre.`
+        : `Efficiency clamped to ${efficiency.value} l per 100 km.`,
+    )
+  }
+  if (passengers?.clamped) {
+    clampedNotes.push(`Passenger count clamped to ${passengers.value}.`)
+  }
+
   const result =
     distance !== null &&
     efficiency !== null &&
@@ -42,11 +57,11 @@ export default function FuelTripCostCalculator() {
     !priceInvalid &&
     !passengersInvalid
       ? computeTripCost({
-          distanceKm: roundTrip ? distance * 2 : distance,
+          distanceKm: roundTrip ? distance.value * 2 : distance.value,
           efficiency: efficiency.value,
           mode,
-          fuelPricePerLitre: price,
-          passengers,
+          fuelPricePerLitre: price.value,
+          passengers: passengers.value,
         })
       : null
 
@@ -54,10 +69,9 @@ export default function FuelTripCostCalculator() {
     const current = parseEfficiency(efficiencyText, mode)
     if (!current) return
     const nextMode: EfficiencyMode = mode === "km-per-litre" ? "litres-per-100km" : "km-per-litre"
-    const converted =
-      nextMode === "litres-per-100km"
-        ? kmPerLitreToLitresPer100Km(current.value)
-        : litresPer100KmToKmPerLitre(current.value)
+    // The helper clamps into the destination mode's bounds BEFORE the value
+    // lands in the field, so the text always matches the effective value.
+    const converted = efficiencyToOppositeMode(current.value, mode)
     if (converted !== null) {
       setEfficiencyText(String(converted))
       setMode(nextMode)
@@ -162,6 +176,9 @@ export default function FuelTripCostCalculator() {
               />
             </Field>
           </div>
+          {clampedNotes.length > 0 ? (
+            <p className="text-sm text-[var(--text-secondary)]">{clampedNotes.join(" ")}</p>
+          ) : null}
           <label className="flex items-center gap-2 text-sm">
             <input
               checked={roundTrip}

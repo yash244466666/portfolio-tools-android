@@ -82,8 +82,8 @@ export default function DiceRoller() {
               </tr>
             </thead>
             <tbody>
-              {lastRoll.groups.map((group) => (
-                <tr className="border-t border-[var(--border)]" key={group.label}>
+              {lastRoll.groups.map((group, groupIndex) => (
+                <tr className="border-t border-[var(--border)]" key={`group-${groupIndex}`}>
                   <td className="py-2">{group.label}</td>
                   <td className="py-2 text-right font-mono">
                     {group.dice.map((die) => die.value).join(", ")}

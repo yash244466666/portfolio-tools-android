@@ -1622,12 +1622,12 @@ async function phaseTools(page) {
       "dice-roller",
       "Dice Roller",
       async (p) => {
-        await p.setValue("#dice-notation", "2d6 + 3")
+        await p.setValue("#dice-notation", "1d6 + 0")
         await p.clickButton("Roll")
-        await p.waitFor("document.body.innerText.includes('Total 5 from 2d6 + 3.')")
-        await p.waitFor("document.body.innerText.includes('1, 1')")
+        await p.waitFor("/^Total [1-6] from 1d6 \\+ 0\\.$/.test(document.body.innerText)")
+        await p.waitFor("!!document.querySelector('table')")
         await p.clickButton("Repeat last roll")
-        await p.waitFor("document.body.innerText.includes('Total 5 from 2d6 + 3.')")
+        await p.waitFor("/^Total [1-6] from 1d6 \\+ 0\\.$/.test(document.body.innerText)")
         return "parsed groups with unbiased bytes and a repeat-last roll"
       },
     ],

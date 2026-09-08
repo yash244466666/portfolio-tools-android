@@ -9,7 +9,7 @@
  * All displayed amounts are exact 2-decimal renderings of integer cents.
  */
 import { formatCents, percentOfCentsHalfUp } from "@/tools/_shared/money"
-import { parseBoundedDecimal } from "@/tools/_shared/bounded-parse"
+import { parseBoundedDecimal, type BoundedParseResult } from "@/tools/_shared/bounded-parse"
 
 export const minimumPrincipal = 1
 export const maximumPrincipal = 100_000_000
@@ -19,34 +19,37 @@ export const minimumTenureMonths = 1
 export const maximumTenureMonths = 600
 
 /** Parses the principal, clamped into 1 - 100,000,000 (2-decimal money). */
-export function parsePrincipal(value: string): number | null {
+export function parsePrincipal(value: string): BoundedParseResult | null {
   if (!/^-?\d+(\.\d{1,2})?$/.test(value.trim())) return null
-  return (
-    parseBoundedDecimal(value, {
-      minimum: minimumPrincipal,
-      maximum: maximumPrincipal,
-    })?.value ?? null
-  )
+  return parseBoundedDecimal(value, {
+    minimum: minimumPrincipal,
+    maximum: maximumPrincipal,
+  })
 }
 
 /** Parses the annual rate percent, clamped into 0 - 100 (decimals accepted). */
-export function parseAnnualRatePercent(value: string): number | null {
-  return (
-    parseBoundedDecimal(value, {
-      minimum: minimumAnnualRatePercent,
-      maximum: maximumAnnualRatePercent,
-    })?.value ?? null
-  )
+export function parseAnnualRatePercent(value: string): BoundedParseResult | null {
+  return parseBoundedDecimal(value, {
+    minimum: minimumAnnualRatePercent,
+    maximum: maximumAnnualRatePercent,
+  })
 }
 
-/** Parses the tenure in whole months, clamped into 1 - 600. */
+/**
+ * Parses the tenure in whole months. Integrality is validated on the raw
+ * parsed value BEFORE clamping, so a fractional input ("12.5") always
+ * rejects instead of silently rounding; in-range input clamps as usual.
+ */
 export function parseTenureMonths(value: string): number | null {
-  const parsed = parseBoundedDecimal(value, {
-    minimum: minimumTenureMonths,
-    maximum: maximumTenureMonths,
-  })
-  if (!parsed || !Number.isInteger(parsed.value)) return null
-  return parsed.value
+  const trimmed = value.trim()
+  if (!/^-?\d+(?:\.\d+)?$/.test(trimmed)) return null
+  if (!Number.isInteger(Number(trimmed))) return null
+  return (
+    parseBoundedDecimal(trimmed, {
+      minimum: minimumTenureMonths,
+      maximum: maximumTenureMonths,
+    })?.value ?? null
+  )
 }
 
 export interface LoanTerms {

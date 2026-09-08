@@ -31,11 +31,20 @@ export default function LoanEmiCalculator() {
   const schedule =
     principal !== null && rate !== null && tenure !== null
       ? buildLoanSchedule({
-          principalCents: Math.round(principal * 100),
-          annualRatePercent: rate,
+          principalCents: Math.round(principal.value * 100),
+          annualRatePercent: rate.value,
           tenureMonths: tenure,
         })
       : null
+
+  // Clamped inputs disclose their effective values (shared bounded-parse flag).
+  const clampedNotes: string[] = []
+  if (principal?.clamped) {
+    clampedNotes.push(`Principal clamped to ${principal.value.toLocaleString("en-US")}.`)
+  }
+  if (rate?.clamped) {
+    clampedNotes.push(`Rate clamped to ${rate.value}%.`)
+  }
 
   return (
     <div className="grid gap-4">
@@ -97,6 +106,9 @@ export default function LoanEmiCalculator() {
               value={tenureText}
             />
           </Field>
+          {clampedNotes.length > 0 ? (
+            <p className="text-sm text-[var(--text-secondary)]">{clampedNotes.join(" ")}</p>
+          ) : null}
           <div>
             <Button onClick={reset} variant="quiet">
               Reset

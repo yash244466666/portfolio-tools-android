@@ -3,8 +3,7 @@ import { formatCents as formatMoney } from "@/tools/_shared/money"
 import {
   computeTripCost,
   formatLitres,
-  kmPerLitreToLitresPer100Km,
-  litresPer100KmToKmPerLitre,
+  efficiencyToOppositeMode,
   parseDistanceKm,
   parseEfficiency,
   parseFuelPrice,
@@ -13,9 +12,9 @@ import {
 
 describe("parsing", () => {
   it("clamps the distance into 0.1-100,000 km", () => {
-    expect(parseDistanceKm("150")).toBe(150)
-    expect(parseDistanceKm("0.05")).toBe(0.1)
-    expect(parseDistanceKm("200000")).toBe(100_000)
+    expect(parseDistanceKm("150")).toEqual({ value: 150, clamped: false })
+    expect(parseDistanceKm("0.05")).toEqual({ value: 0.1, clamped: true })
+    expect(parseDistanceKm("200000")).toEqual({ value: 100_000, clamped: true })
     expect(parseDistanceKm("")).toBeNull()
   })
 
@@ -27,29 +26,39 @@ describe("parsing", () => {
     expect(parseEfficiency("", "km-per-litre")).toBeNull()
   })
 
-  it("clamps the fuel price and whole passenger counts", () => {
-    expect(parseFuelPrice("1.85")).toBe(1.85)
-    expect(parseFuelPrice("2000")).toBe(1000)
+  it("clamps the fuel price and validates whole passenger counts", () => {
+    expect(parseFuelPrice("1.85")).toEqual({ value: 1.85, clamped: false })
+    expect(parseFuelPrice("2000")).toEqual({ value: 1000, clamped: true })
     expect(parseFuelPrice("1.999")).toBeNull()
-    expect(parsePassengers("3")).toBe(3)
-    expect(parsePassengers("0")).toBe(1)
+    // Integrality is validated on the raw value before clamping, so both
+    // fractional inputs reject instead of one silently rounding.
+    expect(parsePassengers("3")).toEqual({ value: 3, clamped: false })
     expect(parsePassengers("2.5")).toBeNull()
+    expect(parsePassengers("0.5")).toBeNull()
+    expect(parsePassengers("0")).toEqual({ value: 1, clamped: true })
   })
 })
 
 describe("efficiency conversion", () => {
   it("converts both ways with known vectors", () => {
     // 5 l/100km is 20 km/l.
-    expect(kmPerLitreToLitresPer100Km(20)).toBe(5)
-    expect(litresPer100KmToKmPerLitre(5)).toBe(20)
+    expect(efficiencyToOppositeMode(20, "km-per-litre")).toBe(5)
+    expect(efficiencyToOppositeMode(5, "litres-per-100km")).toBe(20)
     // 6.5 km/l = 15.385 l/100km.
-    expect(kmPerLitreToLitresPer100Km(6.5)).toBe(15.385)
-    expect(litresPer100KmToKmPerLitre(15.385)).toBe(6.5)
+    expect(efficiencyToOppositeMode(6.5, "km-per-litre")).toBe(15.385)
+    expect(efficiencyToOppositeMode(15.385, "litres-per-100km")).toBe(6.5)
+  })
+
+  it("clamps the converted value into the destination bounds", () => {
+    // 0.1 km/l would convert to 1000 l/100km, far above the 100 bound.
+    expect(efficiencyToOppositeMode(0.1, "km-per-litre")).toBe(100)
+    // 1000 l/100km would convert to 0.1 km/l, at the floor already.
+    expect(efficiencyToOppositeMode(1000, "litres-per-100km")).toBe(0.1)
   })
 
   it("rejects non-positive efficiencies", () => {
-    expect(kmPerLitreToLitresPer100Km(0)).toBeNull()
-    expect(litresPer100KmToKmPerLitre(-1)).toBeNull()
+    expect(efficiencyToOppositeMode(0, "km-per-litre")).toBeNull()
+    expect(efficiencyToOppositeMode(-1, "litres-per-100km")).toBeNull()
   })
 })
 

@@ -9,26 +9,31 @@ import {
 } from "./loan-emi"
 
 describe("parsing", () => {
-  it("clamps the principal into 1-100,000,000 and rejects junk", () => {
-    expect(parsePrincipal("100000")).toBe(100_000)
-    expect(parsePrincipal("0")).toBe(1)
-    expect(parsePrincipal("999999999")).toBe(100_000_000)
+  it("clamps the principal into 1-100,000,000 and reports the clamp", () => {
+    expect(parsePrincipal("100000")).toEqual({ value: 100_000, clamped: false })
+    expect(parsePrincipal("0")).toEqual({ value: 1, clamped: true })
+    expect(parsePrincipal("999999999")).toEqual({
+      value: 100_000_000,
+      clamped: true,
+    })
     expect(parsePrincipal("abc")).toBeNull()
     expect(parsePrincipal("1.999")).toBeNull()
   })
 
   it("clamps the annual rate into 0-100 and accepts decimals", () => {
-    expect(parseAnnualRatePercent("12.5")).toBe(12.5)
-    expect(parseAnnualRatePercent("0")).toBe(0)
-    expect(parseAnnualRatePercent("150")).toBe(100)
-    expect(parseAnnualRatePercent("-1")).toBe(0)
+    expect(parseAnnualRatePercent("12.5")).toEqual({ value: 12.5, clamped: false })
+    expect(parseAnnualRatePercent("0")).toEqual({ value: 0, clamped: false })
+    expect(parseAnnualRatePercent("150")).toEqual({ value: 100, clamped: true })
+    expect(parseAnnualRatePercent("-1")).toEqual({ value: 0, clamped: true })
     expect(parseAnnualRatePercent("")).toBeNull()
   })
 
   it("clamps whole-month tenures into 1-600 and rejects fractions", () => {
     expect(parseTenureMonths("12")).toBe(12)
+    // Sub-minimum whole values clamp to the floor; fractions always reject.
     expect(parseTenureMonths("0")).toBe(1)
     expect(parseTenureMonths("1000")).toBe(600)
+    expect(parseTenureMonths("0.5")).toBeNull()
     expect(parseTenureMonths("12.5")).toBeNull()
   })
 })

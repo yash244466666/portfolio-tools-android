@@ -1,6 +1,6 @@
-> Last updated: 2026-09-08 17:05 Europe/Berlin# Android Tools Implementation Tracker
+# Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 16:00 Europe/Berlin
+> Last updated: 2026-09-08 18:05 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation pass
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
@@ -16,6 +16,7 @@
   - **#188 Fuel and Trip Cost Calculator** (`src/tools/fuel-trip-cost-calculator/`, math): distance clamped 0.1-100,000 km, km/l (0.1-50) or l/100km (0.1-100) mode toggle with a two-way pure conversion helper, fuel price clamped, passengers 1-99 with half-up split, round-trip toggle; litres, total, and per-passenger costs via the shared money rounding.
 - Registry: four enabled entries (risk low, network false, persistent false, lazy components; lucide icons Banknote/Contrast/Dices/Fuel). Tests: four pure suites plus four component suites with boundary/invalid vectors, disclaimers, and `role="status"` feedback; one Playwright scenario exercises the Loan EMI Calculator end to end (known EMI vector, indicative disclaimer, reset).
 - Emulator checklist driver: `enabledToolCount` 96 -> 100 with four per-tool CDP checks appended in the existing style. `docs/SOURCE_PROVENANCE.md` gained one shared batch row.
+- Code-review pass applied on the same branch (11 findings, all fixed): the dice-roller checklist check drives a deterministic single-group notation with a regex on the stable "Total N from 1d6 + 0." shape instead of a random exact total; a fused tracker H1/timestamp was repaired; the AGENT/CLAUDE trailing sentence no longer lists implemented batch-16 tools as remaining; the fuel Convert button clamps the converted efficiency into the destination-mode bounds before writing it into the field; clamped inputs across fuel and loan tools disclose effective values via the shared bounded-parse flag; passenger and tenure integrality validates on the raw parsed value before clamping (both fractional inputs reject); dice result rows use index-based keys; the contrast tool now reuses the established WCAG machinery in color-picker/color-utils (duplicates deleted) and passes/fails on the EXACT ratio with the rounded value display-only (4.497 vector fails AA normal); the dead formatCentsMaybe wrapper was removed in favor of the shared formatCents; the two reciprocal fuel converters collapsed into one clamped efficiencyToOppositeMode helper.
 - **Version-1 scope complete**: all 100 tools (86 in-scope catalog + 14 ADR 0022 additions) now have enabled registry entries; the remaining work before release is the certification, device-evidence, and release gates sequenced in section 27.
 
 ### 2026-09-08 — Dev batch 15: five more ADR 0022 additions (issues #178, #179, #180, #182, #181)

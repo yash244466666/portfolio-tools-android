@@ -7,7 +7,7 @@
  * cost amount rounds to whole cents exactly once through the shared
  * half-up rounding, so displayed totals and splits never show float noise.
  */
-import { parseBoundedDecimal } from "@/tools/_shared/bounded-parse"
+import { parseBoundedDecimal, type BoundedParseResult } from "@/tools/_shared/bounded-parse"
 import { roundToCents } from "@/tools/_shared/money"
 
 export const minimumDistanceKm = 0.1
@@ -25,13 +25,11 @@ export const maximumPassengers = 99
 export type EfficiencyMode = "km-per-litre" | "litres-per-100km"
 
 /** Parses the trip distance, clamped into 0.1 - 100,000 km. */
-export function parseDistanceKm(value: string): number | null {
-  return (
-    parseBoundedDecimal(value, {
-      minimum: minimumDistanceKm,
-      maximum: maximumDistanceKm,
-    })?.value ?? null
-  )
+export function parseDistanceKm(value: string): BoundedParseResult | null {
+  return parseBoundedDecimal(value, {
+    minimum: minimumDistanceKm,
+    maximum: maximumDistanceKm,
+  })
 }
 
 /**
@@ -51,33 +49,40 @@ export function parseEfficiency(
 }
 
 /** Parses the fuel price per litre, clamped into 0 - 1,000 (2-decimal money). */
-export function parseFuelPrice(value: string): number | null {
+export function parseFuelPrice(value: string): BoundedParseResult | null {
   if (!/^-?\d+(\.\d{1,2})?$/.test(value.trim())) return null
-  return (
-    parseBoundedDecimal(value, { minimum: 0, maximum: maximumFuelPricePerLitre })?.value ?? null
-  )
+  return parseBoundedDecimal(value, { minimum: 0, maximum: maximumFuelPricePerLitre })
 }
 
-/** Parses the passenger count, clamped into 1 - 99 (whole numbers only). */
-export function parsePassengers(value: string): number | null {
-  const parsed = parseBoundedDecimal(value, {
+/**
+ * Parses the passenger count. Integrality is validated on the raw parsed
+ * value BEFORE clamping, so a fractional input ("2.5") always rejects
+ * instead of silently rounding; in-range input clamps as usual.
+ */
+export function parsePassengers(value: string): BoundedParseResult | null {
+  const trimmed = value.trim()
+  if (!/^-?\d+(?:\.\d+)?$/.test(trimmed)) return null
+  if (!Number.isInteger(Number(trimmed))) return null
+  return parseBoundedDecimal(trimmed, {
     minimum: minimumPassengers,
     maximum: maximumPassengers,
   })
-  if (!parsed || !Number.isInteger(parsed.value)) return null
-  return parsed.value
 }
 
-/** Converts km/l to l/100km (0.1-50 km/l maps onto 100,000 - 10 l/100km). */
-export function kmPerLitreToLitresPer100Km(kmPerLitre: number): number | null {
-  if (!Number.isFinite(kmPerLitre) || kmPerLitre <= 0) return null
-  return Math.round((100 / kmPerLitre) * 1000) / 1000
-}
-
-/** Converts l/100km to km/l (both directions of the same ratio). */
-export function litresPer100KmToKmPerLitre(litresPer100Km: number): number | null {
-  if (!Number.isFinite(litresPer100Km) || litresPer100Km <= 0) return null
-  return Math.round((100 / litresPer100Km) * 1000) / 1000
+/**
+ * Converts an efficiency to its opposite mode's scale (km/l <-> l/100km).
+ * One reciprocal formula serves both directions; the result is clamped into
+ * the destination mode's documented bounds so the Convert action can never
+ * write an out-of-range value into the field.
+ */
+export function efficiencyToOppositeMode(value: number, sourceMode: EfficiencyMode): number | null {
+  if (!Number.isFinite(value) || value <= 0) return null
+  const converted = Math.round((100 / value) * 1000) / 1000
+  const bounds =
+    sourceMode === "km-per-litre"
+      ? { minimum: minimumLitresPer100Km, maximum: maximumLitresPer100Km }
+      : { minimum: minimumKmPerLitre, maximum: maximumKmPerLitre }
+  return Math.min(bounds.maximum, Math.max(bounds.minimum, converted))
 }
 
 export interface TripInput {
