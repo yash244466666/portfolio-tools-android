@@ -622,13 +622,11 @@ Compiling is not completion. Browser-only success is not Android completion. Vis
 
 Unless the tracker or user changes priority:
 
-1. Complete Android instrumentation/UI Automator foundation coverage through issue #17 and review.
-2. Execute the physical-device foundation checklist through issue #18 on an approved device or emulator.
-3. Validate the complete 12-tool architecture milestone and every enabled post-slice tool on bundled Android artifacts.
-4. Migrate the remaining 19 audited catalog tools in controlled, risk-ordered batches selected from Ready Project work.
-5. Implement the 14 ADR 0022 additions in three risk-ordered batches selected from Ready Project work: batches 14 (aspect-ratio-calculator, css-unit-converter, discount-tax-calculator, unit-price-comparer, bmi-calculator) and 15 (word-frequency-analyzer, text-binary-converter, reading-time-estimator, date-difference-calculator, time-zone-converter) are done; batch 16 (loan-emi-calculator, color-contrast-checker, dice-roller, fuel-trip-cost-calculator) remains.
-6. Complete quality, accessibility, privacy, policy, release, and closed-testing gates without weakening the approved 100-tool scope (ADR 0021/0022).
-7. Submit no production candidate until every in-scope tool passes the Definition of Done and the release manifest, store claims, and signed artifact agree.
+1. Execute the physical-device foundation checklist through issue #18 on an approved device (emulator-side automated evidence is complete through batch 16).
+2. Validate all 100 enabled version-1 tools on bundled Android artifacts and complete outstanding installed-artifact/device-evidence rows (issues #18/#20/#25/#111/#112).
+3. Complete the certification gates (#21-#26): automated regression, accessibility, performance, security/privacy/SBOM, interoperability, and device-matrix work.
+4. Complete product-owner release decisions and gates (#27-#41) without weakening the approved 100-tool scope (ADR 0021/0022).
+5. Submit no production candidate until every in-scope tool passes the Definition of Done and the release manifest, store claims, and signed artifact agree.
 
 ## 28. Handoff checklist
 

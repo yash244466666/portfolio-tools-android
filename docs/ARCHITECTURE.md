@@ -38,7 +38,7 @@ Dependency direction is one way. Tool features may depend on shared UI and platf
 
 `src/tools/registry.ts` is a deterministic compile-time registry. Implemented components are lazy imports. A tool cannot be enabled without an implementation. The registry also exposes risk, persistence, and network classifications needed by UI and tests.
 
-The audited public version 1 scope contains all 87 upstream catalog tools. The completed 12-tool architecture milestone proved the reusable paths, and reviewed post-slice batches have expanded the registry to 25 enabled tools with 62 remaining; the milestone does not reduce the production scope. Production submission requires all 87 entries to be enabled and to pass the per-tool Definition of Done.
+The audited public version 1 scope contains 86 of the 87 upstream catalog tools (ADR 0021 excludes youtube-downloader) plus 14 new original tools for a total of 100 tools (ADR 0022). The 12-tool architecture milestone proved the reusable paths, and batches 2 through 16 have expanded the registry to all 100 enabled entries. Production submission additionally requires every entry to pass the remaining device-evidence, certification, and release gates.
 
 ### Tool features
 
