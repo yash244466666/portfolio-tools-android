@@ -39,7 +39,7 @@ Do not use theme-specific raw hex values in tool components. Add a semantic toke
 - Checkbox/radio options use a full-width row as the tap target: the visible control may stay compact (20 px) inside a `min-h-12` label row that wraps both the input and its visible text label. The row, not the small control, must meet the 48 dp floor; rows keep `gap-3` spacing between the control and text.
 - Adjacent easily confused controls: aim for at least 8 dp separation.
 - Press feedback: visible within 100 ms.
-- Typical transition: 150–300 ms.
+- Transition durations come from the motion tokens on `:root`: `--motion-quick` (150 ms, continuous feedback such as live level meters), `--motion-base` (200 ms, state changes on controls), `--motion-slow` (300 ms, the ceiling; reserved for larger spatial changes). No raw duration literals in components — use a token, and animate transform/opacity/color rather than layout properties.
 - Focus ring: 3 px with offset and AA contrast.
 - Long work: measurable progress when possible plus Cancel.
 - Destructive actions: separated, clearly named, confirmed or safely undoable.
