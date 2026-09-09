@@ -93,6 +93,26 @@ test("markdown preview renders sanitized output", async ({ page }) => {
   await expect(page.getByRole("region", { name: "Rendered preview" })).not.toContainText("alert")
 })
 
+test("multiline inputs keep their starter size, grow with content, and cap", async ({ page }) => {
+  await page.goto("/#/tool/markdown-preview")
+  const input = page.getByLabel("Markdown input")
+
+  const emptyHeight = await input.evaluate((el) => el.getBoundingClientRect().height)
+  expect(emptyHeight, "starter size (min-h-44 = 176 px) applies").toBeGreaterThanOrEqual(160)
+
+  await input.fill(Array.from({ length: 40 }, (_, index) => `line ${index}`).join("\n"))
+  const grownHeight = await input.evaluate((el) => el.getBoundingClientRect().height)
+  expect(grownHeight).toBeGreaterThan(emptyHeight)
+
+  await input.fill(Array.from({ length: 200 }, (_, index) => `line ${index}`).join("\n"))
+  const capped = await input.evaluate((el) => ({
+    height: el.getBoundingClientRect().height,
+    scrollable: el.scrollHeight > el.clientHeight,
+  }))
+  expect(capped.height, "growth caps at 24 rem (384 px)").toBeLessThanOrEqual(385)
+  expect(capped.scrollable, "overflow content scrolls inside the box").toBe(true)
+})
+
 test("theme selection persists", async ({ page }) => {
   await page.goto("/#/settings")
   await page.getByRole("button", { name: "Dark" }).click()

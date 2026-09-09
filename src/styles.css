@@ -425,20 +425,41 @@ button.text-link {
   min-width: 0;
 }
 
-.app-input {
-  width: 100%;
-  min-height: 3rem;
-  padding: 0.75rem 0.9rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 0.9rem;
-  outline: 0;
-  background: var(--background);
-  color: var(--text);
+/*
+ * The component layer lets per-tool utility overrides (e.g. a textarea's
+ * min-h-44 starter height) beat these defaults; unlayered author rules would
+ * otherwise silently defeat every Tailwind layered utility.
+ */
+@layer components {
+  .app-input {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.9rem;
+    outline: 0;
+    background: var(--background);
+    color: var(--text);
+  }
 }
 
 .app-input:focus-visible {
   border-color: var(--focus);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 35%, transparent);
+}
+
+/*
+ * Multiline inputs grow with their content instead of depending on the
+ * engine's tiny corner-grip resize handle, which is near-impossible to use on
+ * touch. Growth is capped so long text scrolls inside the box and the rest of
+ * the tool stays reachable, with extra room kept for the soft keyboard. Each
+ * tool still picks the initial size via its min-height utility.
+ * Engines without field-sizing keep the old behavior: fixed min height plus
+ * the manual resize-y handle (the resize-y classes stay on as the fallback).
+ */
+textarea.app-input {
+  field-sizing: content;
+  max-height: min(24rem, 60dvh);
 }
 
 .segmented-control {
