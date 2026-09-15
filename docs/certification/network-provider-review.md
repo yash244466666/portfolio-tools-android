@@ -22,15 +22,19 @@
 
 ## Packaged-origin CORS proof
 
-The checklist driver's 100-tool runs (2026-09-08, two consecutive green; see
-`docs/PHYSICAL_DEVICE_CHECKLIST.md`) executed both network tools inside the
+The checklist driver's 100-tool runs executed both network tools inside the
 installed debug artifact on the bundled production origin
 (`https://app.yash.tools`, verified `isSecureContext`) against the live
 providers with attribution displayed — proving the packaged origin's CORS
-behavior end to end. The browser harness (`pnpm test:e2e`) additionally
-drives live provider calls with attribution. Cold/offline/stale/error states
-are covered by the driver's airplane-mode rows (offline state for both tools
-and recovery after connectivity returns) and by typed-client tests.
+behavior end to end. The most recent run (2026-09-15 at `bd5b310`, artifact
+`febb136f…`) recorded `tool.currency-converter: live rate plus provider
+attribution` and `tool.dns-lookup` live. **The browser harness
+(`pnpm test:e2e`) does not drive live provider calls**: both provider
+scenarios install `page.route(...)` and `route.fulfill(...)` so the E2E run
+stays deterministic, and only the request _shape_ is asserted. This dossier
+previously claimed live E2E calls, which was false. Cold/offline/stale/error
+states are covered by the driver's airplane-mode rows (offline state for both
+tools and recovery after connectivity returns) and by typed-client tests.
 
 ## Terms, privacy, rates, and country availability (re-verified 2026-09-08)
 

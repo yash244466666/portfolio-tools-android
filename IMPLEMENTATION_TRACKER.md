@@ -1,11 +1,24 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-09-08 21:30 Europe/Berlin
+> Last updated: 2026-09-15 12:05 Europe/Berlin
 > Tracker schema: 1
-> Current milestone: Foundation pass
+> Current milestone: Foundation Complete — all 100 tools implemented and automated evidence green; physical-device evidence (#18/#20/#25) and the product-owner release gates (#27–#41) remain open
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **100 tools per ADR 0022 (86 of the 87 audited catalog tools with ADR 0021 excluding youtube-downloader, plus 14 new original tools); 100 implemented — version-1 scope complete**
 > Public release readiness: **NO — foundation only**
+
+### 2026-09-15 — Head audit: release hygiene, evidence baseline refresh, and defect fixes (PRs #208/#209)
+
+- **Head audit.** An eight-dimension audit of `main` at `bd5b310` raised 54 candidate findings; each was independently adversarially verified before acceptance, leaving 40 confirmed. The verified set is the source of every change below.
+- **Release hygiene (this PR).** `vite.config.ts` set `sourcemap: true` unconditionally, so the release AAB shipped 123 `.map` files — 7.02 of 10.44 MiB of the bundled web payload, and the original source of every tool to every device. Nothing consumes them (no crash reporter or symbolication step), and no document recorded the choice. Maps are now opt-in via `VITE_SOURCEMAP=1`, preserving packaged-WebView debugging over chrome://inspect. Clean rebuild at `bd5b310`: **release AAB 4,657,495 → 2,965,204 bytes (−36 %)**, debug APK −29 %, with the executed code unchanged.
+- **Defect fixes (PR #208).** Four custom properties were referenced but never declared, so each silently dropped its declaration: CronBuilder's selected preset fell back to the inherited colour on a `--primary` fill (**2.74:1 light / 1.75:1 dark**, below AA), and the AudioRecorder/VideoToGif `role="alert"` panels rendered transparent with no border; ChartGenerator's canvas grid always used a hardcoded rgba. Same class as the `--accent` defect fixed in #204, so a gate was added, not just a fix: `scripts/check-css-tokens.mjs` resolves every `var(--x)` / `getPropertyValue("--x")` reference under `src/` (953 references, 27 declared tokens) and fails on a bare reference to an undeclared token. `.text-link` gained the 48 dp floor centrally (it rendered ~24 px at all five call sites) and the E2E floor scenario asserts it; the settings privacy summary now names all seven durable classes instead of four and drops an affirmatively wrong "other tool input is not saved automatically".
+- **Security (PR #209).** `pnpm audit --prod` reported a HIGH on a shipped runtime path: GHSA-2883-xcg3-v3hh against `js-yaml`, a production dependency of the YAML to JSON tool that parses user-pasted YAML. Bumped 4.3.1 → 4.3.2 as a dedicated dependency change; lockfile diff isolated to js-yaml; `pnpm audit --prod` now clean, leaving only the accepted dev-only `uuid` moderate via `@capacitor/cli`. SBOM regenerated (92 components), provenance and the audit dossier corrected.
+- **Evidence corrections.** Three dossiers claimed coverage that does not exist and are now corrected rather than left standing: `network-provider-review.md` claimed the browser harness "additionally drives live provider calls" (the provider E2E scenarios install `page.route`/`route.fulfill` and are explicitly mocked; the checklist driver _does_ run them live, which is the real proof); `performance-evidence.md` and `regression-matrix.md` attributed Android instrumentation to Audio Recorder and Video to GIF (no androidTest file references either; the driver probes **98 of 100** tools and both tools have disclosure-only E2E). The ARIA count of 107 was an all-files count including test files; the component figure is **99**, with 84 using `aria-live`.
+- **Coverage gap closed.** Find & Replace was the only enabled tool without a component test; `FindReplace.test.tsx` adds five literal-mode interaction cases (match counts, case/whole-word options, apply-back, clear, over-limit recovery). All 100 enabled tools now have component coverage.
+- **Evidence refreshed at HEAD.** Bundle sizes re-measured (main chunk 307.40 → 323.57 kB, 95.87 → 101.14 kB gzip; stylesheet 43.62 → 44.50 kB); against the plan's "initial web payload ≤ 500 KiB gzip excluding lazy tool chunks" target the shipped shell is ~110 kB gzip, so the five UI PRs did not breach it. A clean-build gate-run section was added to `regression-matrix.md`.
+- Gates (unpiped, all exit 0): `format:check`, `css:tokens:check`, `github:actions:check`, `github:work-items:check`, `typecheck`, `lint`, `contrast:check` (**36/36**), `test` (**1,664 passed / 216 files**), `build`, `test:e2e` (**212 passed**), `cap:sync`, gradle `clean testDebugUnitTest lintDebug assembleDebug assembleInternal bundleRelease`, `android:manifest:check` ×3, and `node scripts/device-checklist-emulator.mjs` — **112 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL, exit 0** on clean artifact `febb136f…`.
+- **Driver note for future runs.** The checklist driver's Back-key probe depends on 3-button navigation. This AVD was in gesture mode (`navigation_mode=2`), where `adb shell input keyevent 4` is a no-op system-wide — Back failed in the Settings app too, so the first two failures were an emulator configuration difference, not an app defect. With `navigation_mode=0` the probe passes 5/5 and the full run is green. Assert the navigation mode in the driver before trusting that row.
+- **Still not automatable:** every physical-device row (#18/#20/#25), the product-owner release decisions (#27–#41), and #129 (GitHub plan limitation). Remaining repo-local drift not covered here is enumerated in the PR description for follow-up: the 87-tool scope text still present in the epics, `WORK_MANAGEMENT.md`, `ARCHITECTURE.md`, and `README.md`; the FileProvider wording that omits the plugin-provided provider; the two tool-ID spellings that disagree between the registry and the work-item manifest; and the YAML parse still running synchronously on the main thread.
 
 ### 2026-09-08 — UI/UX polish batch 1: catalog density, 48 dp touch floor, Clear-data accuracy (no issue; new polish track)
 
@@ -657,12 +670,18 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 
 ## 7. Artifact inventory
 
-| Artifact         | Package/role                |     Bytes | SHA-256                                                            | Signing/status                                            |
-| ---------------- | --------------------------- | --------: | ------------------------------------------------------------------ | --------------------------------------------------------- |
-| Debug APK        | `dev.yash.tools.debug`      | 8,452,085 | `4ec71a06fa088cddbabb4e6c6185fafecd2251b76412191d28452adbe40bc08c` | Local debug key; APK v2 verified (batch 16 gates)         |
-| Internal APK     | `dev.yash.tools.internal`   | 8,040,119 | `bab29fb8e2e921308ce450290852c744272127811c22a8c0d3323839dcce6d6e` | Local debug key; APK v2 verified (batch 16 gates)         |
-| Release AAB      | `dev.yash.tools`            | 4,658,264 | `d0ef058fec4167b9f0981c0e866092c25e9d06ac87b595754107f87e40074743` | Build proof only; intentionally unsigned (batch 16 gates) |
-| Android-test APK | `dev.yash.tools.debug.test` |   697,385 | `98a0459322ee22a4d98b9442ab19b7a69b60c779c2af409ae04cee1b51aec503` | Test APK only; absent from production runtime             |
+| Artifact     | Package/role              |     Bytes | SHA-256                                                            | Signing/status                            |
+| ------------ | ------------------------- | --------: | ------------------------------------------------------------------ | ----------------------------------------- |
+| Debug APK    | `dev.yash.tools.debug`    | 5,810,251 | `febb136fd161e00bd424899b26641ad792f63eead61d1faf9dc21d31447c9928` | Local debug key; clean build at `bd5b310` |
+| Internal APK | `dev.yash.tools.internal` | 5,810,267 | `26f1b7ea9e76e33688a6b412330f92fb68d4338e4b3cbffeddd7b62c23a9d2b8` | Local debug key; clean build at `bd5b310` |
+| Release AAB  | `dev.yash.tools`          | 2,965,204 | `5c93e87429f26da969ce32040acd4b6612e8701fb3be9573c311e3fbd5b8c32a` | Build proof only; intentionally unsigned  |
+
+These supersede the batch-16 inventory (debug `4ec71a06…` 8,452,085 B, internal
+`bab29fb8…` 8,040,119 B, release `d0ef058f…` 4,658,264 B). They are **not**
+byte-identical to it and should not be: five UI pull requests (#203–#207) plus
+the sourcemap change shipped between them. The release AAB is 36 % smaller
+because `vite.config.ts` no longer emits sourcemaps into the bundled payload.
+| Android-test APK | `dev.yash.tools.debug.test` | 697,385 | `98a0459322ee22a4d98b9442ab19b7a69b60c779c2af409ae04cee1b51aec503` | Test APK only; absent from production runtime |
 
 These are reproducibility evidence, not publication candidates. Rebuild after any source/config change and never distribute a debug-key artifact as production.
 
