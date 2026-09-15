@@ -23,6 +23,12 @@ name: CI
 # `ubuntu-latest` and restore `--with-deps` on the Playwright install (that flag
 # only exists because GitHub's hosted image needs the browsers' system packages
 # installed at run time; here they are already present).
+#
+# Two consequences to remember. A push to a pull-request branch cancels the
+# previous run for that branch, which is intended but means a mid-flight run is
+# not evidence. And if branch protection is ever enabled (issue #129), a
+# `paths-ignore` skip reports as *skipped*, not successful, so a docs-only pull
+# request would need a deliberately added no-op gate before it could merge.
 
 on:
   pull_request:

@@ -569,7 +569,7 @@ Rules:
 
 ## 24. CI, release, and secrets
 
-Pull requests run typecheck, lint, unit/component tests, production web build, phone/tablet browser E2E, Android lint, debug assembly, and the merged-manifest permission/export check. Future gates add SBOM, license notice validation, dependency/secret scan, bundle budgets, emulator tests, backup-rule verification, 16 KB native-library checks, and artifact installation.
+Pull requests run formatting, typecheck, lint, unit/component tests, production web build, phone/tablet browser E2E, Android lint, debug assembly, and the merged-manifest permission/export check. These jobs run on the repository's **self-hosted runner** (label `yash-linux`, registered from the maintainer's Linux workstation) rather than GitHub's hosted runners: this repository is private, so hosted minutes are metered against the 2,000-minute monthly free allowance, and on 2026-09-15 that allowance was exhausted — jobs stopped being allocated a runner entirely and failed after 2 seconds with zero steps, including re-runs of commits that had already passed. Self-hosted jobs are not metered. Two consequences: CI only runs while that machine is up, and the workflow comment records how to return to hosted runners. A push to a pull-request branch cancels that branch's previous run; a docs-only pull request is skipped by design. Future gates add SBOM, license notice validation, dependency/secret scan, bundle budgets, emulator tests, backup-rule verification, 16 KB native-library checks, and artifact installation.
 
 Secrets:
 
