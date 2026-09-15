@@ -174,7 +174,18 @@ export default defineConfig({
   },
   build: {
     target: "es2022",
-    sourcemap: true,
+    /*
+     * Sourcemaps were emitted unconditionally, so the release AAB shipped 123
+     * `.map` files — 7.02 of 10.44 MiB of the bundled web payload, and the
+     * original source of every tool to every device. Nothing consumes them:
+     * the app has no crash reporter or symbolication step, and a dependency
+     * change or an unreviewed default should not silently decide this.
+     *
+     * The shipped artifact must stay lean, so maps are off by default. Set
+     * VITE_SOURCEMAP=1 to build with them when debugging the *packaged*
+     * WebView over chrome://inspect; `pnpm dev` is unaffected either way.
+     */
+    sourcemap: process.env.VITE_SOURCEMAP === "1",
   },
   test: {
     environment: "jsdom",

@@ -1,6 +1,6 @@
 # Foundation Architecture
 
-> Status: accepted for the foundation; the 87-tool first-release scope is accepted, while identity and other irreversible release decisions remain provisional.
+> Status: accepted for the foundation; the 100-tool first-release scope is accepted (ADR 0021 excludes YouTube Downloader from the 87-tool audited catalog, ADR 0022 adds 14 original tools), while identity and other irreversible release decisions remain provisional.
 
 ## Runtime shape
 

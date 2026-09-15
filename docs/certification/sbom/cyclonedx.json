@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:f8188b3f-8002-4768-80cf-9536dfdde46a",
+  "serialNumber": "urn:uuid:5c3159da-e25b-4cad-9da7-486c04dce3d1",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-08T17:12:40.315Z",
+    "timestamp": "2026-09-15T09:49:20.808Z",
     "tools": {
       "components": [
         {
@@ -634,8 +634,8 @@
     {
       "type": "library",
       "name": "js-yaml",
-      "version": "4.3.1",
-      "purl": "pkg:npm/js-yaml@4.3.1",
+      "version": "4.3.2",
+      "purl": "pkg:npm/js-yaml@4.3.2",
       "licenses": [
         {
           "license": {

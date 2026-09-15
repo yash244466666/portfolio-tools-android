@@ -58,6 +58,7 @@ export default function DataSanitizer() {
         >
           <textarea
             aria-describedby={overLimit ? "sanitizer-input-error" : "sanitizer-input-hint"}
+            autoComplete="off"
             className="app-input min-h-28 resize-y font-mono"
             id="sanitizer-input"
             onChange={(event) => setInput(event.target.value)}

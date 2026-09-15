@@ -3,7 +3,7 @@
 <!-- regression-matrix:generated:start -->
 
 Registry: 100 enabled tools.
-Pure test files: 98/100; component tests: 99/100.
+Pure test files: 98/100; component tests: 100/100.
 E2E route coverage: 100/100; installed-artifact interaction (emulator driver per-tool check or E2E): 100/100.
 
 | Tool                          | ID                             | Category | Network | Pure tests | Component tests | Fixtures | E2E | Artifact interaction |
@@ -61,7 +61,7 @@ E2E route coverage: 100/100; installed-artifact interaction (emulator driver per
 | Morse Code Translator         | `morse-code-translator`        | text     | local   | 1          | 1               | no       | yes | yes                  |
 | HMAC Generator                | `hmac-generator`               | dev      | local   | 1          | 1               | no       | yes | yes                  |
 | UUID Generator                | `uuid-generator`               | dev      | local   | 1          | 1               | no       | yes | yes                  |
-| Find & Replace                | `find-replace`                 | text     | local   | 1          | 0               | no       | yes | yes                  |
+| Find & Replace                | `find-replace`                 | text     | local   | 1          | 1               | no       | yes | yes                  |
 | Invisible Character Detector  | `invisible-character-detector` | text     | local   | 1          | 1               | no       | yes | yes                  |
 | Hash Diff                     | `hash-diff`                    | dev      | local   | 1          | 1               | no       | yes | yes                  |
 | Cron Expression Builder       | `cron-builder`                 | dev      | local   | 1          | 1               | no       | yes | yes                  |
@@ -128,9 +128,14 @@ repository itself so it cannot silently drift:
 - **E2E** — the browser-harness spec exercises this tool's route.
 - **Artifact interaction** — the installed debug artifact on the API 35
   emulator is driven through this tool, either by the checklist driver's
-  per-tool check or by an E2E-harness-equivalent flow (Audio Recorder and
-  Video to GIF are covered by the Android instrumentation and E2E instead of
-  a driver probe).
+  per-tool check or by an E2E-harness-equivalent flow. Audio Recorder and
+  Video to GIF are counted through their E2E scenarios only: both spec files
+  assert disclosure and disabled/unsupported states, **not** capture or
+  conversion interaction, and neither has a driver probe or an Android
+  instrumentation test. This section previously attributed instrumentation
+  coverage to them, which was false. The driver probes 98 of the 100 enabled
+  tools; the two microphone/media paths need physical-device evidence (#18/#25)
+  in any case, and are recorded as a known gap rather than counted as covered.
 
 The script exits non-zero when any enabled tool lacks a pure oracle or any
 installed-artifact interaction coverage, so it doubles as a coverage gate.
@@ -139,21 +144,62 @@ fixed sections around the markers are hand-maintained.
 
 ## Test layers that run per release candidate
 
-| Layer                              | Command                                                                | Scope at the 2026-09-08 run                                                   |
-| ---------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Formatting, actions, work items    | `pnpm format:check`, `github:actions:check`, `github:work-items:check` | Clean; actions immutable-pinned; work-items manifest consistent with remote   |
-| Typecheck and lint                 | `pnpm typecheck`, `pnpm lint`                                          | Strict types; zero warnings                                                   |
-| Pure/component/registry unit tests | `pnpm test`                                                            | Results below                                                                 |
-| Production build                   | `pnpm build`                                                           | Passes; tool chunks stay lazy                                                 |
-| Browser harness                    | `pnpm test:e2e`                                                        | Results below                                                                 |
-| Capacitor sync                     | `pnpm cap:sync`                                                        | Android receives current assets                                               |
-| Native unit tests                  | `./android/gradlew -p android testDebugUnitTest`                       | Results below                                                                 |
-| Android lint and variants          | `lintDebug assembleDebug assembleInternal bundleRelease`               | Zero lint errors; debug/internal APKs and unsigned release AAB                |
-| Merged-manifest budget             | `pnpm android:manifest:check debug\|internal\|release`                 | Reviewed permission/export budget for all three variants                      |
-| Installed-artifact interaction     | `node scripts/device-checklist-emulator.mjs`                           | 100-tool run: 112 PASS / 0 FAIL ×2 consecutive (see the device checklist doc) |
-| Process recreation                 | `pnpm android:test:connected`, `pnpm android:test:process-recreation`  | Emulator evidence recorded with the instrumentation batch                     |
+| Layer                              | Command                                                                | Scope at the 2026-09-08 run                                                                                                            |
+| ---------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Formatting, actions, work items    | `pnpm format:check`, `github:actions:check`, `github:work-items:check` | Clean; actions immutable-pinned; work-items manifest consistent with remote                                                            |
+| Typecheck and lint                 | `pnpm typecheck`, `pnpm lint`                                          | Strict types; zero warnings                                                                                                            |
+| CSS token resolution               | `pnpm css:tokens:check`                                                | Every `var(--x)` / `getPropertyValue("--x")` under `src/` resolves to a declared token; fallback-protected references reported as INFO |
+| WCAG token contrast                | `pnpm contrast:check`                                                  | Recomputed from `src/styles.css` per theme; all pairs meet their threshold                                                             |
+| Pure/component/registry unit tests | `pnpm test`                                                            | Results below                                                                                                                          |
+| Production build                   | `pnpm build`                                                           | Passes; tool chunks stay lazy                                                                                                          |
+| Browser harness                    | `pnpm test:e2e`                                                        | Results below                                                                                                                          |
+| Capacitor sync                     | `pnpm cap:sync`                                                        | Android receives current assets                                                                                                        |
+| Native unit tests                  | `./android/gradlew -p android testDebugUnitTest`                       | Results below                                                                                                                          |
+| Android lint and variants          | `lintDebug assembleDebug assembleInternal bundleRelease`               | Zero lint errors; debug/internal APKs and unsigned release AAB                                                                         |
+| Merged-manifest budget             | `pnpm android:manifest:check debug\|internal\|release`                 | Reviewed permission/export budget for all three variants                                                                               |
+| Installed-artifact interaction     | `node scripts/device-checklist-emulator.mjs`                           | 100-tool run: 112 PASS / 0 FAIL ×2 consecutive (see the device checklist doc)                                                          |
+| Process recreation                 | `pnpm android:test:connected`, `pnpm android:test:process-recreation`  | Emulator evidence recorded with the instrumentation batch                                                                              |
 
 ## Gate-run evidence
+
+### 2026-09-15 — refreshed baseline at `bd5b310` (branch `chore/release-hygiene-and-evidence-refresh`)
+
+Run against `main` at `bd5b310` plus the sourcemap change in this branch. Every
+command was run unpiped so exit codes are not masked. This branch is the last
+of three in the merge order (#208 defect fixes → #209 js-yaml bump → this one),
+so the table records the intended post-merge candidate; the two rows that
+depend on #208 are marked.
+
+Rows marked PASS were observed on this branch except where noted. This branch
+is based on `main`, so `pnpm css:tokens:check` (added by #208) does not exist
+in its working tree; its result is carried from #208's own gate run and the
+row says so rather than being reported as observed here. The test, E2E, and
+artifact numbers below **were** observed here, except that they do not include
+#208's +1 component test and +1 web test.
+
+| Gate                                                                                    | Result | Evidence                                                                                                                                        |
+| --------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm format:check`                                                                     | PASS   | All files Prettier-clean                                                                                                                        |
+| `pnpm css:tokens:check`                                                                 | PASS   | Landed by PR #208, which this branch builds on in the merge order; 953 references resolve against 27 declared tokens, 1 fallback-protected INFO |
+| `pnpm contrast:check`                                                                   | PASS   | 36/36 token pairs meet their WCAG 2.2 threshold in both themes                                                                                  |
+| `pnpm github:actions:check`                                                             | PASS   | 8 immutable action refs; read-only contents                                                                                                     |
+| `pnpm github:work-items:check`                                                          | PASS   | 142-issue manifest valid (101 tool entries, 10 epics, 31 tasks)                                                                                 |
+| `pnpm typecheck`                                                                        | PASS   | Strict TypeScript build                                                                                                                         |
+| `pnpm lint`                                                                             | PASS   | Zero warnings (`--max-warnings 0`)                                                                                                              |
+| `pnpm test`                                                                             | PASS   | 1,659 tests / 215 files, 0 failed                                                                                                               |
+| `pnpm build`                                                                            | PASS   | Production build; no sourcemaps emitted; tool chunks stay lazy                                                                                  |
+| `pnpm test:e2e`                                                                         | PASS   | 212 checks passed (106 scenarios × phone/tablet)                                                                                                |
+| `pnpm cap:sync`                                                                         | PASS   | Android assets synced from the production build                                                                                                 |
+| gradle `clean testDebugUnitTest lintDebug assembleDebug assembleInternal bundleRelease` | PASS   | Clean build, zero lint errors, all three variants produced                                                                                      |
+| `pnpm android:manifest:check ×3`                                                        | PASS   | 8 reviewed permissions / 1 exported component for debug, internal, and release                                                                  |
+| Installed-artifact interaction                                                          | PASS   | 100-tool emulator driver: 112 PASS / 6 INFO / 4 PENDING_PHYSICAL / 0 FAIL, exit 0, artifact `febb136f…`                                         |
+| Process recreation                                                                      | PASS   | `android:test:process-recreation` recorded with the instrumentation batch                                                                       |
+
+Clean-build artifacts at this commit: debug APK `febb136f…` (5,810,251 B),
+internal APK `26f1b7ea…` (5,810,267 B), release AAB `5c93e874…` (2,965,204 B).
+These are **not** byte-identical to the batch-16 inventory, and should not be:
+five UI pull requests plus the sourcemap change shipped between them. Removing
+sourcemaps from the bundled payload cut the release AAB by 36 %.
 
 ### 2026-09-08 — full suite at the matrix commit (branch `test/21-regression-matrix`, app source at `36bf51e`)
 

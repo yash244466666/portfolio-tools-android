@@ -1,8 +1,8 @@
 # GitHub Work Management
 
-> Scope: development through the first Google Play production launch containing all 87 audited tools.
+> Scope: development through the first Google Play production launch containing all 100 version-1 tools (ADR 0021 excludes YouTube Downloader from the 87-tool audited catalog; ADR 0022 adds 14 original tools).
 >
-> Product decision: `docs/decisions/0004-all-87-tools-first-release-scope.md`.
+> Product decisions: `docs/decisions/0004-all-87-tools-first-release-scope.md`, amended by `docs/decisions/0021-version-one-scope-exclusion-youtube-downloader.md` and `docs/decisions/0022-version-one-scope-expansion-to-100.md`.
 >
 > Provisioning source: `config/github-work-items.json` and `scripts/setup-github-work-management.ts`.
 
@@ -26,14 +26,14 @@ Live planning links:
 
 The provisioning script uses stable hidden markers in issue bodies. It is safe to rerun: managed titles, planning-body sections, managed labels, milestones, parent relationships, dependency edges, project membership, bootstrap pull-request links, and Project values are reconciled rather than duplicated. Checked acceptance items and content outside the managed body markers are preserved, as are labels not owned by the manifest. Record execution evidence in issue comments so planning-contract updates and evidence remain independently auditable. Closed issues and merged pull requests are mapped to Done on subsequent runs.
 
-The initial 2026-09-05 provisioning created 128 marked issues: 10 epics, 31 foundation/quality/release tasks, and exactly 87 tool issues. It also created 29 labels, 6 milestones, 90 blocking relationships, and 7 custom Project fields. The ADR 0022 scope expansion (2026-09-08, PR #189) added 14 tool issues, bringing the manifest to 143 issues with 100 tool issues. The Project contains those issues plus linked pull requests.
+The initial 2026-09-05 provisioning created 128 marked issues: 10 epics, 31 foundation/quality/release tasks, and exactly 87 tool issues. It also created 29 labels, 6 milestones, 90 blocking relationships, and 7 custom Project fields. The ADR 0022 scope expansion (2026-09-08, PR #189) added 14 tool issues, bringing the manifest to 142 issues — 101 tool entries (100 in scope plus the excluded YouTube Downloader), 10 epics, and 31 tasks; GitHub additionally carries the ad-hoc bug issue #166, which is not part of the manifest. The Project contains those issues plus linked pull requests.
 
 Branch protection and repository rulesets are not available for this private repository on its current GitHub plan; GitHub returns HTTP 403 and requires GitHub Pro or a public repository. The repository must remain private. [Issue #129](https://github.com/yash244466666/portfolio-tools-android/issues/129) tracks enabling protected `main` when the account supports it; immutable CI action pins are handled independently.
 
 ## Hierarchy
 
 ```text
-Google Play v1 — all 87 tools
+Google Play v1 — all 100 tools (ADR 0021/0022)
 ├── Foundation and native platform
 │   └── Foundation work items
 ├── Core catalog
@@ -86,7 +86,7 @@ Recommended views after provisioning:
 
 1. **Current work** — board grouped by Workflow, excluding Done.
 2. **Backlog** — table grouped by Phase, sorted by Priority and Estimate.
-3. **87 tools** — table filtered to `type:tool`, grouped by Category.
+3. **100 tools** — table filtered to `type:tool`, grouped by Category.
 4. **12-tool milestone** — table filtered to `scope:vertical-slice`.
 5. **Blocked and high risk** — table filtered to Workflow Blocked or Risk High/Critical.
 6. **Release roadmap** — roadmap grouped by Phase and milestone.
@@ -100,7 +100,7 @@ GitHub currently requires project view layout/filter configuration through its U
 2. **12-Tool Architecture Milestone** — all representative paths pass their Definition of Done on Android.
 3. **Tier 1 Directly Portable Catalog** — the remaining directly portable tools pass.
 4. **Adapter and Policy-Heavy Catalog** — Tier 2–4 file, persistence, timer, network, media, and special-review tools pass.
-5. **All-87 Closed Beta** — one candidate with all 87 enabled passes closed-test, device, accessibility, security, privacy, and support gates.
+5. **All-87 Closed Beta** — one candidate with all 100 enabled passes closed-test, device, accessibility, security, privacy, and support gates. (The milestone title is live on the repository and still reads "All-87"; renaming it is a user-authorized `pnpm github:work-items:apply` action, tracked with the scope-text follow-up.)
 6. **Google Play v1 Launch** — signing, listing, declarations, pre-launch report, production eligibility, launch plan, and final authorization pass.
 
 Milestone dates are deliberately unset until estimates are re-baselined after the 12-tool milestone and Play account eligibility is known.

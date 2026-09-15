@@ -12,7 +12,7 @@ This repository is currently a foundation build, not a Play-ready release.
 - System, light, and dark themes
 - Offline/network state awareness
 - Typed web/Android platform-service boundary
-- Eighty-four enabled tools, including the complete 12-tool architecture milestone and reviewed post-slice batches
+- One hundred enabled tools (ADR 0022 scope), including the complete 12-tool architecture milestone and reviewed post-slice batches
 - Scoped Android document picker, content reads, Save As, sharing, sensitive clipboard, generated-cache cleanup, notifications, and renderer recovery
 - Capacitor Android project targeting API 36 with minimum API 24
 - Debug/internal/release variants
