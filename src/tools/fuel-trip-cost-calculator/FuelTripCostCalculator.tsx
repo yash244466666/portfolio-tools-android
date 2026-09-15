@@ -179,9 +179,12 @@ export default function FuelTripCostCalculator() {
           {clampedNotes.length > 0 ? (
             <p className="text-sm text-[var(--text-secondary)]">{clampedNotes.join(" ")}</p>
           ) : null}
-          <label className="flex items-center gap-2 text-sm">
+          {/* Checkbox/radio full-row pattern: the label row is the tap target and carries
+              the 48 dp floor; the control itself stays compact inside it. */}
+          <label className="flex min-h-12 items-center gap-2 text-sm font-medium">
             <input
               checked={roundTrip}
+              className="h-5 w-5 accent-[var(--primary)]"
               id="fuel-round-trip"
               onChange={(event) => setRoundTrip(event.target.checked)}
               type="checkbox"

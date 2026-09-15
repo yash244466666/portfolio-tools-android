@@ -1,6 +1,6 @@
 # Foundation Architecture
 
-> Status: accepted for the foundation; the 100-tool first-release scope is accepted (ADR 0021 excludes YouTube Downloader from the 87-tool audited catalog, ADR 0022 adds 14 original tools), while identity and other irreversible release decisions remain provisional.
+> Status: accepted for the foundation; the 30-tool first-release scope is accepted (ADR 0023 supersedes the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004, and ADR 0021 keeps YouTube Downloader excluded), while identity and other irreversible release decisions remain provisional.
 
 ## Runtime shape
 
@@ -38,7 +38,7 @@ Dependency direction is one way. Tool features may depend on shared UI and platf
 
 `src/tools/registry.ts` is a deterministic compile-time registry. Implemented components are lazy imports. A tool cannot be enabled without an implementation. The registry also exposes risk, persistence, and network classifications needed by UI and tests.
 
-The audited public version 1 scope contains 86 of the 87 upstream catalog tools (ADR 0021 excludes youtube-downloader) plus 14 new original tools for a total of 100 tools (ADR 0022). The 12-tool architecture milestone proved the reusable paths, and batches 2 through 16 have expanded the registry to all 100 enabled entries. Production submission additionally requires every entry to pass the remaining device-evidence, certification, and release gates.
+The audited public version 1 scope is 30 tools (ADR 0023, which supersedes the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps youtube-downloader excluded). The registry holds 30 `enabled` entries, each with a lazy component, and 70 `removed` entries with no component, so a cut tool emits no runtime chunk; its source, pure logic, provenance, and tests remain in the repository. The 12-tool architecture milestone proved the reusable paths, and production submission additionally requires every retained entry to pass the remaining device-evidence, certification, and release gates.
 
 ### Tool features
 
@@ -76,9 +76,15 @@ Android view-hierarchy and legacy form persistence are disabled for the WebView,
 - External HTTPS pages open outside the app WebView.
 - Cleartext networking is disabled.
 - Android backup/device transfer is excluded for app-private data.
-- FileProvider exposes only the cache `share/` subtree.
+- The app-owned `FileProvider` exposes only the cache `share/` subtree and is not exported.
+  The merged manifest carries two further non-exported providers that are reviewed parts of
+  the permission budget rather than app-owned surface: `androidx.startup.InitializationProvider`
+  (AndroidX startup) and `com.capacitorjs.plugins.localnotifications.LocalNotificationsAssetProvider`
+  (supplied by the pinned local-notifications plugin, which schedules timer alerts). Neither
+  accepts a URI or intent from outside the app; the manifest gate in
+  `scripts/check-android-manifest.mjs` fails the build if any component becomes exported.
 - Release build is minified and resource-shrunk.
-- Network providers are explicit and narrowly allowlisted.
+- A single network provider is explicit and narrowly allowlisted: Frankfurter, used only by Currency Converter, is the sole entry in the packaged CSP `connect-src` after DNS Lookup was cut.
 - Sensitive user content is excluded from logs and automatic persistence.
 
 ## Expansion rule

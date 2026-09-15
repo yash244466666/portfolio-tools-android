@@ -1,4 +1,4 @@
-import { ArrowLeft, Construction, Home } from "lucide-react"
+import { ArrowLeft, CircleSlash, Construction, Home } from "lucide-react"
 import { Suspense, useEffect, useRef } from "react"
 import { routeHref } from "@/app/routing"
 import { getTool, isEnabledTool } from "@/tools/registry"
@@ -36,18 +36,25 @@ export function ToolScreen({
   const Icon = tool.icon
 
   if (!isEnabledTool(tool) || !tool.component) {
+    // `removed` is a distinct terminal state from "not implemented yet": the tool was
+    // deliberately taken out of the released scope (ADR 0023), so the copy must not
+    // promise it is coming. The icon differs so the state does not rely on wording alone.
+    const removed = tool.status === "removed"
+    const StateIcon = removed ? CircleSlash : Construction
     return (
       <div className="screen-content">
         <a className="back-link" href={routeHref({ screen: "catalog" })}>
           <ArrowLeft aria-hidden="true" size={19} /> Tools
         </a>
         <section className="empty-state mt-4">
-          <Construction aria-hidden="true" size={30} />
+          <StateIcon aria-hidden="true" size={30} />
           <h1 className="text-2xl font-bold" ref={titleRef} tabIndex={-1}>
             {tool.label}
           </h1>
           <p>
-            This tool is part of the vertical-slice backlog and is not enabled in this build yet.
+            {removed
+              ? "This tool is not part of the released tool set, so it is not available in this build."
+              : "This tool is part of the vertical-slice backlog and is not enabled in this build yet."}
           </p>
           <a className="text-link" href={routeHref({ screen: "catalog" })}>
             Browse ready tools

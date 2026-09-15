@@ -2,6 +2,7 @@
 
 - Review issue: #35 (tool issue: #112)
 - Status: **APPROVED 2026-09-08** — the product owner approved proceeding with the 16 MiB input reconciliation (PDF Converter precedent) and the Worker-based design; codec-floor store wording per the dossier. Device-matrix rows in section 5 gate #112's closure.
+- Scope note (**ADR 0023**, 2026-09-15): the version-1 scope is now the 30 tools of ADR 0023 and the ADR 0004 all-87 references below are historical; Video to GIF is one of the 70 tools cut by ADR 0023, so this review is off the release path.
 - Date: 2026-09-08
 - Upstream reference: `portfolio-v2` commit `61e54c64edbeffc9487239b6dae399e255c6a71d`, `components/tools/media/video-to-gif.tsx` (413 lines, includes a self-contained pure-JS GIF89a/LZW encoder)
 - Scope: technical evidence and a proposed design for the tier-4 gate ("Video to GIF worker, codec, memory, metadata, and device review"). Implementation work on #112 must not start before the decision is recorded.

@@ -1,8 +1,8 @@
 # ADR 0023: Focused Version-1 Scope (100 → 30 Tools)
 
-- Status: **Proposed** — not in force. Nothing in this repository changes until the product owner records an approval decision, per the ADR 0004 revisit trigger.
+- Status: **Accepted** — approved by the product owner and in force.
 - Date: 2026-09-15
-- Owner: Yash Sikdar (product owner; approval required)
+- Owner: Yash Sikdar (product owner; approved 2026-09-15)
 - Supersedes: the **100-tool scope of ADR 0022** and the **all-87 clause of ADR 0004**
 - Preserves: ADR 0021 in force — `youtube-downloader` stays excluded for the reasons recorded there (and is a member of the cut set below, so the exclusion becomes moot for version 1 rather than contested)
 - Does not affect: ADRs 0001–0020, which govern architecture, platform contracts, host behaviour, and per-tool policy. Every retained tool keeps the ADR that governs it.
@@ -97,7 +97,7 @@ Recommended: **retain in-tree, disable in the release manifest.**
 
 ## Consequences
 
-If accepted, the following must change together. None of it is started by this proposal.
+The following must change together. Acceptance on 2026-09-15 started this work: the registry change, the work-items manifest change, and the documentation change are implemented on branch `feat/213-focused-version-one-scope`. Live GitHub provisioning (item 4 below) is a separate, explicit run and is not part of that work.
 
 1. **This ADR** moves to Accepted, and ADR 0022 gains a superseded note. ADR 0004 and ADR 0021 are not edited in place.
 2. **`src/tools/registry.ts`** — 70 entries to `removed`, lazy components dropped. The registry remains the runtime manifest and the single source of truth for enabled count.
@@ -119,4 +119,18 @@ If accepted, the following must change together. None of it is started by this p
 
 ## Approval
 
-This ADR is a **proposal**. It becomes effective only when the product owner records an approval decision and the Status line above is changed to Accepted with that date. Until then the approved version-1 scope remains 100 tools per ADR 0022, and no repository state is changed by this document.
+Accepted by the product owner, **Yash Sikdar**, on **2026-09-15**. The Status line above records that acceptance, and the approved public version-1 scope is **30 tools**. The 100-tool clause of ADR 0022 and the all-87 clause of ADR 0004 no longer govern the release scope; ADR 0021 still governs the `youtube-downloader` exclusion, and no retained tool's Definition of Done is weakened.
+
+### Implementation status
+
+Landed on branch `feat/213-focused-version-one-scope`:
+
+- **Registry** — `src/tools/registry.ts` carries the 30 retained entries at `status: "enabled"`, each with its lazy component, and the 70 cut entries at `status: "removed"` with no component. `src/tools/types.ts` declares the `removed` lifecycle state required by section 10. Every cut tool keeps its source directory, pure logic, provenance record, and tests; reinstating one is a manifest edit plus a superseding ADR, not a re-implementation.
+- **Packaged CSP** — `index.html`'s `connect-src` allowlist names Frankfurter alone, because `dns-lookup` (the Cloudflare DoH consumer) is in the cut set.
+- **Work-items manifest** — `config/github-work-items.json` carries the retained 30 plus the excluded `youtube-downloader` in `tools`, the 70 in `retiredTools`, the renamed "30-Tool Closed Beta" milestone, the renamed `regression-matrix` and `release-candidate` task keys (adopted through `renamedFrom`, never duplicated), and two tool-ID spellings corrected to the registry spelling.
+- **Documentation** — the scope statements this ADR's Consequences list names (repository guides, README, architecture and work-management documents, and the certification dossiers) describe the 30-tool scope.
+
+Still outstanding, and deliberately outside the branch:
+
+- **Live GitHub provisioning** — closing the 70 cut tool issues as _not planned_, re-scoping or closing epics #4–#9, and renaming the milestone happen only in an explicit, user-authorized `pnpm github:work-items:apply` run. Provisioning must never run from a build or CI, and until it runs the remote planning state still reflects the pre-acceptance scope.
+- **Release gates #21–#26** — the regression matrix, accessibility, performance, security/SBOM, interoperability, and device-evidence work now target the retained 30 and remain open; no gate is weakened.

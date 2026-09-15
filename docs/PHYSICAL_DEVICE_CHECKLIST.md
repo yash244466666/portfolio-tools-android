@@ -1,6 +1,6 @@
 # Physical Android Device Checklist
 
-> Status: not yet executed on a physical device; automated emulator pre-verification executed 2026-09-07 and re-executed 2026-09-08 against the 100-tool artifact. Do not check an item without recording device/API/WebView/build evidence.
+> Status: not yet executed on a physical device. Scope: the 30-tool public version-1 scope approved by ADR 0023 (2026-09-15). Automated emulator pre-verification is green on this scope — the 2026-09-07 run on the 25-tool foundation, the 2026-09-08 run on the 100-tool artifact, and the 2026-09-15 re-run on the 30-tool artifact (42 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL) — while physical-device execution remains pending. Do not check an item without recording device/API/WebView/build evidence.
 
 ## Test record
 
@@ -17,7 +17,7 @@
 | Navigation mode                | Pending                              |
 | Available storage/memory class | Pending                              |
 
-## Automated emulator pre-verification (2026-09-07)
+## Automated emulator pre-verification (2026-09-07 — 25-tool foundation artifact)
 
 Executed with `scripts/device-checklist-emulator.mjs`, which drives the installed
 debug artifact's WebView over the Chrome DevTools Protocol (raw page-target
@@ -124,6 +124,74 @@ TalkBack, Doze/OEM battery, OEM split-screen, and the WebView update matrix
 (PENDING_PHYSICAL). This record supplements but does not replace the
 physical-device checklist below.
 
+This record was measured on the then-current 100-tool candidate (ADR 0022
+scope). The version-1 release candidate is now the 30-tool scope of ADR 0023,
+so these rows were re-measured on a 30-tool artifact in the 2026-09-15 record
+below; the results above are kept as measured and do not describe the current
+scope.
+
+## Automated emulator pre-verification (2026-09-15 — 30-tool artifact)
+
+`node scripts/device-checklist-emulator.mjs`, run from the repository root,
+re-executed the installed debug artifact against the 30-tool public version-1
+scope approved by ADR 0023; the driver now scopes its probes to the 30
+retained tools. The run completed green — 42 PASS, 8 INFO, 4 PENDING_PHYSICAL,
+0 FAIL across 54 rows, driver exit 0.
+
+Two driver mis-reports were corrected in the test harness; neither is an app
+defect:
+
+- The Back-key probe no longer depends on navigation mode. This run delivered
+  Back correctly while `navigation_mode=2` (gesture), and an earlier attempt at
+  `navigation_mode=0` saw Back silently dropped system-wide — the system
+  Settings app ignored it identically. The driver therefore asserts the
+  capability (a Settings-app control probe) instead of the configuration, and
+  records a FAIL for that row rather than aborting the whole checklist when
+  Back is not delivered.
+- Two driver probes referenced tools ADR 0023 cut (`hash-generator` for the
+  Back and IME-focus probes, and `hash-generator` again for the process-death
+  probe), and the catalog search probe queried `hash`, which now matches
+  nothing. They were repointed to retained tools: `unit-converter` for the
+  Back and IME-focus probes, and `case-converter` for the process-death
+  empty-input assertion — chosen because its input starts empty and is never
+  persisted, where Unit Converter's From field legitimately defaults to `1`.
+
+| Field                          | Value                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------- |
+| Date/time                      | 2026-09-15 (evening run)                                                                     |
+| Tester                         | Automated driver script, orchestrated by the coding agent                                    |
+| Artifact                       | `android/app/build/outputs/apk/debug/app-debug.apk` (versionName `1.0-debug`)                |
+| APK hash                       | SHA-256 `a89e2d6a492469fcdc9332e21702f91af52ef4b45f179320ceff50b104c87f37` (`app-debug.apk`) |
+| Device model                   | `sdk_gphone64_x86_64` (Android Studio AVD `yash_tools_api35_test`)                           |
+| Android/API                    | Android 15 (SDK 35)                                                                          |
+| Android System WebView version | 124.0.6367.219                                                                               |
+| Security patch                 | 2024-09-05                                                                                   |
+| Result                         | 42 PASS, 8 INFO, 4 PENDING_PHYSICAL, 0 FAIL (54 rows), driver exit 0                         |
+
+Automated coverage that passed:
+
+- `shell.catalogRendersAllEnabledTools` verified all 30 enabled tool cards of
+  the retained version-1 scope on the installed artifact.
+- `shell.systemBackReturnsToCatalog` passed: the system Back key returned the
+  app from a tool to the catalog.
+
+New control rows added by this run, recorded as INFO:
+
+- `device.backKeyDelivered` confirms `input keyevent 4` propagates, by driving
+  the system Settings app and observing the activity change.
+- `device.navigationMode` is now reported for diagnosis only.
+
+Recorded as PENDING_PHYSICAL (not automatable on this emulator image), the same
+four rows as the earlier runs:
+
+- TalkBack (not bundled with the emulator image).
+- Real Doze and OEM battery behavior for timer alerts.
+- OEM split-screen/multi-window behavior.
+- WebView version-update smoke matrix.
+
+This emulator record supplements but does not replace the physical-device
+checklist below.
+
 ## Installation and startup
 
 - [ ] Clean install succeeds.
@@ -156,32 +224,41 @@ physical-device checklist below.
 
 ## Enabled tools
 
+The 30 tools of the approved version-1 scope (ADR 0023). The per-tool rows for
+the 70 tools cut from that scope are retired along with their artifact
+coverage; their source, pure logic, and tests remain in the repository, so
+reinstating a tool restores its row here.
+
 - [ ] Unit Converter matches unit fixtures and works offline.
-- [ ] Timestamp Converter handles seconds, milliseconds, local time, and invalid input.
-- [ ] Hash Generator matches SHA vectors, handles Unicode, copies output, and works offline.
-- [ ] Leaving Hash Generator does not retain sensitive input after the approved lifecycle boundary.
-- [ ] Markdown Preview sanitizes hostile markup and remains usable offline.
-- [ ] Regex Tester enforces its deadline, cancellation, and recovery behavior.
-- [ ] QR Generator renders, shares, and saves the exact generated PNG.
-- [ ] JSON Editor validates, formats, and inspects bounded input without restoring sensitive content.
-- [ ] Notes loads, autosaves, imports, exports, and explicitly clears its bounded device-local payload.
-- [ ] Pomodoro Timer reconstructs from its wall-clock anchor and handles denied/granted best-effort alerts.
-- [ ] Image Compressor picks, bounds, re-encodes, previews, shares, and saves supported images.
-- [ ] File Hash Checker streams exact SHA-256/SHA-1/SHA-512 results and cancels cleanly.
 - [ ] Currency Converter proves live and cached/offline states with provider attribution.
-- [ ] DNS Lookup proves live, invalid, no-record, offline, and recovery states with provider attribution.
+- [ ] Percentage Calculator computes percent-of and percent-change with strict input validation.
+- [ ] Tip Calculator computes tip, total, and per-person amounts from presets and custom percentages.
+- [ ] Discount and Tax Calculator applies discount then tax with exact-cent steps and rejects junk money.
+- [ ] Unit Price Comparer ranks up to four mixed-unit items by base-unit cost.
+- [ ] Loan EMI Calculator matches the reducing-balance vector and discloses its indicative nature.
+- [ ] Fuel and Trip Cost Calculator handles round trip and passenger split.
+- [ ] BMI Calculator shows the WHO band and the estimate-only disclaimer.
+- [ ] Scientific Calculator evaluates precedence, functions, and invalid input.
+- [ ] Stopwatch counts, laps, and resets from wall-clock anchors.
+- [ ] Countdown Timer runs from presets, rejects zero durations, and completes best-effort.
+- [ ] Pomodoro Timer reconstructs from its wall-clock anchor and handles denied/granted best-effort alerts.
+- [ ] Time Zone Converter crosses zones and surfaces daylight-saving edges honestly.
+- [ ] Date Difference Calculator reports exclusive spans and business days.
+- [ ] Age Calculator computes age, lifetime totals, and next birthday.
+- [ ] Notes loads, autosaves, imports, exports, and explicitly clears its bounded device-local payload.
+- [ ] Character Counter counts Unicode code points including emoji.
 - [ ] Word Counter matches its Unicode and limit fixtures.
-- [ ] Character Counter counts Unicode code points and spaces correctly.
 - [ ] Case Converter exposes all eight conversions and copies results accessibly.
-- [ ] Reverse Text keeps grapheme clusters intact in character mode.
-- [ ] Number Base Converter strictly validates and converts large integers.
-- [ ] Base64 Encode/Decode round-trips UTF-8 and rejects malformed input.
-- [ ] URL Encoder/Decoder handles malformed escapes and clearly labels assumed schemes.
-- [ ] Text to Slug discloses normalization, stop-word, and truncation behavior.
-- [ ] Sort Lines covers alphabetical, numeric, reverse, shuffle, blank, and duplicate options.
-- [ ] Add Line Numbers validates starts and all separator options.
-- [ ] Trim Whitespace covers per-line trim and space-run collapse.
-- [ ] Remove Duplicates covers stable, case-insensitive, and sorted output.
+- [ ] Color Picker converts hex/RGB/HSL, renders harmony palettes, and checks WCAG contrast.
+- [ ] QR Generator renders, shares, and saves the exact generated PNG.
+- [ ] Image Compressor picks, bounds, re-encodes, previews, shares, and saves supported images.
+- [ ] PDF Converter converts images/PDF, merges, extracts text, and reports encrypted files distinctly.
+- [ ] Audio Recorder captures a take, finalizes on lifecycle inactive, and exports within its duration and size caps.
+- [ ] Password Generator draws uniformly from the selected sets via the device secure random source.
+- [ ] Password Strength Checker reports bands, entropy, and crack-time estimates with honest wording.
+- [ ] vCard Generator escapes RFC 6350 text fields and validates website links.
+- [ ] iCalendar Generator escapes RFC 5545 text, emits a UTC DTSTAMP and fresh UID, and imports cleanly.
+- [ ] Dice Roller rolls notation from secure bytes and repeats the last roll.
 
 ## Platform behavior
 
@@ -203,7 +280,7 @@ physical-device checklist below.
 
 ## Resilience
 
-- [ ] Airplane mode leaves all enabled foundation tools usable.
+- [ ] Airplane mode leaves all enabled version-1 tools usable.
 - [ ] Low-storage behavior does not lose source/user data.
 - [ ] “Don't keep activities” flows recover safely.
 - [ ] WebView update/older supported WebView smoke test passes.
@@ -211,9 +288,10 @@ physical-device checklist below.
 
 ## Result
 
-- Overall: **PARTIAL — emulator pre-verification passed; physical device pending**
-- Emulator evidence: 2026-09-07 automated run (39 PASS / 0 FAIL / 4 PENDING_PHYSICAL) and the 2026-09-08 re-run at 100 enabled tools (112 PASS / 0 FAIL / 4 PENDING_PHYSICAL), both on Android 15 SDK 35, WebView 124.0.6367.219; see "Automated emulator pre-verification" above.
+- Overall: **PARTIAL — emulator pre-verification green on the current 30-tool scope; physical device pending**
+- Emulator evidence: 2026-09-07 automated run on the 25-tool foundation artifact (39 PASS / 0 FAIL / 4 PENDING_PHYSICAL), the 2026-09-08 re-run on the 100-tool candidate at 100 enabled tools (112 PASS / 0 FAIL / 4 PENDING_PHYSICAL), and the 2026-09-15 re-run on the 30-tool version-1 scope of ADR 0023 (42 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL, 54 rows, exit 0), all on Android 15 SDK 35, WebView 124.0.6367.219; see "Automated emulator pre-verification" above. The 2026-09-15 run covers the current scope, so only physical-device execution on that artifact is required before this checklist can be completed.
 - Blocking issues:
   - Physical device has not been selected or tested.
+  - The emulator record now covers the current 30-tool scope (2026-09-15); physical-device execution on that artifact remains outstanding.
   - The instrumentation suite and the emulator checklist driver supplement but do not replace the pending physical-device, OEM-picker/share-target, Doze, TalkBack, and WebView-update evidence.
 - Evidence links/logs: `/tmp/device-checklist-results.json` (single-run record; regenerate with `node scripts/device-checklist-emulator.mjs` against an installed debug artifact).

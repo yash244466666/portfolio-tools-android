@@ -4,8 +4,57 @@ import { writeFileSync } from "node:fs"
 const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
+/**
+ * The approved public version-1 scope (ADR 0023, 30 tools). The catalog must list exactly
+ * these, and only these are probed and counted.
+ *
+ * The per-tool probes below for the 70 cut tools are deliberately retained in this file:
+ * the ADR keeps every cut tool's source, pure logic, and tests in-tree so a reversal is a
+ * manifest change rather than a re-implementation, and the same reasoning applies to the
+ * driver. They are filtered out here, so a cut tool's artifact coverage is retired while
+ * its source survives.
+ */
+const versionOneScope = new Set([
+  // Everyday money and math
+  "unit-converter",
+  "currency-converter",
+  "percentage-calculator",
+  "tip-calculator",
+  "discount-tax-calculator",
+  "unit-price-comparer",
+  "loan-emi-calculator",
+  "fuel-trip-cost-calculator",
+  "bmi-calculator",
+  "calculator",
+  // Time
+  "stopwatch",
+  "countdown-timer",
+  "pomodoro-timer",
+  "time-zone-converter",
+  "date-difference-calculator",
+  "age-calculator",
+  // Everyday text
+  "notes-scratchpad",
+  "character-counter",
+  "word-counter",
+  "case-converter",
+  "color-picker",
+  // Files and media
+  "qr-generator",
+  "image-compressor",
+  "pdf-converter",
+  "audio-recorder",
+  // Privacy and security
+  "password-generator",
+  "password-strength-checker",
+  // Sharing and utility
+  "vcard-generator",
+  "ical-generator",
+  "dice-roller",
+])
+
 /** Enabled tools the catalog must list; keep in step with the registry. */
-const enabledToolCount = 100
+const enabledToolCount = versionOneScope.size
 
 /** @typedef {{ id: string, status: "PASS"|"FAIL"|"PENDING_PHYSICAL"|"INFO", detail: string }} Check */
 
@@ -19,6 +68,28 @@ const results = []
 function adb(...args) {
   const result = spawnSync("adb", ["shell", ...args], { encoding: "utf8" })
   return (result.stdout ?? "").trim()
+}
+
+/** Top resumed activity, used to probe Back-key delivery independently of this app. */
+function topResumedActivity() {
+  return adb("dumpsys", "activity", "activities", "|", "grep", "-m1", "topResumedActivity")
+}
+
+/**
+ * Probes whether `input keyevent 4` is actually delivered, using the system Settings app
+ * as the control. Under gesture navigation — and on some headless emulator boots — Back is
+ * a system-wide no-op, so Settings' Back fails too. Without this control the Back row below
+ * reads as an app regression when it is only the environment.
+ */
+function backKeyIsDelivered() {
+  spawnSync("adb", ["shell", "am", "start", "-a", "android.settings.SETTINGS"])
+  spawnSync("sleep", ["6"])
+  const before = topResumedActivity()
+  spawnSync("adb", ["shell", "input", "keyevent", "4"])
+  spawnSync("sleep", ["4"])
+  const after = topResumedActivity()
+  spawnSync("adb", ["shell", "am", "force-stop", "com.android.settings"])
+  return before !== after
 }
 
 /** @returns {string} */
@@ -417,7 +488,9 @@ async function phaseShell() {
     await page.waitFor('document.querySelector(".search-field input") !== null', 15_000)
   }
 
-  await page.setValue(".search-field input", "hash")
+  // A query that matches retained tools only; "hash" now matches nothing because Hash
+  // Generator was cut by ADR 0023, which would read as a filter regression.
+  await page.setValue(".search-field input", "unit")
   const filtered = /** @type {number} */ (
     await page.evaluate("document.querySelectorAll(\"a[href^='#/tool/']\").length")
   )
@@ -441,11 +514,24 @@ async function phaseShell() {
     JSON.stringify(nav),
   )
 
-  await page.navigate("#/tool/hash-generator")
-  await page.waitFor("document.querySelector('#hash-input') !== null")
+  // Unit Converter replaces Hash Generator as the probe target: Hash Generator was cut by
+  // ADR 0023 and is no longer reachable, while its input is a plain ephemeral field whose
+  // value must be empty on a fresh process, which is what these probes assert.
+  await page.navigate("#/tool/unit-converter")
+  await page.waitFor("document.querySelector('#from-value') !== null")
   spawnSync("adb", ["shell", "input", "keyevent", "4"])
-  await page.waitFor("location.hash === '#/' || location.hash === ''")
-  record("shell.systemBackReturnsToCatalog", "PASS", "Back key returned to catalog")
+  try {
+    await page.waitFor("location.hash === '#/' || location.hash === ''", 15_000)
+    record("shell.systemBackReturnsToCatalog", "PASS", "Back key returned to catalog")
+  } catch {
+    // Never abort the run for this: one environment limitation must not cost the whole
+    // checklist. device.backKeyDelivered records whether Back reached the system at all.
+    record(
+      "shell.systemBackReturnsToCatalog",
+      "FAIL",
+      "Back key did not return to the catalog; check device.backKeyDelivered for the environment control",
+    )
+  }
 
   await page.navigate("#/settings")
   await page.waitFor("document.body.innerText.includes('Your app, your device')")
@@ -1650,7 +1736,12 @@ async function phaseTools(page) {
     ],
   ]
 
-  for (const [toolId, label, check] of checks) {
+  // Only retained tools run. A cut tool's probe is kept in the list above (see the
+  // versionOneScope note) but must not execute: the tool is no longer in the catalog, so
+  // its hash route renders the removed-tool state instead of the tool.
+  const scopedChecks = checks.filter(([toolId]) => versionOneScope.has(toolId))
+
+  for (const [toolId, label, check] of scopedChecks) {
     try {
       await page.navigate(`#/tool/${toolId}`)
       // Wait for the tool's own page to mount: several tools share selector
@@ -1672,26 +1763,22 @@ async function phaseTools(page) {
 async function phaseOffline(page) {
   spawnSync("adb", ["shell", "cmd", "connectivity", "airplane-mode", "enable"])
   try {
+    // Currency Converter is the only network tool left in the released scope: ADR 0023 cut
+    // DNS Lookup, so this phase exercises the single remaining provider (Frankfurter).
     await page.navigate("#/tool/currency-converter")
     await page.waitFor("document.body.innerText.includes('Offline')", 20_000)
     record("offline.currencyConverterState", "PASS", "offline state under airplane mode")
-    await page.navigate("#/tool/dns-lookup")
-    await page.waitFor("document.body.innerText.includes('Offline')", 20_000)
-    record("offline.dnsLookupState", "PASS", "offline state under airplane mode")
   } catch (error) {
-    record("offline.states", "FAIL", String(error).slice(0, 300))
+    record("offline.currencyConverterState", "FAIL", String(error).slice(0, 300))
   } finally {
     spawnSync("adb", ["shell", "cmd", "connectivity", "airplane-mode", "disable"])
   }
   try {
-    // Navigation remounts the tool, so the query input starts empty regardless
-    // of what was typed before airplane mode; fill it before recovering.
-    // Connectivity may still be coming back when the first lookup runs, so the
-    // lookup is retried until the offline state clears or the deadline passes.
-    await page.setValue("#dns-name", "example.com")
+    // Connectivity may still be coming back when the first refresh runs, so the refresh is
+    // retried until the offline state clears or the deadline passes.
     const deadline = Date.now() + 60_000
     for (;;) {
-      await page.clickButton("Look up")
+      await page.clickButton("Refresh rates")
       try {
         await page.waitFor("!document.body.innerText.includes('Offline')", 10_000)
         break
@@ -1703,7 +1790,7 @@ async function phaseOffline(page) {
     record(
       "offline.recoveryAfterAirplaneOff",
       "PASS",
-      "lookup recovered after connectivity restored",
+      "rate fetch recovered after connectivity restored",
     )
   } catch (error) {
     record("offline.recoveryAfterAirplaneOff", "FAIL", String(error).slice(0, 300))
@@ -1734,15 +1821,19 @@ async function phaseProcessDeath() {
       `theme=${state.theme} persisted value did not apply within 15s`,
     )
   }
-  await page.navigate("#/tool/hash-generator")
-  await page.waitFor("document.querySelector('#hash-input') !== null")
+  // Case Converter replaces Hash Generator as the probe target: Hash Generator was cut by
+  // ADR 0023 and is no longer reachable. The target must be a tool whose input starts empty
+  // and is never persisted, so a non-empty value here would prove session state leaked into
+  // durable storage. Unit Converter is unsuitable — its From field legitimately defaults to 1.
+  await page.navigate("#/tool/case-converter")
+  await page.waitFor("document.querySelector('#case-input') !== null")
   const inputValue = /** @type {string} */ (
-    await page.evaluate("document.querySelector('#hash-input').value")
+    await page.evaluate("document.querySelector('#case-input').value")
   )
   record(
     "process.sensitiveInputCleanAfterProcessDeath",
     inputValue === "" ? "PASS" : "FAIL",
-    "hash input starts empty in the fresh process",
+    "case converter input starts empty in the fresh process",
   )
   return page
 }
@@ -1752,9 +1843,12 @@ async function phaseProcessDeath() {
  * @param {CdpPage} page
  */
 async function phaseEnvironment(page) {
-  await page.navigate("#/tool/hash-generator")
-  await page.waitFor("document.querySelector('#hash-input') !== null")
-  await page.evaluate("document.querySelector('#hash-input').focus()")
+  // Unit Converter replaces Hash Generator as the probe target: Hash Generator was cut by
+  // ADR 0023 and is no longer reachable, while its input is a plain ephemeral field whose
+  // value must be empty on a fresh process, which is what these probes assert.
+  await page.navigate("#/tool/unit-converter")
+  await page.waitFor("document.querySelector('#from-value') !== null")
+  await page.evaluate("document.querySelector('#from-value').focus()")
   const ime = adb("dumpsys", "input_method", "|", "grep", "-c", "mInputShown=true")
   record(
     "environment.imeShowsOnFocus",
@@ -1854,6 +1948,29 @@ async function main() {
   )
   record("device.webViewVersion", "INFO", webView.replace(/^.*=/, ""))
   record("device.securityPatch", "INFO", adb("getprop", "ro.build.version.security_patch"))
+  // The Back-key probe below drives `input keyevent 4`, which is a no-op under gesture
+  // navigation — Back fails system-wide, including in the Settings app, and reads as an
+  // app regression when it is only an emulator configuration difference. Assert the mode
+  // so a run cannot report a green Back row it did not actually exercise.
+  // Reported for diagnosis only. Navigation mode does not determine whether Back is
+  // delivered — a run at navigation_mode=2 has been observed delivering Back correctly —
+  // so the gate is the capability probe below, not this setting.
+  const navigationMode = adb("settings", "get", "secure", "navigation_mode").trim()
+  record(
+    "device.navigationMode",
+    "INFO",
+    navigationMode === "0"
+      ? "3-button navigation"
+      : `navigation_mode=${navigationMode} (gesture); Back delivery is asserted independently below`,
+  )
+  const backDelivered = backKeyIsDelivered()
+  record(
+    "device.backKeyDelivered",
+    backDelivered ? "INFO" : "FAIL",
+    backDelivered
+      ? "input keyevent 4 navigates the system Settings app, so the Back row below is meaningful"
+      : "input keyevent 4 is a system-wide no-op on this emulator instance — the Settings control app ignores it too, so this is the environment, not an app defect. shell.systemBackReturnsToCatalog cannot be verified here.",
+  )
   // Hash the actual artifact on disk so the recorded value cannot silently
   // go stale after a rebuild.
   const artifactHash = spawnSync("sha256sum", [ARTIFACT_PATH], { encoding: "utf8" })

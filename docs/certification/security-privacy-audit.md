@@ -1,8 +1,11 @@
 # Security, privacy, dependency, license, notices, and SBOM audit
 
-> Reconciled: 2026-09-08 against the current `main` candidate (registry at 100
-> enabled tools; app source at `79ef271`). Regenerate the SBOM with
-> `node scripts/build-sbom.mjs` after any dependency change.
+> Reconciled: 2026-09-08 against the then-current `main` candidate (registry
+> at 100 enabled tools; app source at `79ef271`). The version-1 release scope
+> is now the 30 enabled tools of ADR 0023 (approved 2026-09-15); sections 1, 4,
+> and 5 note the resulting change in the shipped surface and provider set.
+> Regenerate the SBOM with `node scripts/build-sbom.mjs` after any dependency
+> change.
 
 ## 1. Threat model and boundary reconciliation
 
@@ -15,16 +18,26 @@ re-verified against the current source:
   meta policy blocks script sources other than self).
 - Tools depend only on `src/platform/contracts.ts`; no tool imports
   `@capacitor/*` (enforced by lint/registry invariants and adapter tests).
-- Hostile-input tools (Regex Tester) run in terminable Workers with
-  wall-clock budgets (ADR 0010); Markdown/SVG render through DOMPurify with
-  a narrow reviewed policy; JSON/YAML/XML parsers are size/depth-bounded and
-  covered by hostile-corpus tests.
+- Hostile-input handling is unchanged in requirement but smaller in shipped
+  reach: the tools that carried the heaviest parser/renderer exposure at the
+  100-tool scope — Regex Tester's terminable Workers with wall-clock budgets
+  (ADR 0010), DOMPurify Markdown/SVG rendering under a narrow reviewed policy,
+  and the size/depth-bounded JSON/YAML/XML parsers with their hostile corpora
+  — are mostly among the 70 tools cut by ADR 0023, which shrinks the _shipped_
+  parser/renderer attack surface. The cut tools keep their source, provenance,
+  pure logic, and tests in-tree at lifecycle `removed` (no component is lazily
+  imported), so the repository-side review surface is unchanged while only the
+  shipped one is smaller. Every retained tool keeps its full security
+  requirements; the retained PDF Converter pipeline, for example, still
+  enforces its byte/page/decoded-memory bounds and bundled workers.
 - The YAML to JSON tool's runtime `js-yaml` was bumped to 4.3.1 (PR #195) to
   clear two HIGH quadratic-CPU advisories (GHSA-52cp-r559-cp3m,
   GHSA-5p4m-2wfm-xmqj) that applied to user-controlled YAML, and then to 4.3.2
   (PR #209) to clear a third HIGH (GHSA-2883-xcg3-v3hh, `maxTotalMergeKeys`
   does not limit CPU use for empty merge sources), which also reached the
-  runtime parse path; the parser bounds remain.
+  runtime parse path; the parser bounds remain. YAML to JSON was cut by ADR
+  0023, so this parser is off the shipped release path; the pin, the fixes,
+  and their regression tests stay in-tree with the retained tool source.
 - Cleartext traffic is disabled (manifest + Network Security Configuration),
   backup/device transfer is excluded, the FileProvider exposes only
   `cache/share/`, WebView debugging is disabled in production, and external
@@ -73,19 +86,24 @@ runs (see `docs/certification/regression-matrix.md`).
 
 ## 4. Network providers
 
-Exactly two HTTPS origins are allowlisted (CSP `connect-src` in `index.html`
+Exactly one HTTPS origin is allowlisted (CSP `connect-src` in `index.html`
 and the adapter code agree):
 
-| Provider       | Origin                        | Purpose                  | Terms/privacy (re-verified 2026-09-08)                                                                                                                                                                                           |
-| -------------- | ----------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Frankfurter    | `https://api.frankfurter.dev` | Currency Converter rates | Free/open-source, no API key, commercial use explicitly allowed; ECB + 84 central-bank sources; no quotas beyond abuse rate limits; public instance runs behind Cloudflare (basic analytics).                                    |
-| Cloudflare DoH | `https://cloudflare-dns.com`  | DNS Lookup queries       | Query names appear in 25-hour resolver logs; client IP never stored in non-volatile storage (truncated and deleted within 25 h); no sale/sharing for ad targeting; APNIC sees anonymized metadata only; outside audit published. |
+| Provider    | Origin                        | Purpose                  | Terms/privacy (re-verified 2026-09-08)                                                                                                                                                        |
+| ----------- | ----------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frankfurter | `https://api.frankfurter.dev` | Currency Converter rates | Free/open-source, no API key, commercial use explicitly allowed; ECB + 84 central-bank sources; no quotas beyond abuse rate limits; public instance runs behind Cloudflare (basic analytics). |
 
-Both tools display the provider name, sent-field scope, freshness, and
-typed offline/timeout/rate-limit/malformed states; ordinary connection
-metadata (TLS-visible IP) goes to the provider as with any HTTPS client.
-Only user-entered queries (a currency pair or a domain name) are sent; no
-identifiers, tokens, or tool history are transmitted.
+ADR 0023 cut DNS Lookup, so the Cloudflare DNS-over-HTTPS origin was removed
+from the packaged CSP `connect-src` allowlist (leaving
+`connect-src 'self' https://api.frankfurter.dev`) and the ADR 0018 DoH provider
+review is off the release path. The Data Safety declarations now cover this
+single provider.
+
+The remaining tool displays the provider name, sent-field scope, freshness,
+and typed offline/timeout/rate-limit/malformed states; ordinary connection
+metadata (TLS-visible IP) goes to the provider as with any HTTPS client. Only
+user-entered queries (a currency pair) are sent; no identifiers, tokens, or
+tool history are transmitted.
 
 ## 5. Dependencies and vulnerability posture
 
@@ -98,8 +116,10 @@ identifiers, tokens, or tool history are transmitted.
 - The js-yaml HIGH advisories were fixed by PR #195 and PR #209 (runtime
   dependency of the YAML to JSON tool). A later advisory
   (GHSA-2883-xcg3-v3hh) reappeared against 4.3.1 and is cleared by the 4.3.2
-  pin in PR #209; the runtime path is clean again, and the tool remains the
-  only production dependency that parses hostile user input.
+  pin in PR #209; the runtime path is clean again. ADR 0023 cuts YAML to JSON,
+  so `js-yaml` no longer backs a shipped tool and this parser leaves the
+  shipped attack surface; the pin, the fixes, and their regression tests
+  remain in-tree.
 - Exact dependency pins and the pnpm-only lockfile policy are unchanged; both
   js-yaml lockfile diffs contained only js-yaml.
 

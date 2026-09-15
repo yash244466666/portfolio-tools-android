@@ -3,6 +3,7 @@
 - Status: Accepted
 - Date: 2026-09-08
 - Owner: Yash Sikdar
+- Superseded by: **ADR 0023** (Accepted 2026-09-15) for the 100-tool clause. The approved public version-1 scope is now **30 tools**; the text below is left unedited as the historical record, and ADR 0004 and ADR 0021 are likewise not rewritten in place. The 14 tools this ADR added remain implemented in-tree alongside the cut tools ADR 0023 retains without shipping.
 - Supersedes: the 86-tool scope of ADR 0021 (which remains in force for the `youtube-downloader` exclusion; that tool stays excluded)
 - Revisit when: a new tool cannot meet the Definition of Done, or a Play/legal/privacy gate fails for one of the additions.
 

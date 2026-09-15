@@ -1,6 +1,7 @@
 # ADR 0018: DNS Lookup on the Cloudflare DNS-over-HTTPS JSON API
 
 - Status: Accepted
+- Scope note (**ADR 0023**, 2026-09-15): DNS Lookup was cut from the version-1 scope, so this ADR is off the release path, and its Context claim that the tool "is the second network tool and the last pre-approved version-1 provider" no longer describes the approved scope. The Cloudflare DoH origin was removed from the packaged CSP `connect-src` allowlist, which now names `https://api.frankfurter.dev` alone, so the Decision bullet "The CSP `connect-src` entry stays as is" no longer describes the shipped CSP. The provider review below is retained as the historical record for the tool's in-tree logic; the Decision text itself is left unedited.
 - Date: 2026-09-07
 - Owner: Yash Sikdar
 - Revisit when: Cloudflare changes the DoH JSON contract, its terms/privacy posture, or CORS behavior, or when a second DNS provider is considered.

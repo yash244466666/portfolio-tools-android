@@ -1,6 +1,7 @@
 # ADR 0020: Audio Recorder Microphone Permission Gate
 
 - Status: Accepted (product-owner decision recorded 2026-09-08; see the dossier status header and issue #34 evidence comment)
+- Scope note (**ADR 0023**, 2026-09-15): the approved version-1 scope is now the 30 tools of ADR 0023, which supersedes ADR 0004's all-87 clause. The "approved 87" framing and the all-87 deferral constraint recorded below are therefore historical; the microphone-gate decision itself is unaffected and remains in force for the retained Audio Recorder. (Video to GIF, also named below, is one of the 70 tools cut by ADR 0023.)
 - Date: 2026-09-08
 - Owner: Yash Sikdar
 - Revisit when: the Audio Recorder decision is made, a foreground-service recording mode is proposed, or the WebView capture floor changes.
