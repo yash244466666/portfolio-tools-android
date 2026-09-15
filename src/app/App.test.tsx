@@ -111,6 +111,34 @@ describe("application shell", () => {
     expect(localStorage.getItem("yash-tools:v1:favorites")).not.toBeNull()
   })
 
+  it("names every durable data class in the settings summary", async () => {
+    window.location.hash = "#/settings"
+
+    render(
+      <PlatformProvider>
+        <App />
+      </PlatformProvider>,
+    )
+
+    // Section 12 requires the on-screen privacy summary to enumerate every
+    // durable class. It previously listed four of seven and closed with an
+    // affirmatively wrong "other tool input is not saved automatically".
+    const summary = await screen.findByText(/This device can store/)
+    const text = summary.textContent ?? ""
+    for (const durableClass of [
+      "theme",
+      "favorites",
+      "recent-tool IDs",
+      "scratchpad note",
+      "saved bookmarks",
+      "Pomodoro timer state",
+      "cached exchange rates",
+    ]) {
+      expect(text).toContain(durableClass)
+    }
+    expect(text).toContain("never saves it automatically")
+  })
+
   it("clears every durable class when the clear action is confirmed", async () => {
     localStorage.setItem("yash-tools:v1:favorites", JSON.stringify(["unit-converter"]))
     localStorage.setItem("yash-tools:v1:notes:scratchpad", JSON.stringify({ text: "test" }))

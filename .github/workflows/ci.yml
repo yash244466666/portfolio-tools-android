@@ -24,6 +24,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
+      - run: pnpm css:tokens:check
       - run: pnpm contrast:check
       - run: pnpm github:actions:check
       - run: pnpm github:work-items:check
