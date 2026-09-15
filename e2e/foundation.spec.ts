@@ -66,6 +66,18 @@ test("shell interactive controls meet the 48 dp touch floor", async ({ page }) =
   await page.goto("/#/tool/unit-converter")
   await assertFloor(".back-link")
 
+  // .text-link is a standalone empty-state CTA or settings action, never inline
+  // prose, so it carries the same floor centrally. It previously rendered at
+  // roughly 24 px tall on all five call sites.
+  await page.goto("/#/favorites")
+  await assertFloor(".text-link")
+
+  await page.goto("/#/tool/not-a-real-tool")
+  await assertFloor(".text-link")
+
+  await page.goto("/#/settings")
+  await assertFloor(".text-link")
+
   await page.goto("/#/tool/csp-generator")
   const optionRows = 'label:has(input[type="checkbox"])'
   await page.locator(optionRows).first().waitFor()

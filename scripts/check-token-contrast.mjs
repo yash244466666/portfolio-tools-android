@@ -104,6 +104,23 @@ const pairsFor = (tokens) => [
     token(tokens, "--surface-raised"),
     4.5,
   ],
+  // The alert box pairs --danger-text and --text-secondary against
+  // --danger-surface; both must stay AA on that tint in each theme. The alert's
+  // border is decorative — the component is identified by its surface tint,
+  // heading, and role="alert" — and borders are not contrast-gated anywhere in
+  // this design system (--border is 1.35:1 on --surface by design).
+  [
+    "danger text on danger surface",
+    token(tokens, "--danger-text"),
+    token(tokens, "--danger-surface"),
+    4.5,
+  ],
+  [
+    "secondary on danger surface",
+    token(tokens, "--text-secondary"),
+    token(tokens, "--danger-surface"),
+    4.5,
+  ],
   [
     "success text on background",
     token(tokens, "--success-text"),

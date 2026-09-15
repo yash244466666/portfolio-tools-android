@@ -112,9 +112,9 @@ export default function CronBuilder() {
         <div className="flex flex-wrap gap-2">
           {cronPresets.map((preset) => (
             <button
-              className={`rounded-xl border px-3 py-2 text-sm ${
+              className={`min-h-12 rounded-xl border px-3 py-2 text-sm ${
                 expression === preset.value
-                  ? "border-[var(--primary)] bg-[var(--primary)] font-semibold text-[var(--primary-text)]"
+                  ? "border-[var(--primary)] bg-[var(--primary)] font-semibold text-[var(--on-primary)]"
                   : "border-[var(--border)] bg-[var(--surface-muted)] text-[var(--text)]"
               }`}
               key={preset.label}

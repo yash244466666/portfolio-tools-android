@@ -43,8 +43,9 @@ export function SettingsScreen({
           Your app, your device
         </h1>
         <p className="mt-3 max-w-2xl leading-7 text-[var(--text-secondary)]">
-          This device stores theme, favorites, recent-tool IDs, and — if you use it — your
-          scratchpad note. Other tool input is not saved automatically.
+          This device can store your theme, favorites, recent-tool IDs, the scratchpad note, saved
+          bookmarks, Pomodoro timer state, and cached exchange rates. Every other tool keeps its
+          input in memory only and never saves it automatically.
         </p>
       </header>
 
@@ -147,11 +148,7 @@ export function SettingsScreen({
                 Implementation progress, known limitations, physical-device checks, and release
                 gates are maintained in the repository documentation.
               </p>
-              <button
-                className="text-link inline-flex min-h-12 items-center gap-1 text-left"
-                onClick={openSupportSite}
-                type="button"
-              >
+              <button className="text-link gap-1 text-left" onClick={openSupportSite} type="button">
                 Portfolio and support site <ExternalLink aria-hidden="true" size={15} />
               </button>
             </div>
