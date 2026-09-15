@@ -4,9 +4,9 @@
   "auditedUpstreamCommit": "61e54c64edbeffc9487239b6dae399e255c6a71d",
   "project": {
     "title": "Yash Tools Android — Google Play v1",
-    "description": "Delivery system for the first Google Play release containing the 100 version-1 tools (87 audited catalog + 14 new tools per ADR 0022, minus the excluded YouTube downloader).",
+    "description": "Delivery system for the first Google Play release containing the 30 version-1 tools (ADR 0023, superseding the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps YouTube Downloader excluded). The other 70 implemented tools are retained in-tree as lifecycle `removed`.",
     "visibility": "PRIVATE",
-    "readme": "Tracks foundation, all 87 catalog + 14 new = 101 managed tools (100 in version-1 scope per ADR 0022), quality/device certification, closed testing, signing, store preparation, and the explicitly authorized first production launch. Issues and pull requests provide evidence; project fields provide planning views. Production publication still requires explicit product-owner authorization.",
+    "readme": "Tracks foundation, the 30 version-1 tools (ADR 0023; 70 further tools implemented but cut from the release scope), quality/device certification, closed testing, signing, store readiness, and the approved first launch.",
     "fields": [
       {
         "name": "Workflow",
@@ -221,8 +221,9 @@
     },
     {
       "key": "closed-beta",
-      "title": "All-87 Closed Beta",
-      "description": "One candidate with all 87 tools enabled passes closed testing and complete quality evidence."
+      "title": "30-Tool Closed Beta",
+      "description": "One candidate with all 30 version-1 tools enabled passes closed testing and complete quality evidence.",
+      "renamedFrom": "All-87 Closed Beta"
     },
     {
       "key": "play-launch",
@@ -233,7 +234,7 @@
   "epics": [
     {
       "key": "launch-v1",
-      "title": "[Epic] Launch Yash Tools v1 on Google Play with all 87 tools",
+      "title": "[Epic] Launch Yash Tools v1 on Google Play with all 30 tools",
       "parent": null,
       "category": "Release",
       "phase": "Production",
@@ -242,9 +243,9 @@
       "estimate": 0,
       "workflow": "In Progress",
       "milestone": "play-launch",
-      "outcome": "Publish the reviewed, signed, all-87-tool Android application through the explicitly approved first managed-publishing launch window.",
+      "outcome": "Publish the reviewed, signed, 30-tool Android application through the explicitly approved first managed-publishing launch window.",
       "acceptance": [
-        "All 87 audited tools are enabled and pass the repository Definition of Done.",
+        "All 30 version-1 tools are enabled and pass the repository Definition of Done.",
         "Architecture, closed-beta, and production gates all pass against the same candidate.",
         "The product owner explicitly authorizes publication after reviewing the final AAB hash and launch record."
       ],
@@ -279,7 +280,7 @@
     },
     {
       "key": "core-epic",
-      "title": "[Epic] Deliver all 7 Core tools",
+      "title": "[Epic] Deliver all 6 Core tools",
       "parent": "launch-v1",
       "category": "Core",
       "phase": "Tier 1 Migration",
@@ -296,7 +297,7 @@
     },
     {
       "key": "developer-epic",
-      "title": "[Epic] Deliver all 45 Developer tools",
+      "title": "[Epic] Deliver all 5 Developer tools",
       "parent": "launch-v1",
       "category": "Developer",
       "phase": "Tier 1 Migration",
@@ -308,12 +309,12 @@
       "outcome": "Deliver all 45 audited Developer tools, including network and special-policy entries, at production quality.",
       "acceptance": [
         "All 45 Developer tool sub-issues are complete.",
-        "YouTube Downloader has explicit compliant policy/legal/provider evidence or the all-87 scope is formally revisited."
+        "ADR 0021 keeps YouTube Downloader excluded; ADR 0023 makes the exclusion moot for version 1 by cutting it from the scope outright."
       ]
     },
     {
       "key": "text-epic",
-      "title": "[Epic] Deliver all 17 Text tools",
+      "title": "[Epic] Deliver all 5 Text tools",
       "parent": "launch-v1",
       "category": "Text",
       "phase": "Tier 1 Migration",
@@ -330,7 +331,7 @@
     },
     {
       "key": "media-epic",
-      "title": "[Epic] Deliver all 3 Media tools",
+      "title": "[Epic] Deliver all 1 Media tool",
       "parent": "launch-v1",
       "category": "Media",
       "phase": "Adapter/Network/Special",
@@ -347,7 +348,7 @@
     },
     {
       "key": "security-epic",
-      "title": "[Epic] Deliver all 5 Security tools",
+      "title": "[Epic] Deliver all 1 Security tool",
       "parent": "launch-v1",
       "category": "Security",
       "phase": "Tier 1 Migration",
@@ -364,7 +365,7 @@
     },
     {
       "key": "math-epic",
-      "title": "[Epic] Deliver all 10 Math tools",
+      "title": "[Epic] Deliver all 12 Math tools",
       "parent": "launch-v1",
       "category": "Math",
       "phase": "Tier 1 Migration",
@@ -390,7 +391,7 @@
       "estimate": 0,
       "workflow": "Backlog",
       "milestone": "closed-beta",
-      "outcome": "Produce complete cross-catalog automated, accessibility, performance, interoperability, and physical-device evidence for the all-87 candidate.",
+      "outcome": "Produce complete cross-catalog automated, accessibility, performance, interoperability, and physical-device evidence for the 30-tool candidate.",
       "acceptance": [
         "Every quality sub-issue passes against identified artifacts.",
         "No critical/high security issue, data-loss defect, or release-threshold regression remains."
@@ -429,7 +430,7 @@
       "milestone": "foundation",
       "outcome": "Provide the durable issue hierarchy, dependencies, milestones, labels, project fields, templates, and repository automation used through the first Google Play launch.",
       "acceptance": [
-        "All 87 audited tools and every launch gate are represented by stable, idempotently provisioned work items.",
+        "All 30 version-1 tools and every launch gate are represented by stable, idempotently provisioned work items.",
         "The project workflow, issue hierarchy, dependencies, templates, and contributor rules are documented and independently reproducible from the repository."
       ]
     },
@@ -613,8 +614,8 @@
       ]
     },
     {
-      "key": "all87-test-matrix",
-      "title": "Complete the all-87 automated regression matrix",
+      "key": "regression-matrix",
+      "title": "Complete the 30-tool automated regression matrix",
       "parent": "quality-epic",
       "type": "Quality",
       "category": "Release",
@@ -628,11 +629,12 @@
       "acceptance": [
         "Every tool maps to independent fixtures and applicable test layers.",
         "The matrix records artifact commit/hash and contains no weakened or skipped release gates."
-      ]
+      ],
+      "renamedFrom": "all87-test-matrix"
     },
     {
       "key": "accessibility-certification",
-      "title": "Certify accessibility and adaptive layouts for all 87 tools",
+      "title": "Certify accessibility and adaptive layouts for all 30 tools",
       "parent": "quality-epic",
       "type": "Quality",
       "category": "Release",
@@ -696,12 +698,12 @@
       "estimate": 8,
       "workflow": "Blocked",
       "milestone": "closed-beta",
-      "outcome": "Verify the all-87 candidate across approved Android versions, OEM behavior, WebView versions, form factors, navigation modes, and low-resource conditions.",
+      "outcome": "Verify the 30-tool candidate across approved Android versions, OEM behavior, WebView versions, form factors, navigation modes, and low-resource conditions.",
       "acceptance": [
         "The complete matrix records models, API/WebView, artifact hashes, results, and follow-up disposition.",
         "Process, renderer, storage, sharing, notification, offline, accessibility, and every enabled tool are covered."
       ],
-      "blockedBy": ["all87-test-matrix", "accessibility-certification", "performance-certification"]
+      "blockedBy": ["regression-matrix", "accessibility-certification", "performance-certification"]
     },
     {
       "key": "export-interoperability",
@@ -826,9 +828,9 @@
       "estimate": 5,
       "workflow": "Blocked",
       "milestone": "play-launch",
-      "outcome": "Produce honest listing text and real phone/tablet screenshots for the exact all-87 release candidate.",
+      "outcome": "Produce honest listing text and real phone/tablet screenshots for the exact 30-tool release candidate.",
       "acceptance": [
-        "Title, short/full descriptions, category, feature graphic, icon, screenshots, contact links, help, limitations, network disclosures, and 87-tool claims match the artifact.",
+        "Title, short/full descriptions, category, feature graphic, icon, screenshots, contact links, help, limitations, network disclosures, and 30-tool claims match the artifact.",
         "No fabricated review, rating, capability, privacy, reliability, or offline claim is used."
       ],
       "blockedBy": ["final-identity", "launcher-splash-assets", "privacy-data-safety"]
@@ -899,15 +901,15 @@
       "estimate": 8,
       "workflow": "Blocked",
       "milestone": "heavy-tools",
-      "outcome": "Determine and evidence whether the audited downloader can be legally, contractually, reliably, and policy-compliantly enabled in the all-87 Play release.",
+      "outcome": "Record that ADR 0021 excludes the audited downloader and that ADR 0023 cuts it from version 1, so the review is not on the release path.",
       "acceptance": [
         "Play policy, copyright/legal, YouTube and provider terms, data/network behavior, availability, failure/removal behavior, user value, and store wording are reviewed by the appropriate owner.",
-        "A failed or unresolved review blocks the all-87 release or triggers an explicit superseding scope ADR; it is never silently shipped or omitted."
+        "Re-enabling the downloader requires a superseding scope ADR plus a complete legal, policy, provider, reliability, and product review; it is never silently shipped."
       ]
     },
     {
-      "key": "all87-release-candidate",
-      "title": "Build and approve the reproducible all-87 release candidate",
+      "key": "release-candidate",
+      "title": "Build and approve the reproducible 30-tool release candidate",
       "parent": "play-release-epic",
       "type": "Release",
       "category": "Release",
@@ -917,7 +919,7 @@
       "estimate": 8,
       "workflow": "Blocked",
       "milestone": "closed-beta",
-      "outcome": "Produce one reviewed, signed, reproducible AAB with all 87 tools enabled and every evidence inventory reconciled.",
+      "outcome": "Produce one reviewed, signed, reproducible AAB with all 30 version-1 tools enabled and every evidence inventory reconciled.",
       "acceptance": [
         "Protected commit/tag, version, manifest, tests, device matrix, dependency lock, SBOM, signing, AAB hash, privacy, help, and store claims refer to one candidate.",
         "No release blocker or unreviewed permission/component/dependency/provider remains."
@@ -930,7 +932,7 @@
         "media-epic",
         "security-epic",
         "math-epic",
-        "all87-test-matrix",
+        "regression-matrix",
         "accessibility-certification",
         "performance-certification",
         "security-privacy-sbom",
@@ -944,7 +946,8 @@
         "audio-recorder-review",
         "video-gif-review",
         "youtube-review"
-      ]
+      ],
+      "renamedFrom": "all87-release-candidate"
     },
     {
       "key": "closed-test",
@@ -963,7 +966,7 @@
         "Tester enrollment, required continuous period, feedback, regressions, fixes, and production-access application are recorded without collecting unnecessary private data.",
         "All material tester findings are fixed, accepted with evidence, or block production."
       ],
-      "blockedBy": ["play-account-package", "all87-release-candidate"]
+      "blockedBy": ["play-account-package", "release-candidate"]
     },
     {
       "key": "play-prelaunch",
@@ -982,7 +985,7 @@
         "Every finding has a linked fix, evidence-backed disposition, or release-blocking decision.",
         "The tested Play artifact hash matches the approved candidate."
       ],
-      "blockedBy": ["all87-release-candidate"]
+      "blockedBy": ["release-candidate"]
     },
     {
       "key": "launch-runbooks",
@@ -1014,7 +1017,7 @@
       "estimate": 3,
       "workflow": "Blocked",
       "milestone": "play-launch",
-      "outcome": "Publish the approved all-87 candidate during a staffed managed-publishing window and record the result.",
+      "outcome": "Publish the approved 30-tool candidate during a staffed managed-publishing window and record the result.",
       "acceptance": [
         "Production access, review approval, countries, managed-publishing state, artifact hash, owners, monitoring, support, observation window, and stop conditions are confirmed.",
         "The product owner explicitly authorizes publication immediately before the irreversible action; this issue does not itself grant publication authority."
@@ -1083,34 +1086,19 @@
   "tier3": ["currency-converter", "dns-lookup"],
   "tier4": ["audio-recorder", "video-to-gif", "youtube-downloader"],
   "toolDependencies": {
-    "pdf-converter": ["content-uri-streaming", "share-cache-cleanup"],
-    "currency-converter": ["network-provider-review"],
-    "image-compressor": ["content-uri-streaming", "share-cache-cleanup"],
-    "json-editor": ["content-uri-streaming", "share-cache-cleanup"],
-    "base64-tool": ["content-uri-streaming", "share-cache-cleanup"],
-    "qr-generator": ["share-cache-cleanup"],
-    "password-generator": ["sensitive-clipboard"],
-    "color-palette-from-image": ["content-uri-streaming"],
-    "ical-generator": ["share-cache-cleanup"],
-    "vcard-generator": ["share-cache-cleanup"],
-    "hmac-generator": ["sensitive-clipboard"],
-    "chart-generator": ["share-cache-cleanup"],
-    "dns-lookup": ["network-provider-review"],
-    "youtube-downloader": ["youtube-review", "network-provider-review"],
-    "pomodoro-timer": ["renderer-recovery", "android-instrumentation"],
-    "notes-scratchpad": ["renderer-recovery"],
-    "bookmark-manager": ["renderer-recovery"],
-    "audio-recorder": ["audio-recorder-review", "content-uri-streaming", "share-cache-cleanup"],
-    "video-to-gif": ["video-gif-review", "content-uri-streaming", "share-cache-cleanup"],
-    "file-hash-checker": ["content-uri-streaming"],
-    "stopwatch": ["renderer-recovery"],
-    "countdown-timer": ["renderer-recovery", "android-instrumentation"],
-    "aspect-ratio-calculator": [],
-    "css-unit-converter": [],
-    "color-contrast-checker": [],
-    "word-frequency-analyzer": [],
-    "text-binary-converter": [],
-    "reading-time-estimator": [],
+    "pdf-converter": [],
+    "currency-converter": [],
+    "image-compressor": [],
+    "qr-generator": [],
+    "password-generator": [],
+    "ical-generator": [],
+    "vcard-generator": [],
+    "youtube-downloader": [],
+    "pomodoro-timer": [],
+    "notes-scratchpad": [],
+    "audio-recorder": [],
+    "stopwatch": [],
+    "countdown-timer": [],
     "time-zone-converter": [],
     "date-difference-calculator": [],
     "loan-emi-calculator": [],
@@ -1121,115 +1109,39 @@
     "fuel-trip-cost-calculator": []
   },
   "tools": [
-    ["pdf-converter", "PDF Converter", "core"],
-    ["currency-converter", "Currency Converter", "core"],
-    ["unit-converter", "Unit Converter", "core"],
-    ["timestamp-converter", "Timestamp Converter", "core"],
-    ["number-base-converter", "Number Base Converter", "core"],
-    ["hash-generator", "Hash Generator", "core"],
-    ["image-compressor", "Image Compressor", "core"],
-    ["json-editor", "JSON Editor", "dev"],
-    ["base64-tool", "Base64 Encode/Decode", "dev"],
-    ["qr-generator", "QR Code Generator", "dev"],
-    ["password-generator", "Password Generator", "dev"],
-    ["color-picker", "Color Picker", "dev"],
-    ["lorem-ipsum-generator", "Lorem Ipsum Generator", "dev"],
-    ["markdown-preview", "Markdown Preview", "dev"],
-    ["regex-tester", "Regex Tester", "dev"],
-    ["url-encoder", "URL Encoder/Decoder", "dev"],
-    ["html-entity-encoder", "HTML Entity Encoder", "dev"],
-    ["jwt-decoder", "JWT Decoder", "dev"],
-    ["svg-optimizer", "SVG Optimizer", "dev"],
-    ["css-gradient-generator", "CSS Gradient Generator", "dev"],
-    ["color-palette-from-image", "Color Palette from Image", "dev"],
-    ["csv-json-converter", "CSV to JSON Converter", "dev"],
-    ["yaml-json-converter", "YAML to JSON Converter", "dev"],
-    ["xml-formatter", "XML Formatter", "dev"],
-    ["sql-formatter", "SQL Formatter", "dev"],
-    ["ical-generator", "iCalendar Generator", "dev"],
-    ["vcard-generator", "vCard Generator", "dev"],
-    ["rot13-cipher", "ROT13 / Caesar Cipher", "dev"],
-    ["morse-code-translator", "Morse Code Translator", "dev"],
-    ["hmac-generator", "HMAC Generator", "dev"],
-    ["uuid-generator", "UUID Generator", "dev"],
-    ["box-shadow-generator", "Box Shadow Generator", "dev"],
-    ["border-radius-generator", "Border Radius Generator", "dev"],
-    ["text-shadow-generator", "Text Shadow Generator", "dev"],
-    ["flexbox-playground", "Flexbox Playground", "dev"],
-    ["grid-generator", "CSS Grid Generator", "dev"],
-    ["triangle-generator", "CSS Triangle Generator", "dev"],
-    ["http-status-codes", "HTTP Status Codes", "dev"],
-    ["mime-type-lookup", "MIME Type Lookup", "dev"],
-    ["dns-lookup", "DNS Lookup", "dev"],
-    ["open-graph-preview", "Open Graph Preview", "dev"],
-    ["meta-tag-generator", "Meta Tag Generator", "dev"],
-    ["text-to-slug", "Text to Slug", "dev"],
-    ["unicode-lookup", "Unicode Lookup", "dev"],
-    ["ascii-table", "ASCII Table", "dev"],
-    ["fake-data-generator", "Fake Data Generator", "dev"],
-    ["gradient-border-generator", "Gradient Border Generator", "dev"],
-    ["animation-css-generator", "CSS Animation Generator", "dev"],
-    ["glassmorphism-generator", "Glassmorphism Generator", "dev"],
-    ["neumorphism-generator", "Neumorphism Generator", "dev"],
-    ["chart-generator", "Chart Generator", "dev"],
-    ["youtube-downloader", "YouTube Downloader", "dev"],
-    ["word-counter", "Word Counter", "text"],
-    ["case-converter", "Case Converter", "text"],
-    ["text-diff", "Text Diff", "text"],
-    ["remove-duplicates", "Remove Duplicates", "text"],
-    ["character-counter", "Character Counter", "text"],
-    ["emoji-picker", "Emoji Picker", "text"],
-    ["hash-diff", "Hash Diff", "text"],
-    ["pomodoro-timer", "Pomodoro Timer", "text"],
-    ["cron-builder", "Cron Expression Builder", "text"],
-    ["find-replace", "Find & Replace", "text"],
-    ["reverse-text", "Reverse Text", "text"],
-    ["sort-lines", "Sort Lines", "text"],
-    ["add-line-numbers", "Add Line Numbers", "text"],
-    ["trim-whitespace", "Trim Whitespace", "text"],
-    ["invisible-character-detector", "Invisible Character Detector", "text"],
-    ["notes-scratchpad", "Notes / Scratchpad", "text"],
-    ["bookmark-manager", "Bookmark Manager", "text"],
-    ["audio-recorder", "Audio Recorder", "media"],
-    ["video-to-gif", "Video to GIF", "media"],
-    ["file-hash-checker", "File Hash Checker", "media"],
-    ["password-strength-checker", "Password Strength Checker", "security"],
-    ["data-sanitizer", "Data Sanitizer", "security"],
-    ["csp-generator", "CSP Generator", "security"],
-    ["cors-header-builder", "CORS Header Builder", "security"],
-    ["robots-txt-generator", "Robots.txt Generator", "security"],
-    ["percentage-calculator", "Percentage Calculator", "math"],
     ["age-calculator", "Age Calculator", "math"],
-    ["tip-calculator", "Tip Calculator", "math"],
-    ["gcd-lcm-calculator", "GCD/LCM Calculator", "math"],
-    ["roman-numeral-converter", "Roman Numeral Converter", "math"],
-    ["bitwise-calculator", "Bitwise Calculator", "math"],
-    ["color-blindness-simulator", "Color Blindness Simulator", "math"],
-    ["calculator", "Scientific Calculator", "math"],
-    ["stopwatch", "Stopwatch", "math"],
-    ["countdown-timer", "Countdown Timer", "math"],
-    ["aspect-ratio-calculator", "Aspect Ratio Calculator", "dev"],
-    ["css-unit-converter", "CSS Unit Converter", "dev"],
-    ["color-contrast-checker", "Color Contrast Checker", "dev"],
-    ["word-frequency-analyzer", "Word Frequency Analyzer", "text"],
-    ["text-binary-converter", "Text-Binary Converter", "text"],
-    ["reading-time-estimator", "Reading Time Estimator", "text"],
-    ["time-zone-converter", "Time Zone Converter", "core"],
-    ["date-difference-calculator", "Date Difference Calculator", "core"],
-    ["loan-emi-calculator", "Loan EMI Calculator", "math"],
-    ["discount-tax-calculator", "Discount and Tax Calculator", "math"],
-    ["dice-roller", "Dice Roller", "math"],
+    ["audio-recorder", "Audio Recorder", "media"],
     ["bmi-calculator", "BMI Calculator", "math"],
+    ["calculator", "Scientific Calculator", "math"],
+    ["case-converter", "Case Converter", "text"],
+    ["character-counter", "Character Counter", "text"],
+    ["color-picker", "Color Picker", "dev"],
+    ["countdown-timer", "Countdown Timer", "math"],
+    ["currency-converter", "Currency Converter", "core"],
+    ["date-difference-calculator", "Date Difference Calculator", "core"],
+    ["dice-roller", "Dice Roller", "math"],
+    ["discount-tax-calculator", "Discount and Tax Calculator", "math"],
+    ["fuel-trip-cost-calculator", "Fuel and Trip Cost Calculator", "math"],
+    ["ical-generator", "iCalendar Generator", "dev"],
+    ["image-compressor", "Image Compressor", "core"],
+    ["loan-emi-calculator", "Loan EMI Calculator", "math"],
+    ["notes-scratchpad", "Notes / Scratchpad", "text"],
+    ["password-generator", "Password Generator", "dev"],
+    ["password-strength-checker", "Password Strength Checker", "security"],
+    ["pdf-converter", "PDF Converter", "core"],
+    ["percentage-calculator", "Percentage Calculator", "math"],
+    ["pomodoro-timer", "Pomodoro Timer", "text"],
+    ["qr-generator", "QR Code Generator", "dev"],
+    ["stopwatch", "Stopwatch", "math"],
+    ["time-zone-converter", "Time Zone Converter", "core"],
+    ["tip-calculator", "Tip Calculator", "math"],
+    ["unit-converter", "Unit Converter", "core"],
     ["unit-price-comparer", "Unit Price Comparer", "math"],
-    ["fuel-trip-cost-calculator", "Fuel and Trip Cost Calculator", "math"]
+    ["vcard-generator", "vCard Generator", "dev"],
+    ["word-counter", "Word Counter", "text"],
+    ["youtube-downloader", "YouTube Downloader", "dev"]
   ],
   "toolPriorities": {
-    "aspect-ratio-calculator": "P1 High",
-    "css-unit-converter": "P1 High",
-    "color-contrast-checker": "P1 High",
-    "word-frequency-analyzer": "P1 High",
-    "text-binary-converter": "P1 High",
-    "reading-time-estimator": "P1 High",
     "time-zone-converter": "P1 High",
     "date-difference-calculator": "P1 High",
     "loan-emi-calculator": "P1 High",
@@ -1238,5 +1150,427 @@
     "bmi-calculator": "P1 High",
     "unit-price-comparer": "P1 High",
     "fuel-trip-cost-calculator": "P1 High"
-  }
+  },
+  "retiredTools": [
+    {
+      "id": "hash-generator",
+      "label": "Hash Generator",
+      "category": "core",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "number-base-converter",
+      "label": "Number Base Converter",
+      "category": "core",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "timestamp-converter",
+      "label": "Timestamp Converter",
+      "category": "core",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "ascii-table",
+      "label": "ASCII Table",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "aspect-ratio-calculator",
+      "label": "Aspect Ratio Calculator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "base64-tool",
+      "label": "Base64 Encode/Decode",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "border-radius-generator",
+      "label": "Border Radius Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "box-shadow-generator",
+      "label": "Box Shadow Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "chart-generator",
+      "label": "Chart Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "color-contrast-checker",
+      "label": "Color Contrast Checker",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "color-palette-from-image",
+      "label": "Color Palette from Image",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "css-animation-generator",
+      "label": "CSS Animation Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "css-gradient-generator",
+      "label": "CSS Gradient Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "css-unit-converter",
+      "label": "CSS Unit Converter",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "csv-json",
+      "label": "CSV to JSON Converter",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "dns-lookup",
+      "label": "DNS Lookup",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "fake-data-generator",
+      "label": "Fake Data Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "flexbox-playground",
+      "label": "Flexbox Playground",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "glassmorphism-generator",
+      "label": "Glassmorphism Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "gradient-border-generator",
+      "label": "Gradient Border Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "grid-generator",
+      "label": "CSS Grid Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "hmac-generator",
+      "label": "HMAC Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "html-entity-encoder",
+      "label": "HTML Entity Encoder",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "http-status-codes",
+      "label": "HTTP Status Codes",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "json-editor",
+      "label": "JSON Editor",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "jwt-decoder",
+      "label": "JWT Decoder",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "lorem-ipsum-generator",
+      "label": "Lorem Ipsum Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "markdown-preview",
+      "label": "Markdown Preview",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "meta-tag-generator",
+      "label": "Meta Tag Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "mime-type-lookup",
+      "label": "MIME Type Lookup",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "morse-code-translator",
+      "label": "Morse Code Translator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "neumorphism-generator",
+      "label": "Neumorphism Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "open-graph-preview",
+      "label": "Open Graph Preview",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "regex-tester",
+      "label": "Regex Tester",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "rot13-cipher",
+      "label": "ROT13 / Caesar Cipher",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "sql-formatter",
+      "label": "SQL Formatter",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "svg-optimizer",
+      "label": "SVG Optimizer",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "text-shadow-generator",
+      "label": "Text Shadow Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "text-to-slug",
+      "label": "Text to Slug",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "triangle-generator",
+      "label": "CSS Triangle Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "unicode-lookup",
+      "label": "Unicode Lookup",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "url-encoder",
+      "label": "URL Encoder/Decoder",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "uuid-generator",
+      "label": "UUID Generator",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "xml-formatter",
+      "label": "XML Formatter",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "yaml-json-converter",
+      "label": "YAML to JSON Converter",
+      "category": "dev",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "bitwise-calculator",
+      "label": "Bitwise Calculator",
+      "category": "math",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "color-blindness-simulator",
+      "label": "Color Blindness Simulator",
+      "category": "math",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "gcd-lcm-calculator",
+      "label": "GCD/LCM Calculator",
+      "category": "math",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "roman-numeral-converter",
+      "label": "Roman Numeral Converter",
+      "category": "math",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "file-hash-checker",
+      "label": "File Hash Checker",
+      "category": "media",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "video-to-gif",
+      "label": "Video to GIF",
+      "category": "media",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "cors-header-builder",
+      "label": "CORS Header Builder",
+      "category": "security",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "csp-generator",
+      "label": "CSP Generator",
+      "category": "security",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "data-sanitizer",
+      "label": "Data Sanitizer",
+      "category": "security",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "robots-txt-generator",
+      "label": "Robots.txt Generator",
+      "category": "security",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "add-line-numbers",
+      "label": "Add Line Numbers",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "bookmark-manager",
+      "label": "Bookmark Manager",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "cron-builder",
+      "label": "Cron Expression Builder",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "emoji-picker",
+      "label": "Emoji Picker",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "find-replace",
+      "label": "Find & Replace",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "hash-diff",
+      "label": "Hash Diff",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "invisible-character-detector",
+      "label": "Invisible Character Detector",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "reading-time-estimator",
+      "label": "Reading Time Estimator",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "remove-duplicates",
+      "label": "Remove Duplicates",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "reverse-text",
+      "label": "Reverse Text",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "sort-lines",
+      "label": "Sort Lines",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "text-binary-converter",
+      "label": "Text-Binary Converter",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "text-diff",
+      "label": "Text Diff",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "trim-whitespace",
+      "label": "Trim Whitespace",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    },
+    {
+      "id": "word-frequency-analyzer",
+      "label": "Word Frequency Analyzer",
+      "category": "text",
+      "reason": "Cut from the version-1 scope by ADR 0023; retained in-tree as lifecycle `removed` so a reversal is a manifest edit rather than a re-implementation."
+    }
+  ]
 }

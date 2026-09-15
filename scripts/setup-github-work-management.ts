@@ -21,6 +21,11 @@ interface MilestoneDefinition {
   key: string
   title: string
   description: string
+  /**
+   * Previous title, for a rename. GitHub milestones are matched by title, so without this
+   * a rename would create a second milestone and strand the original with its issues.
+   */
+  renamedFrom?: string
 }
 
 interface WorkItemDefinition {
@@ -41,6 +46,10 @@ interface WorkItemDefinition {
   tier?: number
   verticalSlice?: boolean
   toolId?: string
+  /** Cut from version 1 by ADR 0023: the issue is closed as not planned, never implemented into the release. */
+  retired?: boolean
+  /** Previous key, for a rename. The provisioner adopts the issue carrying this marker instead of creating a new one. */
+  renamedFrom?: string
 }
 
 interface ManifestEpic extends Omit<WorkItemDefinition, "type"> {
@@ -76,9 +85,16 @@ interface WorkManifest {
   tier3: string[]
   tier4: string[]
   toolDependencies: Record<string, string[]>
-  /** Optional per-tool workflow priority overrides; the 100-tool ADR 0022 additions are P1. */
+  /** Optional per-tool workflow priority overrides for the retained version-1 scope. */
   toolPriorities?: Record<string, string>
   tools: [string, string, CategoryId][]
+  /**
+   * Tools cut from the version-1 scope by ADR 0023. They keep their implemented source,
+   * pure logic, provenance, and tests in-tree as lifecycle `removed`; only their lazy
+   * component is dropped. Their GitHub issues stay traceable and are closed as
+   * "not planned" with a link to the ADR rather than being deleted or silently orphaned.
+   */
+  retiredTools: { id: string; label: string; category: CategoryId; reason: string }[]
 }
 
 interface GitHubMilestone {
@@ -166,12 +182,23 @@ const ghBinary = process.env.GH_BIN ?? "gh"
 const apiVersion = "2026-03-10"
 
 const expectedCategoryCounts: Record<CategoryId, number> = {
-  core: 9,
-  dev: 48,
-  text: 20,
-  media: 3,
-  security: 5,
-  math: 16,
+  core: 6,
+  dev: 6,
+  text: 5,
+  media: 1,
+  security: 1,
+  math: 12,
+}
+
+/**
+ * Two tool IDs were misspelled in the manifest before ADR 0023 cut them (`csv-json-converter`
+ * for `csv-json`, `animation-css-generator` for `css-animation-generator`). The registry is the
+ * source of truth for identifiers, so the retired entries carry the registry spelling and adopt
+ * the issue holding the old marker instead of creating a duplicate.
+ */
+const retiredToolRenames: Record<string, string> = {
+  "csv-json": "tool:csv-json-converter",
+  "css-animation-generator": "tool:animation-css-generator",
 }
 
 const categoryNames: Record<CategoryId, string> = {
@@ -239,14 +266,34 @@ function validateManifest(): {
     "Unexpected repository",
   )
   invariant(
-    manifest.tools.length === 101,
-    `Expected 101 managed tools (87 catalog + 14 ADR 0022 additions), found ${manifest.tools.length}`,
+    manifest.tools.length === 31,
+    `Expected 31 managed tools (the 30 version-1 tools of ADR 0023 plus the excluded YouTube Downloader), found ${manifest.tools.length}`,
+  )
+  invariant(
+    manifest.retiredTools.length === 70,
+    `Expected 70 retired tools (ADR 0023), found ${manifest.retiredTools.length}`,
   )
 
   const toolIds = unique(
     manifest.tools.map(([id]) => id),
     "tool ID",
   )
+  const retiredIds = unique(
+    manifest.retiredTools.map(({ id }) => id),
+    "retired tool ID",
+  )
+  // Every identifier that still owns a GitHub issue: the release scope plus the retired set.
+  // Scope lists such as verticalSlice and implementedTools describe history and may name a
+  // tool that ADR 0023 has since cut, so they validate against this wider set.
+  const knownToolIds = new Set([...toolIds, ...retiredIds])
+  for (const id of retiredIds) {
+    invariant(!toolIds.has(id), `Retired tool ${id} is also in the release scope`)
+  }
+  for (const { id, label, category, reason } of manifest.retiredTools) {
+    invariant(typeof label === "string" && label.length > 0, `Retired tool ${id} must have a label`)
+    invariant(categoryNames[category], `Retired tool ${id} has unknown category ${category}`)
+    invariant(reason.trim().length > 0, `Retired tool ${id} must record why it was cut`)
+  }
   unique(
     manifest.tools.map(([, label]) => label),
     "tool label",
@@ -284,27 +331,29 @@ function validateManifest(): {
     verticalSlice.size === 12,
     `Expected 12 vertical-slice tools, found ${verticalSlice.size}`,
   )
-  for (const id of verticalSlice) invariant(toolIds.has(id), `Unknown vertical-slice tool: ${id}`)
+  for (const id of verticalSlice)
+    invariant(knownToolIds.has(id), `Unknown vertical-slice tool: ${id}`)
 
   const implementedTools = unique(manifest.implementedTools, "implemented tool")
   invariant(
     implementedTools.size === 25,
     `Expected 25 implemented tools, found ${implementedTools.size}`,
   )
-  for (const id of implementedTools) invariant(toolIds.has(id), `Unknown implemented tool: ${id}`)
+  for (const id of implementedTools)
+    invariant(knownToolIds.has(id), `Unknown implemented tool: ${id}`)
 
   const tierCounts = [1, 2, 3, 4].map(
     (tier) => manifest.tools.filter(([id]) => tierFor(id) === tier).length,
   )
   invariant(
-    tierCounts.join(",") === "81,15,2,3",
-    `Expected tier counts 81,15,2,3, found ${tierCounts.join(",")}`,
+    tierCounts.join(",") === "19,9,1,2",
+    `Expected tier counts 19,9,1,2 for the 31 managed tools, found ${tierCounts.join(",")}`,
   )
 
   for (const listName of ["tier2", "tier3", "tier4"] as const) {
     unique(manifest[listName], `${listName} tool`)
     for (const id of manifest[listName])
-      invariant(toolIds.has(id), `Unknown ${listName} tool: ${id}`)
+      invariant(knownToolIds.has(id), `Unknown ${listName} tool: ${id}`)
   }
 
   const issueKeys = unique(
@@ -312,6 +361,7 @@ function validateManifest(): {
       ...manifest.epics.map(({ key }) => key),
       ...manifest.tasks.map(({ key }) => key),
       ...manifest.tools.map(([id]) => `tool:${id}`),
+      ...manifest.retiredTools.map(({ id }) => `tool:${id}`),
     ],
     "work-item key",
   )
@@ -401,8 +451,14 @@ function labelsFor(item: WorkItemDefinition): string[] {
     priorityLabel(item.priority),
     categoryLabel(item.category),
   ]
-  const workflowLabel = statusLabel(item.workflow)
-  if (workflowLabel) labels.push(workflowLabel)
+  // A retired tool was implemented and then cut from the scope; `status:excluded` says
+  // that, where the ordinary workflow label would imply ordinary backlog work.
+  if (item.retired) {
+    labels.push("status:excluded")
+  } else {
+    const workflowLabel = statusLabel(item.workflow)
+    if (workflowLabel) labels.push(workflowLabel)
+  }
   if (item.risk === "High") labels.push("risk:high")
   if (item.risk === "Critical") labels.push("risk:critical")
   if (item.tier) labels.push(`tier:${item.tier}`)
@@ -428,6 +484,32 @@ function bodyFor(item: WorkItemDefinition): string {
   if (item.tier) metadata.push(`- Migration tier: ${item.tier}`)
   if (item.toolId) metadata.push(`- Stable tool ID: \`${item.toolId}\``)
   if (item.verticalSlice) metadata.push("- Architecture milestone: yes")
+
+  if (item.retired) {
+    return `${marker}
+
+## Outcome
+
+**${item.title.replace("[Tool] ", "")}** was implemented and then cut from the released version-1 scope by
+[ADR 0023](https://github.com/${manifest.repository}/blob/main/docs/decisions/0023-focused-version-one-scope.md).
+
+This issue is closed as **not planned**. It is kept rather than deleted so the scope decision stays
+traceable, and because a tool ID is a persistent external identifier that is never reused for a
+different function.
+
+## Disposition of the work
+
+- The tool's source, pure logic, provenance record, and tests **remain in the repository**.
+- Only the lazy \`component\` was dropped from \`src/tools/registry.ts\`, and the entry moved to
+  lifecycle \`removed\` — which is what actually shrinks the shipped artifact.
+- Reinstating the tool is therefore a manifest edit plus a superseding ADR, not a re-implementation.
+
+## Planning metadata
+
+${metadata.join("\n")}
+
+${endMarker}`
+  }
 
   if (item.type === "Tool") {
     return `${marker}
@@ -545,7 +627,29 @@ function issueDefinitions(): WorkItemDefinition[] {
       blockedBy: manifest.toolDependencies[id] ?? [],
     }
   })
-  return [...epics, ...tasks, ...tools]
+  // ADR 0023 cut 70 tools. Each still owns its issue so the decision stays traceable and
+  // the identifier is never reused for a different function; the issue is closed as
+  // "not planned" rather than deleted or silently orphaned.
+  const retired: WorkItemDefinition[] = manifest.retiredTools.map(({ id, label, category }) => {
+    const tier = tierFor(id)
+    return {
+      key: `tool:${id}`,
+      renamedFrom: retiredToolRenames[id],
+      title: `[Tool] ${label}`,
+      parent: categoryEpics[category],
+      type: "Tool" as const,
+      category: categoryNames[category],
+      phase: tier === 1 ? "Tier 1 Migration" : "Adapter/Network/Special",
+      priority: "P3 Low",
+      risk: "Low",
+      estimate: 1,
+      workflow: "Backlog",
+      tier,
+      retired: true,
+      toolId: id,
+    }
+  })
+  return [...epics, ...tasks, ...tools, ...retired]
 }
 
 function validateDefinitions(definitions: WorkItemDefinition[]): void {
@@ -693,6 +797,25 @@ function provisionMilestones(repository: string): Map<string, GitHubMilestone> {
 
   for (const definition of manifest.milestones) {
     let milestone = byTitle.get(definition.title)
+    // A rename must adopt the existing milestone by its previous title; milestones are
+    // matched by title alone, so creating a "new" one would strand the original — along
+    // with every issue attached to it.
+    if (!milestone && definition.renamedFrom) {
+      const previous = byTitle.get(definition.renamedFrom)
+      if (previous) {
+        const renamed = api<GitHubMilestone>(
+          "PATCH",
+          `repos/${repository}/milestones/${previous.number}`,
+          { title: definition.title, description: definition.description, state: "open" },
+        )
+        invariant(renamed, `Milestone ${definition.key} was not returned by GitHub`)
+        console.log(`Renamed milestone "${definition.renamedFrom}" to "${definition.title}".`)
+        milestone = renamed
+        byTitle.delete(definition.renamedFrom)
+        byTitle.set(definition.title, renamed)
+        pause(250)
+      }
+    }
     if (!milestone) {
       const created = api<GitHubMilestone>("POST", `repos/${repository}/milestones`, {
         title: definition.title,
@@ -767,7 +890,11 @@ function provisionIssues(
     `repos/${repository}/issues?state=all&per_page=100`,
   ).filter((issue) => !issue.pull_request)
   const byKey = new Map<string, GitHubIssue>()
-  const definitionKeys = new Set(definitions.map(({ key }) => key))
+  // A renamed item is looked up by its old marker too, so the existing issue is adopted
+  // (and re-markered) rather than a duplicate being created beside it.
+  const definitionKeys = new Set(
+    definitions.flatMap(({ key, renamedFrom }) => (renamedFrom ? [key, renamedFrom] : [key])),
+  )
   for (const issue of existing) {
     const key = markerKey(issue.body)
     if (key) {
@@ -790,6 +917,16 @@ function provisionIssues(
     const milestone = definition.milestone ? milestones.get(definition.milestone) : null
     invariant(!definition.milestone || milestone, `${definition.key} milestone missing`)
     let issue = byKey.get(definition.key)
+    if (!issue && definition.renamedFrom) {
+      const previous = byKey.get(definition.renamedFrom)
+      if (previous) {
+        issue = previous
+        byKey.set(definition.key, previous)
+        console.log(
+          `Adopted issue #${previous.number} from renamed work item ${definition.renamedFrom}.`,
+        )
+      }
+    }
     if (!issue) {
       const createdIssue = api<GitHubIssue>("POST", `repos/${repository}/issues`, {
         title: definition.title,
@@ -858,6 +995,41 @@ function provisionIssues(
     `Issues ready: ${byKey.size} marked items (${created} created, ${updated} updated, ${reparented} reparented in this run).`,
   )
   return byKey
+}
+
+/**
+ * Closes every retired tool issue as "not planned". The comment is the durable record on
+ * the issue itself; the repository-side disposition lives in ADR 0023. Closing is skipped
+ * when the issue is already closed, so the step is idempotent.
+ */
+function retireIssues(
+  repository: string,
+  definitions: WorkItemDefinition[],
+  issues: Map<string, GitHubIssue>,
+): void {
+  const retired = definitions.filter((definition) => definition.retired)
+  console.log(`Closing ${retired.length} retired tool issues as not planned...`)
+  let closed = 0
+  for (const definition of retired) {
+    const issue = issues.get(definition.key)
+    invariant(issue, `Missing issue for retired tool ${definition.key}`)
+    if (issue.state === "closed") continue
+    const note = [
+      `Cut from the version-1 scope by [ADR 0023](https://github.com/${repository}/blob/main/docs/decisions/0023-focused-version-one-scope.md).`,
+      "",
+      "Closed as not planned. The tool's source, pure logic, provenance, and tests remain in the",
+      "repository; only its lazy component was dropped from the registry, and the entry moved to",
+      "lifecycle `removed`. Reinstating it needs a superseding ADR, not a re-implementation.",
+    ].join("\n")
+    api("POST", `repos/${repository}/issues/${issue.number}/comments`, { body: note })
+    runGh(["issue", "close", String(issue.number), "--repo", repository, "--reason", "not planned"])
+    // Keep the in-memory record in step with GitHub: setProjectFields derives the Project
+    // Workflow from issue.state, so a stale "open" here would file a closed issue as Backlog.
+    issue.state = "closed"
+    closed += 1
+    pause(350)
+  }
+  console.log(`Retired issues closed in this run: ${closed}.`)
 }
 
 function provisionDependencies(
@@ -1267,6 +1439,7 @@ runGh(["auth", "status", "--hostname", "github.com"])
 provisionLabels(manifest.repository)
 const milestones = provisionMilestones(manifest.repository)
 const issues = provisionIssues(manifest.repository, definitions, milestones)
+retireIssues(manifest.repository, definitions, issues)
 provisionDependencies(manifest.repository, definitions, issues)
 const project = provisionProject(manifest.repository)
 const fields = provisionProjectFields(project)

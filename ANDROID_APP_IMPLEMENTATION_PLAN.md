@@ -2,6 +2,8 @@
 
 > **Plan baseline:** Reviewed against the repository and current Android/Google Play guidance on September 5, 2026. Re-check time-sensitive platform and Play policy requirements immediately before implementation and before every production release.
 
+> **Superseded scope (2026-09-15):** ADR 0023 (Accepted 2026-09-15) rescopes the public version 1 to **30 tools**, superseding ADR 0022's 100-tool scope and the all-87 clause of ADR 0004; ADR 0021 continues to exclude YouTube Downloader. **Every statement below that fixes the release scope at 87 or 100 tools — including the release-gate wording under "Public version 1", Gate B, section 36.4, and the section 37 decision register — is historical baseline text and no longer governs.** The current scope, the retained/cut lists, and the disposition of the 70 cut tools are recorded in `docs/decisions/0023-focused-version-one-scope.md`; `IMPLEMENTATION_TRACKER.md` carries current status. This baseline is deliberately left unedited apart from this notice so it stays comparable with the upstream copy.
+
 ## Executive summary
 
 The recommended approach is to create a separate repository using:

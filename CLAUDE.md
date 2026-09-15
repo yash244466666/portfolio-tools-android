@@ -1,8 +1,11 @@
 # Repository Operating Guide for Coding Agents
 
-> Last verified: 2026-09-07  
-> Applies to: the complete `portfolio-tools-android` repository  
-> Synchronization rule: `AGENT.md` and `CLAUDE.md` intentionally contain identical guidance. Any change to one must be copied to the other in the same change.  
+> Last verified: 2026-09-15
+>
+> Applies to: the complete `portfolio-tools-android` repository
+>
+> Synchronization rule: `AGENT.md` and `CLAUDE.md` intentionally contain identical guidance. Any change to one must be copied to the other in the same change.
+>
 > Project status: foundation implementation; not yet approved for public release.
 
 ## 1. Mission
@@ -18,7 +21,7 @@ The intended product is a fast, privacy-conscious collection of developer and ev
 - Uses Android system facilities for files, sharing, notifications, lifecycle, and external links.
 - Remains usable on phones, tablets, landscape, split-screen, foldable layouts, keyboards, and assistive technology.
 - Publishes only tools that meet the repository's Definition of Done.
-- Ships 100 tools in the first public Google Play release: the 86 in-scope audited catalog tools (YouTube Downloader stays excluded by the accepted ADR 0021 legal/policy review) plus 14 new original tools added by the accepted ADR 0022; the 12-tool vertical slice is an internal milestone, not the public scope.
+- Ships 30 tools in the first public Google Play release, per the accepted ADR 0023, which supersedes the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004. YouTube Downloader stays excluded by the accepted ADR 0021 legal/policy review and is also one of the 70 cut tools, so that exclusion is moot for version 1. The 70 cut tools remain implemented and retained in-tree at lifecycle `removed`; the 12-tool vertical slice is an internal milestone, not the public scope.
 
 The source portfolio is an upstream reference, not a runtime dependency.
 
@@ -28,8 +31,8 @@ Implemented now:
 
 - React/Vite/TypeScript/Tailwind application.
 - Capacitor Android project.
-- Typed tool registry containing the completed 12-tool architecture milestone plus reviewed post-slice batches within the approved 100-tool public-release scope (ADR 0021 youtube-downloader exclusion; ADR 0022 scope expansion to 100 tools).
-- One hundred enabled tools: Unit Converter, Timestamp Converter, Hash Generator, Markdown Preview, Regex Tester, QR Generator, JSON Editor, Notes, Pomodoro Timer, Image Compressor, File Hash Checker, Currency Converter, DNS Lookup, Word Counter, Character Counter, Case Converter, Reverse Text, Number Base Converter, Base64 Encode/Decode, URL Encoder/Decoder, Text to Slug, Sort Lines, Add Line Numbers, Trim Whitespace, Remove Duplicates, Percentage Calculator, Tip Calculator, GCD/LCM Calculator, Roman Numeral Converter, Password Strength Checker, Data Sanitizer, CSP Generator, CORS Header Builder, Robots.txt Generator, Age Calculator, Bitwise Calculator, Color Blindness Simulator, Scientific Calculator, HTTP Status Codes, MIME Type Lookup, Meta Tag Generator, Unicode Lookup, ASCII Table, Box Shadow Generator, Border Radius Generator, Text Shadow Generator, CSS Triangle Generator, Gradient Border Generator, HTML Entity Encoder, ROT13 Cipher, Morse Code Translator, HMAC Generator, UUID Generator, Find & Replace, Invisible Character Detector, Hash Diff, Cron Expression Builder, Lorem Ipsum Generator, Password Generator, JWT Decoder, CSV to JSON, YAML to JSON, Text Diff, Color Picker, CSS Gradient Generator, Flexbox Playground, Grid Generator, CSS Animation Generator, Glassmorphism Generator, Neumorphism Generator, XML Formatter, SQL Formatter, Emoji Picker, SVG Optimizer, Open Graph Preview, Fake Data Generator, Stopwatch, Countdown Timer, iCalendar Generator, vCard Generator, Color Palette from Image, Chart Generator, Bookmark Manager, PDF Converter, Audio Recorder, Video to GIF, Aspect Ratio Calculator, CSS Unit Converter, Discount and Tax Calculator, BMI Calculator, Unit Price Comparer, Word Frequency Analyzer, Text-Binary Converter, Reading Time Estimator, Date Difference Calculator, Time Zone Converter, Loan EMI Calculator, Color Contrast Checker, Dice Roller, and Fuel and Trip Cost Calculator. Fourteen additional tools are approved for version 1 by ADR 0022 and all are implemented in batches 14-16; the version-1 scope is complete pending the certification, device-evidence, and release gates in section 27.
+- Typed tool registry holding 30 `enabled` entries for the approved public-release scope and 70 `removed` entries for the cut tools, which keep their source, logic, provenance, and tests in-tree (ADR 0021 youtube-downloader exclusion; ADR 0023 supersedes the 100-tool scope of ADR 0022).
+- Thirty enabled tools, grouped as ADR 0023 groups them: everyday money and math (Unit Converter, Currency Converter, Percentage Calculator, Tip Calculator, Discount and Tax Calculator, Unit Price Comparer, Loan EMI Calculator, Fuel and Trip Cost Calculator, BMI Calculator, Scientific Calculator), time (Stopwatch, Countdown Timer, Pomodoro Timer, Time Zone Converter, Date Difference Calculator, Age Calculator), everyday text (Notes, Character Counter, Word Counter, Case Converter, Color Picker), files and media (QR Generator, Image Compressor, PDF Converter, Audio Recorder), privacy and security (Password Generator, Password Strength Checker), and sharing and utility (vCard Generator, iCalendar Generator, Dice Roller). The remaining 70 implemented tools are lifecycle `removed`: they keep their source directory, pure logic, provenance record, and tests in-tree, but their lazy components are dropped so no runtime chunk ships for them. Currency Converter is the only tool that contacts a network provider (Frankfurter); the version-1 scope is complete pending the certification, device-evidence, and release gates in section 27.
 - Catalog search and category filters.
 - Favorites and recent-tool persistence.
 - System/light/dark theme preferences.
@@ -44,7 +47,7 @@ Implemented now:
 
 Not yet implemented:
 
-- All 86 in-scope catalog tools are implemented (YouTube Downloader is excluded per ADR 0021). All 14 ADR 0022 additions are implemented in batches 14-16.
+- All 30 retained version-1 tools are implemented and present in the release manifest (ADR 0023). The 70 cut tools are also implemented and remain in-tree at lifecycle `removed`.
 - Installed-artifact device verification of the sensitive clipboard bridge, generated-file cache cleanup, and renderer recovery/safe mode.
 - Final icons, splash assets, app name, application ID approval, App Links, and Play signing.
 - Physical-device verification and Play-distributed artifact testing.
@@ -95,7 +98,7 @@ Important implementation files:
 - Do not add analytics, advertising, accounts, cloud sync, purchases, or crash-upload SDKs without a new product/privacy/Play decision and Data Safety update.
 - Never include YouTube downloading in a release without a separate legal, policy, terms, security, and product review.
 - Do not claim Notes, Bookmarks, or preferences are encrypted at rest unless a real reviewed encryption design exists.
-- Do not claim every tool works locally while Currency Converter or DNS Lookup is enabled. Use precise local/network labels.
+- Version 1 has exactly one network provider: Frankfurter, used by Currency Converter. Do not claim every tool works locally while a network-backed tool is enabled. Use precise local/network labels.
 
 ## 5. Technology and version policy
 
@@ -265,7 +268,7 @@ Lifecycle states:
 planned -> experimental -> enabled -> deprecated -> removed
 ```
 
-Foundation uses `planned` and `enabled`. Never mark a tool `enabled` without:
+The foundation uses `planned`, `enabled`, and — since ADR 0023 — `removed`, which holds the 70 cut tools. A `removed` entry keeps its ID and meaning, keeps its source, logic, provenance, and tests in-tree, and carries no lazy `component`; reinstating one is a manifest edit plus a superseding ADR, never a new ID and never a re-implementation. Never mark a tool `enabled` without:
 
 - An implementation component.
 - Pure correctness tests or another independent oracle.
@@ -465,6 +468,8 @@ Do not copy an existing bug merely to preserve parity. When the governing standa
 
 ## 19. Tool-specific safety reminders
 
+These reminders govern every tool whose code remains in the repository, including the `removed` tools ADR 0023 retains in-tree.
+
 - Hash: label MD5/SHA-1 as legacy where present; never market them as collision-secure.
 - JWT: decode is not verification. Never imply signature or trust validation without a real key/algorithm process.
 - Regex: execute hostile user patterns in a terminable Worker with input/time budgets.
@@ -476,7 +481,7 @@ Do not copy an existing bug merely to preserve parity. When the governing standa
 - File hashing: stream natively or enforce the documented JavaScript limit; never read unbounded files into one ArrayBuffer.
 - Timers: reconstruct from timestamps, distinguish monotonic/wall time, and never promise exact alarm delivery.
 - Audio/video: require physical-device, codec/container, interruption, background, memory, and output-format review before enabling.
-- Currency/DNS: display provider and freshness; ordinary connection metadata goes to the provider.
+- Currency: display provider and freshness; ordinary connection metadata goes to the provider. Frankfurter is the only provider in version 1, and DNS Lookup is cut, so the Cloudflare DoH origin is not in the packaged allowlist.
 
 ## 20. Testing policy
 
@@ -623,9 +628,9 @@ Compiling is not completion. Browser-only success is not Android completion. Vis
 Unless the tracker or user changes priority:
 
 1. Execute the physical-device foundation checklist through issue #18 on an approved device (emulator-side automated evidence is complete through batch 16).
-2. Validate all 100 enabled version-1 tools on bundled Android artifacts and complete outstanding installed-artifact/device-evidence rows (issues #18/#20/#25/#111/#112).
-3. Complete the certification gates (#21-#26): automated regression, accessibility, performance, security/privacy/SBOM, interoperability, and device-matrix work.
-4. Complete product-owner release decisions and gates (#27-#41) without weakening the approved 100-tool scope (ADR 0021/0022).
+2. Validate all 30 retained version-1 tools on bundled Android artifacts and complete outstanding installed-artifact/device-evidence rows (issues #18/#20/#25/#111/#112).
+3. Complete the certification gates (#21-#26), rescoped to the 30 retained tools: automated regression, accessibility, performance, security/privacy/SBOM, interoperability, and device-matrix work. No gate is weakened.
+4. Complete product-owner release decisions and gates (#27-#41) without weakening the approved 30-tool scope (ADR 0021/0023).
 5. Submit no production candidate until every in-scope tool passes the Definition of Done and the release manifest, store claims, and signed artifact agree.
 
 ## 28. Handoff checklist
@@ -644,7 +649,7 @@ Before ending work:
 ## 29. Critical warnings
 
 - The current app name, package ID, origin, and publisher details are provisional.
-- The enabled tools are a foundation, not the public release scope.
+- The 30 `enabled` tools are the approved public release scope (ADR 0023), not yet certified for release; the in-tree `removed` tools are not part of it.
 - Device verification of file picking/Save As and renderer recovery remains outstanding.
 - Device verification of the sensitive clipboard extra and preview suppression remains outstanding.
 - Final icons/splash/store assets are placeholders.

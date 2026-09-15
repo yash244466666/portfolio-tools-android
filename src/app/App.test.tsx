@@ -23,7 +23,8 @@ describe("application shell", () => {
       screen.getByRole("heading", { name: "Useful tools, ready when you are" }),
     ).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Unit Converter" })).toBeInTheDocument()
-    expect(screen.getByText("Markdown Preview")).toBeInTheDocument()
+    // A cut tool (ADR 0023) is no longer part of the catalog.
+    expect(screen.queryByText("Markdown Preview")).not.toBeInTheDocument()
     const enabledCount = tools.filter(isEnabledTool).length
     expect(
       screen.getByLabelText(`${enabledCount} tools enabled in the foundation`),
@@ -162,7 +163,7 @@ describe("application shell", () => {
   it("shows stored recent tools in most-recent-first order", async () => {
     localStorage.setItem(
       "yash-tools:v1:recents",
-      JSON.stringify(["timestamp-converter", "unit-converter", "removed-tool"]),
+      JSON.stringify(["qr-generator", "unit-converter", "removed-tool"]),
     )
     window.location.hash = "#/recent"
 
@@ -175,11 +176,8 @@ describe("application shell", () => {
     expect(screen.getByRole("heading", { name: "Recent tools" })).toBeInTheDocument()
     expect(await screen.findByLabelText("2 recent tools on this device")).toBeInTheDocument()
     const recentLinks = screen.getAllByRole("link", {
-      name: /Timestamp Converter|Unit Converter/,
+      name: /QR Generator|Unit Converter/,
     })
-    expect(recentLinks.map((link) => link.textContent)).toEqual([
-      "Timestamp Converter",
-      "Unit Converter",
-    ])
+    expect(recentLinks.map((link) => link.textContent)).toEqual(["QR Generator", "Unit Converter"])
   })
 })

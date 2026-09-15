@@ -12,7 +12,7 @@ This repository is currently a foundation build, not a Play-ready release.
 - System, light, and dark themes
 - Offline/network state awareness
 - Typed web/Android platform-service boundary
-- One hundred enabled tools (ADR 0022 scope), including the complete 12-tool architecture milestone and reviewed post-slice batches
+- Thirty enabled tools (ADR 0023 scope), including the complete 12-tool architecture milestone; the registry keeps the other 70 implemented tools in-tree as `removed`
 - Scoped Android document picker, content reads, Save As, sharing, sensitive clipboard, generated-cache cleanup, notifications, and renderer recovery
 - Capacitor Android project targeting API 36 with minimum API 24
 - Debug/internal/release variants
@@ -20,7 +20,7 @@ This repository is currently a foundation build, not a Play-ready release.
 - Unit, component, registry, and browser-harness tests
 - Native policy tests plus bundled-artifact Android instrumentation/UI Automator coverage
 
-The first public Google Play release is approved to include all 100 tools per ADRs 0004/0021/0022 (86 of the 87 audited upstream catalog tools — YouTube Downloader stays excluded — plus 14 new original tools). All 100 are implemented and enabled; the 12-tool vertical slice was the first architecture milestone, not the release scope, and every public tool must still pass the remaining device-evidence, certification, and release gates in [IMPLEMENTATION_TRACKER.md](IMPLEMENTATION_TRACKER.md) before publication. The complete roadmap is in [ANDROID_APP_IMPLEMENTATION_PLAN.md](ANDROID_APP_IMPLEMENTATION_PLAN.md), live status and evidence are in [IMPLEMENTATION_TRACKER.md](IMPLEMENTATION_TRACKER.md), and the executable issue/Project workflow is defined in [docs/WORK_MANAGEMENT.md](docs/WORK_MANAGEMENT.md).
+The first public Google Play release is approved to include 30 tools per ADR 0023, which supersedes the 100-tool clause of ADR 0022 and the all-87 clause of ADR 0004 (ADR 0021 keeps YouTube Downloader excluded). All 30 are implemented and enabled, and all but Currency Converter work offline; Currency Converter's provider, Frankfurter, is the only network provider in the release. The 70 tools approved by ADR 0022 but cut from version 1 stay in the repository as `removed` registry entries with their source, pure logic, provenance, and tests intact, so reinstating one is a manifest edit rather than a re-implementation. The 12-tool vertical slice was the first architecture milestone, not the release scope, and every public tool must still pass the remaining device-evidence, certification, and release gates in [IMPLEMENTATION_TRACKER.md](IMPLEMENTATION_TRACKER.md) before publication. The complete roadmap is in [ANDROID_APP_IMPLEMENTATION_PLAN.md](ANDROID_APP_IMPLEMENTATION_PLAN.md), live status and evidence are in [IMPLEMENTATION_TRACKER.md](IMPLEMENTATION_TRACKER.md), and the executable issue/Project workflow is defined in [docs/WORK_MANAGEMENT.md](docs/WORK_MANAGEMENT.md).
 
 ## Requirements
 

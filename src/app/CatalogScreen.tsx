@@ -105,12 +105,15 @@ export function CatalogScreen({
 
   const visibleTools = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase()
+    // Only the release scope is browsable. Before ADR 0023 every registry entry was
+    // `enabled`, so listing `tools` wholesale was equivalent; now the registry also holds
+    // the 70 `removed` entries, and a cut tool must never appear as an openable card.
     const availableTools =
       mode === "recent"
         ? recents
             .map((id) => getTool(id))
             .filter((tool): tool is ToolDefinition => Boolean(tool && isEnabledTool(tool)))
-        : tools
+        : tools.filter(isEnabledTool)
 
     return availableTools.filter((tool) => {
       if (mode === "favorites" && !favorites.includes(tool.id)) return false

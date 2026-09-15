@@ -1,14 +1,15 @@
 # Export/import/Save As/sharing interoperability evidence (automated portions)
 
-> Compiled: 2026-09-08 for issue #26. System picker/Share-target
+> Compiled: 2026-09-08 for issue #26; scoped to the 30-tool public version-1
+> scope approved by ADR 0023 (2026-09-15). System picker/Share-target
 > interoperability against real documents providers and receivers requires
 > the physical-device matrix and remains open there.
 
 ## Format contract coverage
 
-Every file-producing tool records extension, MIME type, encoding,
-filename policy, output limits, and interoperability behavior, enforced by
-tests and the platform contracts:
+Every file-producing tool in the 30-tool version-1 scope records extension,
+MIME type, encoding, filename policy, output limits, and interoperability
+behavior, enforced by tests and the platform contracts:
 
 | Tool                                                    | Output formats                           | Automated oracle                                                                          |
 | ------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------- |
@@ -18,6 +19,12 @@ tests and the platform contracts:
 | Video to GIF                                            | GIF (LZW encoder)                        | Independent parser/decoder oracle with byte-exact vectors (batch 13)                      |
 | QR Generator                                            | PNG canvas export                        | Render-plan vectors, canvas backing-store dimension check (E2E)                           |
 | JSON/YAML/XML/CSV/Markdown/iCalendar/vCard/Notes export | Text encodings                           | Pure standard vectors + component tests + fixtures                                        |
+
+The Video to GIF row and the JSON/YAML/XML/CSV/Markdown entries in the text
+row describe tools cut from the version-1 scope by ADR 0023. Their source,
+pure oracles, and fixtures remain in-tree, but they are outside the release
+scope and their component/E2E coverage is retired; the rows are kept as a
+record of what was built.
 
 ## SAF / Save As / share byte equality
 
@@ -31,7 +38,8 @@ tests and the platform contracts:
 - Native policy tests cover operation-ID/MIME/URI validation, size caps,
   filename sanitization, concurrency, and interrupted calls.
 - Canonical MIME/extension mappings are exercised by the MIME Type Lookup
-  tool's table and the file-service contract tests.
+  tool's table (cut from the version-1 scope by ADR 0023; its dataset and
+  tests remain in-tree) and the file-service contract tests.
 
 ## Pending physical-device rows (keep #26 open)
 
