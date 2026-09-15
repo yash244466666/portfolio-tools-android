@@ -199,8 +199,8 @@
     },
     {
       "name": "status:excluded",
-      "color": "6E7781",
-      "description": "Implemented but deliberately excluded from the released version-1 scope"
+      "color": "E99695",
+      "description": "Work item excluded from the version-1 scope by a recorded ADR decision — never counts as completed"
     }
   ],
   "milestones": [
