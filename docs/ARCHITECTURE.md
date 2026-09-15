@@ -76,7 +76,13 @@ Android view-hierarchy and legacy form persistence are disabled for the WebView,
 - External HTTPS pages open outside the app WebView.
 - Cleartext networking is disabled.
 - Android backup/device transfer is excluded for app-private data.
-- FileProvider exposes only the cache `share/` subtree.
+- The app-owned `FileProvider` exposes only the cache `share/` subtree and is not exported.
+  The merged manifest carries two further non-exported providers that are reviewed parts of
+  the permission budget rather than app-owned surface: `androidx.startup.InitializationProvider`
+  (AndroidX startup) and `com.capacitorjs.plugins.localnotifications.LocalNotificationsAssetProvider`
+  (supplied by the pinned local-notifications plugin, which schedules timer alerts). Neither
+  accepts a URI or intent from outside the app; the manifest gate in
+  `scripts/check-android-manifest.mjs` fails the build if any component becomes exported.
 - Release build is minified and resource-shrunk.
 - A single network provider is explicit and narrowly allowlisted: Frankfurter, used only by Currency Converter, is the sole entry in the packaged CSP `connect-src` after DNS Lookup was cut.
 - Sensitive user content is excluded from logs and automatic persistence.
