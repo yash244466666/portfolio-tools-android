@@ -1,24 +1,28 @@
 name: CI
 
-# This repository is private, so its runner minutes are metered against the GitHub
-# Free allowance (2,000 minutes per billing month). On 2026-09-15 the account
-# exhausted that allowance and every job stopped being allocated a runner — jobs
-# failed 2 s after starting with `runner_id: 0` and no steps, including re-runs of
-# commits that had already passed. Two things below keep the budget from being
-# spent on work that proves nothing:
+# This repository is private, so hosted runner minutes are metered against the
+# GitHub Free allowance (2,000 minutes per billing month). On 2026-09-15 the
+# account exhausted that allowance and every job stopped being allocated a
+# runner — jobs failed 2 s after starting with `runner_id: 0` and no steps,
+# including re-runs of commits that had already passed.
 #
-#   1. `concurrency` cancels a superseded pull-request run. Pushing twice to a
-#      branch used to pay for the whole suite twice, with only the last push
-#      mattering. `main` is deliberately never cancelled: a half-verified main is
-#      worse than a slow one.
-#   2. `paths-ignore` skips pull requests that only touch prose. A documentation
-#      change cannot alter the application, its tests, or the Android artifact,
-#      and nothing in this workflow inspects Markdown. The work-item manifest
-#      lives under `config/`, not `docs/`, so its validation still runs.
+# The jobs therefore run on the repository's self-hosted runner (label
+# `yash-linux`, registered from the maintainer's Linux workstation), which is
+# not metered. Both hosted jobs are kept as they were so the definition stays
+# portable if the runner is retired:
 #
-# If branch protection is ever enabled, note that a skipped workflow reports as
-# skipped rather than successful, and a docs-only pull request would then need a
-# deliberately added no-op gate.
+#   - `concurrency` cancels a superseded pull-request run, so pushing twice to a
+#     branch does not pay twice for the whole suite. `main` is deliberately never
+#     cancelled: a half-verified main is worse than a slow one.
+#   - `paths-ignore` skips pull requests that only touch prose. A documentation
+#     change cannot alter the application, its tests, or the Android artifact, and
+#     nothing in this workflow inspects Markdown. The work-item manifest lives
+#     under `config/`, not `docs/`, so its validation still runs.
+#
+# If the self-hosted runner is removed, set both `runs-on` values back to
+# `ubuntu-latest` and restore `--with-deps` on the Playwright install (that flag
+# only exists because GitHub's hosted image needs the browsers' system packages
+# installed at run time; here they are already present).
 
 on:
   pull_request:
@@ -37,7 +41,7 @@ concurrency:
 
 jobs:
   web-quality:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, yash-linux]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -59,11 +63,11 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: node scripts/check-pdf-worker-polyfill.mjs
-      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright install chromium
       - run: pnpm test:e2e
 
   android-debug:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, yash-linux]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
