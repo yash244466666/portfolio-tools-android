@@ -471,6 +471,31 @@
       ]
     },
     {
+      "key": "apply-adr-0023-scope",
+      "title": "[Governance] Apply ADR 0023 — focused version-1 scope (100 → 30 tools)",
+      "parent": "foundation-epic",
+      "type": "Release",
+      "category": "Release",
+      "phase": "Production",
+      "priority": "P0 Critical",
+      "risk": "Critical",
+      "estimate": 3,
+      "workflow": "In Review",
+      "milestone": "play-launch",
+      "outcome": "Bring the repository and the live GitHub planning state into agreement on the 30-tool version-1 scope accepted by ADR 0023.",
+      "acceptance": [
+        "ADR 0023 is Accepted and ADR 0022 carries a superseded note, with ADR 0004 and ADR 0021 left unedited in place.",
+        "src/tools/registry.ts carries 30 `enabled` entries with lazy components and 70 `removed` entries without; the approved 30 are asserted as an oracle by registry.test.ts.",
+        "The packaged CSP connect-src allowlist names only the single retained network provider.",
+        "config/github-work-items.json describes the retained scope, with the retired tools listed separately and the closed-beta milestone renamed to 30 tools.",
+        "CLAUDE.md and AGENT.md carry identical 30-tool scope text and remain byte-identical.",
+        "IMPLEMENTATION_TRACKER.md, README.md, docs/ARCHITECTURE.md, docs/WORK_MANAGEMENT.md and the certification dossiers state the 30-tool scope.",
+        "The regression-matrix gate and the emulator checklist driver scope to the 30 retained tools and still fail when a retained tool lacks its oracle or artifact coverage.",
+        "Cut-tool E2E and artifact coverage is retired while every pure-logic suite continues to run.",
+        "The authorized `pnpm github:work-items:apply` run has closed the retired tool issues as not planned, renamed the milestone, and reconciled the Project."
+      ]
+    },
+    {
       "key": "sensitive-clipboard",
       "title": "Implement sensitive Android clipboard metadata",
       "parent": "foundation-epic",
