@@ -112,6 +112,8 @@ interface GitHubIssue {
   title: string
   body: string | null
   state: "open" | "closed"
+  /** `completed` | `not_planned` | null. GitHub keeps the original reason across reopens. */
+  state_reason?: string | null
   html_url: string
   labels: ({ name: string } | string)[]
   milestone: { number: number } | null
@@ -199,6 +201,23 @@ const expectedCategoryCounts: Record<CategoryId, number> = {
 const retiredToolRenames: Record<string, string> = {
   "csv-json": "tool:csv-json-converter",
   "css-animation-generator": "tool:animation-css-generator",
+}
+
+/**
+ * Invisible marker appended to the retirement note so the provisioner can tell whether the
+ * note is already on an issue, however often it runs.
+ */
+const retirementNoteMarker = "<!-- adr-0023-retirement -->"
+
+/** The durable on-issue record that ADR 0023 requires a cut tool to link back to. */
+function noteFor(repository: string): string {
+  return [
+    `Cut from the version-1 scope by [ADR 0023](https://github.com/${repository}/blob/main/docs/decisions/0023-focused-version-one-scope.md).`,
+    "",
+    "Closed as not planned. The tool's source, pure logic, provenance, and tests remain in the",
+    "repository; only its lazy component was dropped from the registry, and the entry moved to",
+    "lifecycle `removed`. Reinstating it needs a superseding ADR, not a re-implementation.",
+  ].join("\n")
 }
 
 const categoryNames: Record<CategoryId, string> = {
@@ -1008,28 +1027,64 @@ function retireIssues(
   issues: Map<string, GitHubIssue>,
 ): void {
   const retired = definitions.filter((definition) => definition.retired)
-  console.log(`Closing ${retired.length} retired tool issues as not planned...`)
+  console.log(`Applying the retired disposition to ${retired.length} tool issues...`)
   let closed = 0
+  let noted = 0
+  let corrected = 0
   for (const definition of retired) {
     const issue = issues.get(definition.key)
     invariant(issue, `Missing issue for retired tool ${definition.key}`)
-    if (issue.state === "closed") continue
-    const note = [
-      `Cut from the version-1 scope by [ADR 0023](https://github.com/${repository}/blob/main/docs/decisions/0023-focused-version-one-scope.md).`,
-      "",
-      "Closed as not planned. The tool's source, pure logic, provenance, and tests remain in the",
-      "repository; only its lazy component was dropped from the registry, and the entry moved to",
-      "lifecycle `removed`. Reinstating it needs a superseding ADR, not a re-implementation.",
-    ].join("\n")
-    api("POST", `repos/${repository}/issues/${issue.number}/comments`, { body: note })
-    runGh(["issue", "close", String(issue.number), "--repo", repository, "--reason", "not planned"])
-    // Keep the in-memory record in step with GitHub: setProjectFields derives the Project
-    // Workflow from issue.state, so a stale "open" here would file a closed issue as Backlog.
-    issue.state = "closed"
-    closed += 1
-    pause(350)
+
+    // The note is the durable record on the issue itself, and ADR 0023 requires the cut to
+    // be traceable back to it. Posted once, detected by an invisible marker, so re-running
+    // the provisioner cannot pile up duplicates.
+    const existingComments = paginated<{ body: string }>(
+      `repos/${repository}/issues/${issue.number}/comments?per_page=100`,
+    )
+    if (!existingComments.some((comment) => comment.body.includes(retirementNoteMarker))) {
+      api("POST", `repos/${repository}/issues/${issue.number}/comments`, {
+        body: `${noteFor(repository)}\n\n${retirementNoteMarker}`,
+      })
+      noted += 1
+      pause(350)
+    }
+
+    if (issue.state === "closed") {
+      // Most retired issues were already closed as `completed` back when their tool shipped.
+      // GitHub keeps that reason unless it is corrected, and an early `continue` here once
+      // skipped all 70 — leaving every one of them asserting "closed as not planned" in its
+      // rewritten body while the API still reported `completed`. Correct the reason rather
+      // than skipping, so the live state matches the record.
+      if (issue.state_reason !== "not_planned") {
+        api("PATCH", `repos/${repository}/issues/${issue.number}`, {
+          state: "closed",
+          state_reason: "not_planned",
+        })
+        issue.state_reason = "not_planned"
+        corrected += 1
+        pause(250)
+      }
+    } else {
+      runGh([
+        "issue",
+        "close",
+        String(issue.number),
+        "--repo",
+        repository,
+        "--reason",
+        "not planned",
+      ])
+      // Keep the in-memory record in step with GitHub: setProjectFields derives the Project
+      // Workflow from issue.state, so a stale "open" here would file a closed issue as Backlog.
+      issue.state = "closed"
+      issue.state_reason = "not_planned"
+      closed += 1
+      pause(350)
+    }
   }
-  console.log(`Retired issues closed in this run: ${closed}.`)
+  console.log(
+    `Retired issues ready: ${noted} notes posted, ${corrected} close reasons corrected, ${closed} closed.`,
+  )
 }
 
 function provisionDependencies(
