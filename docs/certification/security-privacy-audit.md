@@ -21,8 +21,10 @@ re-verified against the current source:
   covered by hostile-corpus tests.
 - The YAML to JSON tool's runtime `js-yaml` was bumped to 4.3.1 (PR #195) to
   clear two HIGH quadratic-CPU advisories (GHSA-52cp-r559-cp3m,
-  GHSA-5p4m-2wfm-xmqj) that applied to user-controlled YAML; the parser
-  bounds remain.
+  GHSA-5p4m-2wfm-xmqj) that applied to user-controlled YAML, and then to 4.3.2
+  (PR #209) to clear a third HIGH (GHSA-2883-xcg3-v3hh, `maxTotalMergeKeys`
+  does not limit CPU use for empty merge sources), which also reached the
+  runtime parse path; the parser bounds remain.
 - Cleartext traffic is disabled (manifest + Network Security Configuration),
   backup/device transfer is excluded, the FileProvider exposes only
   `cache/share/`, WebView debugging is disabled in production, and external
@@ -87,15 +89,19 @@ identifiers, tokens, or tool history are transmitted.
 
 ## 5. Dependencies and vulnerability posture
 
-- `pnpm audit` at this commit: **0 critical, 0 high, 1 moderate** — the
+- `pnpm audit --prod` at this commit: **no known vulnerabilities**. `pnpm audit`
+  (including dev dependencies): **0 critical, 0 high, 1 moderate** — the
   moderate is `uuid <11.1.1` (GHSA-w5hq-g745-h8pq) reached only through the
   dev-time `@capacitor/cli > xcode` path. It never ships in the app bundle,
   and the vulnerable v3/v5/v6 `buf` argument is unreachable from CLI usage.
   Accepted dev-only exposure; revisit on the next Capacitor CLI update.
-- The two HIGH js-yaml advisories were fixed by PR #195 (runtime dependency
-  of the YAML to JSON tool).
-- Exact dependency pins and the pnpm-only lockfile policy are unchanged; the
-  js-yaml lockfile diff contained only js-yaml.
+- The js-yaml HIGH advisories were fixed by PR #195 and PR #209 (runtime
+  dependency of the YAML to JSON tool). A later advisory
+  (GHSA-2883-xcg3-v3hh) reappeared against 4.3.1 and is cleared by the 4.3.2
+  pin in PR #209; the runtime path is clean again, and the tool remains the
+  only production dependency that parses hostile user input.
+- Exact dependency pins and the pnpm-only lockfile policy are unchanged; both
+  js-yaml lockfile diffs contained only js-yaml.
 
 ## 6. Licenses and notices (production bundle)
 
