@@ -57,7 +57,12 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
-          cache: pnpm
+          # No `cache:` on a self-hosted runner. The pnpm store and ~/.gradle live on
+          # this machine's disk and already persist between runs, so the Actions cache
+          # is redundant — and actively harmful: setup-java's post step compresses and
+          # uploads the whole Gradle cache, which after one cold run was 7.5 GB and held
+          # a job in "Post Run actions/setup-java" for many minutes. Restore the cache
+          # inputs if these jobs ever move back to hosted runners.
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
       - run: pnpm typecheck
@@ -83,12 +88,11 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
-          cache: pnpm
+          # No `cache:` here or on setup-java — see the note on the web job above.
       - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
         with:
           distribution: temurin
           java-version: 21
-          cache: gradle
       # The action's default `packages` input is "tools platform-tools". Google
       # removed the legacy `tools` package from the SDK repository, so the
       # default now fails with "Failed to find package 'tools'" before any
