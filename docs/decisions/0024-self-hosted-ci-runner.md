@@ -60,4 +60,8 @@ The runner itself is **out-of-tree operational state**, not repository state. It
 
 ## Verification
 
-Recorded when this ADR was accepted: the self-hosted runner was registered and reported `online`, and the pull request's `web-quality` job was picked up by it (`runner_id: 21`, `runner_name: yash-portfolio-ci`) where the same commit had previously failed with `runner_id: 0` — which is the routing change being proven. The full-suite result on that run is recorded in `IMPLEMENTATION_TRACKER.md` rather than asserted here. The gate list itself is unchanged from section 24 of the repository rules; only where it executes changed.
+Verified green on the self-hosted runner before this ADR was accepted. Both jobs ran on the same commit and passed: `android-debug` in 3m30s and `web-quality` in 4m08s, **7m44s end to end**, with `runner_name=yash-portfolio-ci` — where the same class of commit had previously failed with `runner_id: 0` and no runner at all. The suite included `pnpm format:check`, which CI had never before run (the pnpm store and Gradle caches warm on the host; a cold run against the hosted-image defaults had peaked at **5.1 GB**, and removing the Actions caches brought that to **3.3 GB**).
+
+Measured resource profile, for sizing any future host: **`android-debug` peaks around 3–5 GB** and `web-quality` around 2–3 GB. A host intended to take both jobs should have at least 8 GB of RAM; 4 GB would run one job at a time with little headroom.
+
+The gate list is unchanged from section 24 of the repository rules; only where it executes changed.
