@@ -196,6 +196,11 @@
       "name": "risk:critical",
       "color": "B60205",
       "description": "Unresolved risk blocks release"
+    },
+    {
+      "name": "status:excluded",
+      "color": "6E7781",
+      "description": "Implemented but deliberately excluded from the released version-1 scope"
     }
   ],
   "milestones": [
@@ -306,9 +311,9 @@
       "estimate": 0,
       "workflow": "In Progress",
       "milestone": "play-launch",
-      "outcome": "Deliver all 45 audited Developer tools, including network and special-policy entries, at production quality.",
+      "outcome": "Deliver all 5 retained Developer tools that version 1 ships.",
       "acceptance": [
-        "All 45 Developer tool sub-issues are complete.",
+        "All 5 retained Developer tool sub-issues are complete.",
         "ADR 0021 keeps YouTube Downloader excluded; ADR 0023 makes the exclusion moot for version 1 by cutting it from the scope outright."
       ]
     },
@@ -323,9 +328,9 @@
       "estimate": 0,
       "workflow": "In Progress",
       "milestone": "play-launch",
-      "outcome": "Deliver all 17 audited Text tools, including durable Notes and timer behavior, at production quality.",
+      "outcome": "Deliver all 5 retained Text tools, including durable Notes and timer behaviour, at production quality.",
       "acceptance": [
-        "All 17 Text tool sub-issues are complete.",
+        "All 5 retained Text tool sub-issues are complete.",
         "Durable data, export, lifecycle, notification, and recovery behavior pass."
       ]
     },
@@ -968,9 +973,7 @@
         "privacy-data-safety",
         "store-listing",
         "network-provider-review",
-        "audio-recorder-review",
-        "video-gif-review",
-        "youtube-review"
+        "audio-recorder-review"
       ],
       "renamedFrom": "all87-release-candidate"
     },
@@ -1111,27 +1114,37 @@
   "tier3": ["currency-converter", "dns-lookup"],
   "tier4": ["audio-recorder", "video-to-gif", "youtube-downloader"],
   "toolDependencies": {
-    "pdf-converter": [],
-    "currency-converter": [],
-    "image-compressor": [],
-    "qr-generator": [],
-    "password-generator": [],
-    "ical-generator": [],
-    "vcard-generator": [],
-    "youtube-downloader": [],
-    "pomodoro-timer": [],
-    "notes-scratchpad": [],
-    "audio-recorder": [],
-    "stopwatch": [],
-    "countdown-timer": [],
-    "time-zone-converter": [],
-    "date-difference-calculator": [],
-    "loan-emi-calculator": [],
-    "discount-tax-calculator": [],
-    "dice-roller": [],
+    "pdf-converter": ["content-uri-streaming", "share-cache-cleanup"],
+    "currency-converter": ["network-provider-review"],
+    "image-compressor": ["content-uri-streaming", "share-cache-cleanup"],
+    "qr-generator": ["share-cache-cleanup"],
+    "password-generator": ["sensitive-clipboard"],
+    "ical-generator": ["share-cache-cleanup"],
+    "vcard-generator": ["share-cache-cleanup"],
+    "youtube-downloader": ["youtube-review", "network-provider-review"],
+    "pomodoro-timer": ["renderer-recovery", "android-instrumentation"],
+    "notes-scratchpad": ["renderer-recovery"],
+    "audio-recorder": ["audio-recorder-review", "content-uri-streaming", "share-cache-cleanup"],
+    "stopwatch": ["renderer-recovery"],
+    "countdown-timer": ["renderer-recovery", "android-instrumentation"],
+    "age-calculator": [],
     "bmi-calculator": [],
+    "calculator": [],
+    "case-converter": [],
+    "character-counter": [],
+    "color-picker": [],
+    "date-difference-calculator": [],
+    "dice-roller": [],
+    "discount-tax-calculator": [],
+    "fuel-trip-cost-calculator": [],
+    "loan-emi-calculator": [],
+    "password-strength-checker": [],
+    "percentage-calculator": [],
+    "time-zone-converter": [],
+    "tip-calculator": [],
+    "unit-converter": [],
     "unit-price-comparer": [],
-    "fuel-trip-cost-calculator": []
+    "word-counter": []
   },
   "tools": [
     ["age-calculator", "Age Calculator", "math"],
