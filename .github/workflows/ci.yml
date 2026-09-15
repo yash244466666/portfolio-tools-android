@@ -50,7 +50,16 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: gradle
+      # The action's default `packages` input is "tools platform-tools". Google
+      # removed the legacy `tools` package from the SDK repository, so the
+      # default now fails with "Failed to find package 'tools'" before any
+      # repository step runs — it broke this job for every branch, not just one
+      # change. The pinned action ref is unchanged; only the input is narrowed
+      # to the package the runner still publishes, and Gradle resolves the
+      # remainder against the preinstalled SDK and the accepted licences.
       - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: "platform-tools"
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm cap:sync
