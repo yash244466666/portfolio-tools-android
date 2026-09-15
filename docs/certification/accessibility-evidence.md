@@ -1,21 +1,23 @@
 # Accessibility certification evidence (automated portions)
 
-> Compiled: 2026-09-08 for issue #22. Automated evidence supplements but does
-> not replace the pending physical-device TalkBack/Switch Access rows.
+> Compiled: 2026-09-08 for issue #22; refreshed 2026-09-15 at `bd5b310`.
+> Automated evidence supplements but does not replace the pending
+> physical-device TalkBack/Switch Access rows.
 
 ## What is already automated (per release candidate)
 
-| Layer                | Coverage                                                                                                                                                                                                             |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Component tests      | Every enabled tool has interaction tests asserting semantic roles, labels, and accessible names; live-region assertions for important feedback (84 tool components use `aria-live` regions; 107 use ARIA attributes) |
-| Route focus          | ToolScreen moves focus to the destination heading on route change (focusable heading; shell/component tests)                                                                                                         |
-| Navigation semantics | Labeled primary navigation with `aria-current`; toggles use state attributes; skip link present (`Skip to content`)                                                                                                  |
-| Contrast             | WCAG 2.2 AA token pairs in `src/styles.css` light/dark; the Color Contrast Checker itself implements the WCAG 2.2 relative-luminance algorithm with vectors                                                          |
-| Reduced motion       | `prefers-reduced-motion` CSS block constrains animation                                                                                                                                                              |
-| Touch targets        | Shared controls carry `min-height: 3rem/3.25rem` (48–52 px) with adequate separation                                                                                                                                 |
-| 200% text            | Checklist driver row: 200% font scale relayouts without horizontal overflow on the installed artifact (two consecutive green runs)                                                                                   |
-| Landscape/foldable   | Checklist driver row: landscape relayout without horizontal overflow; E2E breakpoint sweep 320–1024 px                                                                                                               |
-| Offline/status       | Status never relies on color alone (typed text states)                                                                                                                                                               |
+| Layer                | Coverage                                                                                                                                                                                                                                                                                                  |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Component tests      | All 100 enabled tools now have interaction tests asserting semantic roles, labels, and accessible names; live-region assertions for important feedback. Of the 101 tool component files, **84 use `aria-live` regions and 99 use ARIA attributes** (measured at `bd5b310`).                               |
+| Route focus          | ToolScreen moves focus to the destination heading on route change (focusable heading). The search-clear focus test in `src/app/App.test.tsx` is the only current `toHaveFocus` assertion; a dedicated ToolScreen route-focus assertion is still outstanding and is recorded as a gap rather than claimed. |
+| Navigation semantics | Labeled primary navigation with `aria-current`; toggles use state attributes; skip link present (`Skip to content`)                                                                                                                                                                                       |
+| Contrast             | WCAG 2.2 AA token pairs in `src/styles.css` light/dark, recomputed by `scripts/check-token-contrast.mjs` — **36/36 pairs** pass, wired into `pnpm check` and CI; the Color Contrast Checker itself implements the WCAG 2.2 relative-luminance algorithm with vectors                                      |
+| Token resolution     | `scripts/check-css-tokens.mjs` fails the build when a component references a custom property that no stylesheet declares — the defect class that shipped invisible fills and a sub-AA selected state twice                                                                                                |
+| Reduced motion       | `prefers-reduced-motion` CSS block constrains animation                                                                                                                                                                                                                                                   |
+| Touch targets        | Shared controls carry `min-height: 3rem/3.25rem` (48–52 px) with adequate separation; the E2E floor scenario now also asserts `.text-link`, which previously rendered ~24 px tall                                                                                                                         |
+| 200% text            | Checklist driver row: 200% font scale relayouts without horizontal overflow on the installed artifact                                                                                                                                                                                                     |
+| Landscape/foldable   | Checklist driver row: landscape relayout without horizontal overflow; E2E breakpoint sweep 320–1024 px                                                                                                                                                                                                    |
+| Offline/status       | Status never relies on color alone (typed text states)                                                                                                                                                                                                                                                    |
 
 ## Pending physical-device rows (keep #22 open)
 
@@ -27,7 +29,8 @@
 
 ## How to reproduce the automated evidence
 
-- `pnpm test` (component/a11y assertions), `pnpm test:e2e` (208 checks incl.
-  focus/theme/overflow), `node scripts/device-checklist-emulator.mjs`
-  (artifact interaction, 200% text, landscape rows) per
-  `docs/certification/regression-matrix.md`.
+- `pnpm test` (component/a11y assertions), `pnpm css:tokens:check`,
+  `pnpm contrast:check`, `pnpm test:e2e` (**212 checks**: 106 scenarios ×
+  phone/tablet, including the 48 dp touch-floor, theme, and overflow sweeps),
+  `node scripts/device-checklist-emulator.mjs` (artifact interaction, 200 %
+  text, landscape rows) per `docs/certification/regression-matrix.md`.
