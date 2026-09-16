@@ -397,6 +397,34 @@ function validateManifest(): {
       invariant(knownToolIds.has(id), `Unknown ${listName} tool: ${id}`)
   }
 
+  // Each category epic names the number of tools its category retains, and that number is
+  // derived from the manifest. Asserting it here turns the drift that survived the 30-tool
+  // cut — four epics keeping pre-ADR counts in their titles and bodies, because a human
+  // scan looked for the wrong numerals — into a gate failure instead. The count lives in
+  // the title alone; a category epic's outcome and acceptance deliberately say
+  // "the retained ... tools" so there is no second copy to fall out of step.
+  for (const [category, epicKey] of Object.entries(categoryEpics) as [CategoryId, string][]) {
+    const epic = manifest.epics.find(({ key }) => key === epicKey)
+    invariant(epic, `Missing category epic ${epicKey}`)
+    const retained = manifest.tools.filter(
+      ([id, , toolCategory]) => toolCategory === category && !excludedToolIds.has(id),
+    ).length
+    const expectedTitle = `[Epic] Deliver all ${retained} ${categoryNames[category]} tool${
+      retained === 1 ? "" : "s"
+    }`
+    invariant(
+      epic.title === expectedTitle,
+      `${epicKey} must name its retained count: expected "${expectedTitle}", found "${epic.title}"`,
+    )
+    const restated = [epic.outcome, ...epic.acceptance].filter((line) =>
+      /\b\d+\s+\w*\s*(tool|tool sub-issues)\b/i.test(line),
+    )
+    invariant(
+      restated.length === 0,
+      `${epicKey} restates a tool count outside its title: ${restated.join(" | ")}`,
+    )
+  }
+
   const issueKeys = unique(
     [
       ...manifest.epics.map(({ key }) => key),

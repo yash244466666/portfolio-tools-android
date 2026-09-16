@@ -294,9 +294,9 @@
       "estimate": 0,
       "workflow": "In Progress",
       "milestone": "play-launch",
-      "outcome": "Deliver all seven audited Core tools at production quality.",
+      "outcome": "Deliver the audited Core tools that version 1 retains at production quality.",
       "acceptance": [
-        "All 7 Core tool sub-issues are complete.",
+        "All retained Core tool sub-issues are complete.",
         "The release manifest and store claims include the same reviewed Core catalog."
       ]
     },
@@ -311,9 +311,9 @@
       "estimate": 0,
       "workflow": "In Progress",
       "milestone": "play-launch",
-      "outcome": "Deliver all 5 retained Developer tools that version 1 ships.",
+      "outcome": "Deliver the audited Developer tools that version 1 retains at production quality.",
       "acceptance": [
-        "All 5 retained Developer tool sub-issues are complete.",
+        "All retained Developer tool sub-issues are complete.",
         "ADR 0021 keeps YouTube Downloader excluded; ADR 0023 makes the exclusion moot for version 1 by cutting it from the scope outright."
       ]
     },
@@ -328,9 +328,9 @@
       "estimate": 0,
       "workflow": "In Progress",
       "milestone": "play-launch",
-      "outcome": "Deliver all 5 retained Text tools, including durable Notes and timer behaviour, at production quality.",
+      "outcome": "Deliver the audited Text tools that version 1 retains, including durable Notes and timer behaviour, at production quality.",
       "acceptance": [
-        "All 5 retained Text tool sub-issues are complete.",
+        "All retained Text tool sub-issues are complete.",
         "Durable data, export, lifecycle, notification, and recovery behavior pass."
       ]
     },
@@ -345,9 +345,9 @@
       "estimate": 0,
       "workflow": "In Progress",
       "milestone": "play-launch",
-      "outcome": "Deliver Audio Recorder, Video to GIF, and File Hash Checker with reviewed permissions, memory limits, streaming, and device evidence.",
+      "outcome": "Deliver the retained Media tool with reviewed permissions, memory limits, streaming, and device evidence.",
       "acceptance": [
-        "All 3 Media tool sub-issues are complete.",
+        "All retained Media tool sub-issues are complete.",
         "Microphone, encoding, large-file, privacy, and Play-policy evidence passes."
       ]
     },
@@ -362,9 +362,9 @@
       "estimate": 0,
       "workflow": "Backlog",
       "milestone": "play-launch",
-      "outcome": "Deliver all five audited Security tools without logging or persisting sensitive inputs.",
+      "outcome": "Deliver the audited Security tools that version 1 retains without logging or persisting sensitive inputs.",
       "acceptance": [
-        "All 5 Security tool sub-issues are complete.",
+        "All retained Security tool sub-issues are complete.",
         "Security wording, correctness oracles, clipboard handling, and sensitive-data tests pass."
       ]
     },
@@ -379,9 +379,9 @@
       "estimate": 0,
       "workflow": "Backlog",
       "milestone": "play-launch",
-      "outcome": "Deliver all ten audited Math tools with independent correctness, time, locale, accessibility, and lifecycle evidence.",
+      "outcome": "Deliver the audited Math tools that version 1 retains, with independent correctness, time, locale, accessibility, and lifecycle evidence.",
       "acceptance": [
-        "All 10 Math tool sub-issues are complete.",
+        "All retained Math tool sub-issues are complete.",
         "Calculations, time tools, simulations, and accessibility output pass independent fixtures."
       ]
     },
