@@ -193,6 +193,21 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
     css: true,
+    /**
+     * Vitest's 5 s default is too tight for the heaviest component tests, which
+     * render large tables or tool shells through jsdom and measure ~1.9 s for a
+     * single test on an idle machine — only ~2.6x headroom, so ordinary
+     * concurrent load (a Gradle build, an emulator, a second job) pushes them
+     * past the limit and reports `Test timed out in 5000ms`, which reads exactly
+     * like a regression. Three such timeouts were observed in one day
+     * (2026-09-16): AsciiTable, Calculator, and App locally under load, and
+     * AsciiTable again in CI.
+     *
+     * 15 s keeps roughly 8x headroom over the measured worst case while still
+     * failing a genuine hang. This raises the ceiling only; no assertion, and no
+     * test's expected behaviour, is relaxed.
+     */
+    testTimeout: 15_000,
     coverage: {
       reporter: ["text", "html"],
       include: ["src/**/*.{ts,tsx}"],
