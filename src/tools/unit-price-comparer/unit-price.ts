@@ -166,5 +166,12 @@ export function formatUnitPrice(value: number): string {
 }
 
 function roundTo4(value: number): number {
-  return Math.round(value * 10000) / 10000
+  // Four decimals, half-up, with a relative-epsilon nudge because the quotient
+  // can land just below the boundary in IEEE doubles: 0.15 / 1000 is
+  // 0.00014999999999999999, so a true half rounded down to 0.0001 instead of up
+  // to 0.0002. Same guard as `roundToCents` in `_shared/money.ts`. This matters
+  // more here than in a display-only field, because `pricePerBaseUnit` is both
+  // what the row shows and the key `rankUnitPrices` sorts and ties on, so a miss
+  // reaches the ranking.
+  return Math.round(value * 10000 * (1 + Number.EPSILON)) / 10000
 }
