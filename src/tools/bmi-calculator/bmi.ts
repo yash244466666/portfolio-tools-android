@@ -111,5 +111,11 @@ export function formatBmi(bmi: number): string {
 }
 
 function roundToOneDecimal(value: number): number {
-  return Math.round(value * 10) / 10
+  // One decimal, half-up, with a relative-epsilon nudge: a decimal-to-float
+  // conversion can land just below the boundary (40.32 kg at 1.60 m is
+  // 15.749999999999996, not 15.75), which would round a true half down to 15.7
+  // instead of 15.8. The nudge is ~1e-14 of the value, far below any genuine
+  // sub-half remainder, so only true half cases flip up. Same guard as
+  // `roundToCents` in `_shared/money.ts`.
+  return Math.round(value * 10 * (1 + Number.EPSILON)) / 10
 }

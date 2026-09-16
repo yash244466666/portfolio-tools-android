@@ -67,3 +67,23 @@ describe("getPercentageOption", () => {
     expect(() => getPercentageOption("nope")).toThrow(RangeError)
   })
 })
+
+describe("computePercentage non-finite results", () => {
+  it("reports an undefined reason instead of returning Infinity", () => {
+    // Only the percent-of branch guarded its result; the other two returned
+    // Infinity with a null reason, so the UI showed a bare placeholder with no
+    // explanation.
+    const share = computePercentage("what-percent", 1, 1e-320)
+    expect(share.value).toBeNull()
+    expect(share.undefinedReason).not.toBeNull()
+
+    const change = computePercentage("percent-change", 1e308, -1e308)
+    expect(change.value).toBeNull()
+    expect(change.undefinedReason).not.toBeNull()
+  })
+
+  it("still returns ordinary finite results unchanged", () => {
+    expect(computePercentage("what-percent", 50, 200).value).toBe(25)
+    expect(computePercentage("percent-change", 150, 100).value).toBe(50)
+  })
+})

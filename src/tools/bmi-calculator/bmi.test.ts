@@ -109,4 +109,17 @@ describe("categories and formatting", () => {
     expect(formatBmi(22.857142857)).toBe("22.9")
     expect(formatBmi(18)).toBe("18.0")
   })
+
+  it("rounds an exact half up instead of down at the float boundary", () => {
+    // 40.32 / 1.6^2 is exactly 15.75 in decimal but 15.749999999999996 as a
+    // double, so an unguarded Math.round returned 15.7.
+    expect(formatBmi(computeBmiMetric(40.32, 160)!)).toBe("15.8")
+    expect(formatBmi(computeBmiMetric(48, 160)!)).toBe("18.8")
+    expect(formatBmi(computeBmiMetric(67.2, 160)!)).toBe("26.3")
+  })
+
+  it("leaves values that are not on a half boundary unchanged", () => {
+    expect(formatBmi(computeBmiMetric(70, 175)!)).toBe("22.9")
+    expect(formatBmi(computeBmiMetric(60, 170)!)).toBe("20.8")
+  })
 })

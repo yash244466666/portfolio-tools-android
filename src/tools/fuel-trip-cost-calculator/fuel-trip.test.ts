@@ -161,4 +161,27 @@ describe("formatting", () => {
     expect(formatMoney(4269)).toBe("42.69")
     expect(formatMoney(5)).toBe("0.05")
   })
+
+  it("rounds the total to cents from the unrounded volume", () => {
+    // 100 km at 7 km/l is 14.285714… l, not the displayed 14.286 l. Rounding the
+    // volume first and then costing it produced 1785.75 instead of 1785.71.
+    const result = computeTripCost({
+      distanceKm: 100,
+      efficiency: 7,
+      mode: "km-per-litre",
+      fuelPricePerLitre: 125,
+      passengers: 1,
+    })
+    expect(result?.litres).toBe(14.286)
+    expect(result?.totalCostCents).toBe(178571)
+
+    const longer = computeTripCost({
+      distanceKm: 333,
+      efficiency: 11,
+      mode: "km-per-litre",
+      fuelPricePerLitre: 125,
+      passengers: 1,
+    })
+    expect(longer?.totalCostCents).toBe(378409)
+  })
 })
