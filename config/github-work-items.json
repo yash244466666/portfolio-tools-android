@@ -1179,6 +1179,7 @@
     ["word-counter", "Word Counter", "text"],
     ["youtube-downloader", "YouTube Downloader", "dev"]
   ],
+  "excludedTools": ["youtube-downloader"],
   "toolPriorities": {
     "time-zone-converter": "P1 High",
     "date-difference-calculator": "P1 High",

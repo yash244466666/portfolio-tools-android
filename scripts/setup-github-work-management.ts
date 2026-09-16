@@ -89,6 +89,14 @@ interface WorkManifest {
   toolPriorities?: Record<string, string>
   tools: [string, string, CategoryId][]
   /**
+   * Tools present in the manifest only to keep their identifier bound, but which the
+   * released version 1 does not contain and which ADR 0023 did not cut — today only
+   * `youtube-downloader` (excluded by ADR 0021). They are deliberately kept out of
+   * `retiredTools`, because that set drives the ADR 0023 retirement note, while these
+   * carry `status:excluded` so they never read as delivered work.
+   */
+  excludedTools: string[]
+  /**
    * Tools cut from the version-1 scope by ADR 0023. They keep their implemented source,
    * pure logic, provenance, and tests in-tree as lifecycle `removed`; only their lazy
    * component is dropped. Their GitHub issues stay traceable and are closed as
@@ -220,6 +228,14 @@ function noteFor(repository: string): string {
   ].join("\n")
 }
 
+/** Tool IDs that version 1 excludes for a reason other than the ADR 0023 scope cut. */
+const excludedToolIds = new Set(manifest.excludedTools)
+
+/** True for a tool the release excludes without ADR 0023 having cut it. */
+function isExcludedTool(item: WorkItemDefinition): boolean {
+  return item.toolId !== undefined && excludedToolIds.has(item.toolId)
+}
+
 const categoryNames: Record<CategoryId, string> = {
   core: "Core",
   dev: "Developer",
@@ -312,6 +328,12 @@ function validateManifest(): {
     invariant(typeof label === "string" && label.length > 0, `Retired tool ${id} must have a label`)
     invariant(categoryNames[category], `Retired tool ${id} has unknown category ${category}`)
     invariant(reason.trim().length > 0, `Retired tool ${id} must record why it was cut`)
+  }
+  // Excluded tools live in `tools` (so their identifier stays bound) but are outside the
+  // released scope for a reason other than the ADR 0023 cut, and must not be in both sets.
+  for (const id of unique(manifest.excludedTools, "excluded tool")) {
+    invariant(toolIds.has(id), `Unknown excluded tool: ${id}`)
+    invariant(!retiredIds.has(id), `Excluded tool ${id} must not also be retired`)
   }
   unique(
     manifest.tools.map(([, label]) => label),
@@ -470,9 +492,11 @@ function labelsFor(item: WorkItemDefinition): string[] {
     priorityLabel(item.priority),
     categoryLabel(item.category),
   ]
-  // A retired tool was implemented and then cut from the scope; `status:excluded` says
-  // that, where the ordinary workflow label would imply ordinary backlog work.
-  if (item.retired) {
+  // A retired or excluded tool is out of the released scope; `status:excluded` says that,
+  // where the ordinary workflow label would imply ordinary backlog work. It matters that
+  // this holds for both: once `status:excluded` became a managed label, an excluded tool
+  // that missed this branch would silently lose the marking on the next run.
+  if (item.retired || isExcludedTool(item)) {
     labels.push("status:excluded")
   } else {
     const workflowLabel = statusLabel(item.workflow)
@@ -504,13 +528,17 @@ function bodyFor(item: WorkItemDefinition): string {
   if (item.toolId) metadata.push(`- Stable tool ID: \`${item.toolId}\``)
   if (item.verticalSlice) metadata.push("- Architecture milestone: yes")
 
-  if (item.retired) {
+  if (item.retired || isExcludedTool(item)) {
+    const scopeLine = item.retired
+      ? `**${item.title.replace("[Tool] ", "")}** was implemented and then cut from the released version-1 scope by
+[ADR 0023](https://github.com/${manifest.repository}/blob/main/docs/decisions/0023-focused-version-one-scope.md).`
+      : `**${item.title.replace("[Tool] ", "")}** is excluded from the released version-1 scope by
+[ADR 0021](https://github.com/${manifest.repository}/blob/main/docs/decisions/0021-version-one-scope-exclusion-youtube-downloader.md).`
     return `${marker}
 
 ## Outcome
 
-**${item.title.replace("[Tool] ", "")}** was implemented and then cut from the released version-1 scope by
-[ADR 0023](https://github.com/${manifest.repository}/blob/main/docs/decisions/0023-focused-version-one-scope.md).
+${scopeLine}
 
 This issue is closed as **not planned**. It is kept rather than deleted so the scope decision stays
 traceable, and because a tool ID is a persistent external identifier that is never reused for a
