@@ -8,11 +8,20 @@
  * here and reconstructed as a local calendar date instead, so the day counts
  * always reflect the entered civil date.
  *
- * Upstream parity kept: the years/months/days borrow arithmetic, the
- * wall-clock millisecond totals, the next-birthday roll-forward, and the
- * `Math.ceil` rounding of days until the next birthday. Wall-clock totals
- * count DST transitions as missing or repeated hours, so "total days" is
- * exact only across intervals without clock changes.
+ * A second divergence: the upstream borrow arithmetic
+ * (`days += length of the month before the current month`) borrowed a single
+ * month's length and never re-checked, so a birth on the 30th or 31st
+ * evaluated in the first days of a shorter month returned a negative day
+ * count — Jan 31 checked on Mar 1 rendered "36 years 1 month -2 days". The
+ * anniversary is now advanced by whole months with the day clamped to the
+ * target month's length, and the leftover days are counted between civil
+ * dates, so the day count can never be negative and cannot move with a clock
+ * change.
+ *
+ * Upstream parity kept: the wall-clock millisecond totals, the next-birthday
+ * roll-forward, and the `Math.ceil` rounding of days until the next birthday.
+ * Wall-clock totals count DST transitions as missing or repeated hours, so
+ * "total days" is exact only across intervals without clock changes.
  */
 
 export interface ParsedDate {
@@ -65,20 +74,34 @@ export function computeAge(birthDate: string, now: Date): AgeResult | null {
   const birth = new Date(parsed.year, parsed.month - 1, parsed.day)
   if (birth.getTime() > now.getTime()) return null
 
-  // Calendar age: borrow days from the length of the month before the
-  // current month, then borrow twelve months from the year.
-  let years = now.getFullYear() - birth.getFullYear()
-  let months = now.getMonth() - birth.getMonth()
-  let days = now.getDate() - birth.getDate()
-  if (days < 0) {
-    months--
-    const previousMonth = new Date(now.getFullYear(), now.getMonth(), 0)
-    days += previousMonth.getDate()
+  // Calendar age: step the birth date forward by whole months, clamping the
+  // day to the target month's length so a Jan 31 birthday has a Feb 28
+  // anniversary in common years, and stop at the last anniversary that is not
+  // in the future. Whole months then decompose into years and months, and the
+  // leftover days are counted between civil dates rather than between instants
+  // so neither a short month nor a clock change can skew them.
+  const daysInMonth = (year: number, monthIndex: number) =>
+    new Date(year, monthIndex + 1, 0).getDate()
+  const anniversary = (totalMonths: number) => {
+    const monthIndex = birth.getMonth() + totalMonths
+    const year = birth.getFullYear() + Math.floor(monthIndex / 12)
+    const month = ((monthIndex % 12) + 12) % 12
+    return new Date(year, month, Math.min(birth.getDate(), daysInMonth(year, month)))
   }
-  if (months < 0) {
-    years--
-    months += 12
+  const civilDays = (date: Date) => Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+
+  let totalMonths =
+    (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth())
+  let anchor = anniversary(totalMonths)
+  // Terminates at totalMonths = 0, whose anniversary is the birth date itself,
+  // which is never in the future because future inputs are rejected above.
+  while (anchor.getTime() > now.getTime()) {
+    totalMonths -= 1
+    anchor = anniversary(totalMonths)
   }
+  const years = Math.floor(totalMonths / 12)
+  const months = totalMonths % 12
+  const days = Math.round((civilDays(now) - civilDays(anchor)) / (1000 * 60 * 60 * 24))
 
   const diffMs = now.getTime() - birth.getTime()
   const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))

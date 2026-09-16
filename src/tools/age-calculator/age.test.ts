@@ -83,3 +83,46 @@ describe("todayIso", () => {
     expect(todayIso(new Date(2026, 0, 3))).toBe("2026-01-03")
   })
 })
+
+describe("computeAge month-end boundaries", () => {
+  it("never borrows past a short month into a negative day count", () => {
+    // Regression: the borrow added only the length of the month before `now`
+    // and never re-checked, so a Jan 31 birth checked on Mar 1 returned
+    // "36 years 1 month -2 days".
+    const jan31 = computeAge("1990-01-31", new Date(2026, 2, 1, 12))
+    expect(jan31!.years).toBe(36)
+    expect(jan31!.months).toBe(1)
+    expect(jan31!.days).toBe(1)
+
+    const mar30 = computeAge("1985-03-30", new Date(2026, 2, 1, 12))
+    expect(mar30!.years).toBe(40)
+    expect(mar30!.months).toBe(11)
+    expect(mar30!.days).toBe(1)
+  })
+
+  it("keeps a clamped end-of-month anniversary consistent the next day", () => {
+    const nextDay = computeAge("1990-01-31", new Date(2026, 2, 2, 12))
+    expect(nextDay!.years).toBe(36)
+    expect(nextDay!.months).toBe(1)
+    expect(nextDay!.days).toBe(2)
+  })
+
+  it("stays inside a valid calendar decomposition across month boundaries", () => {
+    for (const birthDay of [28, 29, 30, 31]) {
+      for (let month = 0; month < 12; month++) {
+        const birth = `1990-${String(month + 1).padStart(2, "0")}-${String(birthDay).padStart(2, "0")}`
+        if (parseIsoDate(birth) === null) continue
+        for (let checkMonth = 0; checkMonth < 12; checkMonth++) {
+          for (const checkDay of [1, 2, 3, 15, 27, 28]) {
+            const result = computeAge(birth, new Date(2026, checkMonth, checkDay, 12))
+            if (!result) continue
+            expect(result.days).toBeGreaterThanOrEqual(0)
+            expect(result.days).toBeLessThan(31)
+            expect(result.months).toBeGreaterThanOrEqual(0)
+            expect(result.months).toBeLessThan(12)
+          }
+        }
+      }
+    }
+  })
+})

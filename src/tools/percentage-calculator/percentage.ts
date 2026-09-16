@@ -81,15 +81,25 @@ export function computePercentage(mode: PercentageMode, a: number, b: number): P
       }
       return { value, undefinedReason: null }
     }
-    case "what-percent":
+    case "what-percent": {
       if (b === 0) {
         return { value: null, undefinedReason: "Undefined: a share of 0 has no percentage." }
       }
-      return { value: (a / b) * 100, undefinedReason: null }
-    case "percent-change":
+      const value = (a / b) * 100
+      if (!Number.isFinite(value)) {
+        return { value: null, undefinedReason: "The result is too large to represent." }
+      }
+      return { value, undefinedReason: null }
+    }
+    case "percent-change": {
       if (b === 0) {
         return { value: null, undefinedReason: "Undefined: change from 0 has no percentage." }
       }
-      return { value: ((a - b) / Math.abs(b)) * 100, undefinedReason: null }
+      const value = ((a - b) / Math.abs(b)) * 100
+      if (!Number.isFinite(value)) {
+        return { value: null, undefinedReason: "The result is too large to represent." }
+      }
+      return { value, undefinedReason: null }
+    }
   }
 }

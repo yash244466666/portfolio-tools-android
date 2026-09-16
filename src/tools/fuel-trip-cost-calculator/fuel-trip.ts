@@ -125,10 +125,16 @@ export function computeTripCost(input: TripInput): TripCost | null {
     litresPerKm = efficiency / 100
   }
 
-  const litres = Math.round(distanceKm * litresPerKm * 1000) / 1000
+  // The displayed volume is rounded to millilitres for presentation only; the
+  // cost is computed from the full-precision volume and rounded to cents
+  // exactly once, as above. Rounding the volume first moved the total by up to
+  // a few cents at the fuel prices this tool targets (100 km at 7 km/l and
+  // 125/l rounded to 1785.75 instead of 1785.71).
+  const exactLitres = distanceKm * litresPerKm
+  const litres = Math.round(exactLitres * 1000) / 1000
   // Total cost: litres x price per litre, rounded to cents exactly once.
   const totalCostCents = Math.round(
-    (roundToCents(litres * fuelPricePerLitre) + Number.EPSILON) * 100,
+    (roundToCents(exactLitres * fuelPricePerLitre) + Number.EPSILON) * 100,
   )
   return {
     litres,
