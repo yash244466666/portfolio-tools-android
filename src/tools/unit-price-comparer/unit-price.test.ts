@@ -123,4 +123,16 @@ describe("rankUnitPrices", () => {
   it("caps the batch at four items by contract", () => {
     expect(maximumItems).toBe(4)
   })
+
+  it("rounds an exact half up at the fourth decimal", () => {
+    // 0.15 for 1000 g is exactly 0.00015 per gram, but the quotient is
+    // 0.00014999999999999999 as a double, so an unguarded Math.round stored
+    // 0.0001 — a value that is both displayed and used as the sort key.
+    const ranked = rankUnitPrices([{ label: "Flour", price: 0.15, quantity: 1000, unit: "g" }])
+    expect(ranked[0]?.pricePerBaseUnit).toBe(0.0002)
+    expect(formatUnitPrice(ranked[0]?.pricePerBaseUnit ?? 0)).toBe("0.0002")
+
+    const other = rankUnitPrices([{ label: "Rice", price: 9.95, quantity: 1000, unit: "g" }])
+    expect(other[0]?.pricePerBaseUnit).toBe(0.01)
+  })
 })
