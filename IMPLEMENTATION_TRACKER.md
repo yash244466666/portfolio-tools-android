@@ -7,6 +7,23 @@
 > Approved public version 1 scope: **30 tools per ADR 0023 (accepted 2026-09-15), which supersedes the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps youtube-downloader excluded. The manifest carries 30 `enabled` entries and 70 `removed` entries whose source, logic, provenance, and tests stay in-tree.**
 > Public release readiness: **NO — foundation only**
 
+### 2026-09-16 — ADR 0023 provisioning applied to GitHub, and repaired (PRs #215–#218)
+
+- **The product owner authorized the merge and the provisioning run.** Merged in order: **#214** (the ADR 0023 scope change, `main` `40cb1d6`), **#215** (a missing manifest definition), **#216** (the retired disposition plus four migration leftovers), **#217** (label text and the `excludedTools` model), **#218** (category-epic counts plus a gate). Every one carried green hosted-CI on the self-hosted runner before merge, and `main` was green after each.
+- **The first apply run stopped rather than provisioning from an inconsistent manifest.** It provisioned labels and renamed the milestone, then failed with `GitHub issue #213 has unknown marker apply-adr-0023-scope`: #213 had been created by hand with a work-item marker but no matching manifest task. The invariant caught it — that is what it is for — and #215 fixed it by adding the definition rather than dropping the marker.
+- **Live end state (verified, not assumed).** 143 managed issues; **71 closed as not planned** (the 70 retired tools plus the ADR 0021 YouTube Downloader exclusion), each of the 70 carrying an ADR 0023 note; 6 milestones with `closed-beta` renamed to **"30-Tool Closed Beta"** and no orphaned original; the 31 open issues unchanged and correctly scoped; and the two renamed task keys plus the two drifted tool IDs **adopted in place** rather than duplicated (#21, #37, #63, #89).
+- **A second apply run proved idempotency**: it posted 0 notes, corrected 0 close reasons, and created or removed 0 dependencies, while updating only the 6 records whose manifest text had changed.
+- **Six defects were found by independent audit of the applied state and fixed**, five of them mine:
+  1. `retireIssues()` skipped every already-closed issue, so all 70 kept `stateReason: completed` with no ADR link — while `provisionIssues` had already rewritten their bodies to say "closed as **not planned**", leaving 70 issues whose text contradicted GitHub's record.
+  2. **33 blocking dependencies were deleted from the board, none of them correctly.** The scope filter kept only edges whose target was a retained tool, so it dropped every edge pointing at a _task_ — including `currency-converter → network-provider-review`, an open release gate.
+  3. The Developer and Text epics contradicted their own re-scoped titles.
+  4. **Then four more** — Core, Media, Security, and Math — because that first sweep searched for the numerals 87/100/45/17 while Core and Security spell their counts as words and Media named two tools that are now cut.
+  5. `status:excluded`, applied to 70 issues, was never declared in the manifest; and its live description ("never counts as completed") was better than the one being declared, so the declaration was aligned to the label instead of overwriting it.
+  6. The release candidate was still gated on two cut tools' reviews.
+- **The class of epic drift is now impossible**: the six category epics no longer restate a count outside their title, and `validateManifest` derives each category's retained count from the manifest and asserts the title names it — proven by reintroducing the old Math title and watching `github:work-items:check` fail with `expected "[Epic] Deliver all 12 Math tools", found "[Epic] Deliver all 10 Math tools"`.
+- **Method.** Both the audit and the re-verification were independent multi-dimension workflows whose findings were adversarially re-checked before acceptance; the re-verification refuted two candidate findings it then judged correct behaviour (the retired issues losing their milestone, and #93's body being replaced), and those refutations were accepted rather than acted on.
+- **Still outstanding:** the physical-device rows (#18/#20/#25/#111/#112) and the product-owner release gates (#27–#41). One cosmetic leftover is recorded, not fixed: the "12-Tool Architecture Milestone" description still reads "All 12" while it now lists 6 issues.
+
 ### 2026-09-15 — Hosted CI exhausted its allowance: moved to a self-hosted runner (ADR 0024)
 
 - **Symptom.** Every job stopped being allocated a runner: each failed ~2 s after starting with **zero steps executed** and `runner_id: 0`, and no log blob existed at all (`BlobNotFound`). It presented as a change-specific breakage because the first failing run was on a feature branch.
