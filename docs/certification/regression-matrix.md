@@ -2,13 +2,14 @@
 
 <!-- regression-matrix:generated:start -->
 
-Registry: 30 enabled tools.
-Pure test files: 29/30; component tests: 30/30.
-E2E route coverage: 30/30; installed-artifact interaction (emulator driver per-tool check or E2E): 30/30.
+Registry: 33 enabled tools.
+Pure test files: 32/33; component tests: 33/33.
+E2E route coverage: 33/33; installed-artifact interaction (emulator driver per-tool check or E2E): 33/33.
 
 | Tool                          | ID                           | Category | Network | Pure tests | Component tests | Fixtures | E2E | Artifact interaction |
 | ----------------------------- | ---------------------------- | -------- | ------- | ---------- | --------------- | -------- | --- | -------------------- |
 | Unit Converter                | `unit-converter`             | core     | local   | 1          | 1               | no       | yes | yes                  |
+| Recipe Scaler                 | `recipe-scaler`              | core     | local   | 1          | 1               | no       | yes | yes                  |
 | QR Generator                  | `qr-generator`               | dev      | local   | 1          | 1               | no       | yes | yes                  |
 | Notes                         | `notes-scratchpad`           | text     | local   | 1          | 1               | no       | yes | yes                  |
 | Pomodoro Timer                | `pomodoro-timer`             | text     | local   | 1          | 1               | no       | yes | yes                  |
@@ -34,9 +35,11 @@ E2E route coverage: 30/30; installed-artifact interaction (emulator driver per-t
 | BMI Calculator                | `bmi-calculator`             | core     | local   | 1          | 1               | no       | yes | yes                  |
 | Unit Price Comparer           | `unit-price-comparer`        | core     | local   | 1          | 1               | no       | yes | yes                  |
 | Date Difference Calculator    | `date-difference-calculator` | core     | local   | 1          | 1               | no       | yes | yes                  |
+| Date Calculator               | `date-calculator`            | core     | local   | 1          | 1               | no       | yes | yes                  |
 | Time Zone Converter           | `time-zone-converter`        | core     | local   | 1          | 1               | no       | yes | yes                  |
 | Loan EMI Calculator           | `loan-emi-calculator`        | core     | local   | 1          | 1               | no       | yes | yes                  |
 | Dice Roller                   | `dice-roller`                | core     | local   | 1          | 1               | no       | yes | yes                  |
+| Random Picker                 | `random-picker`              | core     | local   | 1          | 1               | no       | yes | yes                  |
 | Fuel and Trip Cost Calculator | `fuel-trip-cost-calculator`  | core     | local   | 1          | 1               | no       | yes | yes                  |
 
 <!-- regression-matrix:generated:end -->
@@ -46,8 +49,8 @@ E2E route coverage: 30/30; installed-artifact interaction (emulator driver per-t
 This matrix maps every enabled version-1 tool to its independent correctness
 oracles and the test layers that execute them, per issue #21 (the automated
 regression matrix for the release scope; the "all-87" title predates the ADR
-0022 expansion to 100 tools, which ADR 0023 superseded with the approved
-30-tool version-1 scope). The generated table above is derived from the
+0022 expansion to 100 tools, which ADR 0023 cut to 30 and ADR 0025 expanded to the approved
+33-tool version-1 scope). The generated table above is derived from the
 repository itself so it cannot silently drift:
 
 - **Pure tests** — the tool directory's `*.test.ts` files with independent
@@ -64,7 +67,7 @@ repository itself so it cannot silently drift:
   disabled/unsupported states, **not** capture interaction, and it has no
   driver probe or Android instrumentation test. This section previously
   attributed instrumentation coverage to it, which was false. The driver
-  probes 29 of the 30 enabled tools; the microphone path needs physical-device
+  probes 32 of the 33 enabled tools; the microphone path needs physical-device
   evidence (#18/#25) in any case, and is recorded as a known gap rather than
   counted as covered.
 
@@ -72,8 +75,8 @@ The 70 tools cut by ADR 0023 keep their source directory, pure logic,
 provenance record, and tests, but they are no longer `enabled`: their E2E
 scenarios and installed-artifact interaction are retired, while their
 pure-logic suites continue to run under `pnpm test`. The matrix therefore
-scopes to the 30 retained tools, and the checklist driver keeps the cut tools'
-probes in the file but runs only the retained 30, so a reversal stays a
+scopes to the 33 retained tools, and the checklist driver keeps the cut tools'
+probes in the file but runs only the retained 33, so a reversal stays a
 manifest edit.
 
 The script exits non-zero when any enabled tool lacks a pure oracle or any
@@ -119,7 +122,7 @@ artifact numbers below **were** observed here, except that they do not include
 This run predates the ADR 0023 rescope: it was measured on the 100-tool
 candidate, so its enabled-tool count, its work-items manifest counts, its
 212-check E2E run, and its 100-tool emulator-driver result describe that
-scope, not the approved 30-tool version-1 scope. They are retained as the
+scope, not the approved 33-tool version-1 scope (ADR 0025). They are retained as the
 record of what that run measured and are not renumbered.
 
 | Gate                                                                                    | Result | Evidence                                                                                                                                        |
