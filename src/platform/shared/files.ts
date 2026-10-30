@@ -5,10 +5,33 @@ const maximumFileNameBytes = 120
 
 export const maximumBridgeGeneratedFileBytes = 5 * 1024 * 1024
 
+/**
+ * Bidi embedding/override/isolate controls can visually reverse a filename's
+ * extension ("photo" + RLO + "gnp.exe" displays as "photoexe.png"), and C1
+ * controls/line separators can break the save-dialog presentation. Replace
+ * them along with the filesystem-reserved characters. ZWJ/ZWNJ are kept
+ * because they are legitimate in several scripts.
+ */
+function isUnsafeFileNameCodePoint(codePoint: number): boolean {
+  return (
+    codePoint < 32 ||
+    (codePoint >= 0x7f && codePoint <= 0x9f) ||
+    codePoint === 0x061c ||
+    codePoint === 0x200e ||
+    codePoint === 0x200f ||
+    (codePoint >= 0x202a && codePoint <= 0x202e) ||
+    codePoint === 0x2028 ||
+    codePoint === 0x2029 ||
+    (codePoint >= 0x2066 && codePoint <= 0x2069)
+  )
+}
+
 export function sanitizeGeneratedFileName(name: string): string {
   const withoutUnsafeCharacters = Array.from(name.normalize("NFC"), (character) => {
     const codePoint = character.codePointAt(0) ?? 0
-    return codePoint < 32 || codePoint === 127 || '/\\<>:"|?*'.includes(character) ? "-" : character
+    return isUnsafeFileNameCodePoint(codePoint) || '/\\<>:"|?*'.includes(character)
+      ? "-"
+      : character
   }).join("")
   const sanitized = withoutUnsafeCharacters
     .replace(/-+/g, "-")

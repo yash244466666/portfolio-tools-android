@@ -199,17 +199,17 @@ from the 2026-10-30 audit fixes. The driver exited 0 with **42 PASS, 8 INFO,
 4 PENDING_PHYSICAL, 0 FAIL** (54 rows); the same four physical-only rows remain
 pending (TalkBack, Doze/OEM alerts, OEM multi-window, WebView-upgrade matrix).
 
-| Field                          | Value                                                                                        |
-| ------------------------------ | -------------------------------------------------------------------------------------------- |
-| Date/time                      | 2026-10-30 (automated run)                                                                   |
-| Tester                         | Automated driver script, orchestrated by the coding agent                                    |
-| Artifact                       | `android/app/build/outputs/apk/debug/app-debug.apk` (versionName `1.0-debug`)                |
-| APK hash                       | SHA-256 `875d71f3b556baa12f7eb08848072587aceba059398d29d37cb4f5696248b69b` (`app-debug.apk`) |
-| Device model                   | `sdk_gphone64_x86_64` (Android Studio AVD `yash_tools_api35_test`)                           |
-| Android/API                    | Android 15 (SDK 35)                                                                          |
-| Android System WebView version | 124.0.6367.219                                                                               |
-| Security patch                 | 2024-09-05                                                                                   |
-| Result                         | 42 PASS, 8 INFO, 4 PENDING_PHYSICAL, 0 FAIL (54 rows), driver exit 0                         |
+| Field                          | Value                                                                                                                                                                       |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Date/time                      | 2026-10-30 (automated run)                                                                                                                                                  |
+| Tester                         | Automated driver script, orchestrated by the coding agent                                                                                                                   |
+| Artifact                       | `android/app/build/outputs/apk/debug/app-debug.apk` (versionName `1.0-debug`)                                                                                               |
+| APK hash                       | SHA-256 `0ab5bfd0f242e6add54291abd46d528a28af3869d3b08404a2c1311a9fea95f6` (`app-debug.apk`, final build; the earlier same-day `875d71f3…` build passed the same checklist) |
+| Device model                   | `sdk_gphone64_x86_64` (Android Studio AVD `yash_tools_api35_test`)                                                                                                          |
+| Android/API                    | Android 15 (SDK 35)                                                                                                                                                         |
+| Android System WebView version | 124.0.6367.219                                                                                                                                                              |
+| Security patch                 | 2024-09-05                                                                                                                                                                  |
+| Result                         | 42 PASS, 8 INFO, 4 PENDING_PHYSICAL, 0 FAIL (54 rows), driver exit 0                                                                                                        |
 
 The same artifact also passed the connected instrumentation suite (13 tests,
 0 failures, 2 phase-gated skips) and both phases of the host-orchestrated
@@ -219,6 +219,14 @@ defect, not an app defect: `BundledAppInstrumentedTest` and
 `hash-generator`, so the activity-recreation case timed out. Both were
 repointed to the enabled, session-only Case Converter (`#/tool/case-converter`,
 `#case-input`) before the green run.
+
+A later same-day build added the bidi-safe generated-filename policy. The
+checklist was re-run on that final artifact (`0ab5bfd0…`) with the same
+42/8/4/0 result, and the connected suite re-ran green. The first full connected
+run on that build timed out in `NotificationInstrumentedTest` after the
+permission dialog; the class passed in isolation and the full suite passed on
+the re-run, so that row is recorded as emulator timing variance rather than an
+app regression.
 
 ## Installation and startup
 
