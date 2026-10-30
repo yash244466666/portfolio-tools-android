@@ -46,6 +46,11 @@ const pluginMocks = vi.hoisted(() => ({
   preferencesRemove: vi.fn<(options: { key: string }) => Promise<void>>(),
   preferencesSet: vi.fn<(options: { key: string; value: string }) => Promise<void>>(),
   share: vi.fn<(options: { title: string; files: string[] }) => Promise<void>>(),
+  phoneSensorsAvailable: vi.fn<() => Promise<unknown>>(),
+  phoneSensorsStart: vi.fn<(options: unknown) => Promise<unknown>>(),
+  phoneSensorsStop: vi.fn<() => Promise<void>>(),
+  phoneSensorsAddListener:
+    vi.fn<(eventName: string, listener: (payload: unknown) => void) => Promise<ListenerHandle>>(),
 }))
 
 interface NativePickOptions {
@@ -114,14 +119,21 @@ vi.mock("@capacitor/core", () => ({
       ? { write: pluginMocks.sensitiveClipboardWrite }
       : name === "GeneratedCache"
         ? { cleanup: pluginMocks.generatedCacheCleanup }
-        : {
-            cancelDigest: pluginMocks.documentCancelDigest,
-            digestContent: pluginMocks.documentDigest,
-            discardSave: pluginMocks.documentDiscardSave,
-            pickDocuments: pluginMocks.documentPick,
-            readContent: pluginMocks.documentReadContent,
-            saveDocument: pluginMocks.documentSave,
-          },
+        : name === "PhoneSensors"
+          ? {
+              available: pluginMocks.phoneSensorsAvailable,
+              start: pluginMocks.phoneSensorsStart,
+              stop: pluginMocks.phoneSensorsStop,
+              addListener: pluginMocks.phoneSensorsAddListener,
+            }
+          : {
+              cancelDigest: pluginMocks.documentCancelDigest,
+              digestContent: pluginMocks.documentDigest,
+              discardSave: pluginMocks.documentDiscardSave,
+              pickDocuments: pluginMocks.documentPick,
+              readContent: pluginMocks.documentReadContent,
+              saveDocument: pluginMocks.documentSave,
+            },
 }))
 vi.mock("@capacitor/filesystem", () => ({
   Directory: { Cache: "CACHE" },
@@ -965,3 +977,60 @@ async function readBlobBytes(blob: Blob | undefined): Promise<number[]> {
     reader.readAsArrayBuffer(blob)
   })
 }
+
+describe("PhoneSensors adapter", () => {
+  it("validates availability and only starts supported requests", async () => {
+    pluginMocks.phoneSensorsAvailable.mockResolvedValue({
+      contractVersion: 1,
+      sensors: [
+        { kind: "accelerometer", available: true },
+        { kind: "magnetometer", available: true },
+        { kind: "barometer", available: false },
+      ],
+    })
+    await expect(capacitorPlatformServices.sensors.availability()).resolves.toEqual([
+      { kind: "accelerometer", available: true },
+      { kind: "magnetometer", available: true },
+      { kind: "barometer", available: false },
+    ])
+    pluginMocks.phoneSensorsAvailable.mockResolvedValueOnce({ contractVersion: 2, sensors: [] })
+    await expect(capacitorPlatformServices.sensors.availability()).rejects.toMatchObject({
+      code: "SENSOR_START_FAILED",
+    })
+  })
+
+  it("subscribes, filters samples, and stops the native session", async () => {
+    let nativeListener: ((payload: unknown) => void) | undefined
+    const remove = vi.fn(async () => undefined)
+    pluginMocks.phoneSensorsStart.mockResolvedValue({
+      contractVersion: 1,
+      kinds: ["accelerometer"],
+      intervalMs: 50,
+    })
+    pluginMocks.phoneSensorsAddListener.mockImplementation(async (_event, listener) => {
+      nativeListener = listener
+      return { remove }
+    })
+    pluginMocks.phoneSensorsStop.mockResolvedValue(undefined)
+    const samples: unknown[] = []
+    const session = await capacitorPlatformServices.sensors.start({
+      kinds: ["accelerometer"],
+      onSample: (sample) => samples.push(sample),
+    })
+    nativeListener?.({ kind: "accelerometer", timestampMs: 1, values: [0, 9.8, 0], accuracy: 3 })
+    nativeListener?.({ kind: "magnetometer", timestampMs: 2, values: [1, 2, 3], accuracy: 3 })
+    nativeListener?.({ kind: "accelerometer", timestampMs: 3, values: [1, 2], accuracy: 3 })
+    expect(samples).toEqual([
+      { kind: "accelerometer", timestampMs: 1, values: [0, 9.8, 0], accuracy: 3 },
+    ])
+    await session.stop()
+    expect(remove).toHaveBeenCalledTimes(1)
+    expect(pluginMocks.phoneSensorsStop).toHaveBeenCalledTimes(1)
+  })
+
+  it("rejects invalid requests before touching the bridge", async () => {
+    await expect(
+      capacitorPlatformServices.sensors.start({ kinds: [], onSample: () => undefined }),
+    ).rejects.toMatchObject({ code: "SENSOR_INVALID_ARGUMENT" })
+  })
+})

@@ -16,6 +16,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(DocumentFilesPlugin.class);
         registerPlugin(SensitiveClipboardPlugin.class);
         registerPlugin(GeneratedCachePlugin.class);
+        registerPlugin(PhoneSensorsPlugin.class);
         super.onCreate(savedInstanceState);
         configurePrivateWebViewSession();
         installBackNavigation();

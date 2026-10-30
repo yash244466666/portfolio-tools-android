@@ -18,6 +18,7 @@ import {
   sensitiveClipboardContractVersion,
 } from "@/platform/capacitor/sensitive-clipboard"
 import { GeneratedCache, generatedCacheContractVersion } from "@/platform/capacitor/generated-cache"
+import { capacitorSensorService } from "@/platform/capacitor/phone-sensors"
 import type {
   ContentDigestAlgorithm,
   FilePickOptions,
@@ -536,6 +537,7 @@ export const capacitorPlatformServices: PlatformServices = {
   },
   random: secureRandomService,
   lifecycle: capacitorLifecycle,
+  sensors: capacitorSensorService,
   haptics: {
     async confirm() {
       await Haptics.impact({ style: ImpactStyle.Light }).catch(() => undefined)

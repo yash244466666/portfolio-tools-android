@@ -1,9 +1,9 @@
 import { tools } from "@/tools/registry"
 
 /**
- * The approved public version-1 scope is 33 tools: the 30 of ADR 0023 plus the
- * Recipe Scaler, Date Calculator, and Random Picker added by ADR 0025 (accepted
- * 2026-10-30). The list is enumerated here deliberately: it is the oracle for the
+ * The approved public version-1 scope is 38 tools: the 30 of ADR 0023 plus the
+ * Recipe Scaler, Date Calculator, and Random Picker of ADR 0025, plus the five
+ * permission-free sensor tools of ADR 0026 (accepted 2026-10-30). The list is enumerated here deliberately: it is the oracle for the
  * scope decision, so an accidental `enabled`/`removed` flip — or a new tool slipping
  * into the release manifest — fails the build instead of shipping. Changing this
  * list requires a superseding ADR.
@@ -48,6 +48,12 @@ const approvedVersionOneScope = [
   "ical-generator",
   "dice-roller",
   "random-picker",
+  // Sensors and measurement
+  "level",
+  "compass",
+  "barometer",
+  "light-meter",
+  "vibration-meter",
 ] as const
 
 describe("tool registry", () => {
@@ -66,7 +72,7 @@ describe("tool registry", () => {
   it("enables the approved version-1 scope and nothing else", () => {
     const enabled = tools.filter((tool) => tool.status === "enabled").map((tool) => tool.id)
     expect([...enabled].sort()).toEqual([...approvedVersionOneScope].sort())
-    expect(enabled).toHaveLength(33)
+    expect(enabled).toHaveLength(38)
   })
 
   it("keeps every cut tool in the manifest as a removed entry with no runtime chunk", () => {

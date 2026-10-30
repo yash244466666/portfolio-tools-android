@@ -1,6 +1,6 @@
 # Physical Android Device Checklist
 
-> Status: not yet executed on a physical device. Scope: the 33-tool public version-1 scope approved by ADR 0025 (2026-10-30), expanding ADR 0023's 30-tool scope. Automated emulator pre-verification is green on this scope: the 2026-10-30 33-tool run recorded **45 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL**; the earlier 2026-09-07 (25-tool), 2026-09-08 (100-tool), and 2026-09-15/2026-10-30 (30-tool) runs remain as history. Physical-device execution is still pending. Do not check an item without recording device/API/WebView/build evidence.
+> Status: not yet executed on a physical device. Scope: the 38-tool public version-1 scope approved by ADR 0026 (2026-10-30), adding five permission-free sensor tools to ADR 0025's 33-tool scope. Automated emulator pre-verification is green on this scope: the 2026-10-30 38-tool run recorded **50 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL**; the earlier 2026-09-07 (25-tool), 2026-09-08 (100-tool), and 2026-09-15/2026-10-30 (30/33-tool) runs remain as history. Physical-device execution is still pending. Do not check an item without recording device/API/WebView/build evidence.
 
 ## Test record
 
@@ -256,6 +256,35 @@ process-recreation script. The three new tools are session-only, add no
 permission or network provider, and are covered by pure and component tests
 plus their installed-artifact probes.
 
+## Automated emulator pre-verification (2026-10-30 — 38-tool ADR 0026 scope)
+
+`node scripts/device-checklist-emulator.mjs` ran against the debug APK built
+from the ADR 0026 sensor expansion. The driver verified **38 enabled cards**
+and exited 0 with **50 PASS, 8 INFO, 4 PENDING_PHYSICAL, 0 FAIL** (62 rows).
+The Level, Compass, Barometer, and Light probes inject the emulator's virtual
+sensors and assert live readings; the Vibration probe accepts a numeric
+reading or the honest unsupported state. The first run failed only the Back
+row with the Settings control probe also failing; the immediate re-run was
+green.
+
+| Field                          | Value                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------- |
+| Date/time                      | 2026-10-30 (automated run, 38-tool scope)                                                    |
+| Tester                         | Automated driver script, orchestrated by the coding agent                                    |
+| Artifact                       | `android/app/build/outputs/apk/debug/app-debug.apk` (versionName `1.0-debug`)                |
+| APK hash                       | SHA-256 `13ef843bc29d634d020465a86f6aa83c0142cc1cb71d368f25aa95b2f76942e7` (`app-debug.apk`) |
+| Device model                   | `sdk_gphone64_x86_64` (Android Studio AVD `yash_tools_api35_test`)                           |
+| Android/API                    | Android 15 (SDK 35)                                                                          |
+| Android System WebView version | 124.0.6367.219                                                                               |
+| Security patch                 | 2024-09-05                                                                                   |
+| Result                         | 50 PASS, 8 INFO, 4 PENDING_PHYSICAL, 0 FAIL (62 rows), driver exit 0                         |
+
+The same artifact passed the connected instrumentation suite (13 tests, 0
+failures, 2 phase-gated skips) and both phases of the force-stop
+process-recreation script. Sensor accuracy, calibration behavior, OEM sensor
+variation, and real background-stop behavior remain physical-device rows; the
+emulator injection is a smoke test, not hardware validation.
+
 ## Installation and startup
 
 - [ ] Clean install succeeds.
@@ -326,6 +355,11 @@ reinstating a tool restores its row here.
 - [ ] iCalendar Generator escapes RFC 5545 text, emits a UTC DTSTAMP and fresh UID, treats the all-day end date as inclusive (exclusive DTEND), rejects an end before the start, and imports cleanly.
 - [ ] Dice Roller rolls notation from secure bytes and repeats the last roll.
 - [ ] Random Picker draws from a list, a coin, and an integer range without favoring any value.
+- [ ] Level & Angle reads tilt, calibrates a zero reference, and reaches a text "Level" state.
+- [ ] Compass combines magnetometer and accelerometer readings into headings and warns on magnetic interference.
+- [ ] Barometer & Altitude reads pressure and estimates altitude from the entered sea-level reference.
+- [ ] Light Meter reads ambient lux with a text level and session min/max.
+- [ ] Vibration Meter reports linear-acceleration RMS and peak over a rolling second.
 
 ## Platform behavior
 
@@ -355,10 +389,10 @@ reinstating a tool restores its row here.
 
 ## Result
 
-- Overall: **PARTIAL — emulator pre-verification green on the current 33-tool scope; physical device pending**
-- Emulator evidence: 2026-09-07 automated run on the 25-tool foundation artifact (39 PASS / 0 FAIL / 4 PENDING_PHYSICAL), the 2026-09-08 re-run on the 100-tool candidate at 100 enabled tools (112 PASS / 0 FAIL / 4 PENDING_PHYSICAL), and the 2026-09-15 re-run on the 30-tool version-1 scope of ADR 0023 (42 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL, 54 rows, exit 0), all on Android 15 SDK 35, WebView 124.0.6367.219; see "Automated emulator pre-verification" above. The 2026-09-15 and 2026-10-30 runs cover the then-current scopes; a 33-tool run on the ADR 0025 artifact is recorded in the 2026-10-30 section. Only physical-device execution on that artifact is required before this checklist can be completed.
+- Overall: **PARTIAL — emulator pre-verification green on the current 38-tool scope; physical device pending**
+- Emulator evidence: 2026-09-07 automated run on the 25-tool foundation artifact (39 PASS / 0 FAIL / 4 PENDING_PHYSICAL), the 2026-09-08 re-run on the 100-tool candidate at 100 enabled tools (112 PASS / 0 FAIL / 4 PENDING_PHYSICAL), and the 2026-09-15 re-run on the 30-tool version-1 scope of ADR 0023 (42 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL, 54 rows, exit 0), all on Android 15 SDK 35, WebView 124.0.6367.219; see "Automated emulator pre-verification" above. The 2026-09-15 and 2026-10-30 runs cover the then-current scopes; a 33-tool run on the ADR 0025 artifact and a 38-tool run on the ADR 0026 artifact are recorded in the 2026-10-30 sections. Only physical-device execution on that artifact is required before this checklist can be completed.
 - Blocking issues:
   - Physical device has not been selected or tested.
-  - The emulator record covers the 30-tool ADR 0023 artifact (2026-09-15) and the current 33-tool ADR 0025 artifact `702c5c26…` (2026-10-30); physical-device execution on that artifact remains outstanding.
+  - The emulator record covers the 30-tool ADR 0023 artifact (2026-09-15) and the 33-tool ADR 0025 artifact `702c5c26…` and the current 38-tool ADR 0026 artifact `13ef843b…` (2026-10-30); physical-device execution on that artifact remains outstanding.
   - The instrumentation suite and the emulator checklist driver supplement but do not replace the pending physical-device, OEM-picker/share-target, Doze, TalkBack, and WebView-update evidence.
 - Evidence links/logs: `/tmp/device-checklist-results.json` (single-run record; regenerate with `node scripts/device-checklist-emulator.mjs` against an installed debug artifact).

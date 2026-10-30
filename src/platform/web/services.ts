@@ -8,6 +8,7 @@ import type {
 } from "@/platform/contracts"
 import { isCancellationError, PlatformError } from "@/platform/errors"
 import { createMicrophoneRecorderService } from "@/platform/shared/microphone-recorder"
+import { webSensorService } from "@/platform/web/sensors"
 import {
   bytesToBase64,
   generatedFileBytes,
@@ -314,6 +315,7 @@ export const webPlatformServices: PlatformServices = {
   },
   random: secureRandomService,
   lifecycle: webLifecycle,
+  sensors: webSensorService,
   haptics: {
     async confirm() {
       navigator.vibrate?.(12)

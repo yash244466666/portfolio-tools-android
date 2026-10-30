@@ -1,6 +1,6 @@
 # GitHub Work Management
 
-> Scope: development through the first Google Play production launch containing the 33 version-1 tools approved by ADR 0025, which expands ADR 0023's 30-tool scope (ADR 0021 excludes YouTube Downloader from the audited catalog; ADR 0022's 100-tool clause is superseded).
+> Scope: development through the first Google Play production launch containing the 38 version-1 tools approved by ADR 0026, which adds five permission-free sensor tools to ADR 0025's 33-tool scope (ADR 0025 expanded ADR 0023's 30-tool scope) (ADR 0021 excludes YouTube Downloader from the audited catalog; ADR 0022's 100-tool clause is superseded).
 >
 > Product decisions: `docs/decisions/0004-all-87-tools-first-release-scope.md`, amended by `docs/decisions/0021-version-one-scope-exclusion-youtube-downloader.md`; the current scope is set by `docs/decisions/0023-focused-version-one-scope.md` (approved 2026-09-15), which supersedes the 100-tool scope of `docs/decisions/0022-version-one-scope-expansion-to-100.md` and the all-87 clause of ADR 0004.
 >
@@ -35,7 +35,7 @@ Branch protection and repository rulesets are not available for this private rep
 ## Hierarchy
 
 ```text
-Google Play v1 — 33 tools (ADR 0025)
+Google Play v1 — 38 tools (ADR 0026)
 ├── Foundation and native platform
 │   └── Foundation work items
 ├── Core catalog
@@ -56,7 +56,7 @@ Google Play v1 — 33 tools (ADR 0025)
     └── Identity, signing, policy, listing, testing, candidate, and launch work items
 ```
 
-The 70 retired tool issues are kept under their category epics, closed as not planned, so the live hierarchy still lists them; only the 33 work items above are version-1 scope.
+The 70 retired tool issues are kept under their category epics, closed as not planned, so the live hierarchy still lists them; only the 38 work items above are version-1 scope.
 
 The 12 representative tools stay under their category epics and are grouped by the `12-Tool Architecture Milestone` milestone and `scope:vertical-slice` label. This avoids assigning a tool to two parents while preserving milestone reporting. Representative tools retired by ADR 0023 lose the `scope:vertical-slice` label on the next provisioning run, because managed labels are reconciled to the manifest.
 
@@ -90,7 +90,7 @@ Recommended views after provisioning:
 
 1. **Current work** — board grouped by Workflow, excluding Done.
 2. **Backlog** — table grouped by Phase, sorted by Priority and Estimate.
-3. **33 tools** — table filtered to `type:tool` and not `status:excluded`, grouped by Category.
+3. **38 tools** — table filtered to `type:tool` and not `status:excluded`, grouped by Category.
 4. **12-tool milestone** — table filtered to `scope:vertical-slice`.
 5. **Blocked and high risk** — table filtered to Workflow Blocked or Risk High/Critical.
 6. **Release roadmap** — roadmap grouped by Phase and milestone.
@@ -104,7 +104,7 @@ GitHub currently requires project view layout/filter configuration through its U
 2. **12-Tool Architecture Milestone** — all representative paths pass their Definition of Done on Android.
 3. **Tier 1 Directly Portable Catalog** — the remaining directly portable tools pass.
 4. **Adapter and Policy-Heavy Catalog** — Tier 2–4 file, persistence, timer, network, media, and special-review tools pass.
-5. **33-Tool Closed Beta** — one candidate with all 33 enabled passes closed-test, device, accessibility, security, privacy, and support gates. (The rename from "All-87 Closed Beta" is carried in the manifest as `renamedFrom`, so the next authorized `pnpm github:work-items:apply` run adopts the existing milestone instead of creating a duplicate.)
+5. **38-Tool Closed Beta** — one candidate with all 38 enabled passes closed-test, device, accessibility, security, privacy, and support gates. (The rename from "All-87 Closed Beta" is carried in the manifest as `renamedFrom`, so the next authorized `pnpm github:work-items:apply` run adopts the existing milestone instead of creating a duplicate.)
 6. **Google Play v1 Launch** — signing, listing, declarations, pre-launch report, production eligibility, launch plan, and final authorization pass.
 
 Milestone dates are deliberately unset until estimates are re-baselined after the 12-tool milestone and Play account eligibility is known.
