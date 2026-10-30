@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Meter } from "@/components/motion/primitives"
 import { usePlatform } from "@/platform/platform-context"
 import { toSafeErrorMessage } from "@/platform/errors"
 import { bytesToBase64 } from "@/platform/shared/files"
@@ -65,6 +66,7 @@ export default function PdfConverter() {
   const [error, setError] = useState("")
   const [status, setStatus] = useState("")
   const [busy, setBusy] = useState(false)
+  const [renderProgress, setRenderProgress] = useState<{ done: number; total: number } | null>(null)
 
   // Rendered page previews are disposable; every replacement and the unmount
   // revoke them so page bitmaps do not outlive the screen.
@@ -149,8 +151,10 @@ export default function PdfConverter() {
         }
         const rendered: RenderedPage[] = []
         const total = Math.min(doc.numPages, maximumRenderedPages)
+        setRenderProgress({ done: 0, total })
         for (let pageNumber = 1; pageNumber <= total; pageNumber++) {
           const page = await renderPageToPng(doc, pageNumber, maximumDecodedPixels)
+          setRenderProgress({ done: pageNumber, total })
           rendered.push({
             bytes: page.bytes,
             width: page.width,
@@ -175,6 +179,7 @@ export default function PdfConverter() {
       reportPdfError(convertError, "The PDF could not be converted to images.")
     } finally {
       setBusy(false)
+      setRenderProgress(null)
     }
   }
 
@@ -406,6 +411,14 @@ export default function PdfConverter() {
               <Button disabled={busy || !pdfForImages} onClick={() => void convertPdfToImages()}>
                 {busy ? "Rendering…" : "Convert to images"}
               </Button>
+              {renderProgress ? (
+                <Meter
+                  label="Rendering pages"
+                  maximum={renderProgress.total}
+                  value={renderProgress.done}
+                  valueLabel={`${renderProgress.done} / ${renderProgress.total}`}
+                />
+              ) : null}
               {pages.length > 0 ? (
                 <Button disabled={busy} onClick={() => void savePagesAsZip()}>
                   Save all as ZIP
@@ -420,7 +433,7 @@ export default function PdfConverter() {
                 <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="Rendered pages">
                   {pages.map((page, index) => (
                     <li
-                      className="grid gap-2 rounded-xl border border-[var(--border)] p-2"
+                      className="motion-pop grid gap-2 rounded-xl border border-[var(--border)] p-2"
                       key={page.url}
                     >
                       <img

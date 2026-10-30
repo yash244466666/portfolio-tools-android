@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Waveform } from "@/components/motion/primitives"
 import { useSensorStream } from "@/tools/_sensor/use-sensor-stream"
 import {
   formatAcceleration,
@@ -15,6 +16,7 @@ const bufferLimit = 200
 
 export default function VibrationMeterTool() {
   const [reading, setReading] = useState<VibrationReading | null>(null)
+  const [waveform, setWaveform] = useState<number[]>([])
   const buffer = useRef<VibrationSample[]>([])
   const lastUiUpdate = useRef(0)
 
@@ -26,6 +28,16 @@ export default function VibrationMeterTool() {
     if (sample.timestampMs - lastUiUpdate.current < 100) return
     lastUiUpdate.current = sample.timestampMs
     setReading(vibrationReading(buffer.current))
+    setWaveform(
+      buffer.current
+        .slice(-80)
+        .map((entry) =>
+          Math.min(
+            1,
+            Math.hypot(entry.values[0] ?? 0, entry.values[1] ?? 0, entry.values[2] ?? 0) / 10,
+          ),
+        ),
+    )
   }, [])
 
   const { error, streaming } = useSensorStream(kinds, onSample)
@@ -33,12 +45,14 @@ export default function VibrationMeterTool() {
   function reset() {
     buffer.current = []
     setReading(null)
+    setWaveform([])
   }
 
   return (
     <div className="grid gap-4">
       <ToolPanel title="Vibration">
         <div className="grid gap-4">
+          <Waveform label="Linear acceleration waveform" values={waveform} />
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <p className="text-sm text-[var(--text-secondary)]">RMS (last second)</p>

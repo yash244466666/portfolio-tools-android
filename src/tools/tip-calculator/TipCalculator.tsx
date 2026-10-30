@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Meter, ResultReveal } from "@/components/motion/primitives"
 import {
   computeTip,
   formatTipAmount,
@@ -128,36 +129,46 @@ export default function TipCalculator() {
             Enter a bill amount above to see the tip, total, and per-person amounts.
           </p>
         ) : (
-          <dl className="grid gap-3" aria-live="polite">
-            <div className="flex items-center justify-between">
-              <dt className="text-sm text-[var(--text-secondary)]">Tip amount</dt>
-              <dd className="font-mono text-lg text-[var(--text)]">
-                {formatTipAmount(result.tip)}
-              </dd>
-            </div>
-            <div className="flex items-center justify-between">
-              <dt className="text-sm text-[var(--text-secondary)]">Total</dt>
-              <dd className="font-mono text-lg text-[var(--text)]">
-                {formatTipAmount(result.total)}
-              </dd>
-            </div>
-            {splitCount > 1 ? (
-              <div className="border-t border-[var(--border)] pt-3">
+          <div className="grid gap-3">
+            <Meter
+              label="Tip share of total"
+              maximum={result.total}
+              value={result.tip}
+              valueLabel={`${Math.round((result.tip / result.total) * 100)}%`}
+            />
+            <ResultReveal variant="quick" token={`${result.tip}-${result.total}-${splitCount}`}>
+              <dl className="grid gap-3" aria-live="polite">
                 <div className="flex items-center justify-between">
-                  <dt className="text-sm text-[var(--text-secondary)]">Per person</dt>
-                  <dd className="font-mono text-lg text-[var(--primary)]">
-                    {formatTipAmount(result.perPerson)}
+                  <dt className="text-sm text-[var(--text-secondary)]">Tip amount</dt>
+                  <dd className="font-mono text-lg text-[var(--text)]">
+                    {formatTipAmount(result.tip)}
                   </dd>
                 </div>
-                <div className="mt-1 flex items-center justify-between">
-                  <dt className="text-xs text-[var(--text-secondary)]">Tip per person</dt>
-                  <dd className="font-mono text-sm text-[var(--text-secondary)]">
-                    {formatTipAmount(result.tipPerPerson)}
+                <div className="flex items-center justify-between">
+                  <dt className="text-sm text-[var(--text-secondary)]">Total</dt>
+                  <dd className="font-mono text-lg text-[var(--text)]">
+                    {formatTipAmount(result.total)}
                   </dd>
                 </div>
-              </div>
-            ) : null}
-          </dl>
+                {splitCount > 1 ? (
+                  <div className="border-t border-[var(--border)] pt-3">
+                    <div className="flex items-center justify-between">
+                      <dt className="text-sm text-[var(--text-secondary)]">Per person</dt>
+                      <dd className="font-mono text-lg text-[var(--primary)]">
+                        {formatTipAmount(result.perPerson)}
+                      </dd>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between">
+                      <dt className="text-xs text-[var(--text-secondary)]">Tip per person</dt>
+                      <dd className="font-mono text-sm text-[var(--text-secondary)]">
+                        {formatTipAmount(result.tipPerPerson)}
+                      </dd>
+                    </div>
+                  </div>
+                ) : null}
+              </dl>
+            </ResultReveal>
+          </div>
         )}
       </ToolPanel>
 

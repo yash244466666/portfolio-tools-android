@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Meter } from "@/components/motion/primitives"
 import {
   buildHarmonyPalette,
   evaluateContrast,
@@ -325,17 +326,26 @@ export default function ColorPicker() {
           {contrastValid ? (
             <div>
               {verdict === null ? null : (
-                <p
-                  aria-label="Contrast verdict"
-                  className="rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] p-3 font-mono text-sm"
-                  role="status"
-                >
-                  {color.hex} on {contrastHex} — {verdict.ratio.toFixed(2)}:1. Normal text AA{" "}
-                  {verdict.passesNormalAA ? "passes" : "fails"}, large text AA{" "}
-                  {verdict.passesLargeAA ? "passes" : "fails"}, normal text AAA{" "}
-                  {verdict.passesNormalAAA ? "passes" : "fails"}, large text AAA{" "}
-                  {verdict.passesLargeAAA ? "passes" : "fails"}.
-                </p>
+                <div>
+                  <Meter
+                    label="Contrast ratio"
+                    maximum={21}
+                    tone={verdict.passesNormalAA ? "success" : "danger"}
+                    value={verdict.ratio}
+                    valueLabel={`${verdict.ratio.toFixed(2)}:1`}
+                  />
+                  <p
+                    aria-label="Contrast verdict"
+                    className="rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] p-3 font-mono text-sm"
+                    role="status"
+                  >
+                    {color.hex} on {contrastHex} — {verdict.ratio.toFixed(2)}:1. Normal text AA{" "}
+                    {verdict.passesNormalAA ? "passes" : "fails"}, large text AA{" "}
+                    {verdict.passesLargeAA ? "passes" : "fails"}, normal text AAA{" "}
+                    {verdict.passesNormalAAA ? "passes" : "fails"}, large text AAA{" "}
+                    {verdict.passesLargeAAA ? "passes" : "fails"}.
+                  </p>
+                </div>
               )}
               <div
                 className="mt-3 flex min-h-16 items-center justify-center rounded-2xl border border-[var(--border)] p-3 text-base"

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
@@ -6,6 +6,7 @@ import { caseConversions, maximumCaseChars } from "./case"
 
 export default function CaseConverter() {
   const [text, setText] = useState("")
+  const [copiedId, setCopiedId] = useState<string | null>(null)
   const overLimit = text.length > maximumCaseChars
 
   // Eight conversions per keystroke is bounded work by construction: the input is
@@ -21,6 +22,12 @@ export default function CaseConverter() {
     [text, overLimit],
   )
   const limitLabel = maximumCaseChars.toLocaleString("en-US")
+
+  useEffect(() => {
+    if (copiedId === null) return
+    const timeout = window.setTimeout(() => setCopiedId(null), 1800)
+    return () => window.clearTimeout(timeout)
+  }, [copiedId])
 
   return (
     <div className="grid gap-4">
@@ -63,9 +70,17 @@ export default function CaseConverter() {
                 >
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-semibold text-[var(--text)]">{result.label}</p>
-                    <CopyButton label="Copy" onStatus={() => undefined} value={result.output} />
+                    <CopyButton
+                      label="Copy"
+                      onStatus={() => setCopiedId(result.id)}
+                      value={result.output}
+                    />
                   </div>
-                  <p className="break-all font-mono text-sm">{result.output || "—"}</p>
+                  <p
+                    className={`break-all font-mono text-sm ${copiedId === result.id ? "motion-pop" : ""}`}
+                  >
+                    {result.output || "—"}
+                  </p>
                 </li>
               ))}
             </ul>

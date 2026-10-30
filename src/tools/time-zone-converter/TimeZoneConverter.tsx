@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal } from "@/components/motion/primitives"
 import { convertTimeZone, ianaZones, type TimeZoneConversion } from "./time-zones"
 
 const datePattern = /^(\d{4})-(\d{2})-(\d{2})$/
@@ -146,12 +147,14 @@ export default function TimeZoneConverter() {
         </p>
         {result && result.status !== "error" ? (
           <>
-            <dl className="mt-3 grid gap-1 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-[var(--text-secondary)]">Converted</dt>
-                <dd className="font-mono">{result.formatted}</dd>
-              </div>
-            </dl>
+            <ResultReveal variant="quick" token={result.formatted}>
+              <dl className="mt-3 grid gap-1 text-sm">
+                <div className="flex justify-between">
+                  <dt className="text-[var(--text-secondary)]">Converted</dt>
+                  <dd className="font-mono">{result.formatted}</dd>
+                </div>
+              </dl>
+            </ResultReveal>
             {result.status === "skipped" || result.status === "ambiguous" ? (
               <p className="text-sm" role="alert">
                 {result.note}

@@ -1,5 +1,7 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/Button"
+import { CoinFlip, ResultReveal } from "@/components/motion/primitives"
+import { useReducedMotion } from "@/components/motion/use-reduced-motion"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
@@ -27,6 +29,7 @@ const modeLabels: Record<PickMode, string> = {
 
 export default function RandomPicker() {
   const { random } = usePlatform()
+  const reducedMotion = useReducedMotion()
   const [mode, setMode] = useState<PickMode>("list")
   const [listText, setListText] = useState("")
   const [minimum, setMinimum] = useState("1")
@@ -34,11 +37,23 @@ export default function RandomPicker() {
   const [result, setResult] = useState("")
   const [error, setError] = useState("")
   const [status, setStatus] = useState("")
+  const [flipping, setFlipping] = useState(false)
+  const [flipId, setFlipId] = useState(0)
+  const [pickId, setPickId] = useState(0)
+  const flipTimer = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (flipTimer.current !== null) window.clearTimeout(flipTimer.current)
+    }
+  }, [])
 
   function changeMode(next: PickMode) {
     setMode(next)
     setResult("")
     setError("")
+    setFlipping(false)
+    if (flipTimer.current !== null) window.clearTimeout(flipTimer.current)
   }
 
   function pick() {
@@ -53,10 +68,20 @@ export default function RandomPicker() {
           return
         }
         setResult(pickFromList(parsed.items, source))
+        setPickId((previous) => previous + 1)
         return
       }
       if (mode === "coin") {
-        setResult(flipCoin(source))
+        const face = flipCoin(source)
+        setResult(face)
+        setFlipId((previous) => previous + 1)
+        if (reducedMotion) {
+          setFlipping(false)
+        } else {
+          setFlipping(true)
+          if (flipTimer.current !== null) window.clearTimeout(flipTimer.current)
+          flipTimer.current = window.setTimeout(() => setFlipping(false), 600)
+        }
         return
       }
       const range = parseRange(minimum, maximum)
@@ -66,6 +91,7 @@ export default function RandomPicker() {
         return
       }
       setResult(String(randomInteger(range.minimum, range.maximum, source)))
+      setPickId((previous) => previous + 1)
     } catch (pickError: unknown) {
       setResult("")
       setError(toSafeErrorMessage(pickError))
@@ -140,13 +166,22 @@ export default function RandomPicker() {
           ) : null}
 
           {mode === "coin" ? (
-            <p className="text-sm leading-6 text-[var(--text-secondary)]">
-              One fair coin, drawn from the device&apos;s secure random source.
-            </p>
+            <div className="grid gap-3">
+              <CoinFlip
+                flipping={flipping}
+                flipId={flipId}
+                result={result === "Heads" || result === "Tails" ? result : null}
+              />
+              <p className="text-center text-sm leading-6 text-[var(--text-secondary)]">
+                One fair coin, drawn from the device&apos;s secure random source.
+              </p>
+            </div>
           ) : null}
 
           <div>
-            <Button onClick={pick}>{actionLabel}</Button>
+            <Button aria-busy={flipping || undefined} disabled={flipping} onClick={pick}>
+              {flipping ? "Flipping…" : actionLabel}
+            </Button>
           </div>
 
           {error ? (
@@ -166,17 +201,17 @@ export default function RandomPicker() {
         title="Result"
       >
         {result ? (
-          <>
+          <ResultReveal token={`${mode}-${pickId}-${flipping ? "flipping" : result}`}>
             <output
               className="block break-words font-mono text-2xl font-semibold"
               id="random-picker-result"
             >
-              {result}
+              {flipping && mode === "coin" ? "Flipping…" : result}
             </output>
             <p aria-live="polite" className="sr-only" role="status">
-              Result: {result}.
+              {flipping && mode === "coin" ? "Flipping the coin." : `Result: ${result}.`}
             </p>
-          </>
+          </ResultReveal>
         ) : (
           <p className="text-sm leading-6 text-[var(--text-secondary)]">
             {mode === "list"

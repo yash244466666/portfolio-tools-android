@@ -3,6 +3,7 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal } from "@/components/motion/primitives"
 import {
   convertUnit,
   formatConvertedValue,
@@ -16,6 +17,7 @@ export default function UnitConverter() {
   const [value, setValue] = useState("1")
   const [fromUnit, setFromUnit] = useState("meter")
   const [toUnit, setToUnit] = useState("kilometer")
+  const [swapId, setSwapId] = useState(0)
 
   const categoryUnits = units[category]
   const numericValue = Number(value)
@@ -34,6 +36,7 @@ export default function UnitConverter() {
   function swap() {
     setFromUnit(toUnit)
     setToUnit(fromUnit)
+    setSwapId((previous) => previous + 1)
   }
 
   return (
@@ -86,15 +89,23 @@ export default function UnitConverter() {
             onClick={swap}
             variant="secondary"
           >
-            <ArrowDownUp aria-hidden="true" size={19} />
+            <ArrowDownUp
+              aria-hidden="true"
+              className="transition-transform duration-[var(--motion-base)]"
+              size={19}
+              style={{ transform: `rotate(${swapId * 180}deg)` }}
+            />
             <span className="sm:hidden">Swap units</span>
           </Button>
 
           <Field htmlFor="to-value" label="To">
             <div className="grid gap-2">
-              <output className="app-input block min-h-12 overflow-x-auto font-mono" id="to-value">
-                {result || "—"}
-              </output>
+              <ResultReveal
+                className="app-input block min-h-12 overflow-x-auto font-mono"
+                token={result}
+              >
+                <output id="to-value">{result || "—"}</output>
+              </ResultReveal>
               <select
                 aria-label="Destination unit"
                 className="app-input"

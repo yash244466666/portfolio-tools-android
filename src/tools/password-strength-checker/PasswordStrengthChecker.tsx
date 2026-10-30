@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Meter } from "@/components/motion/primitives"
 import { analyzePassword, maximumPasswordChars } from "./password-strength"
 
 export default function PasswordStrengthChecker() {
@@ -79,6 +80,17 @@ export default function PasswordStrengthChecker() {
                 <dd className="font-mono text-sm">{analysis.length}</dd>
               </div>
             </dl>
+            <div className="mt-3">
+              <Meter
+                label="Strength score"
+                maximum={1}
+                tone={
+                  analysis.band === "very-weak" || analysis.band === "weak" ? "danger" : "success"
+                }
+                value={analysis.score}
+                valueLabel={`${Math.round(analysis.score * 100)} / 100`}
+              />
+            </div>
             <p className="mt-3 text-xs leading-5 text-[var(--text-secondary)]">
               The crack-time figure is a rough character-pool estimate, not a promise. Real attacks
               use dictionaries and leaked passwords, so a password that scores well can still be

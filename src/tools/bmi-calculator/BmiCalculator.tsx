@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Gauge } from "@/components/motion/primitives"
 import { formatEffectiveValue } from "@/tools/_shared/bounded-parse"
 import {
   bmiCategory,
@@ -236,6 +237,17 @@ export default function BmiCalculator() {
                 : "Fix the highlighted measurement to compute your BMI."
               : "Enter your weight and height to see your BMI."}
         </p>
+        {bmi !== null ? (
+          <div className="mt-3">
+            <Gauge
+              label="BMI"
+              maximum={40}
+              minimum={10}
+              value={bmi}
+              valueLabel={`BMI ${formatBmi(bmi)}`}
+            />
+          </div>
+        ) : null}
         {bmi !== null ? (
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
             Category bands are text labels from the WHO adult ranges, shown here as words so no

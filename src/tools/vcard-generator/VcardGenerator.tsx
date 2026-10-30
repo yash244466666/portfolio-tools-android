@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal } from "@/components/motion/primitives"
 import { buildVcard } from "./vcard"
 
 export default function VcardGenerator() {
@@ -139,9 +140,11 @@ export default function VcardGenerator() {
           title="Result"
           action={<CopyButton label="Copy vCard" onStatus={setStatus} value={output} />}
         >
-          <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded-2xl bg-[var(--surface-muted)] p-3 font-mono text-xs leading-5">
-            {output}
-          </pre>
+          <ResultReveal token={output}>
+            <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded-2xl bg-[var(--surface-muted)] p-3 font-mono text-xs leading-5">
+              {output}
+            </pre>
+          </ResultReveal>
         </ToolPanel>
       ) : null}
 

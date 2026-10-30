@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal } from "@/components/motion/primitives"
 import { computeDateDifference, type CalendarDate, type DayCountMode } from "./date-difference"
 
 const datePattern = /^(\d{4})-(\d{2})-(\d{2})$/
@@ -114,13 +115,15 @@ export default function DateDifferenceCalculator() {
       </ToolPanel>
 
       <ToolPanel title="Difference">
-        <p aria-live="polite" className="text-sm" role="status">
-          {result
-            ? `That span is ${result.totalDays.toLocaleString("en-US")} day${result.totalDays === 1 ? "" : "s"} (${result.weeks.toLocaleString("en-US")} week${result.weeks === 1 ? "" : "s"} and ${result.remainderDays} day${result.remainderDays === 1 ? "" : "s"}), ${result.months.toLocaleString("en-US")} calendar month${result.months === 1 ? "" : "s"} and ${result.remainderOfMonths} day${result.remainderOfMonths === 1 ? "" : "s"}, with ${result.businessDays.toLocaleString("en-US")} business day${result.businessDays === 1 ? "" : "s"} (Monday-Friday).`
-            : startInvalid || endInvalid
-              ? "Fix the highlighted date to compute the difference."
-              : "Enter both dates to see the difference."}
-        </p>
+        <ResultReveal variant="quick" token={result ? result.totalDays : "empty"}>
+          <p aria-live="polite" className="text-sm" role="status">
+            {result
+              ? `That span is ${result.totalDays.toLocaleString("en-US")} day${result.totalDays === 1 ? "" : "s"} (${result.weeks.toLocaleString("en-US")} week${result.weeks === 1 ? "" : "s"} and ${result.remainderDays} day${result.remainderDays === 1 ? "" : "s"}), ${result.months.toLocaleString("en-US")} calendar month${result.months === 1 ? "" : "s"} and ${result.remainderOfMonths} day${result.remainderOfMonths === 1 ? "" : "s"}, with ${result.businessDays.toLocaleString("en-US")} business day${result.businessDays === 1 ? "" : "s"} (Monday-Friday).`
+              : startInvalid || endInvalid
+                ? "Fix the highlighted date to compute the difference."
+                : "Enter both dates to see the difference."}
+          </p>
+        </ResultReveal>
         {result ? (
           <table className="mt-3 w-full text-sm">
             <caption className="sr-only">Date difference breakdown</caption>

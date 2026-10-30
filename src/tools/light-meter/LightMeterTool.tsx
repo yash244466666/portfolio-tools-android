@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Meter } from "@/components/motion/primitives"
 import { useSensorStream } from "@/tools/_sensor/use-sensor-stream"
 import { formatLux, lightLevel } from "./light-meter"
 
@@ -29,6 +30,13 @@ export default function LightMeterTool() {
           <output className="font-mono text-4xl font-semibold" id="light-meter-lux">
             {lux === null ? "—" : formatLux(lux)}
           </output>
+          <Meter
+            label="Ambient light"
+            maximum={10000}
+            tone="primary"
+            value={lux ?? 0}
+            valueLabel={lux === null ? "—" : formatLux(lux)}
+          />
           <div>
             <p className="text-lg font-semibold">{level?.label ?? "Waiting for light data"}</p>
             <p className="text-sm text-[var(--text-secondary)]">{level?.description ?? ""}</p>

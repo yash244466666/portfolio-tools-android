@@ -99,7 +99,9 @@ export function ToolScreen({
           </div>
         }
       >
-        <ToolComponent />
+        <div className="tool-enter" key={tool.id}>
+          <ToolComponent />
+        </div>
       </Suspense>
     </div>
   )

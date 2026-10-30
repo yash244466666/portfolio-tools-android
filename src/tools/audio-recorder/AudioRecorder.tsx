@@ -378,7 +378,7 @@ export default function AudioRecorder() {
               </Button>
             </div>
             {exportNote && (
-              <p role="status" className="mt-2 text-sm">
+              <p className="motion-pop mt-2 text-sm" role="status">
                 {exportNote}
               </p>
             )}

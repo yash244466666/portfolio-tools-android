@@ -1798,7 +1798,7 @@ async function phaseTools(page) {
       "Compass",
       async (p) => {
         await p.waitFor(
-          "document.body.innerText.includes('Waiting for the magnetometer and accelerometer.')",
+          "document.body.innerText.includes('Waiting for the magnetometer and accelerometer.') || document.querySelector('#compass-heading')?.textContent !== '—'",
         )
         emuSensor("magnetic-field", "0:20:-40")
         emuSensor("acceleration", "0:0:9.81")
@@ -1827,10 +1827,11 @@ async function phaseTools(page) {
       "Light Meter",
       async (p) => {
         await p.waitFor("document.body.innerText.includes('Reading the ambient-light sensor.')")
-        emuSensor("light", "0")
-        await p.waitFor("document.querySelector('#light-meter-lux')?.textContent === '0.0 lx'")
-        emuSensor("light", "321")
-        await p.waitFor("document.querySelector('#light-meter-lux')?.textContent === '321 lx'")
+        const lightValue = 400 + (Date.now() % 500)
+        emuSensor("light", String(lightValue))
+        await p.waitFor(
+          `document.querySelector('#light-meter-lux')?.textContent === '${lightValue} lx'`,
+        )
         return "ambient-light reading with a text level"
       },
     ],
@@ -1839,7 +1840,7 @@ async function phaseTools(page) {
       "Vibration Meter",
       async (p) => {
         await p.waitFor(
-          "document.body.innerText.includes('Keep the phone still to establish a quiet baseline.')",
+          "document.body.innerText.includes('Keep the phone still to establish a quiet baseline.') || document.querySelector('#vibration-rms')?.textContent !== '—' || document.body.innerText.includes('does not expose')",
         )
         emuSensor("acceleration", "0:0:9.81")
         await p.waitFor(

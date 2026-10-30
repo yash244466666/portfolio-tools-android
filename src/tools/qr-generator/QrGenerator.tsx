@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal } from "@/components/motion/primitives"
 import { usePlatform } from "@/platform/platform-context"
 import { toSafeErrorMessage } from "@/platform/errors"
 import {
@@ -185,15 +186,17 @@ export default function QrGenerator() {
             role="img"
           />
           {matrix && plan ? (
-            <p className="text-center text-sm text-[var(--text-secondary)]">
-              {drawSupported
-                ? ""
-                : "The QR image cannot be displayed on this device, but sharing and saving still work. "}
-              QR version {matrix.version}: {matrix.size} by {matrix.size} modules rendered at{" "}
-              {plan.canvasPixels} by {plan.canvasPixels} pixels, error correction {level}, encoding{" "}
-              {inputBytes} byte{inputBytes === 1 ? "" : "s"}. Share or save the PNG image to scan
-              it.
-            </p>
+            <ResultReveal token={`${matrix.version}-${inputBytes}-${level}`} variant="quick">
+              <p className="text-center text-sm text-[var(--text-secondary)]">
+                {drawSupported
+                  ? ""
+                  : "The QR image cannot be displayed on this device, but sharing and saving still work. "}
+                QR version {matrix.version}: {matrix.size} by {matrix.size} modules rendered at{" "}
+                {plan.canvasPixels} by {plan.canvasPixels} pixels, error correction {level},
+                encoding {inputBytes} byte{inputBytes === 1 ? "" : "s"}. Share or save the PNG image
+                to scan it.
+              </p>
+            </ResultReveal>
           ) : overLimit ? (
             <p className="text-sm text-[var(--text-secondary)]">
               Shorten the text to generate a QR code.

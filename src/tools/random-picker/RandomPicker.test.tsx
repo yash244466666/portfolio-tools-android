@@ -1,6 +1,11 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
+import { afterEach, vi } from "vitest"
 import { PlatformProvider } from "@/platform/platform-context"
 import RandomPicker from "./RandomPicker"
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 function renderTool() {
   render(
@@ -24,10 +29,13 @@ describe("RandomPicker interactions", () => {
     expect(resultText()).toMatch(/^(Pizza|Sushi|Tacos)$/)
   })
 
-  it("flips Heads or Tails", () => {
+  it("flips Heads or Tails", async () => {
+    vi.useFakeTimers()
     renderTool()
     fireEvent.click(screen.getByRole("button", { name: "Coin flip" }))
     fireEvent.click(screen.getByRole("button", { name: "Flip coin" }))
+    expect(screen.getByRole("button", { name: "Flipping…" })).toBeDisabled()
+    await act(() => vi.advanceTimersByTime(600))
     expect(resultText()).toMatch(/^(Heads|Tails)$/)
   })
 

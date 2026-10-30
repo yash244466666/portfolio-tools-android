@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Meter, ResultReveal } from "@/components/motion/primitives"
 import { formatCents } from "@/tools/_shared/money"
 import {
   computeTripCost,
@@ -208,20 +209,33 @@ export default function FuelTripCostCalculator() {
               : "Enter the trip details to see the fuel cost."}
         </p>
         {result ? (
-          <dl className="mt-3 grid gap-1 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-[var(--text-secondary)]">Fuel needed</dt>
-              <dd className="font-mono">{formatLitres(result.litres)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-[var(--text-secondary)]">Total cost</dt>
-              <dd className="font-mono">{formatCents(result.totalCostCents)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-[var(--text-secondary)]">Per passenger</dt>
-              <dd className="font-mono">{formatCents(result.perPassengerCents)}</dd>
-            </div>
-          </dl>
+          <div className="mt-3 grid gap-3">
+            <Meter
+              label="Per-passenger share"
+              maximum={result.totalCostCents}
+              value={result.perPassengerCents}
+              valueLabel={formatCents(result.perPassengerCents)}
+            />
+            <ResultReveal
+              variant="quick"
+              token={`${result.totalCostCents}-${result.perPassengerCents}`}
+            >
+              <dl className="grid gap-1 text-sm">
+                <div className="flex justify-between">
+                  <dt className="text-[var(--text-secondary)]">Fuel needed</dt>
+                  <dd className="font-mono">{formatLitres(result.litres)}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-[var(--text-secondary)]">Total cost</dt>
+                  <dd className="font-mono">{formatCents(result.totalCostCents)}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-[var(--text-secondary)]">Per passenger</dt>
+                  <dd className="font-mono">{formatCents(result.perPassengerCents)}</dd>
+                </div>
+              </dl>
+            </ResultReveal>
+          </div>
         ) : null}
       </ToolPanel>
 

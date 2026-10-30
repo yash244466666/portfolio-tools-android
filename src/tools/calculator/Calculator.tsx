@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal } from "@/components/motion/primitives"
 import {
   applyScientificFunction,
   appendHistoryEntry,
@@ -44,6 +45,7 @@ export default function Calculator() {
   const [expression, setExpression] = useState("")
   const [history, setHistory] = useState<readonly CalculatorHistoryEntry[]>([])
   const [newNumber, setNewNumber] = useState(true)
+  const [calcId, setCalcId] = useState(0)
   const nextHistoryId = useRef(1)
 
   const appendDigit = useCallback(
@@ -109,6 +111,7 @@ export default function Calculator() {
     setDisplay(result)
     setExpression("")
     setNewNumber(true)
+    setCalcId((previous) => previous + 1)
     if (result !== "Error") {
       setHistory((previous) =>
         appendHistoryEntry(previous, nextHistoryId.current, fullExpression, result),
@@ -173,9 +176,11 @@ export default function Calculator() {
         <p className="h-6 truncate text-right text-sm text-[var(--text-secondary)]">
           {expression || " "}
         </p>
-        <p className="truncate text-right font-mono text-3xl font-bold text-[var(--text)]">
-          {display}
-        </p>
+        <ResultReveal token={calcId}>
+          <p className="truncate text-right font-mono text-3xl font-bold text-[var(--text)]">
+            {display}
+          </p>
+        </ResultReveal>
         <p className="sr-only" role="status">
           {expression === "" ? `Display ${display}` : `${expression}, display ${display}`}
         </p>

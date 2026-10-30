@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { BeforeAfter, Meter, ResultReveal } from "@/components/motion/primitives"
 import { usePlatform } from "@/platform/platform-context"
 import { toSafeErrorMessage } from "@/platform/errors"
 import { bytesToBase64 } from "@/platform/shared/files"
@@ -27,6 +28,7 @@ import {
 } from "./image"
 
 interface CompressResult {
+  originalUrl: string
   url: string
   bytes: Uint8Array
   size: number
@@ -50,6 +52,7 @@ export default function ImageCompressor() {
   useEffect(() => {
     return () => {
       if (result?.url) URL.revokeObjectURL(result.url)
+      if (result?.originalUrl) URL.revokeObjectURL(result.originalUrl)
     }
   }, [result])
 
@@ -115,6 +118,9 @@ export default function ImageCompressor() {
         const output = await blobBytes(blob)
         const savings = savingsPercent(picked.size, output.length)
         setResult({
+          originalUrl: URL.createObjectURL(
+            new Blob([bytes.buffer as ArrayBuffer], { type: picked.mimeType }),
+          ),
           url: URL.createObjectURL(blob),
           bytes: output,
           size: output.length,
@@ -253,29 +259,42 @@ export default function ImageCompressor() {
 
       <ToolPanel title="Result">
         {result ? (
-          <div className="grid gap-3">
-            <p className="text-sm text-[var(--text-secondary)]">
-              {result.width} by {result.height} pixels · {formatBytes(result.size)} ·{" "}
-              {result.mimeType.replace("image/", "").toUpperCase()}
-            </p>
-            <img
-              alt={`Compressed image preview, ${result.width} by ${result.height} pixels`}
-              className="max-w-full rounded-xl border border-[var(--border)]"
-              src={result.url}
-            />
-            <p className="text-xs leading-5 text-[var(--text-secondary)]">
-              Re-encoding strips camera and location metadata. The shared or saved file uses the
-              exact bytes shown here.
-            </p>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <Button disabled={busy} onClick={() => void exportImage("share")}>
-                Share image
-              </Button>
-              <Button disabled={busy} onClick={() => void exportImage("save")} variant="secondary">
-                Save image
-              </Button>
+          <ResultReveal token={result.url}>
+            <div className="grid gap-3">
+              <Meter
+                label="Size change"
+                maximum={100}
+                tone={savingsPercent(picked?.size ?? 0, result.size) >= 0 ? "success" : "danger"}
+                value={Math.max(0, savingsPercent(picked?.size ?? 0, result.size))}
+                valueLabel={`${savingsPercent(picked?.size ?? 0, result.size)}% smaller`}
+              />
+              <p className="text-sm text-[var(--text-secondary)]">
+                {result.width} by {result.height} pixels · {formatBytes(result.size)} ·{" "}
+                {result.mimeType.replace("image/", "").toUpperCase()}
+              </p>
+              <BeforeAfter
+                after={result.url}
+                alt={`Compressed image preview, ${result.width} by ${result.height} pixels`}
+                before={result.originalUrl}
+              />
+              <p className="text-xs leading-5 text-[var(--text-secondary)]">
+                Re-encoding strips camera and location metadata. The shared or saved file uses the
+                exact bytes shown here.
+              </p>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <Button disabled={busy} onClick={() => void exportImage("share")}>
+                  Share image
+                </Button>
+                <Button
+                  disabled={busy}
+                  onClick={() => void exportImage("save")}
+                  variant="secondary"
+                >
+                  Save image
+                </Button>
+              </div>
             </div>
-          </div>
+          </ResultReveal>
         ) : (
           <p className="text-sm text-[var(--text-secondary)]">
             The compressed preview appears here after compressing an image.

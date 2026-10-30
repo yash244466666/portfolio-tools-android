@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal } from "@/components/motion/primitives"
 import { usePlatform } from "@/platform/platform-context"
 import { currencyCatalog } from "./catalog"
 import { fetchBaseRates } from "./currency-client"
@@ -172,7 +173,10 @@ export default function CurrencyConverter() {
   )
   const refreshing = entry !== undefined && !entryFresh && connected && loadFailure === null
 
+  const [swapId, setSwapId] = useState(0)
+
   function swap() {
+    setSwapId((previous) => previous + 1)
     setFrom(to)
     setTo(from)
   }
@@ -224,22 +228,29 @@ export default function CurrencyConverter() {
               onClick={swap}
               variant="secondary"
             >
-              <ArrowRightLeft aria-hidden="true" size={18} />
+              <ArrowRightLeft
+                aria-hidden="true"
+                className="transition-transform duration-[var(--motion-base)]"
+                size={18}
+                style={{ transform: `rotate(${swapId * 180}deg)` }}
+              />
               <span className="sm:hidden">Swap</span>
             </Button>
             <Field hint="Result updates as you type." htmlFor="currency-result" label="Result">
-              <output
+              <ResultReveal
                 className="app-input flex min-h-12 items-center overflow-x-auto font-mono"
-                id="currency-result"
+                token={converted ?? "empty"}
               >
-                {converted !== null
-                  ? `${converted} ${to}`
-                  : amountResult.status === "invalid"
-                    ? "—"
-                    : connected && loadFailure === null
-                      ? "Loading rates…"
-                      : "—"}
-              </output>
+                <output id="currency-result">
+                  {converted !== null
+                    ? `${converted} ${to}`
+                    : amountResult.status === "invalid"
+                      ? "—"
+                      : connected && loadFailure === null
+                        ? "Loading rates…"
+                        : "—"}
+                </output>
+              </ResultReveal>
             </Field>
           </div>
 

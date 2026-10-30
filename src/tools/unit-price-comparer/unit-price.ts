@@ -83,6 +83,8 @@ export interface CompareItem {
 
 export interface RankedItem {
   label: string
+  /** Normalized measure family (ml, g, m, pc). */
+  family: string
   price: number
   quantity: number
   unit: MeasureUnit
@@ -150,6 +152,7 @@ export function rankUnitPrices(items: CompareItem[]): RankedItem[] {
     previousPrice = item.pricePerBaseUnit
     return {
       label: item.label,
+      family: item.family,
       price: item.price,
       quantity: item.quantity,
       unit: item.unit,

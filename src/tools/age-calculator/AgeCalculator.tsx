@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Meter } from "@/components/motion/primitives"
 import { computeAge, todayIso, type AgeResult } from "./age"
 
 function AgeStat({ label, value }: { label: string; value: string }) {
@@ -93,6 +94,14 @@ export default function AgeCalculator() {
             <p className="mt-1 text-center text-xs text-[var(--text-secondary)]">
               Turning {result.nextBirthdayAge} years old on {result.nextBirthdayIso}
             </p>
+            <div className="mx-auto mt-3 max-w-xs">
+              <Meter
+                label="Year until next birthday"
+                maximum={366}
+                value={366 - result.daysUntilBirthday}
+                valueLabel={`${result.daysUntilBirthday} day${result.daysUntilBirthday === 1 ? "" : "s"} to go`}
+              />
+            </div>
           </ToolPanel>
         </>
       )}

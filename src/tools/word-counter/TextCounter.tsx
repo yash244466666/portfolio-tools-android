@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Meter } from "@/components/motion/primitives"
 import {
   computeTextStats,
   maximumCounterChars,
@@ -53,6 +54,17 @@ export default function TextCounter({ emphasizeCharacters }: { emphasizeCharacte
             </div>
           ))}
         </div>
+        {text ? (
+          <div className="mt-3">
+            <Meter
+              label="Character limit"
+              maximum={maximumCounterChars}
+              tone={overLimit ? "danger" : "primary"}
+              value={stats?.characters ?? 0}
+              valueLabel={`${(stats?.characters ?? 0).toLocaleString("en-US")} / ${maximumCounterChars.toLocaleString("en-US")}`}
+            />
+          </div>
+        ) : null}
         {overLimit ? (
           <p className="mt-3" role="alert">
             The text exceeds the {maximumCounterChars.toLocaleString("en-US")} character limit.

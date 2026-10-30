@@ -84,6 +84,15 @@ export default function UnitPriceComparer() {
     setRows(initialRows.map((row) => ({ ...row })))
   }
 
+  const familyRanges = new Map<string, { minimum: number; maximum: number }>()
+  for (const item of ranked) {
+    const current = familyRanges.get(item.family)
+    familyRanges.set(item.family, {
+      minimum: Math.min(current?.minimum ?? item.pricePerBaseUnit, item.pricePerBaseUnit),
+      maximum: Math.max(current?.maximum ?? item.pricePerBaseUnit, item.pricePerBaseUnit),
+    })
+  }
+
   return (
     <div className="grid gap-4">
       <ToolPanel title={`Items (up to ${maximumItems})`}>
@@ -220,6 +229,20 @@ export default function UnitPriceComparer() {
                     <td className="py-2 text-right font-mono">{item.price}</td>
                     <td className="py-2 text-right font-mono">
                       {formatUnitPrice(item.pricePerBaseUnit)} per {baseUnitFor(item.unit)}
+                      {(() => {
+                        const range = familyRanges.get(item.family)
+                        const span = range ? range.maximum - range.minimum : 0
+                        const ratio =
+                          span === 0 ? 1 : (range!.maximum - item.pricePerBaseUnit) / span
+                        return (
+                          <span aria-hidden="true" className="motion-rank">
+                            <span
+                              className="motion-rank-fill"
+                              style={{ transform: `scaleX(${Math.max(0.08, ratio)})` }}
+                            />
+                          </span>
+                        )
+                      })()}
                     </td>
                     <td className="py-2 text-right font-mono">{item.rank}</td>
                   </tr>

@@ -207,7 +207,9 @@ test("image compressor compresses a picked image end to end", async ({ page }) =
 
   await page.getByRole("button", { name: "Compress image" }).click()
   await expect(page.getByText(/1 by 1 pixels ·/)).toBeVisible({ timeout: 10_000 })
-  await expect(page.getByAltText("Compressed image preview, 1 by 1 pixels")).toBeVisible()
+  await expect(
+    page.getByAltText(/Compressed image preview, 1 by 1 pixels — compressed/),
+  ).toBeVisible()
 })
 
 test("currency converter fetches mocked Frankfurter rates and converts", async ({ page }) => {
@@ -581,7 +583,7 @@ test("BMI calculator shows the WHO band and the estimate-only disclaimer", async
   await expect(page.getByRole("heading", { name: "BMI Calculator" })).toBeVisible()
   await page.locator("#bmi-weight").fill("70")
   await page.locator("#bmi-height-cm").fill("175")
-  await expect(page.getByText("BMI 22.9")).toBeVisible()
+  await expect(page.getByText(/BMI 22\.9 —/)).toBeVisible()
   await expect(page.getByText(/normal band/)).toBeVisible()
   await expect(page.getByText(/not medical advice/)).toBeVisible()
 })
@@ -606,6 +608,18 @@ test("date difference calculator reports exclusive spans and business days", asy
   await page.locator("#date-diff-end").fill("2026-09-11")
   await expect(page.getByText(/with 4 business days/)).toBeVisible()
   await expect(page.getByText("Business days (Mon-Fri)")).toBeVisible()
+})
+
+test("reduced motion keeps tool results immediate", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" })
+  expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(
+    true,
+  )
+  await page.goto("/#/tool/random-picker")
+  await page.getByRole("button", { name: "Coin flip" }).click()
+  await page.getByRole("button", { name: "Flip coin" }).click()
+  await expect(page.getByRole("button", { name: "Flip coin" })).toBeEnabled()
+  await expect(page.locator("#random-picker-result")).toHaveText(/^(Heads|Tails)$/)
 })
 
 test("sensor tools expose honest live or unsupported states", async ({ page }) => {
