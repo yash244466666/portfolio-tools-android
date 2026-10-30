@@ -1,13 +1,13 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-10-30 05:50 Europe/Berlin
+> Last updated: 2026-10-30 06:05 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation Complete — ADR 0026 expands the approved version-1 scope to **38 tools**: the 33 of ADR 0025 plus Level & Angle, Compass, Barometer & Altitude, Light Meter, and Vibration Meter. All 38 are implemented with automated evidence green and a current 38-tool emulator, instrumentation, and process-recreation run; the 70 cut tools remain implemented in-tree at lifecycle `removed`; physical-device evidence (#18/#20/#25) and the product-owner release gates (#27–#41) remain open
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **38 tools per ADR 0026 (accepted 2026-10-30), which adds five permission-free sensor tools to ADR 0025's 33-tool scope (which expanded ADR 0023's 30 tools; ADR 0023 superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004); ADR 0021 keeps youtube-downloader excluded. The manifest carries 38 `enabled` entries and 70 `removed` entries whose source, logic, provenance, and tests stay in-tree.**
 > Public release readiness: **NO — foundation only**
 
-### 2026-10-30 — Sensor platform and five permission-free sensor tools (ADR 0026)
+### 2026-10-30 — Sensor platform and five permission-free sensor tools (ADR 0026; PR #231)
 
 - **Owner decision.** The product owner selected all permission-free sensor suggestions: **Level & Angle**, **Compass**, **Barometer & Altitude**, **Light Meter**, and **Vibration Meter**. ADR 0026 expands the approved version-1 scope from 33 to 38 and explicitly does **not** approve the microphone sound meter, pedometer/step counter, heart rate, GPS, metal detector, or flashlight tools; those need a separate permission/privacy/Play decision.
 - **New platform capability.** `SensorService` exposes availability and one bounded stream (`accelerometer`, `linear-acceleration`, `magnetometer`, `barometer`, `light`) at 20–500 ms. The app-owned `PhoneSensors` Android plugin reads `SensorManager`, validates requests/samples, reports accuracy, stops on Activity pause/destroy, and declares no permission, background service, logging, or storage. The web adapter supports DeviceMotion for accelerometer/linear acceleration and honestly reports the other kinds unavailable; shared validation drops malformed bridge payloads. Tools stop on lifecycle inactive/unmount through `useSensorStream`.
