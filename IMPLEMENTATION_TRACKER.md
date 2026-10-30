@@ -1,13 +1,13 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-10-30 04:05 Europe/Berlin
+> Last updated: 2026-10-30 04:20 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation Complete — the 30 retained version-1 tools of ADR 0023 are implemented with automated evidence green; an independent two-cluster audit plus a platform-hardening follow-up on 2026-10-30 fixed 14 correctness/scope defect classes and re-established the 30-tool emulator, instrumentation, and process-recreation evidence on the current artifact; the 70 cut tools remain implemented in-tree at lifecycle `removed`; physical-device evidence (#18/#20/#25) and the product-owner release gates (#27–#41) remain open
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **30 tools per ADR 0023 (accepted 2026-09-15), which supersedes the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps youtube-downloader excluded. The manifest carries 30 `enabled` entries and 70 `removed` entries whose source, logic, provenance, and tests stay in-tree.**
 > Public release readiness: **NO — foundation only**
 
-### 2026-10-30 — Platform hardening: bidi-safe generated filenames, and a re-verified final artifact (follow-up to PR #225)
+### 2026-10-30 — Platform hardening: bidi-safe generated filenames, and a re-verified final artifact (PR #227, follow-up to PR #225)
 
 - **Finding.** Both `sanitizeGeneratedFileName` (`src/platform/shared/files.ts`) and `DocumentFilePolicy.sanitizeFileName` removed C0/DEL but kept Unicode bidi embedding/override/isolate controls, C1 controls, and line/paragraph separators. A source name such as `photo` + U+202E + `gnp.exe` displays as `photoexe.png` in a save/share dialog — a classic extension-spoofing pattern — even though the bytes on disk are named correctly. The JS sanitizer feeds the display/share name and the native sanitizer validates the Save As name, so both needed the same policy.
 - **Fix.** One predicate in each layer now replaces U+061C, U+200E/U+200F, U+202A–U+202E, U+2028/U+2029, U+2066–U+2069, and C1 controls with the existing hyphen-replacement policy. ZWJ/ZWNJ are deliberately preserved because they are legitimate inside several scripts. Tests cover an RLO-extension spoof, a line separator + isolate, ZWJ preservation, and the mirrored native vectors.
