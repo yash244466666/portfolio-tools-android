@@ -1,13 +1,13 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-10-30 03:30 Europe/Berlin
+> Last updated: 2026-10-30 03:40 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation Complete — the 30 retained version-1 tools of ADR 0023 are implemented with automated evidence green; an independent two-cluster audit on 2026-10-30 fixed 13 correctness/scope defects and re-established the 30-tool emulator, instrumentation, and process-recreation evidence on the current artifact; the 70 cut tools remain implemented in-tree at lifecycle `removed`; physical-device evidence (#18/#20/#25) and the product-owner release gates (#27–#41) remain open
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **30 tools per ADR 0023 (accepted 2026-09-15), which supersedes the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps youtube-downloader excluded. The manifest carries 30 `enabled` entries and 70 `removed` entries whose source, logic, provenance, and tests stay in-tree.**
 > Public release readiness: **NO — foundation only**
 
-### 2026-10-30 — Independent text/files/time/money audit: 13 defects fixed, stale instrumentation repaired, and device evidence re-established
+### 2026-10-30 — Independent text/files/time/money audit: 13 defects fixed, stale instrumentation repaired, and device evidence re-established (PR #225)
 
 - **Method.** Two independent read-only audits covered the enabled tools' pure logic in two clusters (text/privacy/sharing; files/time/money). Every candidate was then re-derived and reproduced by this session before acceptance — the rule that mattered because the previous audit's "clean" verdict on Unit Price had already been disproved by PR #223. The working tree was rebuilt and re-verified after the first batch while the audits were still running; both audits re-checked their findings against the current tree at the end. The starting suite measured **1,677 passed / 216 files**, one above the previously recorded 1,676 (record reconciliation: the unit-price regression test from #223 was not reflected in the prior count).
 - **Notes was losing the last edit and could resurrect a cleared note.** The 500 ms autosave timer was cleared on unmount (route change, Back), so the last half-second of typing was discarded; `preferences.set` had no rejection handler; a failed initial read left the editor disabled forever; and Clear could race a dispatched write so the note reappeared after `remove`. Autosave now flushes on unmount, Clear cancels the timer and awaits every dispatched write before removing, save failures are surfaced without dropping the text, and an unreadable note blocks editing instead of being overwritten. Four regression tests cover unmount flush, failure, pending-timer clearing, and the in-flight race.
