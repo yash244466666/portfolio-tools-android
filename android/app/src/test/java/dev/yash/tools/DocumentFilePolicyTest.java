@@ -58,6 +58,11 @@ public class DocumentFilePolicyTest {
         assertEquals("yash-tools-output", DocumentFilePolicy.sanitizeFileName("..."));
         assertEquals("report name.txt", DocumentFilePolicy.sanitizeFileName("  report   name.txt  "));
         assertEquals("a-b", DocumentFilePolicy.sanitizeFileName("a--b"));
+        String rlo = new String(new char[] { 0x202E });
+        String lineSeparator = new String(new char[] { 0x2028 });
+        String isolate = new String(new char[] { 0x2066 });
+        assertEquals("photo-gnp.exe", DocumentFilePolicy.sanitizeFileName("photo" + rlo + "gnp.exe"));
+        assertEquals("a-b-c", DocumentFilePolicy.sanitizeFileName("a" + lineSeparator + "b" + isolate + "c"));
     }
 
     @Test

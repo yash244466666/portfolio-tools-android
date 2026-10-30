@@ -13,6 +13,13 @@ describe("generated file safety", () => {
     expect(Array.from(sanitizeGeneratedFileName("😀".repeat(130)))).toHaveLength(30)
   })
 
+  it("strips bidi controls that can disguise the extension", () => {
+    expect(sanitizeGeneratedFileName("photo‮gnp.exe")).toBe("photo-gnp.exe")
+    expect(sanitizeGeneratedFileName("a b⁦c")).toBe("a-b-c")
+    // ZWJ/ZWNJ stay: they are legitimate inside several scripts.
+    expect(sanitizeGeneratedFileName("क्ष‍त्र.txt")).toBe("क्ष‍त्र.txt")
+  })
+
   it("decodes UTF-8 and Base64 into the same bytes used for save and share", () => {
     expect(
       new TextDecoder().decode(
