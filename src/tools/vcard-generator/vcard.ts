@@ -1,5 +1,5 @@
 /**
- * Pure RFC 6350 vCard 3.0 generation. Text properties escape backslash,
+ * Pure RFC 2426 vCard 3.0 generation. Text properties escape backslash,
  * semicolon, comma, and newlines — the upstream version escaped nothing, so a
  * name like `Smith; Jr` corrupted the N property structure.
  */
@@ -74,14 +74,17 @@ export function buildVcard(raw: Partial<VcardInput>): VcardResult {
     if (parsed.protocol !== "https:") {
       return { status: "error", message: "Enter an https website URL." }
     }
-    lines.push(`URL:${escapeVcardText(url)}`)
+    // URL is a URI value in vCard 3.0; text escaping does not apply and would
+    // corrupt legal commas/semicolons in the link.
+    lines.push(`URL:${parsed.href}`)
   }
   const address = input.address.trim()
   if (address !== "") lines.push(`ADR;TYPE=HOME:;;${escapeVcardText(address)};;;;`)
   lines.push("END:VCARD")
   return {
     status: "ok",
-    card: lines.join("\r\n"),
+    // The vCard grammar terminates the object with CRLF.
+    card: `${lines.join("\r\n")}\r\n`,
     filename: vcardFilename(firstName, lastName),
   }
 }

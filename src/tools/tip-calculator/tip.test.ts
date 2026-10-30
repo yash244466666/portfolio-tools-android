@@ -41,6 +41,14 @@ describe("computeTip", () => {
     expect(result?.perPerson).toBe(6.25)
   })
 
+  it("rounds an exact half-cent per-person split up", () => {
+    // 16.90 at 45% is 7.605; the 24.505 total split 13 ways is exactly
+    // 188.5 cents, which must round to 1.89 rather than 1.88.
+    const result = computeTip(16.9, 45, 13)
+    expect(result?.total).toBe(24.51)
+    expect(result?.perPerson).toBe(1.89)
+  })
+
   it("rejects non-positive bills and out-of-range options", () => {
     expect(computeTip(0, 18, 1)).toBeNull()
     expect(computeTip(-5, 18, 1)).toBeNull()

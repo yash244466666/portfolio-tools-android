@@ -150,6 +150,39 @@ describe("convertTimeZone", () => {
     }
   })
 
+  it("detects a fall-back overlap beyond a +12h offset (Auckland +13 DST)", () => {
+    // Auckland 2026-04-05 02:30 happens at 13:30Z (NZDT +13) and 14:30Z
+    // (NZST +12). A ±12h probe lands on the same side of the transition for
+    // both probes and used to report a plain "ok" at the later instant.
+    const result = convertTimeZone(
+      { year: 2026, month: 4, day: 5, hour: 2, minute: 30 },
+      "Pacific/Auckland",
+      "UTC",
+    )
+    expect(result.status).toBe("ambiguous")
+    if (result.status === "ambiguous") {
+      expect(result.formatted).toBe("2026-04-04 13:30")
+      expect(result.note).toMatch(/earlier interpretation was used/)
+    }
+  })
+
+  it("resolves a +13h zone's spring gap forward, not backward", () => {
+    // Auckland 2026-09-27 02:30 does not exist; the forward mapping is
+    // 03:30 NZDT = 2026-09-26 14:30Z. The old probe produced 01:30 NZST and
+    // called it the "next valid time".
+    const result = convertTimeZone(
+      { year: 2026, month: 9, day: 27, hour: 2, minute: 30 },
+      "Pacific/Auckland",
+      "UTC",
+    )
+    expect(result.status).toBe("skipped")
+    if (result.status === "skipped") {
+      expect(result.formatted).toBe("2026-09-26 14:30")
+      expect(result.actualFromWall).toBe("2026-09-27 03:30")
+      expect(result.note).toMatch(/next valid time, 2026-09-27 03:30/)
+    }
+  })
+
   it("rejects malformed components and unknown zones", () => {
     expect(
       convertTimeZone({ year: 2026, month: 13, day: 1, hour: 0, minute: 0 }, "UTC", "UTC").status,

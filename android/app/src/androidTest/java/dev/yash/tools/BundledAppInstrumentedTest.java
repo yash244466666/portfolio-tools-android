@@ -82,13 +82,13 @@ public final class BundledAppInstrumentedTest {
                 "document.documentElement.dataset.theme === 'dark'"
             );
 
-            WebViewTestHarness.navigate(scenario, "#/tool/hash-generator");
-            WebViewTestHarness.waitForText(scenario, "Hash Generator");
-            WebViewTestHarness.setValue(scenario, "#hash-input", SYNTHETIC_SENSITIVE_INPUT);
+            WebViewTestHarness.navigate(scenario, "#/tool/case-converter");
+            WebViewTestHarness.waitForText(scenario, "Case Converter");
+            WebViewTestHarness.setValue(scenario, "#case-input", SYNTHETIC_SENSITIVE_INPUT);
             assertTrue(
                 WebViewTestHarness.evaluateBoolean(
                     scenario,
-                    "document.querySelector('#hash-input').value.length > 0"
+                    "document.querySelector('#case-input').value.length > 0"
                 )
             );
 
@@ -117,8 +117,8 @@ public final class BundledAppInstrumentedTest {
             assertTrue(
                 WebViewTestHarness.evaluateBoolean(
                     scenario,
-                    "document.querySelector('#hash-input') === null || " +
-                    "document.querySelector('#hash-input').value === ''"
+                    "document.querySelector('#case-input') === null || " +
+                    "document.querySelector('#case-input').value === ''"
                 )
             );
         }

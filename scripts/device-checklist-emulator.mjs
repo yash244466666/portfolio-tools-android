@@ -1489,7 +1489,7 @@ async function phaseTools(page) {
         await p.setValue("#vcard-url", "http://example.com")
         await p.clickButton("Generate vCard")
         await p.waitFor("document.body.innerText.includes('Enter an https website URL.')")
-        return "RFC 6350 escaping rendered and non-https URL rejected"
+        return "RFC 2426 escaping rendered and non-https URL rejected"
       },
     ],
     [

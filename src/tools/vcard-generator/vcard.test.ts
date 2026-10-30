@@ -21,13 +21,10 @@ describe("buildVcard", () => {
     const result = buildVcard({ firstName: "Ada", lastName: "Lovelace" })
     expect(result).toEqual({
       status: "ok",
-      card: [
-        "BEGIN:VCARD",
-        "VERSION:3.0",
-        "N:Lovelace;Ada;;;",
-        "FN:Ada Lovelace",
-        "END:VCARD",
-      ].join("\r\n"),
+      card:
+        ["BEGIN:VCARD", "VERSION:3.0", "N:Lovelace;Ada;;;", "FN:Ada Lovelace", "END:VCARD"].join(
+          "\r\n",
+        ) + "\r\n",
       filename: "ada-lovelace.vcf",
     })
   })
@@ -48,7 +45,19 @@ describe("buildVcard", () => {
     expect(result.card).toContain("TEL;TYPE=VOICE:+1 555 123 4567")
     expect(result.card).toContain("EMAIL;TYPE=INTERNET:grace@example.com")
     expect(result.card).toContain("URL:https://example.com/grace")
+    expect(result.card.endsWith("END:VCARD\r\n")).toBe(true)
     expect(result.card).toContain("ADR;TYPE=HOME:;;1 Main St\\, Springfield;;;;")
+  })
+
+  it("emits URI punctuation without text escaping", () => {
+    const result = buildVcard({
+      firstName: "Ada",
+      lastName: "Lovelace",
+      url: "https://example.com/a,b;c?q=x,y;z",
+    })
+    expect(result.status).toBe("ok")
+    if (result.status !== "ok") return
+    expect(result.card).toContain("URL:https://example.com/a,b;c?q=x,y;z")
   })
 
   it("accepts only https website URLs", () => {

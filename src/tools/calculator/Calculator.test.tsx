@@ -61,6 +61,16 @@ describe("Calculator interactions", () => {
     expectDisplay("6")
   })
 
+  it("continues from a result displayed in exponent notation", () => {
+    renderTool()
+    fireEvent.click(screen.getByRole("button", { name: "Scientific" }))
+    press(["1", "0", "0", "0", "0", "0", "0", "0"])
+    fireEvent.click(screen.getByRole("button", { name: "Reciprocal" }))
+    expectDisplay("1e-7")
+    press(["Add", "5", "Equals"])
+    expectDisplay("5.0000001")
+  })
+
   it("inserts pi from the constants row", () => {
     renderTool()
     fireEvent.click(screen.getByRole("button", { name: "Scientific" }))

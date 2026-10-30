@@ -24,6 +24,12 @@ describe("tokenizeWords", () => {
   it("spans scripts and digits", () => {
     expect(tokenizeWords("café 東京 42", true)).toEqual(["café", "東京", "42"])
   })
+
+  it("keeps combining marks attached and normalizes canonical forms", () => {
+    expect(tokenizeWords("naïve", true)).toEqual(["naïve"])
+    expect(tokenizeWords("हिन्दी", true)).toEqual(["हिन्दी"])
+    expect(tokenizeWords("café", true)).toEqual(["café"])
+  })
 })
 
 describe("countWords", () => {
@@ -31,6 +37,9 @@ describe("countWords", () => {
     expect(countWords("one two three")).toBe(3)
     expect(countWords("Dogs' bones", true)).toBe(2)
     expect(countWords("!!!", true)).toBe(0)
+    expect(countWords("— 😀", true)).toBe(0)
+    expect(countWords("café au lait", true)).toBe(3)
+    expect(countWords("हिन्दी भाषा", true)).toBe(2)
   })
 })
 

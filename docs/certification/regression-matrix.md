@@ -13,7 +13,7 @@ E2E route coverage: 30/30; installed-artifact interaction (emulator driver per-t
 | Notes                         | `notes-scratchpad`           | text     | local   | 1          | 1               | no       | yes | yes                  |
 | Pomodoro Timer                | `pomodoro-timer`             | text     | local   | 1          | 1               | no       | yes | yes                  |
 | Image Compressor              | `image-compressor`           | media    | local   | 1          | 1               | no       | yes | yes                  |
-| Currency Converter            | `currency-converter`         | core     | network | 1          | 1               | no       | yes | yes                  |
+| Currency Converter            | `currency-converter`         | core     | network | 2          | 1               | no       | yes | yes                  |
 | Word Counter                  | `word-counter`               | text     | local   | 1          | 1               | no       | yes | yes                  |
 | Character Counter             | `character-counter`          | text     | local   | shared     | 1               | no       | yes | yes                  |
 | Case Converter                | `case-converter`             | text     | local   | 1          | 1               | no       | yes | yes                  |

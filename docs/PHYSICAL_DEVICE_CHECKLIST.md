@@ -1,6 +1,6 @@
 # Physical Android Device Checklist
 
-> Status: not yet executed on a physical device. Scope: the 30-tool public version-1 scope approved by ADR 0023 (2026-09-15). Automated emulator pre-verification is green on this scope — the 2026-09-07 run on the 25-tool foundation, the 2026-09-08 run on the 100-tool artifact, and the 2026-09-15 re-run on the 30-tool artifact (42 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL) — while physical-device execution remains pending. Do not check an item without recording device/API/WebView/build evidence.
+> Status: not yet executed on a physical device. Scope: the 30-tool public version-1 scope approved by ADR 0023 (2026-09-15). Automated emulator pre-verification is green on this scope — the 2026-09-07 run on the 25-tool foundation, the 2026-09-08 run on the 100-tool artifact, the 2026-09-15 re-run, and the 2026-10-30 audit-fix re-run on the 30-tool artifact (each 42 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL) — while physical-device execution remains pending. Do not check an item without recording device/API/WebView/build evidence.
 
 ## Test record
 
@@ -192,6 +192,34 @@ four rows as the earlier runs:
 This emulator record supplements but does not replace the physical-device
 checklist below.
 
+## Automated emulator pre-verification (2026-10-30 — audit-fix artifact)
+
+`node scripts/device-checklist-emulator.mjs` was re-run on the debug APK built
+from the 2026-10-30 audit fixes. The driver exited 0 with **42 PASS, 8 INFO,
+4 PENDING_PHYSICAL, 0 FAIL** (54 rows); the same four physical-only rows remain
+pending (TalkBack, Doze/OEM alerts, OEM multi-window, WebView-upgrade matrix).
+
+| Field                          | Value                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------- |
+| Date/time                      | 2026-10-30 (automated run)                                                                   |
+| Tester                         | Automated driver script, orchestrated by the coding agent                                    |
+| Artifact                       | `android/app/build/outputs/apk/debug/app-debug.apk` (versionName `1.0-debug`)                |
+| APK hash                       | SHA-256 `875d71f3b556baa12f7eb08848072587aceba059398d29d37cb4f5696248b69b` (`app-debug.apk`) |
+| Device model                   | `sdk_gphone64_x86_64` (Android Studio AVD `yash_tools_api35_test`)                           |
+| Android/API                    | Android 15 (SDK 35)                                                                          |
+| Android System WebView version | 124.0.6367.219                                                                               |
+| Security patch                 | 2024-09-05                                                                                   |
+| Result                         | 42 PASS, 8 INFO, 4 PENDING_PHYSICAL, 0 FAIL (54 rows), driver exit 0                         |
+
+The same artifact also passed the connected instrumentation suite (13 tests,
+0 failures, 2 phase-gated skips) and both phases of the host-orchestrated
+force-stop process-recreation script. That run exposed a stale-scope test
+defect, not an app defect: `BundledAppInstrumentedTest` and
+`ProcessRecreationInstrumentedTest` still navigated to the ADR 0023-cut
+`hash-generator`, so the activity-recreation case timed out. Both were
+repointed to the enabled, session-only Case Converter (`#/tool/case-converter`,
+`#case-input`) before the green run.
+
 ## Installation and startup
 
 - [ ] Clean install succeeds.
@@ -245,7 +273,7 @@ reinstating a tool restores its row here.
 - [ ] Time Zone Converter crosses zones and surfaces daylight-saving edges honestly.
 - [ ] Date Difference Calculator reports exclusive spans and business days.
 - [ ] Age Calculator computes age, lifetime totals, and next birthday.
-- [ ] Notes loads, autosaves, imports, exports, and explicitly clears its bounded device-local payload.
+- [ ] Notes loads, autosaves (including an edit made immediately before navigating away), imports, exports, and explicitly clears its bounded device-local payload.
 - [ ] Character Counter counts Unicode code points including emoji.
 - [ ] Word Counter matches its Unicode and limit fixtures.
 - [ ] Case Converter exposes all eight conversions and copies results accessibly.
@@ -256,8 +284,8 @@ reinstating a tool restores its row here.
 - [ ] Audio Recorder captures a take, finalizes on lifecycle inactive, and exports within its duration and size caps.
 - [ ] Password Generator draws uniformly from the selected sets via the device secure random source.
 - [ ] Password Strength Checker reports bands, entropy, and crack-time estimates with honest wording.
-- [ ] vCard Generator escapes RFC 6350 text fields and validates website links.
-- [ ] iCalendar Generator escapes RFC 5545 text, emits a UTC DTSTAMP and fresh UID, and imports cleanly.
+- [ ] vCard Generator escapes RFC 2426 (vCard 3.0) text fields and validates website links.
+- [ ] iCalendar Generator escapes RFC 5545 text, emits a UTC DTSTAMP and fresh UID, treats the all-day end date as inclusive (exclusive DTEND), rejects an end before the start, and imports cleanly.
 - [ ] Dice Roller rolls notation from secure bytes and repeats the last roll.
 
 ## Platform behavior

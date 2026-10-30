@@ -246,6 +246,19 @@ describe("cache migration", () => {
     expect(Object.keys(migrated.cache.entries)).toEqual(["USD"])
     expect(Object.keys(migrated.cache.entries["USD"]?.quotes ?? {})).toEqual(["EUR"])
   })
+
+  it("drops an entry whose fetch timestamp is not finite", () => {
+    const migrated = migrateCache({
+      schemaVersion: 1,
+      entries: {
+        USD: { ...entry, fetchedAtMs: Infinity },
+        EUR: { ...entry, base: "EUR", fetchedAtMs: Number.NaN },
+      },
+    })
+    expect(migrated.status).toBe("ok")
+    if (migrated.status !== "ok") return
+    expect(migrated.cache.entries).toEqual({})
+  })
 })
 
 describe("cache freshness and eviction", () => {

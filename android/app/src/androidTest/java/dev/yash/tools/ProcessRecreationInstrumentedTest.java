@@ -41,16 +41,16 @@ public final class ProcessRecreationInstrumentedTest {
                 scenario,
                 "document.documentElement.dataset.theme === 'dark'"
             );
-            WebViewTestHarness.navigate(scenario, "#/tool/hash-generator");
-            WebViewTestHarness.waitForText(scenario, "Hash Generator");
-            WebViewTestHarness.setValue(scenario, "#hash-input", SYNTHETIC_SENSITIVE_INPUT);
+            WebViewTestHarness.navigate(scenario, "#/tool/case-converter");
+            WebViewTestHarness.waitForText(scenario, "Case Converter");
+            WebViewTestHarness.setValue(scenario, "#case-input", SYNTHETIC_SENSITIVE_INPUT);
             WebViewTestHarness.waitForCondition(
                 scenario,
-                "document.querySelector('#hash-input').value.length > 0"
+                "document.querySelector('#case-input').value.length > 0"
             );
             WebViewTestHarness.waitForCondition(
                 scenario,
-                "window.location.hash === '#/tool/hash-generator'"
+                "window.location.hash === '#/tool/case-converter'"
             );
         }
 
@@ -83,18 +83,18 @@ public final class ProcessRecreationInstrumentedTest {
                     ")"
                 )
             );
-            WebViewTestHarness.navigate(scenario, "#/tool/hash-generator");
+            WebViewTestHarness.navigate(scenario, "#/tool/case-converter");
             // A catalog card also contains this title, so wait for the tool's own input
             // element rather than text that matches before the lazy chunk has rendered.
             WebViewTestHarness.waitForCondition(
                 scenario,
-                "document.querySelector('#hash-input') !== null"
+                "document.querySelector('#case-input') !== null"
             );
             assertTrue(
                 "Fresh process must start with an empty sensitive input.",
                 WebViewTestHarness.evaluateBoolean(
                     scenario,
-                    "document.querySelector('#hash-input').value === ''"
+                    "document.querySelector('#case-input').value === ''"
                 )
             );
         }

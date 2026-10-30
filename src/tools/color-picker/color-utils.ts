@@ -43,7 +43,17 @@ export function hexToRgb(hex: string): RgbColor | null {
   return null
 }
 
-const clampChannel = (value: number): number => Math.min(255, Math.max(0, Math.round(value)))
+/**
+ * Half-up rounding with a small absolute tolerance. The conversion formulas
+ * produce exact .5 channel/hue values from integers, but the double result can
+ * land a few ulps below the tie (hsl(210,100%,50%) computes 127.49999999999989,
+ * where Chromium/CSS produces 128). The tolerance is 1e-9 in channel or
+ * degree units, far below any real difference between neighbouring colors.
+ */
+const roundingTolerance = 1e-9
+const roundHalfUp = (value: number): number => Math.round(value + roundingTolerance)
+
+const clampChannel = (value: number): number => Math.min(255, Math.max(0, roundHalfUp(value)))
 
 export function rgbToHex(color: RgbColor): string {
   const toPair = (channel: number) => clampChannel(channel).toString(16).padStart(2, "0")
@@ -75,7 +85,13 @@ export function rgbToHsl(color: RgbColor): HslColor {
     hue *= 60
     if (hue < 0) hue += 360
   }
-  return { h: Math.round(hue), s: Math.round(saturation * 100), l: Math.round(lightness * 100) }
+  // Hue is circular: a value in the 359.5–360 band rounds to 360, which must
+  // be reported as 0 to stay inside the tool's 0–359 input range.
+  return {
+    h: roundHalfUp(hue) % 360,
+    s: roundHalfUp(saturation * 100),
+    l: roundHalfUp(lightness * 100),
+  }
 }
 
 const hue2rgb = (p: number, q: number, t: number): number => {

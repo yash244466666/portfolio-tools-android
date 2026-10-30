@@ -17,6 +17,13 @@ export const apiOrigin = "https://api.frankfurter.dev"
 /** Hard wall-clock budget for one rate request; requests are also user-cancellable. */
 export const requestTimeoutMs = 15_000
 
+/**
+ * Byte cap for the provider's JSON body. The documented `/v2/rates` shape is
+ * about 10 KiB; 256 KiB leaves ample room for catalog growth while keeping a
+ * compromised or misconfigured provider from forcing unbounded parsing.
+ */
+export const maximumRatesResponseBytes = 256 * 1024
+
 /** Aligned with the provider's advertised `max-age=86400` cache lifetime. */
 export const ratesCacheTtlMs = 24 * 60 * 60 * 1000
 
@@ -96,7 +103,13 @@ export function migrateCache(raw: unknown): CacheMigrationResult {
       continue
     }
     const entry = value as Record<string, unknown>
-    if (typeof entry.fetchedAtMs !== "number" || entry.fetchedAtMs <= 0) continue
+    if (
+      typeof entry.fetchedAtMs !== "number" ||
+      !Number.isFinite(entry.fetchedAtMs) ||
+      entry.fetchedAtMs <= 0
+    ) {
+      continue
+    }
     if (entry.base !== base || typeof entry.quotes !== "object" || entry.quotes === null) {
       continue
     }

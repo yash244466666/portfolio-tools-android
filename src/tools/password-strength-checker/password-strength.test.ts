@@ -77,6 +77,19 @@ describe("analyzePassword", () => {
     expect(analyzePassword("a".repeat(22)).crackTime).toBe("Centuries+")
   })
 
+  it("scores canonically equivalent passwords identically", () => {
+    const composed = analyzePassword("é".repeat(8))
+    const decomposed = analyzePassword("é".repeat(8))
+    expect(decomposed).toEqual(composed)
+    expect(composed.length).toBe(8)
+  })
+
+  it("counts code points rather than UTF-16 units for length checks", () => {
+    const emoji = analyzePassword("😀".repeat(4))
+    expect(emoji.length).toBe(4)
+    expect(emoji.checks.find((check) => check.id === "length8")?.pass).toBe(false)
+  })
+
   it("treats a 256-character password as within the documented bound", () => {
     expect(analyzePassword("a".repeat(maximumPasswordChars)).length).toBe(maximumPasswordChars)
     expect(analyzePassword("a".repeat(maximumPasswordChars + 1)).length).toBe(

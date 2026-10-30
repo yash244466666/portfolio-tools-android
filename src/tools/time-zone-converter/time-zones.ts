@@ -211,13 +211,17 @@ export function convertTimeZone(
     return { status: "error", message: "Enter a valid date and time." }
   }
 
-  // Bracket the offsets 12 hours on either side of the naive instant. The
-  // probes are far enough out that any transition inside a DST edge (never
-  // more than two hours wide) lands between them, so the pair yields the
-  // pre- and post-transition offsets regardless of the zone's offset sign.
+  // Bracket the offsets 48 hours on either side of the naive instant. The
+  // probes must clear the zone's own offset as well as the transition width:
+  // with a 12-hour probe, Pacific/Auckland during +13 DST puts both probes on
+  // the same side of the transition, so the second candidate is never
+  // generated (the fall-back overlap was reported as unambiguous and the
+  // spring gap resolved backwards). Every curated zone is within ±14 hours
+  // and has no two transitions within two days, so ±48h brackets both sides.
+  const probeWindowMs = 48 * 60 * 60 * 1000
   const naive = wallToUtc(input)
-  const offsetBefore = offsetMinutes(naive - 43_200_000, fromZone)
-  const offsetAfter = offsetMinutes(naive + 43_200_000, fromZone)
+  const offsetBefore = offsetMinutes(naive - probeWindowMs, fromZone)
+  const offsetAfter = offsetMinutes(naive + probeWindowMs, fromZone)
   if (offsetBefore === null || offsetAfter === null) {
     return { status: "error", message: `Unknown time zone "${fromZone}".` }
   }

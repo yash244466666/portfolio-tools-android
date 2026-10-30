@@ -171,7 +171,13 @@ on the repository once enabled by the owner.
 ## 10. Residual items
 
 - Critical/high vulnerabilities: none remaining (see section 5).
-- Data-loss defects: none known; durable tools carry versioned schemas,
-  migration gates, export, and tested recovery.
+- Data-loss defects: one was found and fixed on 2026-10-30. The Notes
+  autosave debounce was cleared on unmount, so an edit made within 500 ms of
+  leaving the screen was lost; an explicit clear could also race an in-flight
+  write and resurrect the note, and a failed autosave produced an unhandled
+  rejection. Autosave now flushes on unmount, clear waits for dispatched
+  writes before removing, failures are surfaced, and an unreadable saved note
+  blocks editing instead of being overwritten. Durable tools continue to
+  carry versioned schemas, migration gates, export, and tested recovery.
 - The remaining open gates are physical-device/OEM evidence (#18/#25) and
   product-owner release decisions (#27–#41), not security findings.

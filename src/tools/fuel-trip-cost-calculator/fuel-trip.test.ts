@@ -97,6 +97,18 @@ describe("computeTripCost", () => {
     expect(formatMoney(roundTrip?.totalCostCents ?? 0)).toBe("20.00")
   })
 
+  it("rounds an exact half-cent total up", () => {
+    // 11 km at 5.2 km/l at 1.17/l is exactly 2.475, i.e. 247.5 cents.
+    const result = computeTripCost({
+      distanceKm: 11,
+      efficiency: 5.2,
+      mode: "km-per-litre",
+      fuelPricePerLitre: 1.17,
+      passengers: 1,
+    })
+    expect(result?.totalCostCents).toBe(248)
+  })
+
   it("works in the litres-per-100km mode", () => {
     // 200 km at 7.5 l/100km = 15 l at 1.80/l = 27.00.
     const result = computeTripCost({

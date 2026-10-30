@@ -1,3 +1,5 @@
+import { countWords } from "@/tools/_shared/word-tokenizer"
+
 /**
  * Pure scratchpad storage model for the Notes tool.
  *
@@ -79,7 +81,4 @@ export function decodeNoteContent(base64: string): string {
   return new TextDecoder().decode(bytes)
 }
 
-export function countWords(text: string): number {
-  const trimmed = text.trim()
-  return trimmed ? trimmed.split(/\s+/).filter(Boolean).length : 0
-}
+export { countWords }

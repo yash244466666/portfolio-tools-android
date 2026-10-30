@@ -28,8 +28,8 @@ const bandLabels: Record<PasswordStrengthBand, string> = {
 }
 
 /**
- * Strength bands follow the upstream entropy thresholds; the two lowest
- * bands both report "Very Weak" but keep distinct crack-time estimates.
+ * Strength bands follow the upstream entropy thresholds; the labels are
+ * distinct even where two adjacent bands share a crack-time estimate.
  */
 function bandFor(entropy: number): PasswordStrengthBand {
   if (entropy < 36) return "very-weak"
@@ -56,11 +56,16 @@ function crackTimeFor(entropy: number): string {
  * explicit very-weak band and "instant" crack time instead of blank labels.
  */
 export function analyzePassword(password: string): PasswordAnalysis {
-  const length = password.length
-  const hasLowercase = /[a-z]/.test(password)
-  const hasUppercase = /[A-Z]/.test(password)
-  const hasNumbers = /[0-9]/.test(password)
-  const hasSymbols = /[^a-zA-Z0-9]/.test(password)
+  // Canonically equivalent input must score identically: "é" typed as one
+  // code point and "e" + U+0301 are the same password to a login form. The
+  // length is counted in code points, matching the app's character tools, so
+  // an emoji is one character rather than a surrogate pair.
+  const normalized = password.normalize("NFC")
+  const length = [...normalized].length
+  const hasLowercase = /[a-z]/.test(normalized)
+  const hasUppercase = /[A-Z]/.test(normalized)
+  const hasNumbers = /[0-9]/.test(normalized)
+  const hasSymbols = /[^a-zA-Z0-9]/.test(normalized)
 
   let poolSize = 0
   if (hasLowercase) poolSize += 26

@@ -6,14 +6,17 @@
 
 /**
  * Rounds to whole cents, half-up, with a relative-epsilon nudge because the
- * decimal-to-float conversion can land just below the half boundary
- * (1.005 * 100 is 100.4999… in IEEE doubles). The nudge is ~1e-14 of the
- * value, far below any genuine sub-half remainder, so only true half cases
- * flip up.
+ * decimal-to-float conversion can land several ulps below the half boundary
+ * (1.005 * 100 is 100.4999… in IEEE doubles; a tip split of exactly 188.5
+ * cents evaluates to 188.49999999999994). A single `Number.EPSILON` is about
+ * one ulp and does not cover the measured 4–5 ulp error, so the nudge is
+ * eight ulps. At the largest amount these tools accept (1e11 cents) that is
+ * ~1.8e-4 of a cent, while the smallest genuine sub-half decimal remainder
+ * for their cent-quantized inputs is 0.01 cent, so only true ties flip up.
  */
 export function roundToCents(value: number): number {
   if (!Number.isFinite(value)) return 0
-  return Math.round(value * 100 * (1 + Number.EPSILON)) / 100
+  return Math.round(value * 100 * (1 + 8 * Number.EPSILON)) / 100
 }
 
 /**

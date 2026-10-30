@@ -5,7 +5,12 @@
  * is what a person means by "characters"; the upstream implementation counted
  * UTF-16 units, so emoji-heavy text was miscounted. That divergence is recorded
  * in `docs/SOURCE_PROVENANCE.md`.
+ *
+ * Words come from the shared Unicode tokenizer, not a whitespace split, so
+ * punctuation-only or emoji-only text does not invent words and combining
+ * marks stay attached to their letters.
  */
+import { countWords } from "@/tools/_shared/word-tokenizer"
 
 /** Input bound; counting is only run at or below it, so pasting beyond it is rejected. */
 export const maximumCounterChars = 1_000_000
@@ -35,7 +40,7 @@ export function computeTextStats(text: string): TextStats {
     }
   }
 
-  const words = text.trim().split(/\s+/).filter(Boolean).length
+  const words = countWords(text)
   const characters = codePoints.length
   const charactersWithoutSpaces = codePoints.filter((codePoint) => !/\s/u.test(codePoint)).length
   // Simple heuristic: a run of sentence punctuation ends one sentence. Abbreviations
