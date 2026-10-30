@@ -1,13 +1,13 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-10-30 05:20 Europe/Berlin
+> Last updated: 2026-10-30 05:35 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation Complete — ADR 0025 expands the approved version-1 scope to **33 tools**: the 30 of ADR 0023 plus Recipe Scaler, Date Calculator, and Random Picker. All 33 are implemented with automated evidence green and a current 33-tool emulator, instrumentation, and process-recreation run; the 70 cut tools remain implemented in-tree at lifecycle `removed`; physical-device evidence (#18/#20/#25) and the product-owner release gates (#27–#41) remain open
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **33 tools per ADR 0025 (accepted 2026-10-30), which expands ADR 0023's 30-tool scope (itself superseding the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004); ADR 0021 keeps youtube-downloader excluded. The manifest carries 33 `enabled` entries and 70 `removed` entries whose source, logic, provenance, and tests stay in-tree.**
 > Public release readiness: **NO — foundation only**
 
-### 2026-10-30 — Scope expansion: Recipe Scaler, Date Calculator, Random Picker (ADR 0025)
+### 2026-10-30 — Scope expansion: Recipe Scaler, Date Calculator, Random Picker (ADR 0025; PR #229)
 
 - **Owner decision.** After the audit close-out the product owner selected exactly three daily-use additions: **Recipe Scaler**, **Date Calculator**, and **Random Picker**. ADR 0025 (accepted 2026-10-30) expands the approved version-1 scope from 30 to 33 while preserving ADR 0023's 70-tool `removed` disposition and every Definition of Done. This was a deliberate three-tool batch, not a return to the 100-tool catalog; larger candidates (Bill Splitter, Work Hours, Photo Metadata Remover, Event Countdown) were deferred.
 - **Recipe Scaler** (`recipe-scaler`, core). Parses leading whole numbers, decimals, fractions, mixed numbers, vulgar fractions, and simple ranges; keeps the recipe's units; formats kitchen units as nearest common fractions (1 1/2 cups) and metric units as decimals (125 g); scales by desired/original servings with a ×0.01–×100 bound; leaves unquantified lines ("salt to taste", section headers) unchanged and discloses the count. Session-only; no persistence, network, or permissions. 100-line / 200-char-per-line / 20,000-char limits.
