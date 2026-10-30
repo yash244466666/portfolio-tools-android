@@ -608,6 +608,29 @@ test("date difference calculator reports exclusive spans and business days", asy
   await expect(page.getByText("Business days (Mon-Fri)")).toBeVisible()
 })
 
+test("sensor tools expose honest live or unsupported states", async ({ page }) => {
+  await page.goto("/#/tool/level")
+  await expect(page.getByRole("heading", { name: "Level & Angle" })).toBeVisible()
+  await expect(page.getByTestId("level-state")).toBeVisible()
+  await expect(page.getByText(/accelerometer measures gravity/)).toBeVisible()
+
+  await page.goto("/#/tool/compass")
+  await expect(page.getByRole("heading", { name: "Compass" })).toBeVisible()
+  await expect(page.getByText(/does not use\s+location/)).toBeVisible()
+
+  await page.goto("/#/tool/barometer")
+  await expect(page.getByRole("heading", { name: "Barometer & Altitude" })).toBeVisible()
+  await expect(page.getByText(/standard-atmosphere estimate/)).toBeVisible()
+
+  await page.goto("/#/tool/light-meter")
+  await expect(page.getByRole("heading", { name: "Light Meter" })).toBeVisible()
+  await expect(page.getByText(/ambient-light readings are approximate/i)).toBeVisible()
+
+  await page.goto("/#/tool/vibration-meter")
+  await expect(page.getByRole("heading", { name: "Vibration Meter" })).toBeVisible()
+  await expect(page.getByText(/Linear acceleration excludes gravity/)).toBeVisible()
+})
+
 test("recipe scaler scales quantities and leaves unmeasured lines", async ({ page }) => {
   await page.goto("/#/tool/recipe-scaler")
   await expect(page.getByRole("heading", { name: "Recipe Scaler" })).toBeVisible()

@@ -5,8 +5,8 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /**
- * The approved public version-1 scope (ADR 0025: the 30 tools of ADR 0023 plus the
- * Recipe Scaler, Date Calculator, and Random Picker; 33 tools). The catalog must list
+ * The approved public version-1 scope (ADR 0026: the 33 tools of ADR 0023/0025 plus
+ * the five permission-free sensor tools of ADR 0026; 38 tools). The catalog must list
  * exactly these, and only these are probed and counted.
  *
  * The per-tool probes below for the 70 cut tools are deliberately retained in this file:
@@ -55,6 +55,12 @@ const versionOneScope = new Set([
   "ical-generator",
   "dice-roller",
   "random-picker",
+  // Sensors and measurement
+  "level",
+  "compass",
+  "barometer",
+  "light-meter",
+  "vibration-meter",
 ])
 
 /** Enabled tools the catalog must list; keep in step with the registry. */
@@ -72,6 +78,11 @@ const results = []
 function adb(...args) {
   const result = spawnSync("adb", ["shell", ...args], { encoding: "utf8" })
   return (result.stdout ?? "").trim()
+}
+
+/** Sets an emulator virtual sensor (acceleration, magnetic-field, pressure, light, …). */
+function emuSensor(name, value) {
+  spawnSync("adb", ["emu", "sensor", "set", name, value], { encoding: "utf8" })
 }
 
 /** Top resumed activity, used to probe Back-key delivery independently of this app. */
@@ -1766,6 +1777,75 @@ async function phaseTools(page) {
         await p.clickButton("Pick a number")
         await p.waitFor("document.querySelector('#random-picker-result')?.textContent === '5'")
         return "secure list pick and an inclusive single-value range"
+      },
+    ],
+    [
+      "level",
+      "Level & Angle",
+      async (p) => {
+        await p.waitFor("document.body.innerText.includes('Reading the accelerometer.')")
+        emuSensor("acceleration", "0:0:9.81")
+        await p.waitFor(
+          "document.querySelector('[data-testid=level-state]')?.textContent === 'Level'",
+        )
+        emuSensor("acceleration", "9.81:0:0")
+        await p.waitFor("document.body.innerText.includes('Roll 90.0°')")
+        return "accelerometer tilt and level state with emulator sensor injection"
+      },
+    ],
+    [
+      "compass",
+      "Compass",
+      async (p) => {
+        await p.waitFor(
+          "document.body.innerText.includes('Waiting for the magnetometer and accelerometer.')",
+        )
+        emuSensor("magnetic-field", "0:20:-40")
+        emuSensor("acceleration", "0:0:9.81")
+        await p.waitFor("document.querySelector('#compass-heading')?.textContent === '0° N'")
+        return "tilt-compensated magnetic heading from injected sensors"
+      },
+    ],
+    [
+      "barometer",
+      "Barometer & Altitude",
+      async (p) => {
+        await p.waitFor("document.body.innerText.includes('Reading the barometer.')")
+        emuSensor("pressure", "999")
+        await p.waitFor(
+          "document.querySelector('#barometer-pressure')?.textContent === '999.00 hPa'",
+        )
+        emuSensor("pressure", "1000")
+        await p.waitFor(
+          "document.querySelector('#barometer-pressure')?.textContent === '1000.00 hPa'",
+        )
+        return "pressure and standard-atmosphere altitude"
+      },
+    ],
+    [
+      "light-meter",
+      "Light Meter",
+      async (p) => {
+        await p.waitFor("document.body.innerText.includes('Reading the ambient-light sensor.')")
+        emuSensor("light", "0")
+        await p.waitFor("document.querySelector('#light-meter-lux')?.textContent === '0.0 lx'")
+        emuSensor("light", "321")
+        await p.waitFor("document.querySelector('#light-meter-lux')?.textContent === '321 lx'")
+        return "ambient-light reading with a text level"
+      },
+    ],
+    [
+      "vibration-meter",
+      "Vibration Meter",
+      async (p) => {
+        await p.waitFor(
+          "document.body.innerText.includes('Keep the phone still to establish a quiet baseline.')",
+        )
+        emuSensor("acceleration", "0:0:9.81")
+        await p.waitFor(
+          "document.querySelector('#vibration-rms')?.textContent !== '—' || document.body.innerText.includes('does not expose')",
+        )
+        return "linear-acceleration RMS/peak or an honest unsupported state"
       },
     ],
     [

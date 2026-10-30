@@ -131,6 +131,48 @@ export interface LifecycleService {
 export interface HapticsService {
   confirm(): Promise<void>
 }
+export const sensorKinds = [
+  "accelerometer",
+  "linear-acceleration",
+  "magnetometer",
+  "barometer",
+  "light",
+] as const
+
+export type SensorKind = (typeof sensorKinds)[number]
+
+export interface SensorAvailability {
+  kind: SensorKind
+  available: boolean
+}
+
+export interface SensorSample {
+  kind: SensorKind
+  /** Monotonic platform timestamp in milliseconds. */
+  timestampMs: number
+  /** Accelerometer/magnetometer: x, y, z; barometer: hPa; light: lux. */
+  values: readonly number[]
+  /** Platform accuracy 0–3 where reported; 3 is high. */
+  accuracy: number
+}
+
+export interface SensorStartOptions {
+  kinds: readonly SensorKind[]
+  /** Sampling interval; clamped to 20–500 ms (2–50 Hz). */
+  intervalMs?: number
+  onSample(sample: SensorSample): void
+}
+
+export interface SensorSession {
+  readonly kinds: readonly SensorKind[]
+  readonly intervalMs: number
+  stop(): Promise<void>
+}
+
+export interface SensorService {
+  availability(): Promise<SensorAvailability[]>
+  start(options: SensorStartOptions): Promise<SensorSession>
+}
 
 export type RecordingFinalReason =
   "user" | "duration-limit" | "size-limit" | "interrupted" | "failed"
@@ -183,5 +225,6 @@ export interface PlatformServices {
   random: RandomService
   lifecycle: LifecycleService
   haptics: HapticsService
+  sensors: SensorService
   microphone: MicrophoneRecorderService
 }

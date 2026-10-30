@@ -2,14 +2,19 @@
 
 <!-- regression-matrix:generated:start -->
 
-Registry: 33 enabled tools.
-Pure test files: 32/33; component tests: 33/33.
-E2E route coverage: 33/33; installed-artifact interaction (emulator driver per-tool check or E2E): 33/33.
+Registry: 38 enabled tools.
+Pure test files: 37/38; component tests: 38/38.
+E2E route coverage: 38/38; installed-artifact interaction (emulator driver per-tool check or E2E): 38/38.
 
 | Tool                          | ID                           | Category | Network | Pure tests | Component tests | Fixtures | E2E | Artifact interaction |
 | ----------------------------- | ---------------------------- | -------- | ------- | ---------- | --------------- | -------- | --- | -------------------- |
 | Unit Converter                | `unit-converter`             | core     | local   | 1          | 1               | no       | yes | yes                  |
 | Recipe Scaler                 | `recipe-scaler`              | core     | local   | 1          | 1               | no       | yes | yes                  |
+| Level & Angle                 | `level`                      | core     | local   | 1          | 1               | no       | yes | yes                  |
+| Compass                       | `compass`                    | core     | local   | 1          | 1               | no       | yes | yes                  |
+| Barometer & Altitude          | `barometer`                  | core     | local   | 1          | 1               | no       | yes | yes                  |
+| Light Meter                   | `light-meter`                | core     | local   | 1          | 1               | no       | yes | yes                  |
+| Vibration Meter               | `vibration-meter`            | core     | local   | 1          | 1               | no       | yes | yes                  |
 | QR Generator                  | `qr-generator`               | dev      | local   | 1          | 1               | no       | yes | yes                  |
 | Notes                         | `notes-scratchpad`           | text     | local   | 1          | 1               | no       | yes | yes                  |
 | Pomodoro Timer                | `pomodoro-timer`             | text     | local   | 1          | 1               | no       | yes | yes                  |
@@ -50,7 +55,7 @@ This matrix maps every enabled version-1 tool to its independent correctness
 oracles and the test layers that execute them, per issue #21 (the automated
 regression matrix for the release scope; the "all-87" title predates the ADR
 0022 expansion to 100 tools, which ADR 0023 cut to 30 and ADR 0025 expanded to the approved
-33-tool version-1 scope). The generated table above is derived from the
+38-tool version-1 scope). The generated table above is derived from the
 repository itself so it cannot silently drift:
 
 - **Pure tests** — the tool directory's `*.test.ts` files with independent
@@ -67,7 +72,7 @@ repository itself so it cannot silently drift:
   disabled/unsupported states, **not** capture interaction, and it has no
   driver probe or Android instrumentation test. This section previously
   attributed instrumentation coverage to it, which was false. The driver
-  probes 32 of the 33 enabled tools; the microphone path needs physical-device
+  probes 37 of the 38 enabled tools; the microphone path needs physical-device
   evidence (#18/#25) in any case, and is recorded as a known gap rather than
   counted as covered.
 
@@ -122,7 +127,7 @@ artifact numbers below **were** observed here, except that they do not include
 This run predates the ADR 0023 rescope: it was measured on the 100-tool
 candidate, so its enabled-tool count, its work-items manifest counts, its
 212-check E2E run, and its 100-tool emulator-driver result describe that
-scope, not the approved 33-tool version-1 scope (ADR 0025). They are retained as the
+scope, not the approved 38-tool version-1 scope (ADR 0026). They are retained as the
 record of what that run measured and are not renumbered.
 
 | Gate                                                                                    | Result | Evidence                                                                                                                                        |

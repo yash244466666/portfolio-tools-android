@@ -1,6 +1,6 @@
 # Foundation Architecture
 
-> Status: accepted for the foundation; the 33-tool first-release scope is accepted (ADR 0025 expands the 30-tool scope of ADR 0023, which superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps YouTube Downloader excluded), while identity and other irreversible release decisions remain provisional.
+> Status: accepted for the foundation; the 38-tool first-release scope is accepted (ADR 0026 adds five permission-free sensor tools to the 33-tool scope of ADR 0025, which expanded ADR 0023's 30-tool scope; which superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps YouTube Downloader excluded), while identity and other irreversible release decisions remain provisional.
 
 ## Runtime shape
 
@@ -38,7 +38,7 @@ Dependency direction is one way. Tool features may depend on shared UI and platf
 
 `src/tools/registry.ts` is a deterministic compile-time registry. Implemented components are lazy imports. A tool cannot be enabled without an implementation. The registry also exposes risk, persistence, and network classifications needed by UI and tests.
 
-The audited public version 1 scope is 33 tools (ADR 0025, which expands the 30-tool scope of ADR 0023; ADR 0021 keeps youtube-downloader excluded). The registry holds 33 `enabled` entries, each with a lazy component, and 70 `removed` entries with no component, so a cut tool emits no runtime chunk; its source, pure logic, provenance, and tests remain in the repository. The 12-tool architecture milestone proved the reusable paths, and production submission additionally requires every retained entry to pass the remaining device-evidence, certification, and release gates.
+The audited public version 1 scope is 38 tools (ADR 0026 adds five permission-free sensor tools to ADR 0025's 33-tool scope; ADR 0021 keeps youtube-downloader excluded). The registry holds 38 `enabled` entries, each with a lazy component, and 70 `removed` entries with no component, so a cut tool emits no runtime chunk; its source, pure logic, provenance, and tests remain in the repository. The 12-tool architecture milestone proved the reusable paths, and production submission additionally requires every retained entry to pass the remaining device-evidence, certification, and release gates.
 
 ### Tool features
 
@@ -53,6 +53,8 @@ Tools that execute hostile user input use the terminable-Worker pattern proven b
 Android document selection and Save As use the app-owned, versioned `DocumentFiles` bridge. It returns validated `content://` metadata from `ACTION_OPEN_DOCUMENT` and streams bounded generated output from a private cache handoff into an `ACTION_CREATE_DOCUMENT` destination. The bridge accepts no arbitrary paths or intents and requires no storage/media permission. File-consuming tools read picked content through the versioned bridge's `digestContent` (native streaming hash, 1 GiB cap) and `readContent` (bounded 16 MiB copy) operations, restricted to URIs the picker returned in this process.
 
 Android clipboard writes use the app-owned, versioned `SensitiveClipboard` bridge so secret-classified copies can carry Android 13+ sensitive-clipboard metadata; older versions degrade to a normal write. It validates and bounds every write, never reads the clipboard or logs values, and requires no permission. Clipboard reads and the stale-timer-protected timed clear remain on the official plugin and adapter.
+
+Permission-free phone sensors use the app-owned, versioned `PhoneSensors` bridge: accelerometer, linear acceleration, magnetometer, barometer, and ambient light at a capped 20–500 ms interval, with availability reporting, lifecycle stop, and accuracy events. The bridge declares no permission, starts no background service, logs nothing, and persists nothing; the browser adapter supports DeviceMotion only, so sensor tools show honest unsupported states outside Android.
 
 Generated-file cache (`cache/share/` and `cache/save/<operation>/`) is cleaned by the app-owned, versioned `GeneratedCache` janitor using a pure policy: bounded deterministic retention windows, ownership-validated deletion targets, active-operation protection, low-space behavior, and canonical-path containment. It runs at bridge load and opportunistically before generated-file operations, and never touches other cache or user data.
 

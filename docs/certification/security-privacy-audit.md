@@ -2,8 +2,8 @@
 
 > Reconciled: 2026-09-08 against the then-current `main` candidate (registry
 > at 100 enabled tools; app source at `79ef271`). The version-1 release scope
-> is now the 33 enabled tools of ADR 0025 (approved 2026-10-30), expanding ADR
-> 0023's 30-tool scope; sections 1, 4, and 5 note the resulting change in the
+> is now the 38 enabled tools of ADR 0026 (approved 2026-10-30), adding five
+> permission-free sensor tools to ADR 0025's 33-tool scope; sections 1, 4, and 5 note the resulting change in the
 > shipped surface and provider set.
 > Regenerate the SBOM with `node scripts/build-sbom.mjs` after any dependency
 > change.
@@ -68,15 +68,16 @@ runs (see `docs/certification/regression-matrix.md`).
 
 ## 3. Data inventory (device-local only)
 
-| Data class               | Location                                     | Backup/transfer | Cleared by                                   |
-| ------------------------ | -------------------------------------------- | --------------- | -------------------------------------------- |
-| Preferences              | `yash-tools:v1:` namespaced store            | Excluded        | Uninstall, clear storage, settings Clear All |
-| Notes (durable)          | Versioned preference payload                 | Excluded        | Explicit in-tool clear or uninstall          |
-| Pomodoro state           | Versioned preference (safe metadata only)    | Excluded        | Uninstall/clear                              |
-| Favorites/Recents        | Device-local IDs                             | Excluded        | Explicit clear actions                       |
-| Generated files          | `cache/share/`, `cache/save/<op>/` (janitor) | Disposable      | Retention policy, uninstall                  |
-| Sensitive session        | Never persisted (secrets, JWT, recordings)   | n/a             | Cleared on navigation/unload                 |
-| Recipe/date/random input | Component memory only                        | n/a             | Cleared on navigation/unload                 |
+| Data class               | Location                                     | Backup/transfer | Cleared by                                                 |
+| ------------------------ | -------------------------------------------- | --------------- | ---------------------------------------------------------- |
+| Preferences              | `yash-tools:v1:` namespaced store            | Excluded        | Uninstall, clear storage, settings Clear All               |
+| Notes (durable)          | Versioned preference payload                 | Excluded        | Explicit in-tool clear or uninstall                        |
+| Pomodoro state           | Versioned preference (safe metadata only)    | Excluded        | Uninstall/clear                                            |
+| Favorites/Recents        | Device-local IDs                             | Excluded        | Explicit clear actions                                     |
+| Generated files          | `cache/share/`, `cache/save/<op>/` (janitor) | Disposable      | Retention policy, uninstall                                |
+| Sensitive session        | Never persisted (secrets, JWT, recordings)   | n/a             | Cleared on navigation/unload                               |
+| Recipe/date/random input | Component memory only                        | n/a             | Cleared on navigation/unload                               |
+| Sensor samples           | Component memory only; no logs or files      | n/a             | Cleared on navigation/unload; sampling stops in background |
 
 - No analytics, advertising, accounts, cloud sync, purchases, telemetry, or
   crash uploads exist in any variant; no third-party SDK is initialized.
