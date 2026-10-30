@@ -5,6 +5,10 @@ describe("roundToCents (shared half-up)", () => {
   it("keeps true half cases up despite float error", () => {
     expect(roundToCents(1.005)).toBe(1.01)
     expect(roundToCents(2.675)).toBe(2.68)
+    // A tip split of exactly 188.5 cents evaluates to 188.49999999999994.
+    expect(roundToCents(1.8849999999999996)).toBe(1.89)
+    // 11 km at 5.2 km/l at 1.17 is exactly 247.5 cents.
+    expect(roundToCents(2.474999999999999)).toBe(2.48)
   })
 
   it("never flips genuine sub-half remainders", () => {

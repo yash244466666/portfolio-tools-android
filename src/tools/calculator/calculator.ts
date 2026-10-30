@@ -46,7 +46,14 @@ interface Token {
 }
 
 const operatorPattern = /^[+\-*/%^]$/
-const numberPattern = /^(?:\d+(?:\.\d*)?|\.\d+)/
+/**
+ * Decimal numbers may use exponent notation. A displayed result can be
+ * `1e-7` or `1e+21` (formatCalculatorResult uses the engine's shortest
+ * representation), and that result is committed back into the expression
+ * text when the user continues with an operator; rejecting the exponent made
+ * a perfectly valid displayed value evaluate to Error.
+ */
+const numberPattern = /^(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/
 
 function tokenize(source: string): Token[] | null {
   const tokens: Token[] = []

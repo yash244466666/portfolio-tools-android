@@ -107,10 +107,29 @@ export function migrateTimer(raw: unknown): TimerMigrationResult {
   if (record.workMinutes !== workMinutes || record.breakMinutes !== breakMinutes) {
     return { status: "invalid" }
   }
-  if (typeof record.sessions !== "number" || record.sessions < 0) return { status: "invalid" }
+  if (
+    typeof record.sessions !== "number" ||
+    !Number.isFinite(record.sessions) ||
+    !Number.isInteger(record.sessions) ||
+    record.sessions < 0
+  ) {
+    return { status: "invalid" }
+  }
   if (typeof record.notifyEnabled !== "boolean") return { status: "invalid" }
-  if (typeof record.startedAtMs !== "number" || record.startedAtMs < 0) return { status: "invalid" }
-  if (typeof record.remainingMs !== "number" || record.remainingMs < 0) return { status: "invalid" }
+  if (
+    typeof record.startedAtMs !== "number" ||
+    !Number.isFinite(record.startedAtMs) ||
+    record.startedAtMs < 0
+  ) {
+    return { status: "invalid" }
+  }
+  if (
+    typeof record.remainingMs !== "number" ||
+    !Number.isFinite(record.remainingMs) ||
+    record.remainingMs < 0
+  ) {
+    return { status: "invalid" }
+  }
   if (record.state === "running" && (record.startedAtMs === 0 || record.remainingMs === 0)) {
     return { status: "invalid" }
   }
@@ -122,7 +141,7 @@ export function migrateTimer(raw: unknown): TimerMigrationResult {
       state: record.state,
       workMinutes,
       breakMinutes,
-      sessions: Math.floor(record.sessions),
+      sessions: record.sessions,
       notifyEnabled: record.notifyEnabled,
       startedAtMs: record.startedAtMs,
       remainingMs: record.remainingMs,

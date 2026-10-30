@@ -19,8 +19,13 @@ export interface CaseConversion {
   convert: (text: string) => string
 }
 
-/** Unicode letter/digit runs are "words" for the identifier-style conversions. */
-const wordPattern = /[\p{L}\p{N}]+/gu
+/**
+ * Unicode letter/digit runs plus their combining marks are "words" for the
+ * identifier-style conversions. Marks must be part of the run: a decomposed
+ * "é" is "e" + U+0301, and Indic vowel signs/viramas are marks too, so an
+ * ASCII-only run split would delete accents and fragment Devanagari words.
+ */
+const wordPattern = /[\p{L}\p{N}][\p{L}\p{N}\p{M}]*/gu
 
 function capitalize(word: string): string {
   // The /u flag makes the group capture a whole code point, so astral letters
@@ -32,7 +37,9 @@ function capitalize(word: string): string {
 }
 
 function extractWords(text: string): string[] {
-  return [...text.matchAll(wordPattern)].map((match) => match[0].toLowerCase())
+  // NFC first so canonically equivalent input produces the same identifier
+  // rather than depending on how the accent was composed.
+  return [...text.normalize("NFC").matchAll(wordPattern)].map((match) => match[0].toLowerCase())
 }
 
 function toTitleCase(text: string): string {

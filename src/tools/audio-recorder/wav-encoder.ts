@@ -1,5 +1,5 @@
 /**
- * Pure 16-bit mono PCM WAV encoder (RFC 3362-style RIFF/WAVE layout).
+ * Pure 16-bit mono PCM WAV encoder (canonical RIFF/WAVE layout).
  *
  * Independent-oracle vectors in the test suite parse the produced bytes back
  * with a hand-rolled header parser and fixed PCM expectations, so the encoder

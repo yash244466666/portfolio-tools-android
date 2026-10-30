@@ -60,6 +60,16 @@ describe("case conversions", () => {
     expect(convert("pascal", "naïve café")).toBe("NaïveCafé")
   })
 
+  it("keeps combining marks attached and normalizes identifier output", () => {
+    // NFD "cafe" + U+0301 used to lose the accent entirely; the output is
+    // normalized to NFC so the identifier does not depend on input encoding.
+    expect(convert("snake", "café au lait")).toBe("café_au_lait")
+    expect(convert("camel", "café au lait")).toBe("caféAuLait")
+    // Devanagari vowel signs and the virama are combining marks.
+    expect(convert("snake", "हिन्दी भाषा")).toBe("हिन्दी_भाषा")
+    expect(convert("pascal", "हिन्दी")).toBe("हिन्दी")
+  })
+
   it("handles empty and wordless input", () => {
     for (const id of ["camel", "pascal", "snake", "kebab"] as const) {
       expect(convert(id, "")).toBe("")

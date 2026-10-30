@@ -18,8 +18,9 @@ describe("Character Counter interactions", () => {
     expect(charactersCard).toHaveTextContent("5")
     const withoutSpacesCard = screen.getByText("Without spaces").previousElementSibling
     expect(withoutSpacesCard).toHaveTextContent("4")
+    // The emoji is not a Unicode word, so "a👍b c" is three words.
     const wordsCard = screen.getByText("Words").previousElementSibling
-    expect(wordsCard).toHaveTextContent("2")
+    expect(wordsCard).toHaveTextContent("3")
   })
 
   it("rejects input beyond the character limit", () => {

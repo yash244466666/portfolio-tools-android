@@ -86,7 +86,11 @@ export default function IcsGenerator() {
               />
             </Field>
             <Field
-              hint={allDay ? "Used as the all-day end date." : undefined}
+              hint={
+                allDay
+                  ? "Last day of the event (inclusive). A one-day event uses the same date twice."
+                  : "The event must end after it starts."
+              }
               htmlFor="ics-end-date"
               label="End date"
             >

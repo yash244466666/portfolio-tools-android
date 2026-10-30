@@ -55,7 +55,7 @@ export default function VcardGenerator() {
         <div className="grid gap-3">
           <Field
             error={error === "" ? undefined : error}
-            hint="At least one name is required. Escaping follows RFC 6350: semicolons, commas, backslashes, and newlines are safe."
+            hint="At least one name is required. Escaping follows RFC 2426: semicolons, commas, backslashes, and newlines are safe."
             htmlFor="vcard-first-name"
             label="First name"
           >

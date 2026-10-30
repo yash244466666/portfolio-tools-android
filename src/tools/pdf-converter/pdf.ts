@@ -109,6 +109,12 @@ export function validatePageCount(pageCount: number): string | null {
 /**
  * Returns the render scale that keeps one decoded page within the pixel
  * budget. The requested high-resolution scale is used whenever it fits.
+ *
+ * There is deliberately no minimum scale: a page whose MediaBox is large
+ * enough needs a scale below 0.1 to stay inside the budget, and clamping the
+ * result up would silently breach the limit (a crafted PDF is otherwise a
+ * memory-exhaustion vector). A return of 0 means the dimensions cannot be
+ * rendered safely at all; the caller rejects that page.
  */
 export function renderScaleFor(
   pageWidth: number,
@@ -116,11 +122,14 @@ export function renderScaleFor(
   requestedScale: number,
   maximumPixels: number,
 ): number {
+  if (!Number.isFinite(pageWidth) || !Number.isFinite(pageHeight)) return 0
   if (pageWidth <= 0 || pageHeight <= 0) return 1
-  const pixels = pageWidth * pageHeight * requestedScale * requestedScale
+  const area = pageWidth * pageHeight
+  const pixels = area * requestedScale * requestedScale
+  if (!Number.isFinite(area) || !Number.isFinite(pixels)) return 0
   if (pixels <= maximumPixels) return requestedScale
-  const shrunk = Math.sqrt(maximumPixels / (pageWidth * pageHeight))
-  return Math.max(shrunk, 0.1)
+  const shrunk = Math.sqrt(maximumPixels / area)
+  return Number.isFinite(shrunk) && shrunk > 0 ? shrunk : 0
 }
 
 /**

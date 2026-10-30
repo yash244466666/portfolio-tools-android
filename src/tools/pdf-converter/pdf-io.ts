@@ -139,6 +139,12 @@ export async function renderPageToPng(
     requestedRenderScale,
     maximumPixels,
   )
+  if (!(scale > 0)) {
+    throw new PdfToolError(
+      "limit",
+      "This page is too large to render safely. The document may be damaged or crafted.",
+    )
+  }
   const viewport = page.getViewport({ scale })
   const canvas = document.createElement("canvas")
   canvas.width = Math.floor(viewport.width)

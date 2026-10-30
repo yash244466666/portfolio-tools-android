@@ -43,9 +43,9 @@ export function SettingsScreen({
           Your app, your device
         </h1>
         <p className="mt-3 max-w-2xl leading-7 text-[var(--text-secondary)]">
-          This device can store your theme, favorites, recent-tool IDs, the scratchpad note, saved
-          bookmarks, Pomodoro timer state, and cached exchange rates. Every other tool keeps its
-          input in memory only and never saves it automatically.
+          This device can store your theme, favorites, recent-tool IDs, the scratchpad note,
+          Pomodoro timer state, and cached exchange rates. Every other tool keeps its input in
+          memory only and never saves it automatically.
         </p>
       </header>
 
@@ -85,10 +85,9 @@ export function SettingsScreen({
             <div>
               <p className="text-sm leading-6 text-[var(--text-secondary)]">
                 Clear local data from this installation. This removes favorites, recents, theme,
-                your saved scratchpad note, your saved bookmarks, your saved Pomodoro timer state,
-                and cached exchange rates. The confirmation states exactly how many of each will be
-                removed. Notes and bookmarks are stored unencrypted and are not recoverable after
-                clearing.
+                your saved scratchpad note, your saved Pomodoro timer state, and cached exchange
+                rates. The confirmation states exactly how many of each will be removed. The
+                scratchpad note is stored unencrypted and is not recoverable after clearing.
               </p>
               <Button className="mt-4" onClick={() => void onClearPreferences()} variant="danger">
                 Clear local preferences

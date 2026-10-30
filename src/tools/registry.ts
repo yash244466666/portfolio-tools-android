@@ -1124,7 +1124,7 @@ export const tools: readonly ToolDefinition[] = [
   {
     id: "vcard-generator",
     label: "vCard Generator",
-    description: "Build an RFC 6350 vCard 3.0 contact with escaped text fields, ready to import.",
+    description: "Build an RFC 2426 vCard 3.0 contact with escaped text fields, ready to import.",
     category: "dev",
     tags: ["vcard", "contact", "vcf", "rfc 6350", "offline"],
     icon: IdCard,

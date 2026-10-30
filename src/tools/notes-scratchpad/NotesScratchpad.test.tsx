@@ -13,6 +13,11 @@ import NotesScratchpad from "@/tools/notes-scratchpad/NotesScratchpad"
 import { migrateNote, notesStorageKey, serializeNote } from "./notes"
 
 const store = vi.hoisted(() => new Map<string, unknown>())
+const setBehavior = vi.hoisted(() => ({
+  failure: null as Error | null,
+  gate: null as Promise<void> | null,
+}))
+const getBehavior = vi.hoisted(() => ({ failure: null as Error | null }))
 const pickMock = vi.hoisted(() => vi.fn(() => Promise.resolve([] as PickedFile[])))
 const readContentMock = vi.hoisted(() =>
   vi.fn(() => Promise.resolve({ size: 0, data: "", encoding: "base64" } satisfies BoundedContent)),
@@ -36,9 +41,21 @@ vi.mock("@/platform/services", async (importOriginal) => {
   const services: PlatformServices = {
     ...base,
     preferences: {
-      get: <T,>(key: string): Promise<T | null> =>
-        Promise.resolve((store.get(key) as T | undefined) ?? null),
+      get: <T,>(key: string): Promise<T | null> => {
+        if (getBehavior.failure) return Promise.reject(getBehavior.failure)
+        return Promise.resolve((store.get(key) as T | undefined) ?? null)
+      },
       set: <T,>(key: string, value: T): Promise<void> => {
+        if (setBehavior.failure) {
+          const failure = setBehavior.failure
+          return Promise.reject(failure)
+        }
+        if (setBehavior.gate) {
+          const gate = setBehavior.gate
+          return gate.then(() => {
+            store.set(key, value)
+          })
+        }
         store.set(key, value)
         return Promise.resolve()
       },
@@ -94,6 +111,9 @@ function storedNote() {
 beforeEach(() => {
   vi.useFakeTimers()
   store.clear()
+  setBehavior.failure = null
+  setBehavior.gate = null
+  getBehavior.failure = null
   pickMock.mockClear().mockResolvedValue([])
   readContentMock.mockClear().mockResolvedValue({
     size: 0,
@@ -141,6 +161,70 @@ describe("Notes scratchpad interactions", () => {
     expect(store.size).toBe(1)
   })
 
+  it("flushes a pending autosave when the tool unmounts", async () => {
+    store.set(notesStorageKey, serializeNote("old", new Date()))
+    const view = render(
+      <PlatformProvider>
+        <NotesScratchpad />
+      </PlatformProvider>,
+    )
+    await act(async () => {})
+
+    fireEvent.change(screen.getByLabelText("Scratchpad"), { target: { value: "last edit" } })
+    view.unmount()
+    await act(async () => {})
+
+    expect(storedNote().text).toBe("last edit")
+  })
+
+  it("reports a failed autosave without dropping the latest text", async () => {
+    await renderLoadedTool()
+    setBehavior.failure = new Error("storage unavailable")
+
+    await typeNote("unsaved edit")
+
+    expect(screen.getByText(/Autosave failed/)).toBeInTheDocument()
+    expect(screen.getByLabelText("Scratchpad")).toHaveValue("unsaved edit")
+    expect(store.has(notesStorageKey)).toBe(false)
+  })
+
+  it("cancels a pending autosave when the note is cleared", async () => {
+    await renderLoadedTool()
+
+    fireEvent.change(screen.getByLabelText("Scratchpad"), { target: { value: "race" } })
+    fireEvent.click(screen.getByRole("button", { name: "Clear note" }))
+    fireEvent.click(screen.getByRole("button", { name: "Tap again to confirm" }))
+    await act(async () => {
+      vi.advanceTimersByTime(600)
+    })
+    await act(async () => {})
+
+    expect(store.has(notesStorageKey)).toBe(false)
+    expect(screen.getByLabelText("Scratchpad")).toHaveValue("")
+  })
+
+  it("waits for an in-flight write before removing the stored note", async () => {
+    await renderLoadedTool()
+    let releaseWrite: () => void = () => undefined
+    setBehavior.gate = new Promise<void>((resolve) => {
+      releaseWrite = resolve
+    })
+
+    fireEvent.change(screen.getByLabelText("Scratchpad"), { target: { value: "in flight" } })
+    await act(async () => {
+      vi.advanceTimersByTime(600)
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear note" }))
+    fireEvent.click(screen.getByRole("button", { name: "Tap again to confirm" }))
+    await act(async () => {})
+    expect(store.has(notesStorageKey)).toBe(false)
+
+    releaseWrite()
+    await act(async () => {})
+    expect(store.has(notesStorageKey)).toBe(false)
+  })
+
   it("clears the note only after an explicit two-step confirmation", async () => {
     store.set(notesStorageKey, serializeNote("keep me", new Date()))
     await renderLoadedTool()
@@ -163,6 +247,15 @@ describe("Notes scratchpad interactions", () => {
     await typeNote(`${"a".repeat(256 * 1024)}!`)
     expect(screen.getByText(/exceeds the 256 KiB limit/)).toBeInTheDocument()
     expect(storedNote().text).toBe("previous")
+  })
+
+  it("blocks editing when the saved note cannot be read", async () => {
+    getBehavior.failure = new Error("read failed")
+    await renderLoadedTool()
+
+    expect(screen.getByText(/could not be read/)).toBeInTheDocument()
+    expect(screen.getByLabelText("Scratchpad")).toBeDisabled()
+    expect(store.has(notesStorageKey)).toBe(false)
   })
 
   it("keeps a newer-schema note untouched and blocks editing", async () => {

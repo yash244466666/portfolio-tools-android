@@ -56,6 +56,20 @@ describe("rgbToHsl", () => {
     expect(rgbToHsl({ r: 255, g: 255, b: 255 })).toEqual({ h: 0, s: 0, l: 100 })
     expect(rgbToHsl({ r: 0, g: 0, b: 0 })).toEqual({ h: 0, s: 0, l: 0 })
   })
+
+  it("rounds exact half hue and saturation values up", () => {
+    // 207.5 exactly, but the formula lands at 207.49999999999997; CSS says
+    // the hue is 207.5, so half-up gives 208.
+    expect(rgbToHsl({ r: 0, g: 39, b: 72 }).h).toBe(208)
+    // 87.5% exactly, stored as 87.49999999999999.
+    expect(rgbToHsl({ r: 7, g: 7, b: 105 }).s).toBe(88)
+  })
+
+  it("normalizes a rounded hue of 360 to 0", () => {
+    // #ff0001 has an exact hue of 359.7647…, which rounds to 360; the tool's
+    // H input is 0–359, so the readout must wrap.
+    expect(rgbToHsl({ r: 255, g: 0, b: 1 }).h).toBe(0)
+  })
 })
 
 describe("hslToRgb", () => {
@@ -69,6 +83,14 @@ describe("hslToRgb", () => {
   it("wraps negative and overflowing hues", () => {
     expect(hslToRgb({ h: -180, s: 100, l: 50 })).toEqual({ r: 0, g: 255, b: 255 })
     expect(hslToRgb({ h: 540, s: 100, l: 50 })).toEqual({ r: 0, g: 255, b: 255 })
+  })
+
+  it("rounds exact half channels the way CSS does", () => {
+    // hsl(210,100%,50%) is rgb(0,128,255); the raw green channel is
+    // 127.49999999999989.
+    expect(hslToRgb({ h: 210, s: 100, l: 50 })).toEqual({ r: 0, g: 128, b: 255 })
+    // hsl(0,75%,60%) is rgb(230,77,77); green/blue land at 76.49999999999996.
+    expect(hslToRgb({ h: 0, s: 75, l: 60 })).toEqual({ r: 230, g: 77, b: 77 })
   })
 })
 
@@ -137,9 +159,9 @@ describe("buildHarmonyPalette", () => {
     expect(palette.complementary).toBe("#00ffff")
     expect(palette.analogous).toEqual(["#ff8000", "#ff0080"])
     expect(palette.triadic).toEqual(["#00ff00", "#0000ff"])
-    // Split-complementary of 0deg is 150deg and 210deg. The 210deg green
-    // channel lands on an exact .5 boundary, where float rounding gives 127.
-    expect(palette.splitComplementary).toEqual(["#00ff80", "#007fff"])
+    // Split-complementary of 0deg is 150deg and 210deg. hsl(210,100%,50%)
+    // is rgb(0,128,255): the green channel's exact .5 rounds up to 128.
+    expect(palette.splitComplementary).toEqual(["#00ff80", "#0080ff"])
   })
 
   it("keeps greys grey", () => {

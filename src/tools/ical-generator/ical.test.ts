@@ -35,9 +35,11 @@ describe("formatIcsDate", () => {
     expect(formatIcsDate("2026-09-10", "09:30", false)).toBe("20260910T093000")
   })
 
-  it("rejects malformed dates and times", () => {
+  it("rejects malformed dates, non-existent calendar dates, and times", () => {
     expect(formatIcsDate("09/10/2026", "09:00", true)).toBe("")
+    expect(formatIcsDate("2026-02-30", "09:00", true)).toBe("")
     expect(formatIcsDate("2026-09-10", "9am", false)).toBe("")
+    expect(formatIcsDate("2026-09-10", "24:00", false)).toBe("")
   })
 })
 
@@ -60,7 +62,8 @@ describe("buildIcsCalendar", () => {
     const result = buildIcsCalendar(baseInput, clock)
     expect(result.status).toBe("ok")
     if (result.status !== "ok") return
-    expect(result.calendar.split("\r\n")).toEqual([
+    expect(result.calendar.endsWith("\r\n")).toBe(true)
+    expect(result.calendar.slice(0, -2).split("\r\n")).toEqual([
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
       "PRODID:-//Yash Tools//EN",
@@ -75,15 +78,59 @@ describe("buildIcsCalendar", () => {
     ])
   })
 
-  it("marks all-day events with VALUE=DATE and skips time fields", () => {
-    const result = buildIcsCalendar(
+  it("treats the all-day end date as inclusive and emits the exclusive DTEND", () => {
+    const twoDays = buildIcsCalendar(
       { ...baseInput, allDay: true, startDate: "2026-09-10", endDate: "2026-09-11" },
+      clock,
+    )
+    expect(twoDays.status).toBe("ok")
+    if (twoDays.status !== "ok") return
+    expect(twoDays.calendar).toContain("DTSTART;VALUE=DATE:20260910")
+    expect(twoDays.calendar).toContain("DTEND;VALUE=DATE:20260912")
+
+    const oneDay = buildIcsCalendar(
+      { ...baseInput, allDay: true, startDate: "2026-09-10", endDate: "2026-09-10" },
+      clock,
+    )
+    expect(oneDay.status).toBe("ok")
+    if (oneDay.status !== "ok") return
+    expect(oneDay.calendar).toContain("DTEND;VALUE=DATE:20260911")
+  })
+
+  it("rolls an inclusive all-day end date across month and year boundaries", () => {
+    const result = buildIcsCalendar(
+      { ...baseInput, allDay: true, startDate: "2026-12-31", endDate: "2026-12-31" },
       clock,
     )
     expect(result.status).toBe("ok")
     if (result.status !== "ok") return
-    expect(result.calendar).toContain("DTSTART;VALUE=DATE:20260910")
-    expect(result.calendar).toContain("DTEND;VALUE=DATE:20260911")
+    expect(result.calendar).toContain("DTEND;VALUE=DATE:20270101")
+  })
+
+  it("rejects non-existent calendar dates and end times that do not follow the start", () => {
+    const impossibleDate = buildIcsCalendar(
+      { ...baseInput, allDay: true, startDate: "2026-02-30", endDate: "2026-03-02" },
+      clock,
+    )
+    expect(impossibleDate).toEqual({ status: "error", message: "Enter a real start date." })
+
+    const backwardsAllDay = buildIcsCalendar(
+      { ...baseInput, allDay: true, startDate: "2026-09-12", endDate: "2026-09-11" },
+      clock,
+    )
+    expect(backwardsAllDay).toEqual({
+      status: "error",
+      message: "The end date cannot be before the start date.",
+    })
+
+    const sameInstant = buildIcsCalendar(
+      { ...baseInput, startDate: "2026-09-10", startTime: "10:00", endTime: "10:00" },
+      clock,
+    )
+    expect(sameInstant).toEqual({
+      status: "error",
+      message: "The end date and time must be after the start date and time.",
+    })
   })
 
   it("includes optional properties and escapes their text", () => {
@@ -103,9 +150,16 @@ describe("buildIcsCalendar", () => {
     expect(result.calendar).toContain("DESCRIPTION:Bring\\nnotes")
   })
 
-  it("accepts only https URLs", () => {
+  it("accepts only https URLs and emits the URI without text escaping", () => {
     const https = buildIcsCalendar({ ...baseInput, url: "https://example.com/meeting" }, clock)
     expect(https.status).toBe("ok")
+    const punctuation = buildIcsCalendar(
+      { ...baseInput, url: "https://example.com/a,b;c?q=x,y;z" },
+      clock,
+    )
+    expect(punctuation.status).toBe("ok")
+    if (punctuation.status !== "ok") return
+    expect(punctuation.calendar).toContain("URL:https://example.com/a,b;c?q=x,y;z")
     const http = buildIcsCalendar({ ...baseInput, url: "http://example.com/meeting" }, clock)
     expect(http).toEqual({ status: "error", message: "Enter an https URL for the event link." })
   })
@@ -115,7 +169,7 @@ describe("buildIcsCalendar", () => {
     const noDate = buildIcsCalendar({ ...baseInput, startDate: "" }, clock)
     expect(noDate).toEqual({
       status: "error",
-      message: "Enter a start date and a start time in HH:mm form.",
+      message: "Enter a real start date and a start time in HH:mm form.",
     })
   })
 })

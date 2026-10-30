@@ -10,6 +10,7 @@
 
 import {
   buildRatesUrl,
+  maximumRatesResponseBytes,
   parseRatesResponse,
   requestTimeoutMs,
   type CachedBaseRates,
@@ -78,10 +79,13 @@ export async function fetchBaseRates(options: RatesFetchOptions): Promise<RatesF
 
     let body: unknown
     try {
-      body = await response.json()
+      body = await readBoundedJson(response)
     } catch {
+      if (options.signal?.aborted) return { status: "cancelled" }
+      if (timeoutController.signal.aborted) return { status: "timeout" }
       return { status: "malformed" }
     }
+    if (body === null) return { status: "malformed" }
     if (options.signal?.aborted) return { status: "cancelled" }
 
     const parsed: RatesParseResult = parseRatesResponse(body, options.base)
@@ -98,6 +102,50 @@ export async function fetchBaseRates(options: RatesFetchOptions): Promise<RatesF
     clearTimeout(timeout)
     options.signal?.removeEventListener("abort", onOuterAbort)
   }
+}
+
+/**
+ * Reads and parses a JSON body without ever buffering more than the documented
+ * cap. `Content-Length` is checked first when present; the stream reader is the
+ * authoritative bound because a provider may omit the header or lie about it.
+ * Test doubles that only implement `json()` take the fallback path.
+ */
+async function readBoundedJson(response: Response): Promise<unknown> {
+  const declaredLength = (response as { headers?: Headers }).headers?.get("content-length")
+  if (declaredLength !== null && declaredLength !== undefined) {
+    const declared = Number(declaredLength)
+    if (!Number.isFinite(declared) || declared > maximumRatesResponseBytes) return null
+  }
+
+  if (typeof response.body?.getReader !== "function") {
+    return response.json()
+  }
+
+  const reader = response.body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  try {
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      total += value.byteLength
+      if (total > maximumRatesResponseBytes) {
+        await reader.cancel()
+        return null
+      }
+      chunks.push(value)
+    }
+  } finally {
+    reader.releaseLock()
+  }
+
+  const bytes = new Uint8Array(total)
+  let offset = 0
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  return JSON.parse(new TextDecoder().decode(bytes)) as unknown
 }
 
 function isAbortLike(error: unknown): boolean {

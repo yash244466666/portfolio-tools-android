@@ -148,6 +148,19 @@ describe("renderScaleFor", () => {
     expect(scale).toBeGreaterThan(0.1)
   })
 
+  it("does not floor the scale above the budget for oversized pages", () => {
+    // Regression: the old Math.max(shrunk, 0.1) floor left a 60,000-point
+    // crafted page at 36,000,000 decoded pixels against a 25,000,000 budget.
+    const scale = renderScaleFor(60_000, 60_000, 2, 25_000_000)
+    expect(scale).toBeLessThan(0.1)
+    expect(60_000 * 60_000 * scale * scale).toBeLessThanOrEqual(25_000_000)
+  })
+
+  it("reports an unrenderable scale instead of exceeding the budget", () => {
+    expect(renderScaleFor(Number.MAX_VALUE, Number.MAX_VALUE, 2, 25_000_000)).toBe(0)
+    expect(renderScaleFor(Number.NaN, 100, 2, 25_000_000)).toBe(0)
+  })
+
   it("guards degenerate dimensions", () => {
     expect(renderScaleFor(0, 0, 2, 25_000_000)).toBe(1)
   })

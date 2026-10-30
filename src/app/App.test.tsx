@@ -131,7 +131,6 @@ describe("application shell", () => {
       "favorites",
       "recent-tool IDs",
       "scratchpad note",
-      "saved bookmarks",
       "Pomodoro timer state",
       "cached exchange rates",
     ]) {

@@ -46,4 +46,15 @@ describe("computeTextStats", () => {
     expect(stats.words).toBe(0)
     expect(stats.charactersWithoutSpaces).toBe(0)
   })
+
+  it("does not invent words from punctuation or emoji", () => {
+    expect(computeTextStats("!!!").words).toBe(0)
+    expect(computeTextStats("— 😀").words).toBe(0)
+    expect(computeTextStats("well-known").words).toBe(2)
+  })
+
+  it("counts decomposed and Indic text by Unicode words", () => {
+    expect(computeTextStats("café au lait").words).toBe(3)
+    expect(computeTextStats("हिन्दी भाषा").words).toBe(2)
+  })
 })

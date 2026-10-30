@@ -39,7 +39,7 @@ describe("IcsGenerator interactions", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Enter an event title.")
     fireEvent.change(screen.getByLabelText("Event title"), { target: { value: "X" } })
     fireEvent.click(screen.getByRole("button", { name: "Generate .ics" }))
-    expect(screen.getByRole("alert")).toHaveTextContent("Enter a start date")
+    expect(screen.getByRole("alert")).toHaveTextContent("Enter a real start date")
     expect(screen.queryByText("Result")).toBeNull()
   })
 })

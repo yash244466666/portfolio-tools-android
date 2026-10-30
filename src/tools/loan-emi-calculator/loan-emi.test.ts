@@ -68,6 +68,30 @@ describe("quotedEmiCents", () => {
     // Independent recomputation: 8346.429410 currency units -> 8346.43.
     expect(formatCentsMaybe(emi ?? 0)).toBe("8346.43")
   })
+
+  it("rounds an exact half-cent tie up", () => {
+    // 100.50 at 12% for one month is exactly 101.505 currency units, i.e.
+    // 10150.5 cents; double arithmetic lands at 10150.49999999999.
+    expect(quotedEmiCents({ principalCents: 10_050, annualRatePercent: 12, tenureMonths: 1 })).toBe(
+      10_151,
+    )
+  })
+
+  it("keeps an accepted tiny rate finite and its schedule clearable", () => {
+    const emi = quotedEmiCents({
+      principalCents: 1_000_000_000,
+      annualRatePercent: 1e-13,
+      tenureMonths: 12,
+    })
+    expect(Number.isFinite(emi ?? Number.NaN)).toBe(true)
+    const schedule = buildLoanSchedule({
+      principalCents: 1_000_000_000,
+      annualRatePercent: 1e-13,
+      tenureMonths: 12,
+    })
+    expect(schedule?.years.at(-1)?.balanceCents).toBe(0)
+    expect(schedule?.totalPaymentCents).toBe(1_000_000_000)
+  })
 })
 
 describe("buildLoanSchedule", () => {
@@ -85,6 +109,18 @@ describe("buildLoanSchedule", () => {
     expect(principalPaid).toBe(10_000_000)
     expect(schedule.totalPaymentCents).toBe(10_000_000 + schedule.totalInterestCents)
     expect(schedule.years).toHaveLength(1)
+  })
+
+  it("uses the exact monthly rate for schedule interest", () => {
+    // $300,000 at 10% for 60 months. The exact 10/12 monthly rate gives
+    // $27,808.94 of interest in year one; quantizing 10/12 to six decimal
+    // places of a percent used to lose three cents.
+    const schedule = buildLoanSchedule({
+      principalCents: 30_000_000,
+      annualRatePercent: 10,
+      tenureMonths: 60,
+    })
+    expect(schedule?.years[0]?.interestPaidCents).toBe(2_780_894)
   })
 
   it("produces one summary row per year for a multi-year loan", () => {

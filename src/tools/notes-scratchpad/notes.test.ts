@@ -85,5 +85,7 @@ describe("word counting", () => {
     expect(countWords("one")).toBe(1)
     expect(countWords("  two   words  ")).toBe(2)
     expect(countWords("line one\nline two")).toBe(4)
+    expect(countWords("!!! — 😀")).toBe(0)
+    expect(countWords("café au lait")).toBe(3)
   })
 })

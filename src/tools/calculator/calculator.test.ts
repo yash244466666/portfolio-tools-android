@@ -40,6 +40,15 @@ describe("evaluateExpression", () => {
     expect(evaluateExpression("1/3")).toBe("0.333333333333")
   })
 
+  it("accepts exponent notation produced by displayed results", () => {
+    expect(evaluateExpression("1e-7 + 1")).toBe("1.0000001")
+    expect(evaluateExpression("2e3 + 1")).toBe("2001")
+    expect(evaluateExpression("1.5e+2*2")).toBe("300")
+    expect(evaluateExpression("-1e-7")).toBe("-1e-7")
+    expect(evaluateExpression("1e")).toBe("Error")
+    expect(evaluateExpression("1e+")).toBe("Error")
+  })
+
   it("returns 0 for empty input and Error for malformed input", () => {
     expect(evaluateExpression("")).toBe("0")
     expect(evaluateExpression("   ")).toBe("0")

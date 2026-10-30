@@ -69,6 +69,12 @@ describe("computeBmiMetric", () => {
     expect(computeBmiMetric(50, 150)).toBe(22.2)
   })
 
+  it("rounds an exact tenth boundary up after the full float path", () => {
+    // 164.28 kg at 0.592 m is exactly 468.75, but the implementation's
+    // meters*meters path lands at 4687.499999999998 before scaling.
+    expect(computeBmiMetric(164.28, 59.2)).toBe(468.8)
+  })
+
   it("rejects non-positive values", () => {
     expect(computeBmiMetric(0, 175)).toBeNull()
     expect(computeBmiMetric(70, 0)).toBeNull()
