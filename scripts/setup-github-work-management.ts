@@ -300,6 +300,13 @@ function validateManifest(): {
     manifest.repository === "yash244466666/portfolio-tools-android",
     "Unexpected repository",
   )
+  // GitHub caps a Project's short description at 300 characters and rejects `gh project edit`
+  // only after labels, milestones, and issues have already been provisioned. Reject it here so
+  // a dry run surfaces the problem and an apply never leaves a half-provisioned project.
+  invariant(
+    manifest.project.description.length <= 300,
+    `Project description is ${manifest.project.description.length} characters; GitHub allows at most 300`,
+  )
   invariant(
     manifest.tools.length === 39,
     `Expected 39 managed tools (the 38 version-1 tools of ADR 0026 plus the excluded YouTube Downloader), found ${manifest.tools.length}`,

@@ -1,11 +1,19 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-10-30 09:20 Europe/Berlin
+> Last updated: 2026-10-30 11:15 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation Complete — ADR 0026 expands the approved version-1 scope to **38 tools**: the 33 of ADR 0025 plus Level & Angle, Compass, Barometer & Altitude, Light Meter, and Vibration Meter. All 38 are implemented with automated evidence green and a current 38-tool emulator, instrumentation, and process-recreation run; the 70 cut tools remain implemented in-tree at lifecycle `removed`; physical-device evidence (#18/#20/#25) and the product-owner release gates (#27–#41) remain open
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **38 tools per ADR 0026 (accepted 2026-10-30), which adds five permission-free sensor tools to ADR 0025's 33-tool scope (which expanded ADR 0023's 30 tools; ADR 0023 superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004); ADR 0021 keeps youtube-downloader excluded. The manifest carries 38 `enabled` entries and 70 `removed` entries whose source, logic, provenance, and tests stay in-tree.**
 > Public release readiness: **NO — foundation only**
+
+### 2026-10-30 — Live GitHub planning reconciled to the 38-tool scope
+
+- **Owner authorization.** The product owner asked for the plan to be filed as GitHub issues and chose the full sync, so `pnpm github:work-items:apply` was run against `yash244466666/portfolio-tools-android` (the run is explicit and never part of a build or CI job).
+- **Live state (verified, not assumed).** 151 marked issues: 10 epics, 32 launch tasks, 39 tools (the 38 version-1 tools plus the excluded YouTube Downloader), and 70 retired tools. The run created the eight tool issues that had never existed — **#235** Barometer & Altitude, **#236** Compass, **#237** Date Calculator, **#238** Level & Angle, **#239** Light Meter, **#240** Random Picker, **#241** Recipe Scaler, **#242** Vibration Meter — and updated 16 existing items (including #37 and #21 to the 38-tool wording). 71 issues are closed as not planned with `status:excluded`; the repository carries 152 issues total, the only unmarked one being the ad-hoc bug #166. The closed-beta milestone is **38-Tool Closed Beta** (10 open gate issues) and six milestones remain. The Project holds 151 issues plus 2 linked pull requests, with 1,057 field values reconciled. `Currency Converter (#43)` is still blocked by `network-provider-review (#33)`.
+- **Two provisioning defects found and fixed.** (1) The Project short description was 419 characters against GitHub's 300-character cap, so the first apply created the issues and then aborted at `gh project edit`; the description is now 272 characters and `validateManifest` rejects an over-long one before any remote mutation. (2) `renamedFrom` still named "33-Tool Closed Beta", which was never deployed because no apply ran while ADR 0025 was the scope, while live carried "30-Tool Closed Beta"; the run therefore created a second milestone and stranded the empty original. `renamedFrom` now names the last deployed title, the empty duplicate (milestone id 5) was deleted, and a re-run converged to **0 created / 0 updated / 0 reparented / 0 membership added / 0 dependency changes**.
+- **Gates (unpiped).** `github:work-items:check` (39 managed tools, 151 issues); `github:work-items:apply` twice, second run idempotent; `typecheck`; `lint`; `format:check`.
+- **Still open.** The eight new tool issues sit at `status:device-qa` with the Tier 1 milestone, as the manifest defines implemented tools; closing them still needs the installed-artifact and physical-device evidence. UI/next-phase work items have not been filed yet — the owner has not defined that scope. Physical-device/OEM rows (#18/#20/#25/#111/#112) and the owner release gates (#27–#41) remain open.
 
 ### 2026-10-30 — Tool feedback and motion layer across all 38 tools (PR #233)
 

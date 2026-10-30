@@ -4,7 +4,7 @@
   "auditedUpstreamCommit": "61e54c64edbeffc9487239b6dae399e255c6a71d",
   "project": {
     "title": "Yash Tools Android — Google Play v1",
-    "description": "Delivery system for the first Google Play release containing the 38 version-1 tools (ADR 0026, adding five permission-free sensor tools to the 33-tool scope of ADR 0025, which expanded the 30-tool scope of ADR 0023, which superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps YouTube Downloader excluded). The other 70 implemented tools are retained in-tree as lifecycle `removed`.",
+    "description": "Delivery system for the first Google Play release with the 38 version-1 tools approved by ADR 0026 (the 33-tool scope of ADR 0025, expanding ADR 0023's 30). The other 70 implemented tools stay in-tree as lifecycle `removed`; YouTube Downloader remains excluded (ADR 0021).",
     "visibility": "PRIVATE",
     "readme": "Tracks foundation, the 38 version-1 tools (ADR 0026; 70 further tools implemented but cut from the release scope), quality/device certification, closed testing, signing, store readiness, and the approved first launch.",
     "fields": [
@@ -228,7 +228,7 @@
       "key": "closed-beta",
       "title": "38-Tool Closed Beta",
       "description": "One candidate with all 38 version-1 tools enabled passes closed testing and complete quality evidence.",
-      "renamedFrom": "33-Tool Closed Beta"
+      "renamedFrom": "30-Tool Closed Beta"
     },
     {
       "key": "play-launch",
