@@ -37,7 +37,7 @@ artifact on the bundled production origin (`https://app.yash.tools`, verified
 proving the packaged origin's CORS behavior end to end. The most recent of
 those runs (2026-09-15 at `bd5b310`, artifact `febb136f…`) recorded
 `tool.currency-converter: live rate plus provider attribution` and
-`tool.dns-lookup` live; only the currency row carries forward to the 30-tool
+`tool.dns-lookup` live; only the currency row carries forward to the 33-tool
 scope, and the DNS Lookup probe is filtered out along with its cut tool.
 **The browser harness (`pnpm test:e2e`) does not drive live provider calls**:
 the remaining provider scenario installs `page.route(...)` and

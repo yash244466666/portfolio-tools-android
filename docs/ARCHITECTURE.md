@@ -1,6 +1,6 @@
 # Foundation Architecture
 
-> Status: accepted for the foundation; the 30-tool first-release scope is accepted (ADR 0023 supersedes the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004, and ADR 0021 keeps YouTube Downloader excluded), while identity and other irreversible release decisions remain provisional.
+> Status: accepted for the foundation; the 33-tool first-release scope is accepted (ADR 0025 expands the 30-tool scope of ADR 0023, which superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps YouTube Downloader excluded), while identity and other irreversible release decisions remain provisional.
 
 ## Runtime shape
 
@@ -38,7 +38,7 @@ Dependency direction is one way. Tool features may depend on shared UI and platf
 
 `src/tools/registry.ts` is a deterministic compile-time registry. Implemented components are lazy imports. A tool cannot be enabled without an implementation. The registry also exposes risk, persistence, and network classifications needed by UI and tests.
 
-The audited public version 1 scope is 30 tools (ADR 0023, which supersedes the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps youtube-downloader excluded). The registry holds 30 `enabled` entries, each with a lazy component, and 70 `removed` entries with no component, so a cut tool emits no runtime chunk; its source, pure logic, provenance, and tests remain in the repository. The 12-tool architecture milestone proved the reusable paths, and production submission additionally requires every retained entry to pass the remaining device-evidence, certification, and release gates.
+The audited public version 1 scope is 33 tools (ADR 0025, which expands the 30-tool scope of ADR 0023; ADR 0021 keeps youtube-downloader excluded). The registry holds 33 `enabled` entries, each with a lazy component, and 70 `removed` entries with no component, so a cut tool emits no runtime chunk; its source, pure logic, provenance, and tests remain in the repository. The 12-tool architecture milestone proved the reusable paths, and production submission additionally requires every retained entry to pass the remaining device-evidence, certification, and release gates.
 
 ### Tool features
 

@@ -192,12 +192,12 @@ const ghBinary = process.env.GH_BIN ?? "gh"
 const apiVersion = "2026-03-10"
 
 const expectedCategoryCounts: Record<CategoryId, number> = {
-  core: 6,
+  core: 7,
   dev: 6,
   text: 5,
   media: 1,
   security: 1,
-  math: 12,
+  math: 14,
 }
 
 /**
@@ -301,8 +301,8 @@ function validateManifest(): {
     "Unexpected repository",
   )
   invariant(
-    manifest.tools.length === 31,
-    `Expected 31 managed tools (the 30 version-1 tools of ADR 0023 plus the excluded YouTube Downloader), found ${manifest.tools.length}`,
+    manifest.tools.length === 34,
+    `Expected 34 managed tools (the 33 version-1 tools of ADR 0025 plus the excluded YouTube Downloader), found ${manifest.tools.length}`,
   )
   invariant(
     manifest.retiredTools.length === 70,
@@ -377,8 +377,8 @@ function validateManifest(): {
 
   const implementedTools = unique(manifest.implementedTools, "implemented tool")
   invariant(
-    implementedTools.size === 25,
-    `Expected 25 implemented tools, found ${implementedTools.size}`,
+    implementedTools.size === 28,
+    `Expected 28 implemented tools, found ${implementedTools.size}`,
   )
   for (const id of implementedTools)
     invariant(knownToolIds.has(id), `Unknown implemented tool: ${id}`)
@@ -387,8 +387,8 @@ function validateManifest(): {
     (tier) => manifest.tools.filter(([id]) => tierFor(id) === tier).length,
   )
   invariant(
-    tierCounts.join(",") === "19,9,1,2",
-    `Expected tier counts 19,9,1,2 for the 31 managed tools, found ${tierCounts.join(",")}`,
+    tierCounts.join(",") === "22,9,1,2",
+    `Expected tier counts 22,9,1,2 for the 34 managed tools, found ${tierCounts.join(",")}`,
   )
 
   for (const listName of ["tier2", "tier3", "tier4"] as const) {

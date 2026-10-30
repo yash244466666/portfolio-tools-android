@@ -5,8 +5,9 @@ const PACKAGE = "dev.yash.tools.debug"
 const ARTIFACT_PATH = "android/app/build/outputs/apk/debug/app-debug.apk"
 const CDP_HOST = "http://127.0.0.1:9222"
 /**
- * The approved public version-1 scope (ADR 0023, 30 tools). The catalog must list exactly
- * these, and only these are probed and counted.
+ * The approved public version-1 scope (ADR 0025: the 30 tools of ADR 0023 plus the
+ * Recipe Scaler, Date Calculator, and Random Picker; 33 tools). The catalog must list
+ * exactly these, and only these are probed and counted.
  *
  * The per-tool probes below for the 70 cut tools are deliberately retained in this file:
  * the ADR keeps every cut tool's source, pure logic, and tests in-tree so a reversal is a
@@ -26,6 +27,7 @@ const versionOneScope = new Set([
   "fuel-trip-cost-calculator",
   "bmi-calculator",
   "calculator",
+  "recipe-scaler",
   // Time
   "stopwatch",
   "countdown-timer",
@@ -33,6 +35,7 @@ const versionOneScope = new Set([
   "time-zone-converter",
   "date-difference-calculator",
   "age-calculator",
+  "date-calculator",
   // Everyday text
   "notes-scratchpad",
   "character-counter",
@@ -51,6 +54,7 @@ const versionOneScope = new Set([
   "vcard-generator",
   "ical-generator",
   "dice-roller",
+  "random-picker",
 ])
 
 /** Enabled tools the catalog must list; keep in step with the registry. */
@@ -1708,6 +1712,19 @@ async function phaseTools(page) {
       },
     ],
     [
+      "recipe-scaler",
+      "Recipe Scaler",
+      async (p) => {
+        await p.setValue("#recipe-original-servings", "4")
+        await p.setValue("#recipe-desired-servings", "8")
+        await p.setValue("#recipe-ingredients", "2 cups flour\n1 1/2 tsp salt\nsalt to taste")
+        await p.waitFor("document.body.innerText.includes('4 cups flour')")
+        await p.waitFor("document.body.innerText.includes('3 tsp salt')")
+        await p.waitFor("document.body.innerText.includes('salt to taste')")
+        return "servings-scaled quantities with unmeasured lines preserved"
+      },
+    ],
+    [
       "dice-roller",
       "Dice Roller",
       async (p) => {
@@ -1718,6 +1735,37 @@ async function phaseTools(page) {
         await p.clickButton("Repeat last roll")
         await p.waitFor("/^Total [1-6] from 1d6 \\+ 0\\.$/m.test(document.body.innerText)")
         return "parsed groups with unbiased bytes and a repeat-last roll"
+      },
+    ],
+    [
+      "date-calculator",
+      "Date Calculator",
+      async (p) => {
+        await p.setValue("#date-calculator-start", "2026-01-31")
+        await p.setValue("#date-calculator-amount", "1")
+        await p.selectOption("#date-calculator-unit", "months")
+        await p.waitFor(
+          "document.querySelector('#date-calculator-result')?.textContent === '2026-02-28'",
+        )
+        await p.waitFor("document.body.innerText.includes('Saturday')")
+        return "month-end-clamped addition with weekday"
+      },
+    ],
+    [
+      "random-picker",
+      "Random Picker",
+      async (p) => {
+        await p.setValue("#random-picker-list", "Pizza\nSushi\nTacos")
+        await p.clickButton("Pick an item")
+        await p.waitFor(
+          "/^(Pizza|Sushi|Tacos)$/m.test(document.querySelector('#random-picker-result')?.textContent ?? '')",
+        )
+        await p.clickButton("Number")
+        await p.setValue("#random-picker-minimum", "5")
+        await p.setValue("#random-picker-maximum", "5")
+        await p.clickButton("Pick a number")
+        await p.waitFor("document.querySelector('#random-picker-result')?.textContent === '5'")
+        return "secure list pick and an inclusive single-value range"
       },
     ],
     [

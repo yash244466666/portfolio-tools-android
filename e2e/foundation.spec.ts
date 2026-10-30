@@ -608,6 +608,41 @@ test("date difference calculator reports exclusive spans and business days", asy
   await expect(page.getByText("Business days (Mon-Fri)")).toBeVisible()
 })
 
+test("recipe scaler scales quantities and leaves unmeasured lines", async ({ page }) => {
+  await page.goto("/#/tool/recipe-scaler")
+  await expect(page.getByRole("heading", { name: "Recipe Scaler" })).toBeVisible()
+  await page.getByLabel("Desired servings").fill("8")
+  await page.getByLabel("Ingredients").fill("2 cups flour\n1 1/2 tsp salt\nsalt to taste")
+  const list = page.getByRole("list", { name: "Scaled list" })
+  await expect(list.getByText("4 cups flour")).toBeVisible()
+  await expect(list.getByText("3 tsp salt")).toBeVisible()
+  await expect(list.getByText("salt to taste")).toBeVisible()
+  await expect(page.getByText("×2", { exact: true })).toBeVisible()
+})
+
+test("date calculator adds months with month-end clamping", async ({ page }) => {
+  await page.goto("/#/tool/date-calculator")
+  await expect(page.getByRole("heading", { name: "Date Calculator" })).toBeVisible()
+  await page.locator("#date-calculator-start").fill("2026-01-31")
+  await page.locator("#date-calculator-amount").fill("1")
+  await page.getByLabel("Unit").selectOption("months")
+  await expect(page.locator("#date-calculator-result")).toHaveText("2026-02-28")
+  await expect(page.getByText("Saturday", { exact: true })).toBeVisible()
+})
+
+test("random picker selects a list item and an inclusive number", async ({ page }) => {
+  await page.goto("/#/tool/random-picker")
+  await expect(page.getByRole("heading", { name: "Random Picker" })).toBeVisible()
+  await page.getByLabel("Items").fill("Pizza\nSushi\nTacos")
+  await page.getByRole("button", { name: "Pick an item" }).click()
+  await expect(page.locator("#random-picker-result")).toHaveText(/^(Pizza|Sushi|Tacos)$/)
+  await page.getByRole("button", { name: "Number" }).click()
+  await page.getByLabel("Minimum").fill("5")
+  await page.getByLabel("Maximum").fill("5")
+  await page.getByRole("button", { name: "Pick a number" }).click()
+  await expect(page.locator("#random-picker-result")).toHaveText("5")
+})
+
 test("dice roller rolls from secure bytes and repeats the last roll", async ({ page }) => {
   await page.goto("/#/tool/dice-roller")
   await expect(page.getByRole("heading", { name: "Dice Roller" })).toBeVisible()

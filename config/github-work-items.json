@@ -4,9 +4,9 @@
   "auditedUpstreamCommit": "61e54c64edbeffc9487239b6dae399e255c6a71d",
   "project": {
     "title": "Yash Tools Android — Google Play v1",
-    "description": "Delivery system for the first Google Play release containing the 30 version-1 tools (ADR 0023, superseding the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps YouTube Downloader excluded). The other 70 implemented tools are retained in-tree as lifecycle `removed`.",
+    "description": "Delivery system for the first Google Play release containing the 33 version-1 tools (ADR 0025, expanding the 30-tool scope of ADR 0023, which superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps YouTube Downloader excluded). The other 70 implemented tools are retained in-tree as lifecycle `removed`.",
     "visibility": "PRIVATE",
-    "readme": "Tracks foundation, the 30 version-1 tools (ADR 0023; 70 further tools implemented but cut from the release scope), quality/device certification, closed testing, signing, store readiness, and the approved first launch.",
+    "readme": "Tracks foundation, the 33 version-1 tools (ADR 0025; 70 further tools implemented but cut from the release scope), quality/device certification, closed testing, signing, store readiness, and the approved first launch.",
     "fields": [
       {
         "name": "Workflow",
@@ -226,9 +226,9 @@
     },
     {
       "key": "closed-beta",
-      "title": "30-Tool Closed Beta",
-      "description": "One candidate with all 30 version-1 tools enabled passes closed testing and complete quality evidence.",
-      "renamedFrom": "All-87 Closed Beta"
+      "title": "33-Tool Closed Beta",
+      "description": "One candidate with all 33 version-1 tools enabled passes closed testing and complete quality evidence.",
+      "renamedFrom": "30-Tool Closed Beta"
     },
     {
       "key": "play-launch",
@@ -239,7 +239,7 @@
   "epics": [
     {
       "key": "launch-v1",
-      "title": "[Epic] Launch Yash Tools v1 on Google Play with all 30 tools",
+      "title": "[Epic] Launch Yash Tools v1 on Google Play with all 33 tools",
       "parent": null,
       "category": "Release",
       "phase": "Production",
@@ -248,9 +248,9 @@
       "estimate": 0,
       "workflow": "In Progress",
       "milestone": "play-launch",
-      "outcome": "Publish the reviewed, signed, 30-tool Android application through the explicitly approved first managed-publishing launch window.",
+      "outcome": "Publish the reviewed, signed, 33-tool Android application through the explicitly approved first managed-publishing launch window.",
       "acceptance": [
-        "All 30 version-1 tools are enabled and pass the repository Definition of Done.",
+        "All 33 version-1 tools are enabled and pass the repository Definition of Done.",
         "Architecture, closed-beta, and production gates all pass against the same candidate.",
         "The product owner explicitly authorizes publication after reviewing the final AAB hash and launch record."
       ],
@@ -285,7 +285,7 @@
     },
     {
       "key": "core-epic",
-      "title": "[Epic] Deliver all 6 Core tools",
+      "title": "[Epic] Deliver all 7 Core tools",
       "parent": "launch-v1",
       "category": "Core",
       "phase": "Tier 1 Migration",
@@ -370,7 +370,7 @@
     },
     {
       "key": "math-epic",
-      "title": "[Epic] Deliver all 12 Math tools",
+      "title": "[Epic] Deliver all 14 Math tools",
       "parent": "launch-v1",
       "category": "Math",
       "phase": "Tier 1 Migration",
@@ -396,7 +396,7 @@
       "estimate": 0,
       "workflow": "Backlog",
       "milestone": "closed-beta",
-      "outcome": "Produce complete cross-catalog automated, accessibility, performance, interoperability, and physical-device evidence for the 30-tool candidate.",
+      "outcome": "Produce complete cross-catalog automated, accessibility, performance, interoperability, and physical-device evidence for the 33-tool candidate.",
       "acceptance": [
         "Every quality sub-issue passes against identified artifacts.",
         "No critical/high security issue, data-loss defect, or release-threshold regression remains."
@@ -435,7 +435,7 @@
       "milestone": "foundation",
       "outcome": "Provide the durable issue hierarchy, dependencies, milestones, labels, project fields, templates, and repository automation used through the first Google Play launch.",
       "acceptance": [
-        "All 30 version-1 tools and every launch gate are represented by stable, idempotently provisioned work items.",
+        "All 33 version-1 tools and every launch gate are represented by stable, idempotently provisioned work items.",
         "The project workflow, issue hierarchy, dependencies, templates, and contributor rules are documented and independently reproducible from the repository."
       ]
     },
@@ -645,7 +645,7 @@
     },
     {
       "key": "regression-matrix",
-      "title": "Complete the 30-tool automated regression matrix",
+      "title": "Complete the 33-tool automated regression matrix",
       "parent": "quality-epic",
       "type": "Quality",
       "category": "Release",
@@ -664,7 +664,7 @@
     },
     {
       "key": "accessibility-certification",
-      "title": "Certify accessibility and adaptive layouts for all 30 tools",
+      "title": "Certify accessibility and adaptive layouts for all 33 tools",
       "parent": "quality-epic",
       "type": "Quality",
       "category": "Release",
@@ -728,7 +728,7 @@
       "estimate": 8,
       "workflow": "Blocked",
       "milestone": "closed-beta",
-      "outcome": "Verify the 30-tool candidate across approved Android versions, OEM behavior, WebView versions, form factors, navigation modes, and low-resource conditions.",
+      "outcome": "Verify the 33-tool candidate across approved Android versions, OEM behavior, WebView versions, form factors, navigation modes, and low-resource conditions.",
       "acceptance": [
         "The complete matrix records models, API/WebView, artifact hashes, results, and follow-up disposition.",
         "Process, renderer, storage, sharing, notification, offline, accessibility, and every enabled tool are covered."
@@ -858,9 +858,9 @@
       "estimate": 5,
       "workflow": "Blocked",
       "milestone": "play-launch",
-      "outcome": "Produce honest listing text and real phone/tablet screenshots for the exact 30-tool release candidate.",
+      "outcome": "Produce honest listing text and real phone/tablet screenshots for the exact 33-tool release candidate.",
       "acceptance": [
-        "Title, short/full descriptions, category, feature graphic, icon, screenshots, contact links, help, limitations, network disclosures, and 30-tool claims match the artifact.",
+        "Title, short/full descriptions, category, feature graphic, icon, screenshots, contact links, help, limitations, network disclosures, and 33-tool claims match the artifact.",
         "No fabricated review, rating, capability, privacy, reliability, or offline claim is used."
       ],
       "blockedBy": ["final-identity", "launcher-splash-assets", "privacy-data-safety"]
@@ -939,7 +939,7 @@
     },
     {
       "key": "release-candidate",
-      "title": "Build and approve the reproducible 30-tool release candidate",
+      "title": "Build and approve the reproducible 33-tool release candidate",
       "parent": "play-release-epic",
       "type": "Release",
       "category": "Release",
@@ -949,7 +949,7 @@
       "estimate": 8,
       "workflow": "Blocked",
       "milestone": "closed-beta",
-      "outcome": "Produce one reviewed, signed, reproducible AAB with all 30 version-1 tools enabled and every evidence inventory reconciled.",
+      "outcome": "Produce one reviewed, signed, reproducible AAB with all 33 version-1 tools enabled and every evidence inventory reconciled.",
       "acceptance": [
         "Protected commit/tag, version, manifest, tests, device matrix, dependency lock, SBOM, signing, AAB hash, privacy, help, and store claims refer to one candidate.",
         "No release blocker or unreviewed permission/component/dependency/provider remains."
@@ -1045,7 +1045,7 @@
       "estimate": 3,
       "workflow": "Blocked",
       "milestone": "play-launch",
-      "outcome": "Publish the approved 30-tool candidate during a staffed managed-publishing window and record the result.",
+      "outcome": "Publish the approved 33-tool candidate during a staffed managed-publishing window and record the result.",
       "acceptance": [
         "Production access, review approval, countries, managed-publishing state, artifact hash, owners, monitoring, support, observation window, and stop conditions are confirmed.",
         "The product owner explicitly authorizes publication immediately before the irreversible action; this issue does not itself grant publication authority."
@@ -1080,6 +1080,9 @@
     "image-compressor",
     "file-hash-checker",
     "currency-converter",
+    "date-calculator",
+    "random-picker",
+    "recipe-scaler",
     "dns-lookup",
     "word-counter",
     "character-counter",
@@ -1133,7 +1136,10 @@
     "case-converter": [],
     "character-counter": [],
     "color-picker": [],
+    "date-calculator": [],
     "date-difference-calculator": [],
+    "random-picker": [],
+    "recipe-scaler": [],
     "dice-roller": [],
     "discount-tax-calculator": [],
     "fuel-trip-cost-calculator": [],
@@ -1156,6 +1162,7 @@
     ["color-picker", "Color Picker", "dev"],
     ["countdown-timer", "Countdown Timer", "math"],
     ["currency-converter", "Currency Converter", "core"],
+    ["date-calculator", "Date Calculator", "core"],
     ["date-difference-calculator", "Date Difference Calculator", "core"],
     ["dice-roller", "Dice Roller", "math"],
     ["discount-tax-calculator", "Discount and Tax Calculator", "math"],
@@ -1170,6 +1177,8 @@
     ["percentage-calculator", "Percentage Calculator", "math"],
     ["pomodoro-timer", "Pomodoro Timer", "text"],
     ["qr-generator", "QR Code Generator", "dev"],
+    ["random-picker", "Random Picker", "math"],
+    ["recipe-scaler", "Recipe Scaler", "math"],
     ["stopwatch", "Stopwatch", "math"],
     ["time-zone-converter", "Time Zone Converter", "core"],
     ["tip-calculator", "Tip Calculator", "math"],
@@ -1183,6 +1192,9 @@
   "toolPriorities": {
     "time-zone-converter": "P1 High",
     "date-difference-calculator": "P1 High",
+    "date-calculator": "P1 High",
+    "random-picker": "P1 High",
+    "recipe-scaler": "P1 High",
     "loan-emi-calculator": "P1 High",
     "discount-tax-calculator": "P1 High",
     "dice-roller": "P1 High",
