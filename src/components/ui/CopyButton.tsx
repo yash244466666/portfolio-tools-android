@@ -41,7 +41,12 @@ export function CopyButton({
   }
 
   return (
-    <Button aria-label={`${label} result`} onClick={() => void copy()} variant="quiet">
+    <Button
+      aria-label={`${label} result`}
+      className={copied ? "motion-pop" : ""}
+      onClick={() => void copy()}
+      variant="quiet"
+    >
       {copied ? <Check aria-hidden="true" size={18} /> : <Copy aria-hidden="true" size={18} />}
       {copied ? "Copied" : label}
     </Button>

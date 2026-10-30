@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal, StackedBar } from "@/components/motion/primitives"
 import { formatCents } from "@/tools/_shared/money"
 import {
   buildLoanSchedule,
@@ -126,41 +127,61 @@ export default function LoanEmiCalculator() {
               : "Enter the principal, rate, and tenure to see the EMI."}
         </p>
         {schedule ? (
-          <table className="mt-3 w-full text-sm">
-            <caption className="sr-only">
-              Indicative year-by-year amortization for the entered loan terms
-            </caption>
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-[var(--text-secondary)]">
-                <th scope="col" className="py-2">
-                  Year
-                </th>
-                <th scope="col" className="py-2 text-right">
-                  Principal paid
-                </th>
-                <th scope="col" className="py-2 text-right">
-                  Interest paid
-                </th>
-                <th scope="col" className="py-2 text-right">
-                  Balance
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {schedule.years.map((year) => (
-                <tr className="border-t border-[var(--border)]" key={year.year}>
-                  <td className="py-2">{year.year}</td>
-                  <td className="py-2 text-right font-mono">
-                    {formatCents(year.principalPaidCents)}
-                  </td>
-                  <td className="py-2 text-right font-mono">
-                    {formatCents(year.interestPaidCents)}
-                  </td>
-                  <td className="py-2 text-right font-mono">{formatCents(year.balanceCents)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="mt-3 grid gap-3">
+            <StackedBar
+              label="Principal and interest in the total payment"
+              segments={[
+                {
+                  label: "Principal",
+                  value: schedule.totalPaymentCents - schedule.totalInterestCents,
+                  tone: "primary",
+                },
+                { label: "Interest", value: schedule.totalInterestCents, tone: "danger" },
+              ]}
+            />
+            <ResultReveal
+              variant="quick"
+              token={`${schedule.emiCents}-${schedule.totalInterestCents}`}
+            >
+              <table className="w-full text-sm">
+                <caption className="sr-only">
+                  Indicative year-by-year amortization for the entered loan terms
+                </caption>
+                <thead>
+                  <tr className="text-left text-xs uppercase tracking-wide text-[var(--text-secondary)]">
+                    <th scope="col" className="py-2">
+                      Year
+                    </th>
+                    <th scope="col" className="py-2 text-right">
+                      Principal paid
+                    </th>
+                    <th scope="col" className="py-2 text-right">
+                      Interest paid
+                    </th>
+                    <th scope="col" className="py-2 text-right">
+                      Balance
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {schedule.years.map((year) => (
+                    <tr className="border-t border-[var(--border)]" key={year.year}>
+                      <td className="py-2">{year.year}</td>
+                      <td className="py-2 text-right font-mono">
+                        {formatCents(year.principalPaidCents)}
+                      </td>
+                      <td className="py-2 text-right font-mono">
+                        {formatCents(year.interestPaidCents)}
+                      </td>
+                      <td className="py-2 text-right font-mono">
+                        {formatCents(year.balanceCents)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </ResultReveal>
+          </div>
         ) : null}
       </ToolPanel>
 

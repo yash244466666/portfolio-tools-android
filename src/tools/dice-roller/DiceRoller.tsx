@@ -10,6 +10,7 @@ export default function DiceRoller() {
   const [notation, setNotation] = useState("2d6")
   const [lastRoll, setLastRoll] = useState<DiceRoll | null>(null)
   const [lastNotation, setLastNotation] = useState<string | null>(null)
+  const [rollId, setRollId] = useState(0)
 
   const parsed = useMemo(() => parseDiceNotation(notation), [notation])
 
@@ -20,6 +21,7 @@ export default function DiceRoller() {
     const byteStream = () => random.bytes(1)[0] ?? 0
     setLastRoll(rollGroups(parsed.groups, parsed.modifier, byteStream))
     setLastNotation(source)
+    setRollId((previous) => previous + 1)
   }
 
   function repeatLast() {
@@ -65,6 +67,25 @@ export default function DiceRoller() {
               ? "Fix the notation to roll."
               : "Enter notation and roll to see the dice."}
         </p>
+        {lastRoll ? (
+          <div
+            aria-hidden="true"
+            className="motion-dice-result mt-3 flex flex-wrap gap-2"
+            key={rollId}
+          >
+            {lastRoll.groups.flatMap((group, groupIndex) =>
+              group.dice.map((die, dieIndex) => (
+                <span
+                  className="dice-face"
+                  key={`${groupIndex}-${dieIndex}`}
+                  title={`d${die.sides}: ${die.value}`}
+                >
+                  {die.value}
+                </span>
+              )),
+            )}
+          </div>
+        ) : null}
         {lastRoll ? (
           <table className="mt-3 w-full text-sm">
             <caption className="sr-only">Per-die results for the last roll</caption>

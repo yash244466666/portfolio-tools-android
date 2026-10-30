@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal } from "@/components/motion/primitives"
 import {
   formatScaleFactor,
   maximumIngredientLineChars,
@@ -121,11 +122,15 @@ export default function RecipeScaler() {
                 ? ` · ${result.unscaledCount} line${result.unscaledCount === 1 ? "" : "s"} without a quantity left unchanged`
                 : ""}
             </p>
-            <ul className="mt-3 grid gap-1 font-mono text-sm leading-6" aria-label="Scaled list">
-              {result.lines.map((line, index) => (
-                <li key={`${index}-${line.scaled}`}>{line.scaled}</li>
-              ))}
-            </ul>
+            <ResultReveal
+              token={`${result.factor}-${result.lines.length}-${result.lines[0]?.scaled ?? ""}`}
+            >
+              <ul className="mt-3 grid gap-1 font-mono text-sm leading-6" aria-label="Scaled list">
+                {result.lines.map((line, index) => (
+                  <li key={`${index}-${line.scaled}`}>{line.scaled}</li>
+                ))}
+              </ul>
+            </ResultReveal>
             <p aria-live="polite" className="sr-only" role="status">
               Scaled {result.lines.length} ingredient line{result.lines.length === 1 ? "" : "s"} by
               ×{formatScaleFactor(result.factor)}.

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal } from "@/components/motion/primitives"
 import {
   calculateDate,
   dateUnits,
@@ -134,7 +135,7 @@ export default function DateCalculator() {
             Enter a start date, or use today, then choose an operation, amount, and unit.
           </p>
         ) : calculation ? (
-          <>
+          <ResultReveal variant="quick" token={calculation.iso}>
             <output className="block font-mono text-2xl font-semibold" id="date-calculator-result">
               {calculation.iso}
             </output>
@@ -149,7 +150,7 @@ export default function DateCalculator() {
             <p aria-live="polite" className="sr-only" role="status">
               Result {calculation.iso}, {calculation.weekday}.
             </p>
-          </>
+          </ResultReveal>
         ) : null}
       </ToolPanel>
 

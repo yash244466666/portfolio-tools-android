@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal } from "@/components/motion/primitives"
 import { usePlatform } from "@/platform/platform-context"
 import {
   clampBreakMinutes,
@@ -351,9 +352,11 @@ export default function PomodoroTimer() {
           </div>
 
           <div className="grid justify-items-center gap-3">
-            <p className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-              {modeLabel}
-            </p>
+            <ResultReveal token={mode}>
+              <p className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                {modeLabel}
+              </p>
+            </ResultReveal>
             <p
               aria-label={`Timer, ${formatClock(remainingMs)} remaining`}
               className="font-mono text-6xl font-bold tabular-nums text-[var(--text)]"

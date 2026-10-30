@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal } from "@/components/motion/primitives"
 import {
   computePercentage,
   formatPercentageNumber,
@@ -125,9 +126,11 @@ export default function PercentageCalculator() {
         ) : invalid !== null ? (
           <p role="alert">Correct the highlighted field to compute a result.</p>
         ) : (
-          <p className="font-mono text-3xl font-bold text-[var(--text)]" aria-live="polite">
-            {formatted}
-          </p>
+          <ResultReveal variant="quick" token={formatted ?? "empty"}>
+            <p className="font-mono text-3xl font-bold text-[var(--text)]" aria-live="polite">
+              {formatted}
+            </p>
+          </ResultReveal>
         )}
       </ToolPanel>
 

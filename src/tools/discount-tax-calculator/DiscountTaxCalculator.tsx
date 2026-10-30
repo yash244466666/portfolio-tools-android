@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { ResultReveal, StackedBar } from "@/components/motion/primitives"
 import {
   computeDiscountTax,
   formatCents,
@@ -167,41 +168,54 @@ export default function DiscountTaxCalculator() {
               : "Enter the price, discount, and tax to see each step."}
         </p>
         {result ? (
-          <table className="mt-3 w-full text-sm">
-            <caption className="sr-only">Discount and tax computation steps</caption>
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-[var(--text-secondary)]">
-                <th scope="col" className="py-2">
-                  Step
-                </th>
-                <th scope="col" className="py-2 text-right">
-                  Amount
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-t border-[var(--border)]">
-                <td className="py-2">Original price</td>
-                <td className="py-2 text-right font-mono">{formatCents(priceCents ?? 0)}</td>
-              </tr>
-              <tr className="border-t border-[var(--border)]">
-                <td className="py-2">Saved by discount</td>
-                <td className="py-2 text-right font-mono">{formatCents(result.savedCents)}</td>
-              </tr>
-              <tr className="border-t border-[var(--border)]">
-                <td className="py-2">Subtotal after discount</td>
-                <td className="py-2 text-right font-mono">{formatCents(result.subtotalCents)}</td>
-              </tr>
-              <tr className="border-t border-[var(--border)]">
-                <td className="py-2">Tax added</td>
-                <td className="py-2 text-right font-mono">{formatCents(result.taxCents)}</td>
-              </tr>
-              <tr className="border-t border-[var(--border)]">
-                <td className="py-2 font-semibold">Total to pay</td>
-                <td className="py-2 text-right font-mono">{formatCents(result.totalCents)}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="mt-3 grid gap-3">
+            <StackedBar
+              label="Subtotal and tax making the total"
+              segments={[
+                { label: "Subtotal", value: result.subtotalCents, tone: "success" },
+                { label: "Tax", value: result.taxCents, tone: "danger" },
+              ]}
+            />
+            <ResultReveal variant="quick" token={`${result.totalCents}-${result.savedCents}`}>
+              <table className="w-full text-sm">
+                <caption className="sr-only">Discount and tax computation steps</caption>
+                <thead>
+                  <tr className="text-left text-xs uppercase tracking-wide text-[var(--text-secondary)]">
+                    <th scope="col" className="py-2">
+                      Step
+                    </th>
+                    <th scope="col" className="py-2 text-right">
+                      Amount
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-t border-[var(--border)]">
+                    <td className="py-2">Original price</td>
+                    <td className="py-2 text-right font-mono">{formatCents(priceCents ?? 0)}</td>
+                  </tr>
+                  <tr className="border-t border-[var(--border)]">
+                    <td className="py-2">Saved by discount</td>
+                    <td className="py-2 text-right font-mono">{formatCents(result.savedCents)}</td>
+                  </tr>
+                  <tr className="border-t border-[var(--border)]">
+                    <td className="py-2">Subtotal after discount</td>
+                    <td className="py-2 text-right font-mono">
+                      {formatCents(result.subtotalCents)}
+                    </td>
+                  </tr>
+                  <tr className="border-t border-[var(--border)]">
+                    <td className="py-2">Tax added</td>
+                    <td className="py-2 text-right font-mono">{formatCents(result.taxCents)}</td>
+                  </tr>
+                  <tr className="border-t border-[var(--border)]">
+                    <td className="py-2 font-semibold">Total to pay</td>
+                    <td className="py-2 text-right font-mono">{formatCents(result.totalCents)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ResultReveal>
+          </div>
         ) : null}
       </ToolPanel>
 

@@ -249,7 +249,12 @@ export default function NotesScratchpad() {
           <p className="text-sm text-[var(--text-secondary)]">
             {words} {words === 1 ? "word" : "words"} · {text.length}{" "}
             {text.length === 1 ? "character" : "characters"}
-            {savedAt ? ` · Last saved ${savedAt.toLocaleTimeString()}` : ""}
+            {savedAt ? (
+              <span className="motion-pop" key={savedAt.getTime()}>
+                {" "}
+                · Last saved {savedAt.toLocaleTimeString()}
+              </span>
+            ) : null}
           </p>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <CopyButton label="Copy note" onStatus={setStatus} value={text} />

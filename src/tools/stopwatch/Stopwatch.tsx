@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Meter } from "@/components/motion/primitives"
 import { usePlatform } from "@/platform/platform-context"
 import {
   computeElapsedMs,
@@ -91,6 +92,14 @@ export default function Stopwatch() {
         >
           {formatStopwatchTime(elapsed)}
         </p>
+        <div className="mx-auto mt-4 max-w-sm">
+          <Meter
+            label="Minute sweep"
+            maximum={60_000}
+            value={elapsed % 60_000}
+            valueLabel={`${Math.floor((elapsed % 60_000) / 1000)} s`}
+          />
+        </div>
         <p aria-live="polite" className="sr-only" role="status">
           {running ? "Stopwatch running" : elapsed > 0 ? "Stopwatch stopped" : "Stopwatch idle"}
         </p>

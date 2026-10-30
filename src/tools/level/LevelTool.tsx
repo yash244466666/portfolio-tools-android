@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/Button"
+import { LevelBubble } from "@/components/motion/primitives"
 import { ToolPanel } from "@/components/ui/ToolPanel"
 import { usePlatform } from "@/platform/platform-context"
 import { useSensorStream } from "@/tools/_sensor/use-sensor-stream"
@@ -39,27 +40,15 @@ export default function LevelTool() {
     wasLevel.current = level
   }, [haptics, level])
 
-  const offsetX = relative ? Math.max(-10, Math.min(10, relative.rollDeg)) * 7 : 0
-  const offsetY = relative ? Math.max(-10, Math.min(10, relative.pitchDeg)) * 7 : 0
-
   return (
     <div className="grid gap-4">
       <ToolPanel title="Level">
         <div className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
-          <div
-            aria-hidden="true"
-            className="relative mx-auto h-44 w-44 rounded-full border-2 border-[var(--border-strong)] bg-[var(--surface-muted)]"
-          >
-            <div className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--border)] opacity-50" />
-            <div className="absolute left-1/2 top-1/2 h-px w-full -translate-x-1/2 -translate-y-1/2 bg-[var(--border)]" />
-            <div className="absolute left-1/2 top-1/2 h-full w-px -translate-x-1/2 -translate-y-1/2 bg-[var(--border)]" />
-            <div
-              className="absolute left-1/2 top-1/2 h-5 w-5 rounded-full bg-[var(--primary)] transition-transform duration-[var(--motion-quick)]"
-              style={{
-                transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`,
-              }}
-            />
-          </div>
+          <LevelBubble
+            level={level}
+            pitch={relative?.pitchDeg ?? 0}
+            roll={relative?.rollDeg ?? 0}
+          />
           <div className="grid gap-3">
             <p className="text-2xl font-semibold" data-testid="level-state">
               {relative ? levelLabel(relative) : "Waiting for level data"}

@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Gauge, Sparkline } from "@/components/motion/primitives"
 import { useSensorStream } from "@/tools/_sensor/use-sensor-stream"
 import {
   altitudeFromPressure,
@@ -52,6 +53,25 @@ export default function BarometerTool() {
             </output>
           </div>
         </div>
+
+        {pressure !== null ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-[auto_1fr] sm:items-center">
+            <Gauge
+              label="Pressure"
+              maximum={1050}
+              minimum={950}
+              value={pressure}
+              valueLabel={formatPressure(pressure)}
+            />
+            <div>
+              <p className="text-sm text-[var(--text-secondary)]">Session trend</p>
+              <Sparkline
+                label="Pressure samples in this session"
+                values={samples.map((sample) => sample.hPa)}
+              />
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-4 max-w-xs">
           <Field

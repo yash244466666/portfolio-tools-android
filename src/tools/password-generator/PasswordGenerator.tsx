@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { Field } from "@/components/ui/Field"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { Meter, ResultReveal } from "@/components/motion/primitives"
 import { usePlatform } from "@/platform/platform-context"
 import { analyzePassword } from "@/tools/password-strength-checker/password-strength"
 import {
@@ -115,13 +116,26 @@ export default function PasswordGenerator() {
 
       {password !== "" && analysis !== null ? (
         <ToolPanel title="Generated password">
-          <p
-            aria-readonly="true"
-            aria-label="Generated password"
-            className="break-all rounded-2xl bg-[var(--surface-muted)] p-3 font-mono text-base"
-          >
-            {password}
-          </p>
+          <ResultReveal token={password}>
+            <p
+              aria-readonly="true"
+              aria-label="Generated password"
+              className="break-all rounded-2xl bg-[var(--surface-muted)] p-3 font-mono text-base"
+            >
+              {password}
+            </p>
+          </ResultReveal>
+          <div className="mt-3">
+            <Meter
+              label="Password entropy"
+              maximum={128}
+              tone={
+                analysis.band === "very-weak" || analysis.band === "weak" ? "danger" : "success"
+              }
+              value={analysis.entropy}
+              valueLabel={`${analysis.entropy} bits`}
+            />
+          </div>
           <p
             aria-live="polite"
             className="mt-3 text-sm font-semibold text-[var(--text)]"

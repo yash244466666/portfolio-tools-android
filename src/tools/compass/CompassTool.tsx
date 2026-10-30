@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react"
 import { ToolPanel } from "@/components/ui/ToolPanel"
+import { CompassDial } from "@/components/motion/primitives"
 import { useSensorStream } from "@/tools/_sensor/use-sensor-stream"
 import { accuracyLabel, computeCompass, formatHeading, type CompassReading } from "./compass"
 
@@ -27,19 +28,11 @@ export default function CompassTool() {
     <div className="grid gap-4">
       <ToolPanel title="Compass">
         <div className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
-          <div
-            aria-hidden="true"
-            className="relative mx-auto flex h-44 w-44 items-center justify-center rounded-full border-2 border-[var(--border-strong)] bg-[var(--surface-muted)]"
-          >
-            <span className="absolute top-2 text-xs font-semibold">N</span>
-            <span className="absolute right-2 text-xs text-[var(--text-secondary)]">E</span>
-            <span className="absolute bottom-2 text-xs text-[var(--text-secondary)]">S</span>
-            <span className="absolute left-2 text-xs text-[var(--text-secondary)]">W</span>
-            <div
-              className="h-28 w-1 rounded-full bg-[var(--primary)] transition-transform duration-[var(--motion-quick)]"
-              style={{ transform: `rotate(${-(reading?.headingDeg ?? 0)}deg)` }}
-            />
-          </div>
+          <CompassDial
+            accuracy={reading?.accuracy ?? 0}
+            heading={reading?.headingDeg ?? 0}
+            interference={reading?.interference ?? false}
+          />
           <div className="grid gap-3">
             <output className="font-mono text-3xl font-semibold" id="compass-heading">
               {reading ? formatHeading(reading) : "—"}
