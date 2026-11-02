@@ -1,15 +1,15 @@
 # Export/import/Save As/sharing interoperability evidence (automated portions)
 
-> Compiled: 2026-09-08 for issue #26; scoped to the 38-tool public version-1
-> scope approved by ADR 0023 (2026-09-15). System picker/Share-target
+> Compiled: 2026-09-08 for issue #26; scoped to the 39-tool public version-1
+> scope approved through ADR 0026 (2026-10-30) and ADR 0027 (2026-11-02). System picker/Share-target
 > interoperability against real documents providers and receivers requires
 > the physical-device matrix and remains open there.
 
 ## Format contract coverage
 
-Every file-producing tool in the 38-tool version-1 scope records extension,
+Every file-producing tool in the 39-tool version-1 scope records extension,
 MIME type, encoding, filename policy, output limits, and interoperability
-behavior, enforced by tests and the platform contracts:
+behavior, enforced by tests and the platform contracts. Internet Speed Meter produces no file output, so it is outside this format contract and adds no export/import surface:
 
 | Tool                                                    | Output formats                           | Automated oracle                                                                          |
 | ------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------- |

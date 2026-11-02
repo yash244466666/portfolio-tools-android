@@ -1,9 +1,10 @@
 import { tools } from "@/tools/registry"
 
 /**
- * The approved public version-1 scope is 38 tools: the 30 of ADR 0023 plus the
+ * The approved public version-1 scope is 39 tools: the 30 of ADR 0023 plus the
  * Recipe Scaler, Date Calculator, and Random Picker of ADR 0025, plus the five
- * permission-free sensor tools of ADR 0026 (accepted 2026-10-30). The list is enumerated here deliberately: it is the oracle for the
+ * permission-free sensor tools of ADR 0026, plus the Internet Speed Meter of
+ * ADR 0027 (accepted 2026-11-02). The list is enumerated here deliberately: it is the oracle for the
  * scope decision, so an accidental `enabled`/`removed` flip — or a new tool slipping
  * into the release manifest — fails the build instead of shipping. Changing this
  * list requires a superseding ADR.
@@ -54,6 +55,8 @@ const approvedVersionOneScope = [
   "barometer",
   "light-meter",
   "vibration-meter",
+  // Network and connectivity
+  "internet-speed-meter",
 ] as const
 
 describe("tool registry", () => {
@@ -72,7 +75,7 @@ describe("tool registry", () => {
   it("enables the approved version-1 scope and nothing else", () => {
     const enabled = tools.filter((tool) => tool.status === "enabled").map((tool) => tool.id)
     expect([...enabled].sort()).toEqual([...approvedVersionOneScope].sort())
-    expect(enabled).toHaveLength(38)
+    expect(enabled).toHaveLength(39)
   })
 
   it("keeps every cut tool in the manifest as a removed entry with no runtime chunk", () => {
@@ -92,11 +95,14 @@ describe("tool registry", () => {
   })
 
   it("labels all network behavior in metadata", () => {
-    // Cutting DNS Lookup leaves a single network provider in the released scope, which is
-    // what narrows the CSP connect-src allowlist and the Data Safety declarations to one.
+    // ADR 0027 adds Cloudflare as the second reviewed provider; both are named in the
+    // CSP connect-src allowlist and the Data Safety declarations.
     expect(
-      tools.filter((tool) => tool.network && tool.status === "enabled").map((tool) => tool.id),
-    ).toEqual(["currency-converter"])
+      tools
+        .filter((tool) => tool.network && tool.status === "enabled")
+        .map((tool) => tool.id)
+        .sort(),
+    ).toEqual(["currency-converter", "internet-speed-meter"])
     expect(
       tools.filter((tool) => tool.network && tool.status === "removed").map((tool) => tool.id),
     ).toEqual(["dns-lookup"])

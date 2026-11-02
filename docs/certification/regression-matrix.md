@@ -2,9 +2,9 @@
 
 <!-- regression-matrix:generated:start -->
 
-Registry: 38 enabled tools.
-Pure test files: 37/38; component tests: 38/38.
-E2E route coverage: 38/38; installed-artifact interaction (emulator driver per-tool check or E2E): 38/38.
+Registry: 39 enabled tools.
+Pure test files: 38/39; component tests: 39/39.
+E2E route coverage: 39/39; installed-artifact interaction (emulator driver per-tool check or E2E): 39/39.
 
 | Tool                          | ID                           | Category | Network | Pure tests | Component tests | Fixtures | E2E | Artifact interaction |
 | ----------------------------- | ---------------------------- | -------- | ------- | ---------- | --------------- | -------- | --- | -------------------- |
@@ -15,6 +15,7 @@ E2E route coverage: 38/38; installed-artifact interaction (emulator driver per-t
 | Barometer & Altitude          | `barometer`                  | core     | local   | 1          | 1               | no       | yes | yes                  |
 | Light Meter                   | `light-meter`                | core     | local   | 1          | 1               | no       | yes | yes                  |
 | Vibration Meter               | `vibration-meter`            | core     | local   | 1          | 1               | no       | yes | yes                  |
+| Internet Speed Meter          | `internet-speed-meter`       | core     | network | 2          | 1               | no       | yes | yes                  |
 | QR Generator                  | `qr-generator`               | dev      | local   | 1          | 1               | no       | yes | yes                  |
 | Notes                         | `notes-scratchpad`           | text     | local   | 1          | 1               | no       | yes | yes                  |
 | Pomodoro Timer                | `pomodoro-timer`             | text     | local   | 1          | 1               | no       | yes | yes                  |

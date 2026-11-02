@@ -84,6 +84,7 @@ import {
   Scissors,
   Shuffle,
   Server,
+  Signal,
   Smile,
   ShieldAlert,
   ShieldHalf,
@@ -203,6 +204,20 @@ export const tools: readonly ToolDefinition[] = [
     network: false,
     persistent: false,
     component: lazy(() => import("@/tools/vibration-meter/VibrationMeterTool")),
+  },
+  {
+    id: "internet-speed-meter",
+    label: "Internet Speed Meter",
+    description:
+      "See live device-wide download and upload rates with connection details, and run an optional Cloudflare speed test. The live meter works offline.",
+    category: "core",
+    tags: ["network", "speed", "bandwidth", "latency", "cloudflare", "connection"],
+    icon: Signal,
+    status: "enabled",
+    risk: "medium",
+    network: true,
+    persistent: false,
+    component: lazy(() => import("@/tools/internet-speed-meter/InternetSpeedMeter")),
   },
   {
     id: "timestamp-converter",
