@@ -19,6 +19,7 @@ import {
 } from "@/platform/capacitor/sensitive-clipboard"
 import { GeneratedCache, generatedCacheContractVersion } from "@/platform/capacitor/generated-cache"
 import { capacitorSensorService } from "@/platform/capacitor/phone-sensors"
+import { capacitorConnectionService } from "@/platform/capacitor/network-diagnostics"
 import type {
   ContentDigestAlgorithm,
   FilePickOptions,
@@ -520,6 +521,7 @@ export const capacitorPlatformServices: PlatformServices = {
       return () => handle.remove()
     },
   },
+  connection: capacitorConnectionService,
   browser: {
     async open(url) {
       const validatedUrl = validatedExternalUrl(url)

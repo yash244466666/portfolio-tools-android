@@ -21,7 +21,7 @@ The intended product is a fast, privacy-conscious collection of developer and ev
 - Uses Android system facilities for files, sharing, notifications, lifecycle, and external links.
 - Remains usable on phones, tablets, landscape, split-screen, foldable layouts, keyboards, and assistive technology.
 - Publishes only tools that meet the repository's Definition of Done.
-- Ships 38 tools in the first public Google Play release, per the accepted ADR 0026, which adds five permission-free sensor tools to the 33-tool scope of ADR 0025 (which expanded the 30-tool scope of ADR 0023; ADR 0023 superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004). YouTube Downloader stays excluded by the accepted ADR 0021 legal/policy review and is also one of the 70 cut tools, so that exclusion is moot for version 1. The 70 cut tools remain implemented and retained in-tree at lifecycle `removed`; the 12-tool vertical slice is an internal milestone, not the public scope.
+- Ships 39 tools in the first public Google Play release, per the accepted ADR 0026 (five permission-free sensor tools) and ADR 0027 (Internet Speed Meter), which add to the 33-tool scope of ADR 0025 (which expanded the 30-tool scope of ADR 0023; ADR 0023 superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004). YouTube Downloader stays excluded by the accepted ADR 0021 legal/policy review and is also one of the 70 cut tools, so that exclusion is moot for version 1. The 70 cut tools remain implemented and retained in-tree at lifecycle `removed`; the 12-tool vertical slice is an internal milestone, not the public scope.
 
 The source portfolio is an upstream reference, not a runtime dependency.
 
@@ -31,8 +31,8 @@ Implemented now:
 
 - React/Vite/TypeScript/Tailwind application.
 - Capacitor Android project.
-- Typed tool registry holding 38 `enabled` entries for the approved public-release scope and 70 `removed` entries for the cut tools, which keep their source, logic, provenance, and tests in-tree (ADR 0021 youtube-downloader exclusion; ADR 0026 adds five permission-free sensor tools to the 33-tool scope of ADR 0025, which expanded ADR 0023's 30-tool scope).
-- Thirty-eight enabled tools, grouped as ADR 0026 groups them: everyday money and math (Unit Converter, Currency Converter, Percentage Calculator, Tip Calculator, Discount and Tax Calculator, Unit Price Comparer, Loan EMI Calculator, Fuel and Trip Cost Calculator, BMI Calculator, Scientific Calculator, Recipe Scaler), time (Stopwatch, Countdown Timer, Pomodoro Timer, Time Zone Converter, Date Difference Calculator, Age Calculator, Date Calculator), everyday text (Notes, Character Counter, Word Counter, Case Converter, Color Picker), files and media (QR Generator, Image Compressor, PDF Converter, Audio Recorder), privacy and security (Password Generator, Password Strength Checker), sharing and utility (vCard Generator, iCalendar Generator, Dice Roller, Random Picker), and sensors and measurement (Level & Angle, Compass, Barometer & Altitude, Light Meter, Vibration Meter). The remaining 70 implemented tools are lifecycle `removed`: they keep their source directory, pure logic, provenance record, and tests in-tree, but their lazy components are dropped so no runtime chunk ships for them. Currency Converter is the only tool that contacts a network provider (Frankfurter); the version-1 scope is complete pending the certification, device-evidence, and release gates in section 27.
+- Typed tool registry holding 39 `enabled` entries for the approved public-release scope and 70 `removed` entries for the cut tools, which keep their source, logic, provenance, and tests in-tree (ADR 0021 youtube-downloader exclusion; ADR 0026 adds five permission-free sensor tools to the 33-tool scope of ADR 0025, which expanded ADR 0023's 30-tool scope; ADR 0027 adds Internet Speed Meter).
+- Thirty-nine enabled tools, grouped as ADR 0026/0027 group them: everyday money and math (Unit Converter, Currency Converter, Percentage Calculator, Tip Calculator, Discount and Tax Calculator, Unit Price Comparer, Loan EMI Calculator, Fuel and Trip Cost Calculator, BMI Calculator, Scientific Calculator, Recipe Scaler), time (Stopwatch, Countdown Timer, Pomodoro Timer, Time Zone Converter, Date Difference Calculator, Age Calculator, Date Calculator), everyday text (Notes, Character Counter, Word Counter, Case Converter, Color Picker), files and media (QR Generator, Image Compressor, PDF Converter, Audio Recorder), privacy and security (Password Generator, Password Strength Checker), sharing and utility (vCard Generator, iCalendar Generator, Dice Roller, Random Picker), sensors and measurement (Level & Angle, Compass, Barometer & Altitude, Light Meter, Vibration Meter), and network and connectivity (Internet Speed Meter). The remaining 70 implemented tools are lifecycle `removed`: they keep their source directory, pure logic, provenance record, and tests in-tree, but their lazy components are dropped so no runtime chunk ships for them. Currency Converter (Frankfurter) and the Internet Speed Meter's explicit Cloudflare test are the only tools that contact a network provider; the live meter uses device-wide Android counters and works offline. The version-1 scope is complete pending the certification, device-evidence, and release gates in section 27.
 - Catalog search and category filters.
 - Favorites and recent-tool persistence.
 - System/light/dark theme preferences.
@@ -47,7 +47,7 @@ Implemented now:
 
 Not yet implemented:
 
-- All 38 retained version-1 tools are implemented and present in the release manifest (ADR 0026). The 70 cut tools are also implemented and remain in-tree at lifecycle `removed`.
+- All 39 retained version-1 tools are implemented and present in the release manifest (ADR 0026/0027). The 70 cut tools are also implemented and remain in-tree at lifecycle `removed`.
 - Installed-artifact device verification of the sensitive clipboard bridge, generated-file cache cleanup, and renderer recovery/safe mode.
 - Final icons, splash assets, app name, application ID approval, App Links, and Play signing.
 - Physical-device verification and Play-distributed artifact testing.
@@ -98,7 +98,7 @@ Important implementation files:
 - Do not add analytics, advertising, accounts, cloud sync, purchases, or crash-upload SDKs without a new product/privacy/Play decision and Data Safety update.
 - Never include YouTube downloading in a release without a separate legal, policy, terms, security, and product review.
 - Do not claim Notes, Bookmarks, or preferences are encrypted at rest unless a real reviewed encryption design exists.
-- Version 1 has exactly one network provider: Frankfurter, used by Currency Converter. Do not claim every tool works locally while a network-backed tool is enabled. Use precise local/network labels.
+- Version 1 has exactly two reviewed network providers: Frankfurter for Currency Converter and Cloudflare Speed Test for an explicit Internet Speed Meter run. The live speed meter uses device-wide Android counters and works offline. Do not claim every tool works locally while network-backed tools are enabled. Use precise local/network labels.
 
 ## 5. Technology and version policy
 
@@ -295,6 +295,7 @@ Current services:
 - `LifecycleService` — active/inactive subscription.
 - `HapticsService` — optional enhancement; failure must not block the action.
 - `SensorService` — permission-free accelerometer, linear-acceleration, magnetometer, barometer, and ambient-light streams; bounded 2–50 Hz sampling, lifecycle stop, availability, and no persistence or logging.
+- `ConnectionService` — active-network details and device-wide traffic counters for the live speed meter; no permission beyond `ACCESS_NETWORK_STATE`, 1 Hz sampling only while foregrounded, bounded display strings, and no persistence or logging.
 
 Adapter requirements:
 
@@ -323,6 +324,7 @@ Current preference namespace is `yash-tools:v1:`. Changes require migration desi
 Privacy rules:
 
 - Never log raw tool input, output, clipboard, filenames, paths, domains, URLs, notes, bookmarks, generated secrets, recordings, or parser exception text that can echo input.
+- Speed-test payloads, provider response headers, live rates, local addresses, DNS servers, and interface names are session-only; never persist or log them, and read only the edge-location header.
 - Clipboard reads occur only after explicit user action.
 - Secret fields disable autocomplete/spellcheck where appropriate and clear on navigation.
 - Android backup and device transfer are disabled/excluded in the foundation; manual Export/Import will be user-controlled.
@@ -352,18 +354,19 @@ Initial limits are defined in the implementation plan. Do not increase them with
 
 ## 14. Network and external-content rules
 
-Version 1 allowed providers are intended to be limited to:
+Version 1 allowed providers are limited to:
 
-- Frankfurter for currency rates.
-- Cloudflare DNS-over-HTTPS for DNS queries.
+- Frankfurter for currency rates (Currency Converter).
+- Cloudflare Speed Test at `https://speed.cloudflare.com` for an explicit, user-initiated Internet Speed Meter run (ADR 0027).
 
-Before enabling either tool:
+DNS-over-HTTPS is cut with DNS Lookup and is not allowlisted. Before enabling or changing a provider:
 
 - Prove CORS behavior from the packaged production local origin.
-- Confirm current terms, privacy, rate limits, attribution, country availability, and response schema.
-- Use HTTPS-only exact host allowlists, timeouts, `AbortController`, bounded responses, and schema validation.
-- Show provider name, sent fields, freshness timestamp, cache expiry, and stale/offline state.
+- Confirm current terms, privacy, rate limits, attribution, country availability, and response schema; record undocumented or unsupported endpoints explicitly.
+- Use HTTPS-only exact host allowlists, timeouts, `AbortController`, bounded requests and responses, schema validation, `credentials: "omit"`, `referrerPolicy: "no-referrer"`, and `redirect: "error"`.
+- Show provider name, sent fields, data use, freshness timestamp, cache expiry, and stale/offline state.
 - Treat no-record, offline, timeout, provider failure, rate limit, malformed response, and cancellation distinctly.
+- Never run a speed test automatically, periodically, or in the background; it sends test payloads and consumes data, so require an explicit user action and disclose the byte budget.
 - Do not ship API secrets in the app.
 
 External links:
@@ -482,7 +485,7 @@ These reminders govern every tool whose code remains in the repository, includin
 - File hashing: stream natively or enforce the documented JavaScript limit; never read unbounded files into one ArrayBuffer.
 - Timers: reconstruct from timestamps, distinguish monotonic/wall time, and never promise exact alarm delivery.
 - Audio/video: require physical-device, codec/container, interruption, background, memory, and output-format review before enabling.
-- Currency: display provider and freshness; ordinary connection metadata goes to the provider. Frankfurter is the only provider in version 1, and DNS Lookup is cut, so the Cloudflare DoH origin is not in the packaged allowlist.
+- Currency and speed test: display provider, data use, and freshness or run time; ordinary connection metadata (including the IP address) goes to the provider. Frankfurter and Cloudflare Speed Test are the only providers in version 1; DNS Lookup is cut, so the Cloudflare DoH origin is not in the packaged allowlist.
 
 ## 20. Testing policy
 
@@ -629,9 +632,9 @@ Compiling is not completion. Browser-only success is not Android completion. Vis
 Unless the tracker or user changes priority:
 
 1. Execute the physical-device foundation checklist through issue #18 on an approved device (emulator-side automated evidence is complete through batch 16).
-2. Validate all 38 retained version-1 tools on bundled Android artifacts and complete outstanding installed-artifact/device-evidence rows (issues #18/#20/#25/#111/#112).
-3. Complete the certification gates (#21-#26), rescoped to the 38 retained tools: automated regression, accessibility, performance, security/privacy/SBOM, interoperability, and device-matrix work. No gate is weakened.
-4. Complete product-owner release decisions and gates (#27-#41) without weakening the approved 38-tool scope (ADR 0021/0023/0025/0026).
+2. Validate all 39 retained version-1 tools on bundled Android artifacts and complete outstanding installed-artifact/device-evidence rows (issues #18/#20/#25/#111/#112).
+3. Complete the certification gates (#21-#26), rescoped to the 39 retained tools: automated regression, accessibility, performance, security/privacy/SBOM, interoperability, and device-matrix work. No gate is weakened.
+4. Complete product-owner release decisions and gates (#27-#41) without weakening the approved 39-tool scope (ADR 0021/0023/0025/0026/0027).
 5. Submit no production candidate until every in-scope tool passes the Definition of Done and the release manifest, store claims, and signed artifact agree.
 
 ## 28. Handoff checklist
@@ -650,7 +653,7 @@ Before ending work:
 ## 29. Critical warnings
 
 - The current app name, package ID, origin, and publisher details are provisional.
-- The 38 `enabled` tools are the approved public release scope (ADR 0026), not yet certified for release; the in-tree `removed` tools are not part of it.
+- The 39 `enabled` tools are the approved public release scope (ADR 0026/0027), not yet certified for release; the in-tree `removed` tools are not part of it.
 - Device verification of file picking/Save As and renderer recovery remains outstanding.
 - Device verification of the sensitive clipboard extra and preview suppression remains outstanding.
 - Final icons/splash/store assets are placeholders.

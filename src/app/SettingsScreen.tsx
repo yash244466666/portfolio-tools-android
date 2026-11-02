@@ -106,13 +106,19 @@ export function SettingsScreen({
             <ul className="grid gap-2 text-sm leading-6 text-[var(--text-secondary)]">
               <li>No account, ads, analytics, or automatic crash uploads.</li>
               <li>
-                Every tool except Currency Converter works offline and processes input on this
-                device. Currency Converter is labeled in the catalog as requiring internet.
+                Every tool works offline except Currency Converter's rate fetch and the Internet
+                Speed Meter's optional speed test. Both are labeled in the catalog as requiring
+                internet; the speed meter's live connection view uses device-wide counters and works
+                offline.
               </li>
               <li>
                 Currency Converter sends only the selected base currency code to Frankfurter
-                (api.frankfurter.dev); amounts never leave this device. It is the only network
-                provider in this release.
+                (api.frankfurter.dev); amounts never leave this device.
+              </li>
+              <li>
+                The Internet Speed Meter sends test payloads (up to 8 MiB down and 4 MiB up) to
+                Cloudflare (speed.cloudflare.com) only when you start a speed test. Cloudflare sees
+                your IP address and ordinary connection metadata. Results are not saved.
               </li>
               <li>Android backup exclusions are configured for app-private data.</li>
             </ul>

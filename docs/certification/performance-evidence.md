@@ -1,12 +1,59 @@
 # Performance certification evidence (automated portions)
 
-> Compiled: 2026-09-08 for issue #23; refreshed 2026-09-15 at `bd5b310` and
-> 2026-10-30 for the 38-tool ADR 0026 UX/motion build. Bundle, artifact, and
-> driver measurements below are from the final 38-tool build; profiling-grade
-> memory/responsiveness measurement still requires the physical-device matrix
-> (#25) and remains open there.
+> Compiled: 2026-09-08 for issue #23; refreshed 2026-09-15 at `bd5b310`,
+> 2026-10-30 for the 38-tool ADR 0026 UX/motion build, and 2026-11-02 for the
+> 39-tool ADR 0027 build. Bundle, artifact, and driver measurements below are
+> current as of the 2026-11-02 build; profiling-grade memory/responsiveness
+> measurement still requires the physical-device matrix (#25) and remains open
+> there.
 
-## Bundle and load budgets (38-tool UX build, 2026-10-30)
+## Current build (39-tool ADR 0027, 2026-11-02)
+
+| Item              | Value                                                                                                                                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Main index chunk  | 324.12 kB (101.44 kB gzip), +3.97 kB (+1.23 kB gzip) for the new registry entry and metadata                                                                                                                   |
+| Global stylesheet | 50.32 kB (10.17 kB gzip)                                                                                                                                                                                       |
+| Tool chunks       | 58 emitted JS chunks: 39 lazy tool chunks plus shared code. Internet Speed Meter is 13.65 kB (4.71 kB gzip); no implementation ships in the main chunk                                                         |
+| Workers           | `pdf.worker.min` 1,269.40 kB, fetched only by PDF Converter; no new worker or dependency was added for the speed meter                                                                                         |
+| Network behavior  | The live meter samples once per second only while foregrounded and stops on lifecycle inactive; the provider test is explicit, bounded to 8 MiB down / 4 MiB up / 15 s per phase / 40 s total, and cancellable |
+
+The new tool adds no dependency and no permission. The release AAB grew
+**2,722,171 → 2,731,400 bytes (+9,229 bytes, +0.34 %)**, consistent with one
+lazy chunk plus the app-owned native bridge classes. The shipped shell remains
+well inside the plan's "initial web payload ≤ 500 KiB gzip excluding lazy tool
+chunks" target.
+
+## Shipped-artifact size (39-tool ADR 0027 build, 2026-11-02)
+
+| Variant                |     Bytes | SHA-256                                                            |
+| ---------------------- | --------: | ------------------------------------------------------------------ |
+| Debug APK              | 5,657,413 | `ccdca084b022dd31bff3b826a7ee177130cc90056506ac316ccb73a0904f7947` |
+| Internal APK           | 5,657,425 | `2f18aad0606344fdf25c8bb1a895e4f307e4d61144e7447d001ad336ce5ce155` |
+| Release AAB (unsigned) | 2,731,400 | `ad3c9db0bca9e5cc9aa3033616b0f830bfa61f9b144fd23e3f21849dc962cc29` |
+
+## Installed-artifact behavior (39-tool run, 2026-11-02)
+
+- On debug artifact `ccdca084…` (API 35 emulator, Android 15, WebView
+  124.0.6367.219), the driver verified **39 enabled cards** and completed
+  **52 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL (64 rows), exit 0**. The
+  `tool.internet-speed-meter` row exercised the native counters and a real
+  Cloudflare measurement, and `offline.speedTestState` verified the explicit
+  test reports offline/timeout without a result under airplane mode.
+- The driver probes 38 of the 39 enabled tools. Audio Recorder has no capture
+  probe; its coverage is disclosure-only E2E because the microphone path needs
+  a physical device.
+- Connected instrumentation reported **13 tests, 0 failures, 2 phase-gated
+  skips** on the re-run; the first run hit the known notification-dialog timing
+  flake (`NotificationInstrumentedTest`) and the class/suite passed on the
+  re-run. The host-orchestrated force-stop process-recreation script passed
+  both processes.
+- A provider-size finding is recorded: Cloudflare rejects a single download
+  above 10,000,000 bytes with a 429 response that omits CORS headers, which a
+  browser surfaces as a network failure. The download phase is capped at 8 MiB
+  (safely below the provider limit) and the failure text now says the provider
+  could not be reached rather than claiming the device is offline.
+
+## Historical bundle and load budgets (38-tool UX build, 2026-10-30)
 
 | Item              | Value                                                                                                                                                                                                                                                                                                                                                                       |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

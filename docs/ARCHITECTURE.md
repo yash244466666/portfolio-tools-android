@@ -1,6 +1,6 @@
 # Foundation Architecture
 
-> Status: accepted for the foundation; the 38-tool first-release scope is accepted (ADR 0026 adds five permission-free sensor tools to the 33-tool scope of ADR 0025, which expanded ADR 0023's 30-tool scope; which superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps YouTube Downloader excluded), while identity and other irreversible release decisions remain provisional.
+> Status: accepted for the foundation; the 39-tool first-release scope is accepted (ADR 0026 adds five permission-free sensor tools and ADR 0027 adds the Internet Speed Meter to the 33-tool scope of ADR 0025, which expanded ADR 0023's 30-tool scope; which superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004; ADR 0021 keeps YouTube Downloader excluded), while identity and other irreversible release decisions remain provisional.
 
 ## Runtime shape
 
@@ -38,7 +38,7 @@ Dependency direction is one way. Tool features may depend on shared UI and platf
 
 `src/tools/registry.ts` is a deterministic compile-time registry. Implemented components are lazy imports. A tool cannot be enabled without an implementation. The registry also exposes risk, persistence, and network classifications needed by UI and tests.
 
-The audited public version 1 scope is 38 tools (ADR 0026 adds five permission-free sensor tools to ADR 0025's 33-tool scope; ADR 0021 keeps youtube-downloader excluded). The registry holds 38 `enabled` entries, each with a lazy component, and 70 `removed` entries with no component, so a cut tool emits no runtime chunk; its source, pure logic, provenance, and tests remain in the repository. The 12-tool architecture milestone proved the reusable paths, and production submission additionally requires every retained entry to pass the remaining device-evidence, certification, and release gates.
+The audited public version 1 scope is 39 tools (ADR 0026 adds five permission-free sensor tools and ADR 0027 adds the Internet Speed Meter to ADR 0025's 33-tool scope; ADR 0021 keeps youtube-downloader excluded). The registry holds 39 `enabled` entries, each with a lazy component, and 70 `removed` entries with no component, so a cut tool emits no runtime chunk; its source, pure logic, provenance, and tests remain in the repository. The 12-tool architecture milestone proved the reusable paths, and production submission additionally requires every retained entry to pass the remaining device-evidence, certification, and release gates.
 
 ### Tool features
 
@@ -86,7 +86,8 @@ Android view-hierarchy and legacy form persistence are disabled for the WebView,
   accepts a URI or intent from outside the app; the manifest gate in
   `scripts/check-android-manifest.mjs` fails the build if any component becomes exported.
 - Release build is minified and resource-shrunk.
-- A single network provider is explicit and narrowly allowlisted: Frankfurter, used only by Currency Converter, is the sole entry in the packaged CSP `connect-src` after DNS Lookup was cut.
+- Two network providers are explicit and narrowly allowlisted: Frankfurter for Currency Converter and `https://speed.cloudflare.com` for an explicit Internet Speed Meter run (ADR 0027) are the only entries in the packaged CSP `connect-src`. DNS Lookup was cut, so the Cloudflare DoH origin is absent.
+- The app-owned `NetworkDiagnostics` bridge exposes active-network capabilities and device-wide `TrafficStats` counters through `ConnectionService`; it declares no permission (`ACCESS_NETWORK_STATE` is already reviewed), starts no service, and neither persists nor logs a value. The live meter samples once per second only while the tool is foregrounded and stops on lifecycle inactive.
 - Sensitive user content is excluded from logs and automatic persistence.
 
 ## Expansion rule

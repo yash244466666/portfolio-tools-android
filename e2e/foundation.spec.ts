@@ -703,3 +703,48 @@ test("fuel and trip cost calculator handles round trip and passenger split", asy
   await page.getByLabel("Round trip (double the distance)").check()
   await expect(page.getByText("46.154 l of fuel, costing 85.38 total")).toBeVisible()
 })
+
+test("internet speed meter shows connection details and a mocked provider result", async ({
+  page,
+}) => {
+  await page.route("https://speed.cloudflare.com/**", async (route) => {
+    const url = new URL(route.request().url())
+    if (route.request().method() === "POST") {
+      await route.fulfill({
+        status: 200,
+        headers: { "access-control-allow-origin": "*" },
+        body: "",
+      })
+      return
+    }
+    const requested = Number(url.searchParams.get("bytes") ?? "1")
+    const body = Buffer.alloc(requested === 1 ? 1 : 512 * 1024)
+    await route.fulfill({
+      status: 200,
+      headers: {
+        "content-type": "application/octet-stream",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "cf-meta-colo",
+        "cf-meta-colo": "DAC",
+      },
+      body,
+    })
+  })
+
+  await page.goto("/#/tool/internet-speed-meter")
+  await expect(page.getByRole("heading", { name: "Internet Speed Meter" })).toBeVisible()
+  await expect(
+    page.getByText(/Live traffic counters are not available in this browser/),
+  ).toBeVisible()
+  await expect(page.getByText(/speed\.cloudflare\.com/)).toBeVisible()
+  await expect(page.getByText(/device-wide Android traffic counters/)).toBeVisible()
+
+  await page.getByRole("button", { name: "Start speed test" }).click()
+  await expect(page.getByText("Cloudflare edge")).toBeVisible()
+  await expect(page.getByText("DAC")).toBeVisible()
+
+  // Results are session-only: a fresh visit starts from the idle state.
+  await page.goto("/#/")
+  await page.goto("/#/tool/internet-speed-meter")
+  await expect(page.getByRole("button", { name: "Start speed test" })).toBeVisible()
+})

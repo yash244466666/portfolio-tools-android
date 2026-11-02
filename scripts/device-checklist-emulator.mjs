@@ -61,6 +61,8 @@ const versionOneScope = new Set([
   "barometer",
   "light-meter",
   "vibration-meter",
+  // Network and connectivity
+  "internet-speed-meter",
 ])
 
 /** Enabled tools the catalog must list; keep in step with the registry. */
@@ -1850,6 +1852,24 @@ async function phaseTools(page) {
       },
     ],
     [
+      "internet-speed-meter",
+      "Internet Speed Meter",
+      async (p) => {
+        await p.waitFor(
+          "document.querySelector('#speed-meter-download') !== null && document.body.innerText.includes('Speed test (contacts Cloudflare)')",
+        )
+        await p.clickButton("Start speed test")
+        // A real provider run proves the packaged-origin CSP allowlist and the
+        // installed bridge, not only the idle disclosure.
+        await p.waitFor("document.body.innerText.includes('Cloudflare edge')", 90_000)
+        await p.waitFor(
+          "document.querySelector('#speed-meter-download')?.textContent !== '—'",
+          15_000,
+        )
+        return "native counters plus a real Cloudflare measurement"
+      },
+    ],
+    [
       "fuel-trip-cost-calculator",
       "Fuel and Trip Cost Calculator",
       async (p) => {
@@ -1892,8 +1912,21 @@ async function phaseTools(page) {
 async function phaseOffline(page) {
   spawnSync("adb", ["shell", "cmd", "connectivity", "airplane-mode", "enable"])
   try {
-    // Currency Converter is the only network tool left in the released scope: ADR 0023 cut
-    // DNS Lookup, so this phase exercises the single remaining provider (Frankfurter).
+    // ADR 0027 adds Cloudflare as the second provider; its explicit test must
+    // report an offline state rather than hang or fabricate a measurement.
+    await page.navigate("#/tool/internet-speed-meter")
+    await page.awaitToolPage("Internet Speed Meter")
+    await page.clickButton("Start speed test")
+    await page.waitFor(
+      "document.body.innerText.includes('could not reach the provider') || document.body.innerText.includes('timed out')",
+      30_000,
+    )
+    record("offline.speedTestState", "PASS", "speed test reports offline/timeout without a result")
+  } catch (error) {
+    record("offline.speedTestState", "FAIL", String(error).slice(0, 300))
+  }
+  try {
+    // Currency Converter uses the other provider (Frankfurter).
     await page.navigate("#/tool/currency-converter")
     await page.waitFor("document.body.innerText.includes('Offline')", 20_000)
     record("offline.currencyConverterState", "PASS", "offline state under airplane mode")

@@ -1,6 +1,6 @@
 # Physical Android Device Checklist
 
-> Status: not yet executed on a physical device. Scope: the 38-tool public version-1 scope approved by ADR 0026 (2026-10-30), adding five permission-free sensor tools to ADR 0025's 33-tool scope. Automated emulator pre-verification is green on this scope: the 2026-10-30 38-tool run recorded **50 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL**; the earlier 2026-09-07 (25-tool), 2026-09-08 (100-tool), and 2026-09-15/2026-10-30 (30/33-tool) runs remain as history. Physical-device execution is still pending. Do not check an item without recording device/API/WebView/build evidence.
+> Status: not yet executed on a physical device. Scope: the 39-tool public version-1 scope approved through ADR 0026 (2026-10-30) and ADR 0027 (2026-11-02), adding five permission-free sensor tools and the Internet Speed Meter to ADR 0025's 33-tool scope. Automated emulator pre-verification is green on this scope: the 2026-11-02 39-tool run recorded **52 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL**; the 2026-10-30 38-tool run recorded 50 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL; the earlier 2026-09-07 (25-tool), 2026-09-08 (100-tool), and 2026-09-15/2026-10-30 (30/33-tool) runs remain as history. Physical-device execution is still pending. Do not check an item without recording device/API/WebView/build evidence.
 
 ## Test record
 
@@ -256,6 +256,36 @@ process-recreation script. The three new tools are session-only, add no
 permission or network provider, and are covered by pure and component tests
 plus their installed-artifact probes.
 
+## Automated emulator pre-verification (2026-11-02 — 39-tool ADR 0027 scope)
+
+`node scripts/device-checklist-emulator.mjs` ran against the debug APK built
+from the ADR 0027 Internet Speed Meter addition. The driver verified **39
+enabled cards** and exited 0 with **52 PASS, 8 INFO, 4 PENDING_PHYSICAL, 0
+FAIL** (64 rows). The new `tool.internet-speed-meter` row asserted the native
+connection details and live device-wide counters, then ran a real Cloudflare
+measurement on the installed artifact; `offline.speedTestState` asserted the
+explicit test reports an offline/timeout state under airplane mode without
+producing a result.
+
+| Field                          | Value                                                                                                             |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Date/time                      | 2026-11-02 (automated run, 39-tool scope)                                                                         |
+| Tester                         | Automated driver script, orchestrated by the coding agent                                                         |
+| Artifact                       | `android/app/build/outputs/apk/debug/app-debug.apk` (versionName `1.0-debug`)                                     |
+| APK hash                       | SHA-256 `ccdca084b022dd31bff3b826a7ee177130cc90056506ac316ccb73a0904f7947` (`app-debug.apk`, final 39-tool build) |
+| Device model                   | `sdk_gphone64_x86_64` (Android Studio AVD `yash_tools_api35_test`)                                                |
+| Android/API                    | Android 15 (SDK 35)                                                                                               |
+| Android System WebView version | 124.0.6367.219                                                                                                    |
+| Security patch                 | 2024-09-05                                                                                                        |
+| Result                         | 52 PASS, 8 INFO, 4 PENDING_PHYSICAL, 0 FAIL (64 rows), driver exit 0                                              |
+
+The same artifact passed the connected instrumentation suite (13 tests, 0
+failures, 2 phase-gated skips; the known notification-dialog flake failed the
+first run and passed on the re-run) and both phases of the force-stop
+process-recreation script. Real cellular/Wi-Fi counter behavior, metered
+networks, provider reachability by country/carrier, sensor accuracy, and OEM
+variation remain physical-device rows.
+
 ## Automated emulator pre-verification (2026-10-30 — 38-tool ADR 0026 scope)
 
 `node scripts/device-checklist-emulator.mjs` ran against the debug APK built
@@ -317,8 +347,8 @@ emulator injection is a smoke test, not hardware validation.
 
 ## Enabled tools
 
-The 33 tools of the approved version-1 scope (ADR 0025). The per-tool rows for
-the 70 tools cut by ADR 0023 are retired along with their artifact
+The 39 tools of the approved version-1 scope (ADR 0026/0027). The per-tool
+rows for the 70 tools cut by ADR 0023 are retired along with their artifact
 coverage; their source, pure logic, and tests remain in the repository, so
 reinstating a tool restores its row here.
 
@@ -360,11 +390,14 @@ reinstating a tool restores its row here.
 - [ ] Barometer & Altitude reads pressure and estimates altitude from the entered sea-level reference.
 - [ ] Light Meter reads ambient lux with a text level and session min/max.
 - [ ] Vibration Meter reports linear-acceleration RMS and peak over a rolling second.
+- [ ] Internet Speed Meter shows transport, metered/VPN state, OS link estimate, local addresses, DNS, MTU, and signal without a new permission; live counters reflect device-wide traffic and stop in the background.
+- [ ] Internet Speed Meter's Cloudflare test discloses the byte budget and metered data use, completes latency/download/upload with cancellation, and reports offline/timeout/rate-limit/provider failures distinctly.
 
 ## Platform behavior
 
 - [ ] Clipboard copy works and accessible feedback is announced.
 - [ ] Network status changes show offline state without disabling local tools.
+- [ ] The live speed meter continues to show local connection details offline while its provider test reports a typed offline state.
 - [ ] External HTTPS links open outside the app WebView.
 - [ ] Clear local preferences removes only the classes described.
 - [ ] No unexpected permission prompt appears on first launch.
@@ -381,7 +414,7 @@ reinstating a tool restores its row here.
 
 ## Resilience
 
-- [ ] Airplane mode leaves all enabled version-1 tools usable.
+- [ ] Airplane mode leaves all offline tools usable; Currency Converter and the speed test show typed offline states.
 - [ ] Low-storage behavior does not lose source/user data.
 - [ ] “Don't keep activities” flows recover safely.
 - [ ] WebView update/older supported WebView smoke test passes.
@@ -389,10 +422,10 @@ reinstating a tool restores its row here.
 
 ## Result
 
-- Overall: **PARTIAL — emulator pre-verification green on the current 38-tool scope; physical device pending**
-- Emulator evidence: 2026-09-07 automated run on the 25-tool foundation artifact (39 PASS / 0 FAIL / 4 PENDING_PHYSICAL), the 2026-09-08 re-run on the 100-tool candidate at 100 enabled tools (112 PASS / 0 FAIL / 4 PENDING_PHYSICAL), and the 2026-09-15 re-run on the 30-tool version-1 scope of ADR 0023 (42 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL, 54 rows, exit 0), all on Android 15 SDK 35, WebView 124.0.6367.219; see "Automated emulator pre-verification" above. The 2026-09-15 and 2026-10-30 runs cover the then-current scopes; a 33-tool run on the ADR 0025 artifact and a 38-tool run on the ADR 0026 artifact are recorded in the 2026-10-30 sections. Only physical-device execution on that artifact is required before this checklist can be completed.
+- Overall: **PARTIAL — emulator pre-verification green on the current 39-tool scope; physical device pending**
+- Emulator evidence: 2026-09-07 automated run on the 25-tool foundation artifact (39 PASS / 0 FAIL / 4 PENDING_PHYSICAL), the 2026-09-08 re-run on the 100-tool candidate at 100 enabled tools (112 PASS / 0 FAIL / 4 PENDING_PHYSICAL), and the 2026-09-15 re-run on the 30-tool version-1 scope of ADR 0023 (42 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL, 54 rows, exit 0), all on Android 15 SDK 35, WebView 124.0.6367.219; see "Automated emulator pre-verification" above. The 2026-09-15 and 2026-10-30 runs cover the then-current scopes; a 33-tool run on the ADR 0025 artifact, a 38-tool run on the ADR 0026 artifact, and the current 39-tool ADR 0027 run are recorded in the 2026-10-30/2026-11-02 sections. Only physical-device execution on the 39-tool artifact is required before this checklist can be completed.
 - Blocking issues:
   - Physical device has not been selected or tested.
-  - The emulator record covers the 30-tool ADR 0023 artifact (2026-09-15) and the 33-tool ADR 0025 artifact `702c5c26…` and the current 38-tool ADR 0026 artifact `b9ec3312…` (2026-10-30 motion build; the earlier `13ef843b…` sensor build passed the same checklist); physical-device execution on that artifact remains outstanding.
+  - The emulator record covers the 30-tool ADR 0023 artifact (2026-09-15), the 33-tool ADR 0025 artifact `702c5c26…`, the 38-tool ADR 0026 artifact `b9ec3312…` (2026-10-30 motion build), and the current 39-tool ADR 0027 artifact `ccdca084…` (2026-11-02); physical-device execution on that artifact remains outstanding.
   - The instrumentation suite and the emulator checklist driver supplement but do not replace the pending physical-device, OEM-picker/share-target, Doze, TalkBack, and WebView-update evidence.
 - Evidence links/logs: `/tmp/device-checklist-results.json` (single-run record; regenerate with `node scripts/device-checklist-emulator.mjs` against an installed debug artifact).

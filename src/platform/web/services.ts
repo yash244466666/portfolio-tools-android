@@ -9,6 +9,7 @@ import type {
 import { isCancellationError, PlatformError } from "@/platform/errors"
 import { createMicrophoneRecorderService } from "@/platform/shared/microphone-recorder"
 import { webSensorService } from "@/platform/web/sensors"
+import { webConnectionService } from "@/platform/web/connection"
 import {
   bytesToBase64,
   generatedFileBytes,
@@ -305,6 +306,7 @@ export const webPlatformServices: PlatformServices = {
       }
     },
   },
+  connection: webConnectionService,
   browser: {
     async open(url) {
       const opened = window.open(validatedExternalUrl(url), "_blank", "noopener,noreferrer")

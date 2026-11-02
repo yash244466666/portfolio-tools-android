@@ -110,6 +110,65 @@ export interface NetworkService {
   subscribe(listener: (state: NetworkState) => void): Promise<Unsubscribe>
 }
 
+export const connectionTransports = [
+  "wifi",
+  "cellular",
+  "ethernet",
+  "vpn",
+  "bluetooth",
+  "other",
+  "none",
+] as const
+
+export type ConnectionTransport = (typeof connectionTransports)[number]
+
+/**
+ * A bounded snapshot of the active network. Every value is optional in
+ * practice: platforms omit what they cannot report, and `null` means unknown
+ * rather than zero. Addresses are display data only and are never persisted or
+ * logged.
+ */
+export interface ConnectionDetails {
+  transport: ConnectionTransport
+  metered: boolean | null
+  validated: boolean | null
+  internetCapable: boolean | null
+  vpn: boolean
+  /** Operating-system link estimate in kbps, not a measured throughput. */
+  linkDownKbps: number | null
+  linkUpKbps: number | null
+  /** Browser NetworkInformation estimate such as `4g`; null where unavailable. */
+  effectiveType: string | null
+  /** Browser NetworkInformation round-trip estimate in milliseconds. */
+  roundTripTimeMs: number | null
+  interfaceName: string | null
+  /** At most eight length-bounded local addresses. */
+  localAddresses: readonly string[]
+  /** At most eight length-bounded DNS server addresses. */
+  dnsServers: readonly string[]
+  mtu: number | null
+  /** Raw platform signal value where reported (API 29+); otherwise null. */
+  signalStrength: number | null
+}
+
+/**
+ * Device-wide traffic counters. `supported: false` is an honest unsupported
+ * platform state (for example a browser), not an error. Counters are
+ * monotonic-since-boot totals and may reset after a reboot or interface change.
+ */
+export interface TrafficCounters {
+  supported: boolean
+  rxBytes: number | null
+  txBytes: number | null
+  /** Monotonic milliseconds used to derive rates without wall-clock changes. */
+  elapsedRealtimeMs: number | null
+}
+
+export interface ConnectionService {
+  details(): Promise<ConnectionDetails>
+  traffic(): Promise<TrafficCounters>
+}
+
 export interface ExternalBrowserService {
   open(url: URL): Promise<void>
 }
@@ -221,6 +280,7 @@ export interface PlatformServices {
   files: FileService
   notifications: NotificationService
   network: NetworkService
+  connection: ConnectionService
   browser: ExternalBrowserService
   random: RandomService
   lifecycle: LifecycleService
