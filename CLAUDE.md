@@ -2,7 +2,7 @@
 
 > Last verified: 2026-09-15
 >
-> Applies to: the complete `portfolio-tools-android` repository
+> Applies to: the complete `ruma-tools` repository
 >
 > Synchronization rule: `AGENT.md` and `CLAUDE.md` intentionally contain identical guidance. Any change to one must be copied to the other in the same change.
 >
@@ -570,7 +570,7 @@ Rules:
 
 ## 24. CI, release, and secrets
 
-Pull requests run formatting, typecheck, lint, unit/component tests, production web build, phone/tablet browser E2E, Android lint, debug assembly, and the merged-manifest permission/export check. These jobs run on the repository's **self-hosted runner** (label `yash-linux`, registered from the maintainer's Linux workstation) rather than GitHub's hosted runners: this repository is private, so hosted minutes are metered against the 2,000-minute monthly free allowance, and on 2026-09-15 that allowance was exhausted — jobs stopped being allocated a runner entirely and failed after 2 seconds with zero steps, including re-runs of commits that had already passed. Self-hosted jobs are not metered. Two consequences: CI only runs while that machine is up, and the workflow comment records how to return to hosted runners. A push to a pull-request branch cancels that branch's previous run; a docs-only pull request is skipped by design. Future gates add SBOM, license notice validation, dependency/secret scan, bundle budgets, emulator tests, backup-rule verification, 16 KB native-library checks, and artifact installation.
+Pull requests run formatting, typecheck, lint, unit/component tests, production web build, phone/tablet browser E2E, Android lint, all three Android variants, and the merged-manifest permission/export checks for all three variants. These jobs run on **GitHub-hosted `ubuntu-latest` runners**: the repository is public (ADR 0028), so standard hosted runners are free. The former self-hosted runner was deleted and stopped before the visibility change; **a self-hosted runner must never be attached to this public repository**, because a fork pull request could execute workflow code on the maintainer's machine. CI runs on pushes and pull requests for `main` (release) and `dev` (integration). The Android job uploads the debug APK, internal APK, and unsigned release AAB as 14-day build artifacts; pushes to either branch publish a debug APK pre-release; a Pages workflow publishes the web harness with `main` at `/` and `dev` at `/dev/`. Nothing deploys to Google Play: the AAB is intentionally unsigned and no signing or Play credentials exist. A push to a pull-request branch cancels that branch's previous run; a docs-only pull request is skipped by design. Future gates add SBOM, license notice validation, dependency/secret scan, bundle budgets, emulator tests, backup-rule verification, 16 KB native-library checks, and artifact installation.
 
 Secrets:
 
@@ -593,7 +593,7 @@ Release distinctions:
 - Do not use destructive Git operations such as `git reset --hard` or blind checkout/revert.
 - Do not commit unless the user requests a commit.
 - Use the GitHub work-management system in `docs/WORK_MANAGEMENT.md`; Issues are executable scope, dependencies are blockers, milestones are gates, and the linked Project is the planning view.
-- Start substantial implementation from a refined issue, use `<type>/<issue-number>-<short-slug>` branches, and put `Closes #<issue-number>` in the pull request body.
+- Start substantial implementation from a refined issue, branch from `dev`, use `<type>/<issue-number>-<short-slug>` branches, target pull requests at `dev`, and put `Closes #<issue-number>` in the pull request body. Promote `dev` to `main` only as a reviewed release or maintenance merge.
 - Keep issue/Project state and `IMPLEMENTATION_TRACKER.md` evidence reconciled after every substantial batch; do not close a tool before Android artifact and applicable device evidence pass.
 - Run `pnpm github:work-items:check` after changing the work-item manifest. Remote provisioning is explicit through `pnpm github:work-items:apply`; builds and CI must never mutate GitHub planning state.
 - Keep generated Android project changes reviewable.

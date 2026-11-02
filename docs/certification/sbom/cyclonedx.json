@@ -15,7 +15,7 @@
     },
     "component": {
       "type": "application",
-      "name": "portfolio-tools-android",
+      "name": "ruma-tools",
       "version": "0.1.0",
       "description": "Yash Tools: offline-first Android utility app (Capacitor/React)."
     }

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "repository": "yash244466666/portfolio-tools-android",
+  "repository": "yash244466666/ruma-tools",
   "auditedUpstreamCommit": "61e54c64edbeffc9487239b6dae399e255c6a71d",
   "project": {
-    "title": "Yash Tools Android — Google Play v1",
+    "title": "ruma-tools",
     "description": "Delivery system for the first Google Play release with the 38 version-1 tools approved by ADR 0026 (the 33-tool scope of ADR 0025, expanding ADR 0023's 30). The other 70 implemented tools stay in-tree as lifecycle `removed`; YouTube Downloader remains excluded (ADR 0021).",
     "visibility": "PRIVATE",
     "readme": "Tracks foundation, the 38 version-1 tools (ADR 0026; 70 further tools implemented but cut from the release scope), quality/device certification, closed testing, signing, store readiness, and the approved first launch.",

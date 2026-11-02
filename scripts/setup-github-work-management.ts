@@ -296,10 +296,7 @@ function validateManifest(): {
   issueKeys: Set<string>
 } {
   invariant(manifest.schemaVersion === 1, "Unsupported work-item manifest schema")
-  invariant(
-    manifest.repository === "yash244466666/portfolio-tools-android",
-    "Unexpected repository",
-  )
+  invariant(manifest.repository === "yash244466666/ruma-tools", "Unexpected repository")
   // GitHub caps a Project's short description at 300 characters and rejects `gh project edit`
   // only after labels, milestones, and issues have already been provisioned. Reject it here so
   // a dry run surfaces the problem and an apply never leaves a half-provisioned project.
