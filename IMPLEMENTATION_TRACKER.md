@@ -1,11 +1,22 @@
 # Android Tools Implementation Tracker
 
-> Last updated: 2026-10-30 11:15 Europe/Berlin
+> Last updated: 2026-11-02 07:46 Europe/Berlin
 > Tracker schema: 1
 > Current milestone: Foundation Complete — ADR 0026 expands the approved version-1 scope to **38 tools**: the 33 of ADR 0025 plus Level & Angle, Compass, Barometer & Altitude, Light Meter, and Vibration Meter. All 38 are implemented with automated evidence green and a current 38-tool emulator, instrumentation, and process-recreation run; the 70 cut tools remain implemented in-tree at lifecycle `removed`; physical-device evidence (#18/#20/#25) and the product-owner release gates (#27–#41) remain open
 > Upstream portfolio commit: `61e54c64edbeffc9487239b6dae399e255c6a71d`
 > Approved public version 1 scope: **38 tools per ADR 0026 (accepted 2026-10-30), which adds five permission-free sensor tools to ADR 0025's 33-tool scope (which expanded ADR 0023's 30 tools; ADR 0023 superseded the 100-tool scope of ADR 0022 and the all-87 clause of ADR 0004); ADR 0021 keeps youtube-downloader excluded. The manifest carries 38 `enabled` entries and 70 `removed` entries whose source, logic, provenance, and tests stay in-tree.**
 > Public release readiness: **NO — foundation only**
+
+### 2026-11-02 — DOMPurify critical/high advisories cleared (issue #244)
+
+- **Finding.** `pnpm audit --prod` on `main` at `377be25` reported five advisories against the pinned `dompurify@3.4.14` — one critical (GHSA-cg2g-xh64-v4q7, `SAFE_FOR_TEMPLATES` shadow-root bypass), one high (GHSA-mrv2-3pqr-j5jr, `IN_PLACE` hook leaving detached handlers armed), and three lows (GHSA-p98j-92pf-mc4p, GHSA-6688-9rhm-gjv2, GHSA-c6gr-qvv4-5v3f). The security dossier's "no known vulnerabilities" claim was stale.
+- **Reachability checked before changing the pin.** The only in-tree consumer is `src/tools/markdown-preview/markdown.ts`, which calls `DOMPurify.sanitize(parsed, sanitizeConfig)` in the default HTML-string mode and never uses `IN_PLACE`, `SAFE_FOR_TEMPLATES`, or `PARSER_MEDIA_TYPE`. Markdown Preview is lifecycle `removed` under ADR 0023/0026, so its lazy component is absent from the shipped manifest; the dependency is retained only with the in-tree source, logic, and tests.
+- **Fix.** `dompurify` 3.4.14 → **3.4.17** (the patch release that clears all five). Release notes reviewed: `IN_PLACE`/`SAFE_FOR_TEMPLATES`/shadow-root, XHTML SMIL guard, namespace/literal-text hardening, and dependency bumps; no new permission, native, or host behavior. The lockfile diff contains only `dompurify`; no dependency was added.
+- **Shipped-bundle evidence.** A clean `pnpm build` contains no Markdown Preview chunk and no `DOMPurify` reference in `dist/`, so the dependency does not ship. The rebuilt release AAB is **byte-identical** to the 2026-10-30 `93bb27ad…` artifact, confirming the upgrade cannot affect the release payload. SBOM regenerated (92 components, `dompurify@3.4.17`); `docs/SOURCE_PROVENANCE.md` and the security dossier record the new pin and advisory history.
+- **Gates (unpiped, all exit 0).** `format:check`; `github:actions:check` (8 immutable refs); `github:work-items:check` (39 tools / 151 issues); `typecheck`; `lint` (zero warnings); `css:tokens:check`; `contrast:check` (36/36); `test` (**1,805 passed / 236 files**); `build` (main 320.15 kB / 100.21 kB gzip; 57 JS chunks; only the PDF worker remains); `check-pdf-worker-polyfill`; `test:e2e` (**80 passed**); `pnpm audit --prod` (**no known vulnerabilities**); `cap:sync`; gradle `testDebugUnitTest lintDebug assembleDebug assembleInternal bundleRelease` (BUILD SUCCESSFUL); `android:manifest:check` debug/internal/release (reviewed 8-permission budget, one exported `MainActivity`).
+- **Installed-artifact evidence.** On AVD `yash_tools_api35_test` (Android 15 / API 35, WebView 124.0.6367.219) against debug APK **`d9772fab…` 5,540,207 B**: the first checklist run recorded 49 PASS / 7 INFO / 4 PENDING_PHYSICAL / 2 FAIL, both failures being the known emulator Back-delivery pair (`device.backKeyDelivered` and `shell.systemBackReturnsToCatalog`) with the Settings control probe failing identically; the immediate re-run was **50 PASS / 8 INFO / 4 PENDING_PHYSICAL / 0 FAIL (62 rows)**. Connected instrumentation: **13 tests, 0 failures, 2 phase-gated skips**; the host-orchestrated force-stop script passed both processes (`Process-recreation boundary passed across two instrumentation processes`).
+- **Artifacts.** Debug APK 5,540,207 B `d9772fab41bce5237578ec4c90b17cfe5be45813b045c39028853bdb209499c0`; internal APK 5,540,219 B `4b36da75fbcfdae28482f9d8ee4f6b524b05a232a5e133a379b72ce2d8350a1a`; release AAB 2,722,171 B `93bb27ad23ec046c6913bd720cfcd29cba19f486dbefb1f4874cb8671ba1fce3` (unsigned, unchanged); test APK 698,945 B `75cf23a5…`. The debug/internal APKs are ~83 KiB smaller than the 2026-10-30 pair while the release AAB is byte-identical; no app or native source changed since PR #233, so this is the documented cross-environment debug-build variance, not an app change (the installed-artifact checklist exercised all 38 tools on the new APK).
+- **Still open.** Every physical-device/OEM row (#18/#20/#25/#111/#112) and every product-owner release decision (#27–#41). No production candidate is approved.
 
 ### 2026-10-30 — Live GitHub planning reconciled to the 38-tool scope
 
@@ -827,17 +838,18 @@ Vertical-slice completion requires all twelve to pass their Definition of Done i
 
 ## 7. Artifact inventory
 
-Current inventory, measured on 2026-10-30 at the ADR 0026 38-tool UX source, with the
-bundled web payload rebuilt from source and `cap sync`ed before assembly:
+Current inventory, measured on 2026-11-02 at the DOMPurify 3.4.17 pin on the
+ADR 0026 38-tool UX source, with the bundled web payload rebuilt from source
+and `cap sync`ed before assembly:
 
-| Artifact         | Package/role                |     Bytes | SHA-256                                                            | Signing/status                                      |
-| ---------------- | --------------------------- | --------: | ------------------------------------------------------------------ | --------------------------------------------------- |
-| Debug APK        | `dev.yash.tools.debug`      | 5,623,578 | `b9ec3312ee25c8acbff4effbc1e002f249782f72a8b292849389e6e76243d1d4` | Local debug key; device-verified (50 PASS / 0 FAIL) |
-| Internal APK     | `dev.yash.tools.internal`   | 5,623,598 | `62ee8ae6f19ea7d5a7ed52e6f6255af100d3edc7b83aa4747699417eae4698ff` | Local debug key                                     |
-| Release AAB      | `dev.yash.tools`            | 2,722,171 | `93bb27ad23ec046c6913bd720cfcd29cba19f486dbefb1f4874cb8671ba1fce3` | Build proof only; intentionally unsigned            |
-| Android-test APK | `dev.yash.tools.debug.test` |   698,945 | `75cf23a5088646e966ccb34738e1b77dcef4ec43f119db10f3a2ffadced31cb3` | Test APK only; absent from production runtime       |
+| Artifact         | Package/role                |     Bytes | SHA-256                                                            | Signing/status                                                         |
+| ---------------- | --------------------------- | --------: | ------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| Debug APK        | `dev.yash.tools.debug`      | 5,540,207 | `d9772fab41bce5237578ec4c90b17cfe5be45813b045c39028853bdb209499c0` | Local debug key; device-verified (50 PASS / 0 FAIL)                    |
+| Internal APK     | `dev.yash.tools.internal`   | 5,540,219 | `4b36da75fbcfdae28482f9d8ee4f6b524b05a232a5e133a379b72ce2d8350a1a` | Local debug key                                                        |
+| Release AAB      | `dev.yash.tools`            | 2,722,171 | `93bb27ad23ec046c6913bd720cfcd29cba19f486dbefb1f4874cb8671ba1fce3` | Build proof only; intentionally unsigned; byte-identical to 2026-10-30 |
+| Android-test APK | `dev.yash.tools.debug.test` |   698,945 | `75cf23a5088646e966ccb34738e1b77dcef4ec43f119db10f3a2ffadced31cb3` | Test APK only; absent from production runtime                          |
 
-Superseded: the 38-tool sensor-build 2026-10-30 inventory (debug `13ef843b…` 5,623,407 B, internal `8b2835dc…` 5,623,427 B, release `1ebf79f2…` 2,715,422 B); the 33-tool 2026-10-30 inventory (debug `702c5c26…` 5,620,738 B,
+Superseded: the 2026-10-30 motion-layer inventory (debug `b9ec3312…` 5,623,578 B, internal `62ee8ae6…` 5,623,598 B); the 38-tool sensor-build 2026-10-30 inventory (debug `13ef843b…` 5,623,407 B, internal `8b2835dc…` 5,623,427 B, release `1ebf79f2…` 2,715,422 B); the 33-tool 2026-10-30 inventory (debug `702c5c26…` 5,620,738 B,
 internal `ab09e6ce…` 5,620,758 B, release `dd11b9a3…` 2,700,405 B); the 30-tool
 2026-10-30 inventory (debug `0ab5bfd0…` 5,619,765 B,
 internal `3e0b3b4e…` 5,619,785 B, release `acdec41d…` 2,691,357 B); the earlier
@@ -898,7 +910,7 @@ These are reproducibility evidence, not publication candidates. Rebuild after an
 1. Configure the recommended saved Project views in GitHub's UI; upgrade the account plan before completing protected-main issue #129.
 2. Connect/authorize a physical Android device, install the verified debug APK, and execute issue #18's physical checklist.
 
-   **38-tool work-item provisioning:** `config/github-work-items.json` now describes 39 managed tools / 151 issues and passes `pnpm github:work-items:check`, but live GitHub still carries the earlier 30-tool/143-issue state. Run `pnpm github:work-items:apply` only on explicit owner authorization; it is not part of a build or CI.
+   **38-tool work-item provisioning:** applied on 2026-10-30 (PR #243). Live GitHub now carries 151 marked issues for the 39 managed tools (the 38 version-1 tools plus excluded YouTube Downloader) plus the unmarked ad-hoc #166; `pnpm github:work-items:check` passes at 39 tools / 151 issues. Re-run `pnpm github:work-items:apply` only on explicit owner authorization if the manifest changes; it is not part of a build or CI.
 
 3. Complete physical Android validation of the 38 retained version-1 tools and the outstanding device-evidence rows (#18/#20/#25/#111/#112) and the physical rows recorded in the certification dossiers (#22/#23/#25/#26).
 4. Certification-gate note: the automatable portions of #21/#22/#23/#24/#26/#33 are complete with dossiers under `docs/certification/`; the remaining rows on those issues depend on the device evidence above.
