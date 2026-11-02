@@ -135,7 +135,7 @@ Do not use labels as evidence that a gate passed. Evidence belongs in the issue,
 6. Record commands, exact results, device/API/WebView information, and artifact hashes without sensitive data.
 7. Merge the pull request into `dev` only after required CI/review gates pass. Never weaken permissions or tests to obtain green status.
 8. Move to Device QA when code review is complete but installed-artifact evidence remains.
-9. Close only when the issue acceptance criteria and applicable repository Definition of Done pass. Promote `dev` to `main` as a reviewed release or maintenance merge; `main` is the default branch.
+9. Close only when the issue acceptance criteria and applicable repository Definition of Done pass. Promote `dev` to `main` as a reviewed release or maintenance merge; `main` is the default branch. Use a **merge commit** for `dev` → `main` (not a squash) so branch ancestry stays aligned; squash individual feature pull requests into `dev`.
 
 ## Tool work-item contract
 

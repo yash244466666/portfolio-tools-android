@@ -12,6 +12,9 @@ name: Pages preview
 on:
   push:
     branches: [main, dev]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
   workflow_dispatch:
 
 permissions:
