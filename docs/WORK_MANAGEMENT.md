@@ -34,7 +34,7 @@ The ADR 0025 and ADR 0026 scope expansions were applied on 2026-10-30 in one aut
 
 Two provisioning defects surfaced during that run and are fixed in the same change. First, the manifest's Project short description was 419 characters while GitHub caps it at 300; `gh project edit` failed only after labels, milestones, and issues had already been provisioned. The description is now 272 characters and `validateManifest` rejects an over-long one before any remote mutation, so a dry run reports it. Second, `renamedFrom` still named "33-Tool Closed Beta", a title never deployed because no apply ran while ADR 0025 was the scope; live still carried "30-Tool Closed Beta", so the run matched nothing, created a second milestone, and stranded the empty original. `renamedFrom` now names the last deployed title ("30-Tool Closed Beta"), the empty duplicate was deleted, and a re-run is idempotent (0 created, 0 updated, 0 added, 0 dependency changes).
 
-Branch protection and repository rulesets are not available for this private repository on its current GitHub plan; GitHub returns HTTP 403 and requires GitHub Pro or a public repository. The repository must remain private. [Issue #129](https://github.com/yash244466666/portfolio-tools-android/issues/129) tracks enabling protected `main` when the account supports it; immutable CI action pins are handled independently.
+The repository is **public** (ADR 0028), so GitHub branch protection and rulesets are available on the current plan. [Issue #129](https://github.com/yash244466666/portfolio-tools-android/issues/129) tracks enabling protected `main`; that work is deliberately deferred until the GitHub-hosted workflow is merged to `main` and green, because enabling required checks while `main` still references the retired self-hosted runner would lock the branch. Immutable CI action pins are handled independently.
 
 ## Hierarchy
 
@@ -128,14 +128,14 @@ Do not use labels as evidence that a gate passed. Evidence belongs in the issue,
 ## Branch and pull-request convention
 
 1. Move an issue to Ready only after its dependencies and Definition of Ready are valid.
-2. Create one focused branch named `<type>/<issue-number>-<short-slug>`.
+2. Branch from `dev` and create one focused branch named `<type>/<issue-number>-<short-slug>`.
 3. Keep commits scoped and use imperative Conventional Commit subjects where practical.
 4. Open a PR early when review of architecture, permissions, privacy, dependencies, or limits is valuable.
 5. Put `Closes #<issue-number>` in the PR body.
 6. Record commands, exact results, device/API/WebView information, and artifact hashes without sensitive data.
-7. Merge only after required CI/review gates pass. Never weaken permissions or tests to obtain green status.
+7. Merge the pull request into `dev` only after required CI/review gates pass. Never weaken permissions or tests to obtain green status.
 8. Move to Device QA when code review is complete but installed-artifact evidence remains.
-9. Close only when the issue acceptance criteria and applicable repository Definition of Done pass.
+9. Close only when the issue acceptance criteria and applicable repository Definition of Done pass. Promote `dev` to `main` as a reviewed release or maintenance merge; `main` is the default branch.
 
 ## Tool work-item contract
 
