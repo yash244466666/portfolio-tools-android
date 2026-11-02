@@ -92,19 +92,19 @@ jobs:
       - run: pnpm android:manifest:check release
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: debug-apk-${{ github.ref_name }}
+          name: debug-apk-${{ github.run_id }}
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: internal-apk-${{ github.ref_name }}
+          name: internal-apk-${{ github.run_id }}
           path: android/app/build/outputs/apk/internal/app-internal.apk
           if-no-files-found: error
           retention-days: 14
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: release-aab-${{ github.ref_name }}
+          name: release-aab-${{ github.run_id }}
           path: android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
@@ -118,7 +118,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
-          name: debug-apk-${{ github.ref_name }}
+          name: debug-apk-${{ github.run_id }}
           path: artifact
       - name: Publish the debug APK as a pre-release
         env:
