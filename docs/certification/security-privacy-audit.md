@@ -1,7 +1,9 @@
 # Security, privacy, dependency, license, notices, and SBOM audit
 
 > Reconciled: 2026-09-08 against the then-current `main` candidate (registry
-> at 100 enabled tools; app source at `79ef271`). The version-1 release scope
+> at 100 enabled tools; app source at `79ef271`); dependency posture
+> re-verified 2026-11-02 at the DOMPurify 3.4.17 pin (issue #244). The
+> version-1 release scope
 > is now the 38 enabled tools of ADR 0026 (approved 2026-10-30), adding five
 > permission-free sensor tools to ADR 0025's 33-tool scope; sections 1, 4, and 5 note the resulting change in the
 > shipped surface and provider set.
@@ -110,12 +112,30 @@ tool history are transmitted.
 
 ## 5. Dependencies and vulnerability posture
 
-- `pnpm audit --prod` at this commit: **no known vulnerabilities**. `pnpm audit`
-  (including dev dependencies): **0 critical, 0 high, 1 moderate** — the
-  moderate is `uuid <11.1.1` (GHSA-w5hq-g745-h8pq) reached only through the
-  dev-time `@capacitor/cli > xcode` path. It never ships in the app bundle,
-  and the vulnerable v3/v5/v6 `buf` argument is unreachable from CLI usage.
-  Accepted dev-only exposure; revisit on the next Capacitor CLI update.
+- `pnpm audit --prod` re-run on 2026-11-02 at the DOMPurify 3.4.17 pin:
+  **no known vulnerabilities**. `pnpm audit` (including dev dependencies):
+  **0 critical, 0 high, 1 moderate** — the moderate is `uuid <11.1.1`
+  (GHSA-w5hq-g745-h8pq) reached only through the dev-time
+  `@capacitor/cli > xcode` path. It never ships in the app bundle, and the
+  vulnerable v3/v5/v6 `buf` argument is unreachable from CLI usage. Accepted
+  dev-only exposure; revisit on the next Capacitor CLI update.
+- **DOMPurify critical/high advisories cleared (issue #244).** The 3.4.14 pin
+  accumulated five advisories published after the previous audit: critical
+  GHSA-cg2g-xh64-v4q7 (`SAFE_FOR_TEMPLATES` bypass with shadow roots), high
+  GHSA-mrv2-3pqr-j5jr (`IN_PLACE` hook removes a parent/sibling and leaves
+  detached handlers armed), and three lows (GHSA-p98j-92pf-mc4p,
+  GHSA-6688-9rhm-gjv2, GHSA-c6gr-qvv4-5v3f) covering `IN_PLACE`,
+  raw-text reparse, and the SMIL `attributeName=href` guard in XHTML mode.
+  The 3.4.17 patch release fixes all five. Reachability was checked before
+  the bump: the only in-tree consumer is Markdown Preview's default
+  HTML-string `DOMPurify.sanitize(parsed, sanitizeConfig)` call, which does
+  not use `IN_PLACE`, `SAFE_FOR_TEMPLATES`, or `PARSER_MEDIA_TYPE`; the tool
+  is also lifecycle `removed` under ADR 0023/0026, so its lazy component is
+  not in the shipped manifest and the dependency is retained only with the
+  in-tree source, logic, and tests. The pin was nonetheless upgraded because
+  the release gate in #24 requires no critical/high advisory and the prior
+  dossier claim was stale. Lockfile diff limited to `dompurify`; no new
+  dependency, permission, or component.
 - The js-yaml HIGH advisories were fixed by PR #195 and PR #209 (runtime
   dependency of the YAML to JSON tool). A later advisory
   (GHSA-2883-xcg3-v3hh) reappeared against 4.3.1 and is cleared by the 4.3.2
@@ -173,7 +193,9 @@ on the repository once enabled by the owner.
 
 ## 10. Residual items
 
-- Critical/high vulnerabilities: none remaining (see section 5).
+- Critical/high vulnerabilities: none remaining (see section 5). The
+  DOMPurify critical/high advisories found on 2026-11-02 were cleared by the
+  3.4.17 pin in issue #244.
 - Data-loss defects: one was found and fixed on 2026-10-30. The Notes
   autosave debounce was cleared on unmount, so an edit made within 500 ms of
   leaving the screen was lost; an explicit clear could also race an in-flight
