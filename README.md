@@ -10,7 +10,7 @@ This repository is currently a foundation build, not a Play-ready release.
 - GitHub Actions runs the full web and Android gate on both branches using GitHub-hosted runners. Every run uploads the debug APK, internal APK, and unsigned release AAB as build artifacts; each branch push also publishes a debug APK pre-release for testers.
 - A Pages workflow publishes the Vite web harness: `main` at the site root and `dev` under `/dev/`.
 - Nothing deploys to Google Play. The release AAB is intentionally unsigned and no signing or Play credentials are stored in this repository.
-- Preview: <https://yash244466666.github.io/portfolio-tools-android/> (and `/dev/`).
+- Preview: <https://yash244466666.github.io/ruma-tools/> (and `/dev/`).
 
 ## Implemented foundation
 

@@ -2,7 +2,7 @@
 
 > Last verified: 2026-09-15
 >
-> Applies to: the complete `portfolio-tools-android` repository
+> Applies to: the complete `ruma-tools` repository
 >
 > Synchronization rule: `AGENT.md` and `CLAUDE.md` intentionally contain identical guidance. Any change to one must be copied to the other in the same change.
 >
